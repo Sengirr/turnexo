@@ -470,11 +470,10 @@ private enum DateVocabulary {
 
 /// Fechas en formato europeo / español que `NSDataDetector` puede no reconocer.
 private enum FallbackDateParser {
-    // NSRegularExpression es inmutable y thread-safe según la documentación de Apple.
-    nonisolated(unsafe) private static let numeric = try! NSRegularExpression(
+    private static let numeric = try! NSRegularExpression(
         pattern: #"(?<![\d:.])(0?[1-9]|[12]\d|3[01])([/.\-])(0?[1-9]|1[0-2])(?:\2((?:19|20)?\d{2}))?(?![\d:])"#
     )
-    nonisolated(unsafe) private static let textual = try! NSRegularExpression(
+    private static let textual = try! NSRegularExpression(
         pattern: #"(?<!\d)(0?[1-9]|[12]\d|3[01])\s*(?:de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre|january|february|march|april|may|june|july|august|september|october|november|december|ene|feb|mar|abr|apr|jun|jul|ago|aug|sept|sep|set|oct|nov|dic|dec|jan)\.?(?:\s*(?:del|de|,)?\s*((?:19|20)\d{2}))?(?![a-záéíóúñ])"#,
         options: [.caseInsensitive]
     )
@@ -528,8 +527,7 @@ enum TimeParser {
 
     private enum Kind { case twelveHour, twentyFourHour }
 
-    // NSRegularExpression es inmutable y thread-safe según la documentación de Apple.
-    nonisolated(unsafe) private static let rules: [(NSRegularExpression, Kind)] = {
+    private static let rules: [(NSRegularExpression, Kind)] = {
         // El orden importa: las reglas más específicas primero; las siguientes no pisan rangos ya tomados.
         let raw: [(String, Kind)] = [
             (#"(?<![\d:.])(1[0-2]|0?[1-9])(?:[:.]([0-5]\d))?\s?([ap])\.?\s?m\.?(?![a-z])"#, .twelveHour),

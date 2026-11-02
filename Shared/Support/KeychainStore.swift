@@ -15,12 +15,15 @@ enum KeychainStore {
     private static let service = "com.silentsnap.quota"
 
     private static func baseQuery(account: String) -> [String: Any] {
-        [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
-            kSecAttrAccessGroup as String: AppGroup.identifier,
         ]
+        #if !targetEnvironment(simulator)
+        query[kSecAttrAccessGroup as String] = AppGroup.identifier
+        #endif
+        return query
     }
 
     /// - Returns: el valor guardado, o `nil` si el elemento no existe.

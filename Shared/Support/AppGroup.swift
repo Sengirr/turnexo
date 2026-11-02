@@ -10,7 +10,8 @@ enum AppGroup {
 
 extension UserDefaults {
     /// Defaults compartidos (App Group). Solo para datos no sensibles (caché del estado Pro).
-    static let shared: UserDefaults = UserDefaults(suiteName: AppGroup.identifier) ?? .standard
+    /// `UserDefaults` es thread-safe según la documentación de Apple.
+    nonisolated(unsafe) static let shared: UserDefaults = UserDefaults(suiteName: AppGroup.identifier) ?? .standard
 }
 
 /// Cuota de escaneos del plan gratuito, persistida en el **Keychain** para que

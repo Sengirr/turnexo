@@ -1,0 +1,34 @@
+{
+  "identifier" : "5C1E7A9B",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "14.99",
+      "familyShareable" : true,
+      "internalID" : "6740000001",
+      "localizations" : [
+        {
+          "description" : "Escaneos ilimitados de por vida. Pago único.",
+          "displayName" : "SilentSnap Ilimitado",
+          "locale" : "es_ES"
+        }
+      ],
+      "productID" : "com.silentsnap.unlimited",
+      "referenceName" : "SilentSnap Unlimited Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_locale" : "es_ES",
+    "_storefront" : "ESP"
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

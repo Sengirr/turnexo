@@ -19,6 +19,8 @@ import CleanerMagicView from './components/CleanerMagicView';
 import GuestGuidePortalView from './components/GuestGuidePortalView';
 import LandingPageView from './components/LandingPageView';
 import AuthOnboardingView from './components/AuthOnboardingView';
+import LegalModal from './components/LegalModal';
+import CookieBanner from './components/CookieBanner';
 import {
   deleteCleanerFromSupabase,
   deletePropertyFromSupabase,
@@ -102,6 +104,7 @@ export default function App() {
     INITIAL_RESERVATIONS[0].id
   );
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms' | 'legal' | null>(null);
 
   // Sincronización inicial y tiempo real con Supabase si está configurado en .env
   useEffect(() => {
@@ -465,6 +468,7 @@ export default function App() {
               fromApp: true,
             });
           }}
+          onOpenLegal={(tab = 'privacy') => setLegalModalTab(tab)}
         />
       )}
 
@@ -572,6 +576,19 @@ export default function App() {
           onUpdateReservation={handleUpdateReservation}
           onReportGuestIncident={handleReportGuestIncident}
           onBackToApp={() => navigate('/app', { kind: 'app' })}
+        />
+      )}
+
+      {/* Banner de Cookies UE / AEPD */}
+      {route.kind === 'landing' && (
+        <CookieBanner onOpenLegal={() => setLegalModalTab('privacy')} />
+      )}
+
+      {/* Modal Legal (Privacidad / Términos / Aviso Legal) */}
+      {legalModalTab && (
+        <LegalModal
+          initialTab={legalModalTab}
+          onClose={() => setLegalModalTab(null)}
         />
       )}
     </>

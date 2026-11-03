@@ -28,12 +28,14 @@ interface Props {
   onNavigateToApp: () => void;
   onOpenGuestDemo: () => void;
   onOpenCleanerDemo: () => void;
+  onOpenLegal?: (tab?: 'privacy' | 'terms' | 'legal') => void;
 }
 
 export default function LandingPageView({
   onNavigateToApp,
   onOpenGuestDemo,
   onOpenCleanerDemo,
+  onOpenLegal,
 }: Props) {
   const [units, setUnits] = useState(5);
   const [upsellAvg, setUpsellAvg] = useState(35);
@@ -992,6 +994,31 @@ export default function LandingPageView({
             <a href="#modulos" className="hover:text-white transition">Módulos</a>
             <a href="#precios" className="hover:text-white transition">Precios</a>
             <a href="#faq" className="hover:text-white transition">FAQ</a>
+            {onOpenLegal && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onOpenLegal('privacy')}
+                  className="hover:text-white transition"
+                >
+                  Privacidad
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenLegal('terms')}
+                  className="hover:text-white transition"
+                >
+                  Términos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenLegal('legal')}
+                  className="hover:text-white transition"
+                >
+                  Aviso Legal
+                </button>
+              </>
+            )}
             <button type="button" onClick={onNavigateToApp} className="text-[#C85A32] font-bold hover:underline">
               Panel /app
             </button>

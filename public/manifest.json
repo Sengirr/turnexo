@@ -1,0 +1,17 @@
+{
+  "name": "Turnexo · Hospitality Operations",
+  "short_name": "Turnexo",
+  "description": "Operativa de limpiezas por iCal y Guía Digital del Huésped",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#141413",
+  "theme_color": "#141413",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

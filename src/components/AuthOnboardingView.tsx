@@ -141,7 +141,7 @@ export default function AuthOnboardingView({ onSuccess, onBackToLanding }: Props
             <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
               PASO 1 · ELIGE QUÉ MÓDULOS QUIERES ACTIVAR
             </span>
-            <h1 className="font-serif text-4xl sm:text-5xl leading-[1.05] mt-2">
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] mt-2">
               Contrata un solo módulo o conecta los dos.
             </h1>
             <p className="text-sm text-[#57554F] mt-2 leading-relaxed">
@@ -179,7 +179,7 @@ export default function AuthOnboardingView({ onSuccess, onBackToLanding }: Props
                         MÓDULO 1 + MÓDULO 2 CONECTADOS
                       </span>
                     </div>
-                    <h3 className="font-serif text-2xl mt-1.5">
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1.5">
                       Pack Completo Turnexo (Limpiezas iCal + Guía Huésped)
                     </h3>
                     <p
@@ -222,7 +222,7 @@ export default function AuthOnboardingView({ onSuccess, onBackToLanding }: Props
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold flex items-center gap-1.5">
                       <Calendar size={12} /> SOLO MÓDULO 1 · OPERATIVA DE LIMPIEZA
                     </span>
-                    <h3 className="font-serif text-2xl mt-1">
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1">
                       Módulo Limpiezas Automáticas por iCal
                     </h3>
                     <p
@@ -265,7 +265,7 @@ export default function AuthOnboardingView({ onSuccess, onBackToLanding }: Props
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold flex items-center gap-1.5">
                       <Sparkles size={12} /> SOLO MÓDULO 2 · EXPERIENCIA & UPSELLING
                     </span>
-                    <h3 className="font-serif text-2xl mt-1">
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1">
                       Módulo Guía Digital del Huésped + Extras
                     </h3>
                     <p

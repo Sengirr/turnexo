@@ -106,7 +106,7 @@ export default function CleanerMagicView({
           <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C85A32]">
             TURNEXO OPERACIONES · /c/{cleaner.magicToken}
           </span>
-          <h1 className="font-serif text-3xl mt-2">
+          <h1 className="text-3xl font-extrabold tracking-tight mt-2">
             Hola, {cleaner.name.split(' ')[0]}
           </h1>
           <p className="text-xs text-white/60 mt-0.5">

@@ -16,11 +16,15 @@ import {
   Smartphone,
   ExternalLink,
   ChevronRight,
+  ChevronDown,
   TrendingUp,
   FileSpreadsheet,
   MessageSquare,
   HelpCircle,
   Copy,
+  Zap,
+  Layers,
+  ArrowRight,
 } from 'lucide-react';
 import { parseICalContent } from '../lib/icalParser';
 
@@ -40,6 +44,15 @@ export default function LandingPageView({
   const [units, setUnits] = useState(5);
   const [upsellAvg, setUpsellAvg] = useState(35);
   const monthlyGain = units * 2 * upsellAvg;
+  const platformCost = units * 14;
+  const netProfit = monthlyGain - platformCost;
+  const hoursSaved = units * 6;
+
+  // Estado del simulador de flujo en vivo
+  const [simStep, setSimStep] = useState<1 | 2 | 3 | 4>(1);
+
+  // Estado del acordeón de FAQ
+  const [activeFaq, setActiveFaq] = useState<number | null>(0);
 
   // Estado del probador de iCal interactivo
   const [testerUrl, setTesterUrl] = useState('');
@@ -456,6 +469,282 @@ export default function LandingPageView({
               </div>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* SIMULADOR INTERACTIVO DE FLUJO OPERATIVO */}
+      <section id="simulador" className="bg-[#FAF9F5] border-b border-[#E2DDD2] py-24 px-6">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold flex items-center justify-center gap-1.5">
+              <Zap size={14} /> SIMULADOR EN VIVO · CÓMO FUNCIONA TURNEXO
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
+              De la reserva al cobro del extra, sin cruzar un solo WhatsApp.
+            </h2>
+            <p className="text-sm text-[#57554F]">
+              Haz clic en cada paso para ver cómo la información fluye en tiempo real entre el calendario, tu personal de limpieza y el huésped.
+            </p>
+          </div>
+
+          {/* Selector de Pasos del Flujo */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-[#E8E4D9] p-1.5 border border-[#D5CFC0]">
+            {(
+              [
+                { step: 1, num: '01', title: 'Reserva iCal Recibida', desc: 'Airbnb / Booking' },
+                { step: 2, num: '02', title: 'Cuadrante Limpiadora', desc: 'Enlace móvil /c/' },
+                { step: 3, num: '03', title: 'Upsell Late Check-out', desc: 'Guía digital /g/' },
+                { step: 4, num: '04', title: 'Sincronización Total', desc: '+35€ y hora retrasada' },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.step}
+                type="button"
+                onClick={() => setSimStep(item.step)}
+                className={`p-3.5 text-left transition ${
+                  simStep === item.step
+                    ? 'bg-[#141413] text-[#F6F4EE] shadow-md'
+                    : 'bg-transparent text-[#57554F] hover:bg-white/50'
+                }`}
+              >
+                <span className={`font-mono text-[10px] uppercase font-bold block ${
+                  simStep === item.step ? 'text-[#C85A32]' : 'text-[#57554F]'
+                }`}>
+                  PASO {item.num}
+                </span>
+                <span className="font-bold text-xs sm:text-sm block mt-0.5">
+                  {item.title}
+                </span>
+                <span className="font-mono text-[11px] opacity-70 block mt-0.5">
+                  {item.desc}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Tarjeta Visual Interactiva del Paso Seleccionado */}
+          <div className="bg-white border-2 border-[#141413] p-6 sm:p-10 shadow-[8px_8px_0px_#141413] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-6 space-y-4">
+              {simStep === 1 && (
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <span className="font-mono text-[10px] uppercase tracking-wider bg-[#141413] text-white px-2.5 py-1 font-bold">
+                    PASO 1 · DETECCIÓN AUTOMÁTICA
+                  </span>
+                  <h3 className="text-2xl font-bold text-[#141413]">
+                    Entrada de reserva por calendario iCal
+                  </h3>
+                  <p className="text-sm text-[#57554F] leading-relaxed">
+                    Airbnb o Booking confirman la reserva de un huésped. Turnexo la detecta silenciosamente sin necesidad de contraseñas de tus plataformas.
+                  </p>
+                  <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 space-y-2 font-mono text-xs">
+                    <div className="flex justify-between border-b border-[#E2DDD2] pb-2">
+                      <span className="text-[#57554F]">Huésped detectado:</span>
+                      <strong className="text-[#141413]">Thomas Müller (Airbnb · #HM891)</strong>
+                    </div>
+                    <div className="flex justify-between border-b border-[#E2DDD2] pb-2">
+                      <span className="text-[#57554F]">Estancia:</span>
+                      <strong className="text-[#141413]">24 Oct (15:00h) → 27 Oct (11:00h)</strong>
+                    </div>
+                    <div className="flex justify-between text-[#1F4E3D] font-bold">
+                      <span>Detección de rotación:</span>
+                      <span>Tarde libre el 27 Oct (Sin entrada siguiente)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {simStep === 2 && (
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <span className="font-mono text-[10px] uppercase tracking-wider bg-[#1F4E3D] text-white px-2.5 py-1 font-bold">
+                    PASO 2 · ASIGNACIÓN INMEDIATA
+                  </span>
+                  <h3 className="text-2xl font-bold text-[#141413]">
+                    El turno aparece en el móvil de tu limpiadora
+                  </h3>
+                  <p className="text-sm text-[#57554F] leading-relaxed">
+                    María Carmen abre su enlace único en el navegador de su teléfono. Ve la hora asignada, el checklist del piso y el botón para subir fotos de auditoría al terminar.
+                  </p>
+                  <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 space-y-2 font-mono text-xs">
+                    <div className="flex justify-between border-b border-[#E2DDD2] pb-2">
+                      <span className="text-[#57554F]">Personal asignado:</span>
+                      <strong className="text-[#141413]">María Carmen (+34 611 22 33 44)</strong>
+                    </div>
+                    <div className="flex justify-between border-b border-[#E2DDD2] pb-2">
+                      <span className="text-[#57554F]">Horario programado:</span>
+                      <strong className="text-[#141413]">11:00h (Salida del huésped)</strong>
+                    </div>
+                    <div className="flex justify-between text-[#141413]">
+                      <span>Checklist de tareas:</span>
+                      <span>4 tareas cargadas automáticamente</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {simStep === 3 && (
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <span className="font-mono text-[10px] uppercase tracking-wider bg-[#C85A32] text-white px-2.5 py-1 font-bold">
+                    PASO 3 · OFERTA INTELIGENTE
+                  </span>
+                  <h3 className="text-2xl font-bold text-[#141413]">
+                    El huésped solicita Late Check-out desde su Guía
+                  </h3>
+                  <p className="text-sm text-[#57554F] leading-relaxed">
+                    Al ver que su vuelo sale por la tarde, Thomas abre la Guía Digital. El sistema detecta que el piso no tiene entrada ese día y le ofrece quedarse hasta las 17:00h por 35€.
+                  </p>
+                  <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 space-y-2 font-mono text-xs">
+                    <div className="flex justify-between border-b border-[#E2DDD2] pb-2">
+                      <span className="text-[#57554F]">Suplemento solicitado:</span>
+                      <strong className="text-[#C85A32] text-sm">+35 € (Salida hasta las 17:00h)</strong>
+                    </div>
+                    <div className="flex justify-between border-b border-[#E2DDD2] pb-2">
+                      <span className="text-[#57554F]">Método de cobro:</span>
+                      <strong className="text-[#141413]">Directo anfitrión (Bizum / Airbnb)</strong>
+                    </div>
+                    <div className="flex justify-between text-[#1F4E3D] font-bold">
+                      <span>Comisión Turnexo:</span>
+                      <span>0 % (100% íntegro para ti)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {simStep === 4 && (
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <span className="font-mono text-[10px] uppercase tracking-wider bg-[#141413] text-white px-2.5 py-1 font-bold">
+                    PASO 4 · MAGIA OPERATIVA
+                  </span>
+                  <h3 className="text-2xl font-bold text-[#141413]">
+                    Reprogramación automática y cero mensajes
+                  </h3>
+                  <p className="text-sm text-[#57554F] leading-relaxed">
+                    Tú apruebas la solicitud con 1 clic en tu panel. Al instante, la hora de entrada de María Carmen cambia en su enlace móvil a las 17:00h. Sin cruzar una sola llamada ni mensaje de WhatsApp.
+                  </p>
+                  <div className="bg-[#1F4E3D]/10 border border-[#1F4E3D]/30 p-4 space-y-2 font-mono text-xs">
+                    <div className="flex justify-between border-b border-[#1F4E3D]/20 pb-2">
+                      <span className="text-[#1F4E3D] font-bold">Nuevo turno de limpieza:</span>
+                      <strong className="text-[#1F4E3D]">17:00h (Actualizado en vivo)</strong>
+                    </div>
+                    <div className="flex justify-between border-b border-[#1F4E3D]/20 pb-2">
+                      <span className="text-[#141413]">Ingreso extra para ti:</span>
+                      <strong className="text-[#1F4E3D] text-sm font-bold">+35 € netos</strong>
+                    </div>
+                    <div className="flex justify-between text-[#141413]">
+                      <span>Tiempo invertido en WhatsApp:</span>
+                      <strong>0 segundos</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSimStep((prev) => (prev === 4 ? 1 : ((prev + 1) as any)))}
+                  className="bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-mono uppercase font-bold px-5 py-3 transition flex items-center gap-2"
+                >
+                  <span>{simStep === 4 ? 'Volver al Paso 1' : 'Ver Siguiente Paso'}</span>
+                  <ArrowRight size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={onNavigateToApp}
+                  className="text-xs font-mono uppercase font-bold text-[#C85A32] hover:underline"
+                >
+                  Probar con mis alojamientos →
+                </button>
+              </div>
+            </div>
+
+            {/* Simulación Gráfica de la Pantalla */}
+            <div className="lg:col-span-6 bg-[#141413] text-[#F6F4EE] p-6 border border-[#2C2C29] space-y-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span className="font-mono text-[10px] text-white/50 ml-2">turnexo-live-sync</span>
+                </div>
+                <span className="font-mono text-[10px] text-[#C85A32] uppercase font-bold">
+                  {simStep === 1 && 'ical_ingest.sync'}
+                  {simStep === 2 && 'cleaner_dispatch.view'}
+                  {simStep === 3 && 'guest_guide_upsell.request'}
+                  {simStep === 4 && 'realtime_reschedule.done'}
+                </span>
+              </div>
+
+              {simStep === 1 && (
+                <div className="space-y-3 font-mono text-xs">
+                  <div className="p-3 bg-white/5 border border-white/10 space-y-1">
+                    <span className="text-[#C85A32] text-[10px] font-bold block">EVENTO ICAL CAPTURADO</span>
+                    <p className="font-bold text-white text-sm">UID: airbnb-res-HM891@turnexo</p>
+                    <p className="text-white/60 text-[11px]">SUMMARY: Thomas Müller (Reserva Confirmada)</p>
+                    <p className="text-white/60 text-[11px]">DTSTART: 20261024T150000Z · DTEND: 20261027T110000Z</p>
+                  </div>
+                  <div className="p-3 bg-[#1F4E3D]/30 border border-[#1F4E3D]/50 text-emerald-300 text-[11px]">
+                    ✓ El algoritmo verifica el calendario: No hay entrada el 27 Oct por la tarde. El alojamiento queda marcado como apto para venta de Late Check-out.
+                  </div>
+                </div>
+              )}
+
+              {simStep === 2 && (
+                <div className="space-y-3 font-mono text-xs">
+                  <div className="bg-[#FAF9F5] text-[#141413] p-4 border border-[#D5CFC0] space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-xs uppercase text-[#1F4E3D]">Vista Limpiadora Móvil</span>
+                      <span className="bg-[#141413] text-white px-2 py-0.5 text-[10px]">11:00h</span>
+                    </div>
+                    <p className="font-bold text-sm">Ático Vista Marina · 45 €</p>
+                    <p className="text-[11px] text-[#57554F]">Cajetín: 4829# · Thomas Müller sale a las 11:00h</p>
+                  </div>
+                  <p className="text-white/60 text-[11px]">
+                    María Carmen lo consulta en su teléfono móvil sin instalar nada. Su enlace está activo y actualizado.
+                  </p>
+                </div>
+              )}
+
+              {simStep === 3 && (
+                <div className="space-y-3 font-mono text-xs">
+                  <div className="bg-[#FAF9F5] text-[#141413] p-4 border-2 border-[#C85A32] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-[#C85A32] flex items-center gap-1">
+                        <Sparkles size={12} /> Oferta Especial para Thomas
+                      </span>
+                      <span className="font-bold text-sm text-[#141413]">+35 €</span>
+                    </div>
+                    <p className="font-bold text-sm">¿Tu vuelo sale tarde? Quédate hasta las 17:00h</p>
+                    <p className="text-[11px] text-[#57554F]">
+                      Disfruta la mañana en la playa y dúchate con calma antes de salir al aeropuerto.
+                    </p>
+                    <div className="pt-1">
+                      <span className="inline-block bg-[#C85A32] text-white px-3 py-1 font-bold text-[10px] uppercase">
+                        ✓ Solicitado por el huésped
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {simStep === 4 && (
+                <div className="space-y-3 font-mono text-xs">
+                  <div className="bg-[#1F4E3D] text-white p-4 space-y-2">
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-200">
+                      ✓ HORARIO RETRASADO AUTOMÁTICAMENTE
+                    </span>
+                    <div className="flex justify-between items-center">
+                      <p className="font-bold text-base">Ático Vista Marina</p>
+                      <span className="bg-white text-[#1F4E3D] px-2.5 py-1 font-bold text-xs">
+                        NUEVA HORA: 17:00h
+                      </span>
+                    </div>
+                    <p className="text-white/80 text-[11px]">
+                      María Carmen ve su turno aplazado a las 17:00h. Huésped feliz y anfitrión con +35€ en cuenta.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -886,22 +1175,38 @@ export default function LandingPageView({
             </div>
           </div>
 
-          <div id="precios" className="lg:col-span-5 bg-[#FAF9F5] text-[#141413] p-8 space-y-6">
-            <div className="border-b border-[#E2DDD2] pb-5">
-              <span className="font-mono text-[11px] uppercase tracking-wider text-[#57554F]">
-                INGRESO EXTRA ESTIMADO (2 VENTAS/MES POR PISO)
+          <div id="precios" className="lg:col-span-5 bg-[#FAF9F5] text-[#141413] p-8 space-y-6 shadow-xl">
+            <div className="border-b border-[#E2DDD2] pb-5 space-y-2">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-[#57554F] block">
+                BENEFICIO NETO ESTIMADO TRAS COSTE DE TURNEXO
               </span>
-              <p className="font-mono text-5xl font-bold text-[#1F4E3D] mt-2">
-                +{monthlyGain} €<span className="text-base font-normal text-[#57554F]">/mes</span>
-              </p>
-              <p className="text-xs text-[#57554F] mt-1">
-                +{monthlyGain * 12} € anuales íntegros para ti.
+              <div className="flex items-baseline gap-2">
+                <p className="font-mono text-5xl font-extrabold text-[#1F4E3D]">
+                  +{netProfit} €<span className="text-base font-normal text-[#57554F]">/mes</span>
+                </p>
+                <span className="font-mono text-xs font-bold uppercase bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
+                  +{Math.round((monthlyGain / (platformCost || 1)) * 100)}% ROI
+                </span>
+              </div>
+              <p className="text-xs text-[#57554F]">
+                +{(netProfit * 12).toLocaleString()} € de beneficio extra anual neto para tu negocio.
               </p>
             </div>
 
-            <div className="space-y-2.5 text-xs">
+            <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+              <div className="bg-white border border-[#E2DDD2] p-3">
+                <span className="text-[10px] text-[#57554F] uppercase block">INGRESOS EXTRAS BRUTOS</span>
+                <span className="font-bold text-sm text-[#141413] mt-0.5 block">+{monthlyGain} €/mes</span>
+              </div>
+              <div className="bg-white border border-[#E2DDD2] p-3">
+                <span className="text-[10px] text-[#57554F] uppercase block">TIEMPO AHORRADO</span>
+                <span className="font-bold text-sm text-[#C85A32] mt-0.5 block">~{hoursSaved} h/mes</span>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-xs">
               <div className="flex justify-between py-1.5 border-b border-[#E2DDD2]">
-                <span className="font-semibold">Módulo Suelto (Solo Guía o Solo Limpiezas)</span>
+                <span className="font-semibold">Módulo Individual (Solo Guía o Solo Limpiezas)</span>
                 <span className="font-mono font-bold">9 € / piso / mes</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-[#E2DDD2]">
@@ -912,22 +1217,23 @@ export default function LandingPageView({
               </div>
               <div className="flex justify-between py-1.5">
                 <span className="font-semibold">Periodo de Prueba</span>
-                <span className="font-mono font-bold text-[#1F4E3D]">14 Días Gratis</span>
+                <span className="font-mono font-bold text-[#1F4E3D]">14 Días Gratis · Sin Tarjeta</span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={onNavigateToApp}
-              className="w-full bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-mono uppercase tracking-wider font-bold py-4 transition"
+              className="w-full bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-mono uppercase tracking-wider font-bold py-4 transition flex items-center justify-center gap-2"
             >
-              Entrar al Panel de Gestión (/app) →
+              <span>Comenzar Prueba Gratuita (/app)</span>
+              <ArrowRight size={14} />
             </button>
           </div>
         </div>
       </section>
 
-      {/* SECCIÓN FAQ PARA SEO Y RESOLUCIÓN DE OBJECIONES */}
+      {/* SECCIÓN FAQ INTERACTIVA PARA SEO Y RESOLUCIÓN DE OBJECIONES */}
       <section id="faq" className="max-w-7xl mx-auto px-6 py-20 border-t border-[#E2DDD2]">
         <div className="max-w-3xl mx-auto space-y-12">
           <div className="text-center space-y-3">
@@ -939,42 +1245,56 @@ export default function LandingPageView({
             </h2>
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-2">
-              <h3 className="font-bold text-base text-[#141413]">
-                ¿Cómo se conecta con mis anuncios de Airbnb y Booking?
-              </h3>
-              <p className="text-xs text-[#57554F] leading-relaxed">
-                Sin contraseñas de tus cuentas. Solo copias el enlace público de exportación iCal (.ics) que te da Airbnb o Booking en la sección de calendarios y lo pegas en Turnexo. En 30 segundos todas tus reservas pasadas y futuras quedan sincronizadas automáticamente.
-              </p>
-            </div>
-
-            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-2">
-              <h3 className="font-bold text-base text-[#141413]">
-                ¿Mis limpiadoras necesitan descargarse una app de la App Store o crearse cuenta?
-              </h3>
-              <p className="text-xs text-[#57554F] leading-relaxed">
-                No. Cada limpiadora recibe su enlace mágico único (por ejemplo <code>/c/maria-7f9a</code>) por WhatsApp. Al abrirlo en el navegador de su teléfono ven su parte de trabajo del día, horas de check-in urgente, checklist en español y botón para tomar fotos de auditoría.
-              </p>
-            </div>
-
-            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-2">
-              <h3 className="font-bold text-base text-[#141413]">
-                ¿Cómo funciona la venta de Late Check-out y cobro de extras?
-              </h3>
-              <p className="text-xs text-[#57554F] leading-relaxed">
-                Turnexo detecta mediante el calendario iCal si el día de salida del huésped entra otra reserva o queda libre. Si queda libre, ofrece el Late Check-out hasta la tarde. Tú cobras el 100% del dinero directamente al huésped (por el centro de resoluciones de Airbnb, Bizum o tarjeta) sin que Turnexo te cobre ninguna comisión.
-              </p>
-            </div>
-
-            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-2">
-              <h3 className="font-bold text-base text-[#141413]">
-                ¿Puedo contratar solo la Guía Digital o solo la Operativa de Limpiezas?
-              </h3>
-              <p className="text-xs text-[#57554F] leading-relaxed">
-                Sí. Los módulos son totalmente independientes. Si ya tienes resuelta la limpieza y solo quieres la Guía Digital con vídeos para huéspedes y venta de extras, contratas el Módulo 2 (9€/mes). Si solo necesitas el cuadrante de limpiezas por iCal, el Módulo 1 (9€/mes). O ambos conectados por 14€/mes.
-              </p>
-            </div>
+          <div className="space-y-3">
+            {[
+              {
+                q: '¿Cómo se conecta con mis anuncios de Airbnb y Booking?',
+                a: 'Sin contraseñas de tus cuentas. Solo copias el enlace público de exportación iCal (.ics) que te da Airbnb o Booking en la sección de calendarios y lo pegas en Turnexo. En 30 segundos todas tus reservas pasadas y futuras quedan sincronizadas automáticamente.',
+              },
+              {
+                q: '¿Mis limpiadoras necesitan descargarse una app de la App Store o crearse cuenta?',
+                a: 'No. Cada limpiadora recibe su enlace mágico único (por ejemplo /c/maria-7f9a) por WhatsApp. Al abrirlo en el navegador de su teléfono ven su parte de trabajo del día, horas de check-in urgente, checklist en español y botón para tomar fotos de auditoría sin necesidad de usuario ni contraseña.',
+              },
+              {
+                q: '¿Cómo funciona la venta de Late Check-out y cobro de extras?',
+                a: 'Turnexo detecta mediante el calendario iCal si el día de salida del huésped entra otra reserva o queda libre. Si queda libre, ofrece el Late Check-out hasta la tarde. Tú cobras el 100% del dinero directamente al huésped (por el centro de resoluciones de Airbnb, Bizum o tarjeta) sin que Turnexo te cobre ninguna comisión.',
+              },
+              {
+                q: '¿Puedo contratar solo la Guía Digital o solo la Operativa de Limpiezas?',
+                a: 'Sí. Los módulos son totalmente independientes. Si ya tienes resuelta la limpieza y solo quieres la Guía Digital con vídeos para huéspedes y venta de extras, contratas el Módulo 2 (9€/mes). Si solo necesitas el cuadrante de limpiezas por iCal, el Módulo 1 (9€/mes). O ambos conectados en el Pack por 14€/mes.',
+              },
+              {
+                q: '¿Tengo permanencia o tengo que poner mi tarjeta de crédito para probar?',
+                a: 'Cero permanencia y cero tarjetas para empezar. Disfrutas de 14 días de prueba completa con tus alojamientos reales. Puedes cancelar o pausar tu cuenta en cualquier momento con un solo clic desde tu panel.',
+              },
+            ].map((faqItem, idx) => {
+              const isOpen = activeFaq === idx;
+              return (
+                <div
+                  key={idx}
+                  className="bg-[#FAF9F5] border border-[#D5CFC0] transition overflow-hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveFaq(isOpen ? null : idx)}
+                    className="w-full text-left p-5 font-bold text-sm sm:text-base text-[#141413] flex items-center justify-between gap-4"
+                  >
+                    <span>{faqItem.q}</span>
+                    <ChevronDown
+                      size={18}
+                      className={`text-[#C85A32] shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-[#57554F] leading-relaxed border-t border-[#E2DDD2]/60 animate-in fade-in duration-200">
+                      {faqItem.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

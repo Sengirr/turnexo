@@ -5,9 +5,9 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
   const plans = [
     {
       name: 'Módulo Guía + Extras',
-      price: '12 €',
-      period: '/mes',
-      subtitle: 'Solo Guía del Huésped (hasta 5 pisos)',
+      price: '9 €',
+      period: '/piso/mes',
+      subtitle: 'Solo Guía del Huésped',
       icon: QrCode,
       features: [
         'Guía digital 100 % personalizable (horarios, WiFi, códigos, normas)',
@@ -20,9 +20,9 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
     },
     {
       name: 'Módulo Limpiezas iCal',
-      price: '12 €',
-      period: '/mes',
-      subtitle: 'Solo Gestión de Limpiadoras (hasta 5 pisos)',
+      price: '9 €',
+      period: '/piso/mes',
+      subtitle: 'Solo Gestión de Limpiadoras',
       icon: Users,
       features: [
         'Sincronización iCal automática con Airbnb, Booking y Vrbo',
@@ -35,15 +35,15 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
     },
     {
       name: 'Pack Completo (Los 2)',
-      price: '19 €',
-      period: '/mes',
+      price: '14 €',
+      period: '/piso/mes',
       subtitle: 'Guía Huésped + Limpiezas Conectadas',
       icon: Sparkles,
       features: [
-        'Incluye los 2 módulos completos con 25 % de descuento',
+        'Incluye los 2 módulos completos con ahorro de 4€/piso',
         'Conexión inteligente: la Guía ofrece Late Check-out solo si el iCal ve que no entra nadie',
         'Al aprobar un Late Check-out en 1 clic, la hora de tu limpiadora cambia sola a las 17:00h',
-        'Hasta 5 apartamentos incluidos (planes superiores para 15 o 30 pisos)',
+        'Ajuste automático según el número de alojamientos que gestiones',
       ],
       highlighted: true,
     },

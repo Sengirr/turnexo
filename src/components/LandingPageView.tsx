@@ -476,7 +476,7 @@ export default function LandingPageView({
                 <span className="font-mono text-xs uppercase tracking-widest text-[#57554F]">
                   MÓDULO A · EXPERIENCIA & UPSELL
                 </span>
-                <span className="font-mono text-sm font-bold text-[#141413]">12 € / mes</span>
+                <span className="font-mono text-sm font-bold text-[#141413]">9 € / piso / mes</span>
               </div>
 
               <h3 className="text-2xl font-bold text-[#141413]">
@@ -555,7 +555,7 @@ export default function LandingPageView({
                 <span className="font-mono text-xs uppercase tracking-widest text-[#57554F]">
                   MÓDULO B · OPERACIONES & LIMPIEZA
                 </span>
-                <span className="font-mono text-sm font-bold text-[#141413]">12 € / mes</span>
+                <span className="font-mono text-sm font-bold text-[#141413]">9 € / piso / mes</span>
               </div>
 
               <h3 className="text-2xl font-bold text-[#141413]">

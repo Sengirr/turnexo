@@ -44,7 +44,14 @@ export default function LandingPageView({
   const [units, setUnits] = useState(5);
   const [upsellAvg, setUpsellAvg] = useState(35);
   const monthlyGain = units * 2 * upsellAvg;
-  const platformCost = units * 14;
+  // Tramos cerrados (Tarifa plana por volumen)
+  const getFlatPlanCost = (numUnits: number) => {
+    if (numUnits <= 1) return 0;
+    if (numUnits <= 4) return 29;
+    if (numUnits <= 8) return 49;
+    return 89;
+  };
+  const platformCost = getFlatPlanCost(units);
   const netProfit = monthlyGain - platformCost;
   const hoursSaved = units * 6;
 
@@ -151,9 +158,9 @@ export default function LandingPageView({
             <button
               type="button"
               onClick={onNavigateToApp}
-              className="bg-[#141413] hover:bg-[#2C2C29] text-[#F6F4EE] text-xs font-semibold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2"
+              className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-semibold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-sm"
             >
-              <span>Entrar al Panel</span>
+              <span>Probar 1 Piso Gratis</span>
               <ArrowUpRight size={15} />
             </button>
           </div>
@@ -175,34 +182,51 @@ export default function LandingPageView({
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
-              Dos módulos independientes diseñados para gestores y propietarios que no quieren perder tiempo en WhatsApp. Conecta el enlace iCal de tus anuncios para automatizar los turnos de tu personal de limpieza y ofrece una Guía Digital a medida con vídeos del alojamiento y venta de Late Check-out.
+              Dos herramientas especializadas para anfitriones y gestores que no quieren perder tiempo en WhatsApp. Conecta el enlace iCal de tus anuncios para automatizar los turnos de tu personal de limpieza y ofrece una Guía Digital a medida con vídeos del alojamiento y venta de Late Check-out.
             </p>
 
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <button
-                type="button"
-                onClick={onNavigateToApp}
-                className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-sm font-semibold px-7 py-4 transition flex items-center gap-2.5 shadow-sm"
-              >
-                <span>Abrir Panel del Anfitrión</span>
-                <ArrowUpRight size={17} />
-              </button>
+            <div className="space-y-4 pt-2">
+              <div className="flex flex-wrap items-center gap-4">
+                <button
+                  type="button"
+                  onClick={onNavigateToApp}
+                  className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-sm sm:text-base font-bold px-7 py-4 transition flex items-center gap-2.5 shadow-md group"
+                >
+                  <span>Crear mi primer manual gratis (Sin tarjeta)</span>
+                  <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </button>
 
-              <button
-                type="button"
-                onClick={onOpenGuestDemo}
-                className="border border-[#141413] bg-transparent hover:bg-[#141413] hover:text-[#F6F4EE] text-[#141413] text-sm font-semibold px-6 py-4 transition"
-              >
-                Ver Guía Digital en Vivo (/g/...)
-              </button>
+                <button
+                  type="button"
+                  onClick={onOpenGuestDemo}
+                  className="border border-[#141413] bg-transparent hover:bg-[#141413] hover:text-[#F6F4EE] text-[#141413] text-sm font-semibold px-6 py-4 transition flex items-center gap-2"
+                >
+                  <span>Ver Guía Digital en Vivo</span>
+                  <span className="font-mono text-xs opacity-60">(/g/...)</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={onOpenCleanerDemo}
-                className="text-xs font-mono uppercase tracking-wider underline underline-offset-4 text-[#57554F] hover:text-[#141413] px-3 py-2"
-              >
-                Ver Vista Limpiadora (/c/...) →
-              </button>
+                <button
+                  type="button"
+                  onClick={onOpenCleanerDemo}
+                  className="text-xs font-mono uppercase tracking-wider underline underline-offset-4 text-[#57554F] hover:text-[#141413] px-2 py-2"
+                >
+                  Ver Vista Limpiadora (/c/...) →
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-[#57554F]">
+                <span className="flex items-center gap-1.5 text-[#1F4E3D] font-bold">
+                  <Check size={14} /> 1 alojamiento Gratis de por vida
+                </span>
+                <span>·</span>
+                <span className="flex items-center gap-1.5">
+                  <Check size={14} className="text-[#1F4E3D]" /> Sin tarjeta de crédito
+                </span>
+                <span>·</span>
+                <span className="flex items-center gap-1.5">
+                  <Check size={14} className="text-[#1F4E3D]" /> Listo en 60 segundos
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[#E2DDD2] max-w-xl">
@@ -764,48 +788,55 @@ export default function LandingPageView({
           <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-8 sm:p-10 flex flex-col justify-between space-y-8">
             <div className="space-y-5">
               <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-4">
-                <span className="font-mono text-xs uppercase tracking-widest text-[#57554F]">
-                  MÓDULO A · EXPERIENCIA & UPSELL
+                <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
+                  MÓDULO A · EXPERIENCIA & LLEGADA AUTÓNOMA
                 </span>
-                <span className="font-mono text-sm font-bold text-[#141413]">9 € / piso / mes</span>
+                <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
+                  1 Piso Gratis · Desde 29€/mes
+                </span>
               </div>
 
-              <h3 className="text-2xl font-bold text-[#141413]">
-                Guía Digital del Huésped a Medida
-              </h3>
+              <div className="space-y-2">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[#C85A32] font-bold block">
+                  CERO MENSAJES A DESHORAS
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
+                  El Wi-Fi, la llegada autónoma y las normas en 1 clic.
+                </h3>
+              </div>
 
               <p className="text-sm text-[#57554F] leading-relaxed">
-                Sustituye los PDFs interminables y las llamadas a medianoche por una web móvil con estética de hotel boutique. Cada apartamento tiene su propio enlace y cartel QR imprimible.
+                Evita que los huéspedes te llamen o te escriban a las 23:30h porque no encuentran el cajetín de llaves, no recuerdan la clave del Wi-Fi o no logran encender el aire acondicionado. Todo en un enlace web inmediato sin descargar apps, con cartel QR para el recibidor y venta de Late Check-out cuando el calendario lo permite.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs">
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
-                    <Video size={14} className="text-[#C85A32]" />
-                    Vídeos y Home Tour
+                    <CheckCircle2 size={14} className="text-[#1F4E3D]" />
+                    Llegada Autónoma y Wi-Fi en 1 toque
                   </p>
                   <p className="text-[#57554F]">
-                    Inserta vídeos de cómo abrir el cajetín, usar la vitrocerámica o recorrer el piso.
+                    Códigos de cajetín y portal con desbloqueo guiado, y clave Wi-Fi con botón copiar y QR instantáneo.
+                  </p>
+                </div>
+
+                <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
+                  <p className="font-bold text-[#141413] flex items-center gap-1.5">
+                    <Video size={14} className="text-[#C85A32]" />
+                    Vídeos Cortos Paso a Paso
+                  </p>
+                  <p className="text-[#57554F]">
+                    Inserta vídeos cortos de cómo abrir el portal, usar la vitrocerámica o localizar el parking sin dudas.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Sparkles size={14} className="text-[#C85A32]" />
-                    Catálogo de Extras Propios
+                    Venta Automática de Late Check-out
                   </p>
                   <p className="text-[#57554F]">
-                    Configura Late Check-out, Parking, Cuna o Mascota. Lo cobras tú por Airbnb o Bizum.
-                  </p>
-                </div>
-
-                <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
-                  <p className="font-bold text-[#141413] flex items-center gap-1.5">
-                    <Clock size={14} className="text-[#C85A32]" />
-                    Horarios y Normas Editables
-                  </p>
-                  <p className="text-[#57554F]">
-                    Cambia horas de entrada/salida, WiFi, códigos y recomendaciones en tiempo real.
+                    Si la tarde queda libre, ofrece al huésped quedarse hasta las 17:00h (+35€ cobrados 100% para ti).
                   </p>
                 </div>
 
@@ -815,7 +846,7 @@ export default function LandingPageView({
                     Cartel QR Listo para Imprimir
                   </p>
                   <p className="text-[#57554F]">
-                    Genera una lámina PDF con los datos del WiFi y el código QR de cada propiedad.
+                    Genera una lámina PDF con el QR del piso y los datos del Wi-Fi lista para enmarcar en el recibidor.
                   </p>
                 </div>
               </div>
@@ -832,9 +863,9 @@ export default function LandingPageView({
               <button
                 type="button"
                 onClick={onNavigateToApp}
-                className="bg-[#141413] text-white text-xs font-semibold px-5 py-3"
+                className="bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-semibold px-5 py-3 transition"
               >
-                Personalizar Guía en el Panel
+                Crear Guía Gratis
               </button>
             </div>
           </div>
@@ -846,7 +877,9 @@ export default function LandingPageView({
                 <span className="font-mono text-xs uppercase tracking-widest text-[#57554F]">
                   MÓDULO B · OPERACIONES & LIMPIEZA
                 </span>
-                <span className="font-mono text-sm font-bold text-[#141413]">9 € / piso / mes</span>
+                <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
+                  1 Piso Gratis · Desde 29€/mes
+                </span>
               </div>
 
               <h3 className="text-2xl font-bold text-[#141413]">
@@ -1031,7 +1064,7 @@ export default function LandingPageView({
                   30 € a 60 € / mes
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#C85A32]">
-                  Desde 9 €/mes (amortizado con 1 sola venta)
+                  1 piso Gratis · Hasta 4 pisos: 29 €/mes (tarifa plana)
                 </td>
               </tr>
             </tbody>
@@ -1177,15 +1210,20 @@ export default function LandingPageView({
 
           <div id="precios" className="lg:col-span-5 bg-[#FAF9F5] text-[#141413] p-8 space-y-6 shadow-xl">
             <div className="border-b border-[#E2DDD2] pb-5 space-y-2">
-              <span className="font-mono text-[11px] uppercase tracking-wider text-[#57554F] block">
-                BENEFICIO NETO ESTIMADO TRAS COSTE DE TURNEXO
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[#57554F] block">
+                  BENEFICIO NETO ESTIMADO TRAS COSTE DE TURNEXO
+                </span>
+                <span className="font-mono text-[10px] uppercase font-bold px-2 py-0.5 bg-[#C85A32] text-white">
+                  {units === 1 ? 'Plan 100% Gratis' : `Tarifa Plana ${platformCost} €/mes`}
+                </span>
+              </div>
               <div className="flex items-baseline gap-2">
                 <p className="font-mono text-5xl font-extrabold text-[#1F4E3D]">
                   +{netProfit} €<span className="text-base font-normal text-[#57554F]">/mes</span>
                 </p>
                 <span className="font-mono text-xs font-bold uppercase bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
-                  +{Math.round((monthlyGain / (platformCost || 1)) * 100)}% ROI
+                  {platformCost === 0 ? 'Coste 0 € · 100% Neto' : `+${Math.round((monthlyGain / platformCost) * 100)}% ROI`}
                 </span>
               </div>
               <p className="text-xs text-[#57554F]">
@@ -1204,30 +1242,33 @@ export default function LandingPageView({
               </div>
             </div>
 
+            {/* Tramos Cerrados de Tarifa Plana */}
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between py-1.5 border-b border-[#E2DDD2]">
-                <span className="font-semibold">Módulo Individual (Solo Guía o Solo Limpiezas)</span>
-                <span className="font-mono font-bold">9 € / piso / mes</span>
+              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units === 1 ? 'bg-[#1F4E3D]/10 font-bold' : ''}`}>
+                <span className="font-semibold">1 Alojamiento</span>
+                <span className="font-mono font-bold text-[#1F4E3D]">0 € Gratis de por vida</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E2DDD2]">
-                <span className="font-semibold text-[#C85A32]">
-                  Pack Completo (Guía + Limpiezas Conectadas)
-                </span>
-                <span className="font-mono font-bold text-[#C85A32]">14 € / piso / mes</span>
+              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units >= 2 && units <= 4 ? 'bg-[#C85A32]/10 font-bold' : ''}`}>
+                <span className="font-semibold text-[#141413]">Hasta 4 Alojamientos</span>
+                <span className="font-mono font-bold">29 € / mes (tarifa plana total)</span>
               </div>
-              <div className="flex justify-between py-1.5">
-                <span className="font-semibold">Periodo de Prueba</span>
-                <span className="font-mono font-bold text-[#1F4E3D]">14 Días Gratis · Sin Tarjeta</span>
+              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units >= 5 && units <= 8 ? 'bg-[#C85A32]/10 font-bold' : ''}`}>
+                <span className="font-semibold text-[#C85A32]">Hasta 8 Alojamientos (Superhosts)</span>
+                <span className="font-mono font-bold text-[#C85A32]">49 € / mes (tarifa plana total)</span>
+              </div>
+              <div className={`flex justify-between py-2 px-2 ${units > 8 ? 'bg-[#141413]/10 font-bold' : ''}`}>
+                <span className="font-semibold text-[#57554F]">Más de 8 Alojamientos (Gestores Pro)</span>
+                <span className="font-mono font-bold text-[#57554F]">89 € / mes (tarifa plana total)</span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={onNavigateToApp}
-              className="w-full bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-mono uppercase tracking-wider font-bold py-4 transition flex items-center justify-center gap-2"
+              className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-mono uppercase tracking-wider font-bold py-4 transition flex items-center justify-center gap-2 shadow-md group"
             >
-              <span>Comenzar Prueba Gratuita (/app)</span>
-              <ArrowRight size={14} />
+              <span>Crear mi primer manual gratis (Sin tarjeta)</span>
+              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>

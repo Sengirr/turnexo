@@ -15,7 +15,7 @@ export interface HostAccount {
   email: string;
   fullName: string;
   companyName: string;
-  plan: 'module_cleanings' | 'module_guide' | 'pack_complete';
+  plan: 'module_cleanings' | 'module_guide' | 'pack_complete' | 'plan_starter' | 'plan_pro' | 'plan_manager' | string;
   subscriptionStatus?: 'trialing' | 'active';
   trialEndsAt: string;
 }

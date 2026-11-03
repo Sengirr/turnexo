@@ -150,11 +150,11 @@ export default function AuthOnboardingView({ onSuccess, onBackToLanding }: Props
           </div>
 
           <div className="space-y-3.5">
-            {/* Opción Pack Completo */}
+            {/* Opción 1: Plan Starter (1 Alojamiento Gratis) */}
             <div
-              onClick={() => setSelectedPlan('pack_complete')}
+              onClick={() => setSelectedPlan('plan_starter')}
               className={`p-5 border-2 cursor-pointer transition ${
-                selectedPlan === 'pack_complete'
+                selectedPlan === 'plan_starter'
                   ? 'border-[#141413] bg-[#141413] text-[#F6F4EE] shadow-xl'
                   : 'border-[#D5CFC0] bg-[#FAF9F5] hover:border-[#141413]'
               }`}
@@ -163,46 +163,94 @@ export default function AuthOnboardingView({ onSuccess, onBackToLanding }: Props
                 <div className="flex items-start gap-3.5">
                   <div
                     className={`w-6 h-6 mt-0.5 flex items-center justify-center border ${
-                      selectedPlan === 'pack_complete'
+                      selectedPlan === 'plan_starter'
+                        ? 'bg-[#1F4E3D] border-[#1F4E3D] text-white'
+                        : 'border-[#141413]'
+                    }`}
+                  >
+                    {selectedPlan === 'plan_starter' && <Check size={14} />}
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 bg-[#1F4E3D] text-white font-bold">
+                        1 PISO GRATIS DE POR VIDA
+                      </span>
+                      <span className="font-mono text-[11px] uppercase tracking-wider opacity-70">
+                        SIN TARJETA DE CRÉDITO
+                      </span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1.5">
+                      Plan Starter (1 Alojamiento Turístico)
+                    </h3>
+                    <p
+                      className={`text-xs mt-1 leading-relaxed ${
+                        selectedPlan === 'plan_starter' ? 'text-white/75' : 'text-[#57554F]'
+                      }`}
+                    >
+                      Guía Digital del Huésped completa (Wi-Fi, códigos, vídeos, normas), enlace iCal con Airbnb y Booking, y enlace móvil para 1 limpiadora con checklist.
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right font-mono shrink-0">
+                  <span className="text-2xl font-bold text-[#1F4E3D]">0 €</span>
+                  <span className="block text-[10px] opacity-60">/ mes de por vida</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Opción 2: Plan Pro (Hasta 4 Pisos - 29€/mes) */}
+            <div
+              onClick={() => setSelectedPlan('plan_pro')}
+              className={`p-5 border-2 cursor-pointer transition ${
+                selectedPlan === 'plan_pro'
+                  ? 'border-[#141413] bg-[#141413] text-[#F6F4EE] shadow-xl'
+                  : 'border-[#D5CFC0] bg-[#FAF9F5] hover:border-[#141413]'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div
+                    className={`w-6 h-6 mt-0.5 flex items-center justify-center border ${
+                      selectedPlan === 'plan_pro'
                         ? 'bg-[#C85A32] border-[#C85A32] text-white'
                         : 'border-[#141413]'
                     }`}
                   >
-                    {selectedPlan === 'pack_complete' && <Check size={14} />}
+                    {selectedPlan === 'plan_pro' && <Check size={14} />}
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 bg-[#C85A32] text-white font-bold">
-                        MÁS ELEGIDO · AHORRA 4€/PISO
+                        TARIFA PLANA · 7,25€/PISO
                       </span>
                       <span className="font-mono text-[11px] uppercase tracking-wider opacity-70">
-                        MÓDULO 1 + MÓDULO 2 CONECTADOS
+                        HASTA 4 ALOJAMIENTOS
                       </span>
                     </div>
                     <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1.5">
-                      Pack Completo Turnexo (Limpiezas iCal + Guía Huésped)
+                      Plan Pro (Hasta 4 Alojamientos)
                     </h3>
                     <p
                       className={`text-xs mt-1 leading-relaxed ${
-                        selectedPlan === 'pack_complete' ? 'text-white/75' : 'text-[#57554F]'
+                        selectedPlan === 'plan_pro' ? 'text-white/75' : 'text-[#57554F]'
                       }`}
                     >
-                      Sincronización total: cuando un huésped pide Late Check-out desde su guía y lo apruebas en 1 clic, la hora de entrada de la limpiadora se retrasa automáticamente.
+                      Tarifa plana fija sin sustos mensuales. Todo incluido: Guías 100% personalizadas sin marca Turnexo, cuadrante iCal, limpiadoras ilimitadas y cobro de late check-outs sin comisiones.
                     </p>
                   </div>
                 </div>
                 <div className="text-right font-mono shrink-0">
-                  <span className="text-2xl font-bold">14 €</span>
-                  <span className="block text-[10px] opacity-60">/ piso / mes</span>
+                  <span className="text-2xl font-bold">29 €</span>
+                  <span className="block text-[10px] opacity-60">/ mes total</span>
                 </div>
               </div>
             </div>
 
-            {/* Opción Solo Módulo 1: Limpiezas */}
+            {/* Opción 3: Plan Gestor (Hasta 8 Pisos - 49€/mes) */}
             <div
-              onClick={() => setSelectedPlan('module_cleanings')}
+              onClick={() => setSelectedPlan('plan_manager')}
               className={`p-5 border-2 cursor-pointer transition ${
-                selectedPlan === 'module_cleanings'
+                selectedPlan === 'plan_manager'
                   ? 'border-[#141413] bg-[#141413] text-[#F6F4EE] shadow-xl'
                   : 'border-[#D5CFC0] bg-[#FAF9F5] hover:border-[#141413]'
               }`}
@@ -211,75 +259,37 @@ export default function AuthOnboardingView({ onSuccess, onBackToLanding }: Props
                 <div className="flex items-start gap-3.5">
                   <div
                     className={`w-6 h-6 mt-0.5 flex items-center justify-center border ${
-                      selectedPlan === 'module_cleanings'
+                      selectedPlan === 'plan_manager'
                         ? 'bg-[#C85A32] border-[#C85A32] text-white'
                         : 'border-[#141413]'
                     }`}
                   >
-                    {selectedPlan === 'module_cleanings' && <Check size={14} />}
+                    {selectedPlan === 'plan_manager' && <Check size={14} />}
                   </div>
                   <div>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold flex items-center gap-1.5">
-                      <Calendar size={12} /> SOLO MÓDULO 1 · OPERATIVA DE LIMPIEZA
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1">
-                      Módulo Limpiezas Automáticas por iCal
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 bg-[#C85A32] text-white font-bold">
+                        MÁS ELEGIDO POR SUPERHOSTS
+                      </span>
+                      <span className="font-mono text-[11px] uppercase tracking-wider opacity-70">
+                        HASTA 8 ALOJAMIENTOS (6,12€/PISO)
+                      </span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1.5">
+                      Plan Gestor (Hasta 8 Alojamientos)
                     </h3>
                     <p
                       className={`text-xs mt-1 leading-relaxed ${
-                        selectedPlan === 'module_cleanings' ? 'text-white/75' : 'text-[#57554F]'
+                        selectedPlan === 'plan_manager' ? 'text-white/75' : 'text-[#57554F]'
                       }`}
                     >
-                      Lectura de Airbnb y Booking, alerta de rotación el mismo día, enlace móvil en español (/c/token) para cada limpiadora, checklist por piso y fotos WebP.
+                      Para anfitriones profesionales y gestoras boutique. Incluye liquidaciones de honorarios para limpiadoras con exportación CSV y despacho por WhatsApp.
                     </p>
                   </div>
                 </div>
                 <div className="text-right font-mono shrink-0">
-                  <span className="text-2xl font-bold">9 €</span>
-                  <span className="block text-[10px] opacity-60">/ piso / mes</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Opción Solo Módulo 2: Guía del Huésped */}
-            <div
-              onClick={() => setSelectedPlan('module_guide')}
-              className={`p-5 border-2 cursor-pointer transition ${
-                selectedPlan === 'module_guide'
-                  ? 'border-[#141413] bg-[#141413] text-[#F6F4EE] shadow-xl'
-                  : 'border-[#D5CFC0] bg-[#FAF9F5] hover:border-[#141413]'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3.5">
-                  <div
-                    className={`w-6 h-6 mt-0.5 flex items-center justify-center border ${
-                      selectedPlan === 'module_guide'
-                        ? 'bg-[#C85A32] border-[#C85A32] text-white'
-                        : 'border-[#141413]'
-                    }`}
-                  >
-                    {selectedPlan === 'module_guide' && <Check size={14} />}
-                  </div>
-                  <div>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold flex items-center gap-1.5">
-                      <Sparkles size={12} /> SOLO MÓDULO 2 · EXPERIENCIA & UPSELLING
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1">
-                      Módulo Guía Digital del Huésped + Extras
-                    </h3>
-                    <p
-                      className={`text-xs mt-1 leading-relaxed ${
-                        selectedPlan === 'module_guide' ? 'text-white/75' : 'text-[#57554F]'
-                      }`}
-                    >
-                      Portal móvil multi-idioma (ES/EN/FR) con vídeos de llegada paso a paso, desbloqueo de código de buzón/portero, WiFi, checklist de salida y venta de Late Check-out y extras.
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right font-mono shrink-0">
-                  <span className="text-2xl font-bold">9 €</span>
-                  <span className="block text-[10px] opacity-60">/ piso / mes</span>
+                  <span className="text-2xl font-bold">49 €</span>
+                  <span className="block text-[10px] opacity-60">/ mes total</span>
                 </div>
               </div>
             </div>

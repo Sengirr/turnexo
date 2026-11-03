@@ -413,9 +413,10 @@ export default function HostDashboardView({
                     onChange={(e) => onChangePlan(e.target.value as HostAccount['plan'])}
                     className="w-full bg-[#141413] border border-white/20 text-white font-mono text-[10px] px-2 py-1.5 focus:outline-none focus:border-[#C85A32]"
                   >
-                    <option value="pack_complete">Pack Completo (14€/mes)</option>
-                    <option value="module_cleanings">Solo Limpiezas iCal (9€/mes)</option>
-                    <option value="module_guide">Solo Guía Huésped (9€/mes)</option>
+                    <option value="plan_starter">Plan 1 Piso (0€ Gratis)</option>
+                    <option value="plan_pro">Plan Pro 4 Pisos (29€/mes)</option>
+                    <option value="plan_manager">Plan Gestor 8 Pisos (49€/mes)</option>
+                    <option value="pack_complete">Tarifa Plana Completa</option>
                   </select>
                 </div>
               )}
@@ -1396,11 +1397,13 @@ export default function HostDashboardView({
                       PLAN ACTIVO EN TU CUENTA
                     </span>
                     <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1">
-                      {hostAccount?.plan === 'module_cleanings'
-                        ? 'Solo Módulo 1 · Limpiezas iCal (9€/piso)'
-                        : hostAccount?.plan === 'module_guide'
-                        ? 'Solo Módulo 2 · Guía del Huésped (9€/piso)'
-                        : 'Pack Completo Turnexo · Módulo 1 + 2 (14€/piso)'}
+                      {hostAccount?.plan === 'plan_starter'
+                        ? 'Plan Starter · 1 Alojamiento (0€ Gratis)'
+                        : hostAccount?.plan === 'plan_pro'
+                        ? 'Plan Pro · Hasta 4 Alojamientos (29€/mes)'
+                        : hostAccount?.plan === 'plan_manager'
+                        ? 'Plan Gestor · Hasta 8 Alojamientos (49€/mes)'
+                        : 'Plan Pro Turnexo · Tarifa Plana'}
                     </h3>
                     <p className="text-xs text-white/65 mt-1">
                       Estado:{' '}
@@ -1411,12 +1414,11 @@ export default function HostDashboardView({
                   </div>
                   <div className="text-right font-mono">
                     <span className="text-3xl font-bold text-white">
-                      {properties.length *
-                        (hostAccount?.plan === 'pack_complete' || !hostAccount?.plan ? 14 : 9)}{' '}
+                      {properties.length <= 1 ? 0 : properties.length <= 4 ? 29 : properties.length <= 8 ? 49 : 89}{' '}
                       €
                     </span>
                     <span className="block text-[10px] text-white/50">
-                      / mes ({properties.length} alojamientos)
+                      / mes tarifa plana total ({properties.length} alojamientos)
                     </span>
                   </div>
                 </div>
@@ -1425,26 +1427,26 @@ export default function HostDashboardView({
                   {(
                     [
                       {
-                        id: 'pack_complete',
-                        title: 'Pack Completo',
-                        price: '14 € / piso',
-                        desc: 'Limpiezas iCal + Guía Huésped conectadas',
+                        id: 'plan_starter',
+                        title: '1 Alojamiento',
+                        price: '0 € / mes',
+                        desc: 'Gratis de por vida para propietarios',
                       },
                       {
-                        id: 'module_cleanings',
-                        title: 'Solo Limpiezas',
-                        price: '9 € / piso',
-                        desc: 'Solo cuadrante iCal y app limpiadoras',
+                        id: 'plan_pro',
+                        title: 'Hasta 4 Alojamientos',
+                        price: '29 € / mes',
+                        desc: 'Tarifa plana total (7,25€/piso)',
                       },
                       {
-                        id: 'module_guide',
-                        title: 'Solo Guía Huésped',
-                        price: '9 € / piso',
-                        desc: 'Solo portal huésped y venta de extras',
+                        id: 'plan_manager',
+                        title: 'Hasta 8 Alojamientos',
+                        price: '49 € / mes',
+                        desc: 'Tarifa plana total (6,12€/piso)',
                       },
                     ] as const
                   ).map((p) => {
-                    const isCurrent = (hostAccount?.plan || 'pack_complete') === p.id;
+                    const isCurrent = (hostAccount?.plan || 'plan_pro') === p.id;
                     return (
                       <button
                         key={p.id}
@@ -1476,7 +1478,7 @@ export default function HostDashboardView({
                     type="button"
                     onClick={() => {
                       const planKey = hostAccount?.plan || 'pack_complete';
-                      const stripeUrl = STRIPE_PAYMENT_LINKS[planKey];
+                      const stripeUrl = (STRIPE_PAYMENT_LINKS as Record<string, string>)[planKey] || STRIPE_PAYMENT_LINKS.pack_complete;
                       if (stripeUrl) {
                         window.open(stripeUrl, '_blank');
                       } else {

@@ -154,9 +154,9 @@ export default function LandingPageView({
               <span>Compatible con Airbnb · Booking.com · Vrbo (.ics)</span>
             </div>
 
-            <h1 className="font-serif text-5xl sm:text-7xl leading-[1.03] tracking-tight text-[#141413]">
+            <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.08] tracking-tight text-[#141413]">
               Operativa de limpiezas y experiencia del huésped,{' '}
-              <span className="italic text-[#C85A32]">en sincronía.</span>
+              <span className="text-[#C85A32]">en sincronía.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
@@ -242,7 +242,7 @@ export default function LandingPageView({
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
                       SIN CONTRASEÑAS · ACCESO DIRECTO
                     </span>
-                    <h4 className="font-serif text-2xl text-[#141413] mt-0.5">
+                    <h4 className="text-xl font-bold text-[#141413] mt-0.5">
                       Parte de María Carmen
                     </h4>
                   </div>
@@ -295,7 +295,7 @@ export default function LandingPageView({
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
                       PORTAL BOUTIQUE DEL HUÉSPED
                     </span>
-                    <h3 className="font-serif text-2xl mt-0.5">Ático Vista Marina</h3>
+                    <h3 className="text-xl font-bold mt-0.5">Ático Vista Marina</h3>
                   </div>
                   <span className="font-mono text-xs bg-white/10 px-2.5 py-1 text-white/80">
                     ES · EN · FR
@@ -347,7 +347,7 @@ export default function LandingPageView({
             <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
               HERRAMIENTA GRATUITA · PRUÉBALO EN 10 SEGUNDOS
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl text-white">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Comprueba cuántas rotaciones y euros estás perdiendo en tu calendario.
             </h2>
             <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto">
@@ -463,7 +463,7 @@ export default function LandingPageView({
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
             Arquitectura Modular
           </span>
-          <h2 className="font-serif text-4xl sm:text-5xl text-[#141413] leading-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] leading-tight tracking-tight">
             Dos herramientas especializadas. Úsalas por separado o conéctalas.
           </h2>
         </div>
@@ -479,7 +479,7 @@ export default function LandingPageView({
                 <span className="font-mono text-sm font-bold text-[#141413]">12 € / mes</span>
               </div>
 
-              <h3 className="font-serif text-3xl text-[#141413]">
+              <h3 className="text-2xl font-bold text-[#141413]">
                 Guía Digital del Huésped a Medida
               </h3>
 
@@ -558,7 +558,7 @@ export default function LandingPageView({
                 <span className="font-mono text-sm font-bold text-[#141413]">12 € / mes</span>
               </div>
 
-              <h3 className="font-serif text-3xl text-[#141413]">
+              <h3 className="text-2xl font-bold text-[#141413]">
                 Coordinación Automática de Limpiadoras vía iCal
               </h3>
 
@@ -635,7 +635,7 @@ export default function LandingPageView({
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
             COMPARATIVA DIRECTA
           </span>
-          <h2 className="font-serif text-3xl sm:text-5xl text-[#141413] leading-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] leading-tight tracking-tight">
             ¿Por qué los anfitriones abandonan las hojas de cálculo y WhatsApp?
           </h2>
           <p className="text-sm text-[#57554F] leading-relaxed">
@@ -755,10 +755,10 @@ export default function LandingPageView({
             <span className="font-mono text-xs uppercase tracking-widest text-[#1F4E3D] font-bold">
               CASOS DE ÉXITO · ANFITRIONES EN ESPAÑA
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl text-[#141413]">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
               Superhosts y gestores que ya operan con Turnexo.
             </h2>
-            <p className="text-xs sm:text-sm text-[#57554F]">
+            <p className="text-sm text-[#57554F]">
               Historias reales de anfitriones que redujeron sus llamadas y aumentaron su ticket medio por reserva.
             </p>
           </div>
@@ -771,7 +771,7 @@ export default function LandingPageView({
                     <Star key={i} size={15} fill="currentColor" />
                   ))}
                 </div>
-                <p className="text-xs sm:text-sm text-[#141413] leading-relaxed italic font-serif">
+                <p className="text-sm text-[#141413] leading-relaxed font-normal">
                   "Llevo 6 apartamentos turísticos en Málaga capital. Los domingos por la tarde eran una pesadilla cuadrando cambios de sábanas. Ahora cada limpiadora tiene su enlace fijado en el móvil y no me llaman ni una sola vez para preguntar qué piso toca."
                 </p>
               </div>
@@ -794,7 +794,7 @@ export default function LandingPageView({
                     <Star key={i} size={15} fill="currentColor" />
                   ))}
                 </div>
-                <p className="text-xs sm:text-sm text-[#141413] leading-relaxed italic font-serif">
+                <p className="text-sm text-[#141413] leading-relaxed font-normal">
                   "Solo el mes pasado ingresamos 245 € extras vendiendo Late Check-outs desde la Guía Digital en el ático de Marbella. Antes el huésped nos lo pedía por chat a última hora y se lo dábamos gratis por compromiso. Ahora lo piden por la guía y pagan contentos."
                 </p>
               </div>
@@ -817,7 +817,7 @@ export default function LandingPageView({
                     <Star key={i} size={15} fill="currentColor" />
                   ))}
                 </div>
-                <p className="text-xs sm:text-sm text-[#141413] leading-relaxed italic font-serif">
+                <p className="text-sm text-[#141413] leading-relaxed font-normal">
                   "El vídeo de cómo abrir el cajetín de llaves y el WiFi en QR en el recibidor nos ha quitado el 90% de los mensajes de bienvenida de huéspedes extranjeros. La guía en inglés y francés hace que se sientan como en un hotel de 5 estrellas."
                 </p>
               </div>
@@ -843,7 +843,7 @@ export default function LandingPageView({
             <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32]">
               Retorno de Inversión Inmediato
             </span>
-            <h2 className="font-serif text-4xl sm:text-5xl leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight">
               Con un solo Late Check-out al mes, Turnexo te sale gratis.
             </h2>
             <p className="text-sm text-white/70 leading-relaxed max-w-xl">
@@ -932,7 +932,7 @@ export default function LandingPageView({
             <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
               PREGUNTAS FRECUENTES
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl text-[#141413]">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
               Todo lo que necesitas saber antes de empezar.
             </h2>
           </div>

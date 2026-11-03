@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /g/
+Disallow: /app
+Disallow: /c/
+Disallow: /api/
+
+Sitemap: https://turnexo.vercel.app/sitemap.xml

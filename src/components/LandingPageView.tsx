@@ -47,14 +47,14 @@ export default function LandingPageView({
               <a href="#modulos" className="hover:text-[#141413] transition">
                 Módulos Independientes
               </a>
-              <a href="#como-funciona" className="hover:text-[#141413] transition">
-                Arquitectura iCal
-              </a>
               <a href="#retorno" className="hover:text-[#141413] transition">
                 Calculadora Upsell
               </a>
               <a href="#precios" className="hover:text-[#141413] transition">
                 Tarifas
+              </a>
+              <a href="#faq" className="hover:text-[#141413] transition">
+                Preguntas Frecuentes
               </a>
             </nav>
           </div>
@@ -462,18 +462,18 @@ export default function LandingPageView({
 
             <div className="space-y-2.5 text-xs">
               <div className="flex justify-between py-1.5 border-b border-[#E2DDD2]">
-                <span className="font-semibold">Módulo Suelto (Guía o Limpiezas)</span>
-                <span className="font-mono font-bold">12 € / mes</span>
+                <span className="font-semibold">Módulo Suelto (Solo Guía o Solo Limpiezas)</span>
+                <span className="font-mono font-bold">9 € / piso / mes</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-[#E2DDD2]">
                 <span className="font-semibold text-[#C85A32]">
                   Pack Completo (Guía + Limpiezas Conectadas)
                 </span>
-                <span className="font-mono font-bold text-[#C85A32]">19 € / mes</span>
+                <span className="font-mono font-bold text-[#C85A32]">14 € / piso / mes</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="font-semibold">Plan Gestora (Hasta 25 alojamientos)</span>
-                <span className="font-mono font-bold">49 € / mes</span>
+                <span className="font-semibold">Periodo de Prueba</span>
+                <span className="font-mono font-bold text-[#1F4E3D]">14 Días Gratis</span>
               </div>
             </div>
 
@@ -487,6 +487,83 @@ export default function LandingPageView({
           </div>
         </div>
       </section>
+
+      {/* SECCIÓN FAQ PARA SEO Y RESOLUCIÓN DE OBJECIONES */}
+      <section id="faq" className="max-w-7xl mx-auto px-6 py-20 border-t border-[#E2DDD2]">
+        <div className="max-w-3xl mx-auto space-y-12">
+          <div className="text-center space-y-3">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
+              PREGUNTAS FRECUENTES
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl text-[#141413]">
+              Todo lo que necesitas saber antes de empezar.
+            </h2>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-2">
+              <h3 className="font-bold text-base text-[#141413]">
+                ¿Cómo se conecta con mis anuncios de Airbnb y Booking?
+              </h3>
+              <p className="text-xs text-[#57554F] leading-relaxed">
+                Sin contraseñas de tus cuentas. Solo copias el enlace público de exportación iCal (.ics) que te da Airbnb o Booking en la sección de calendarios y lo pegas en Turnexo. En 30 segundos todas tus reservas pasadas y futuras quedan sincronizadas automáticamente.
+              </p>
+            </div>
+
+            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-2">
+              <h3 className="font-bold text-base text-[#141413]">
+                ¿Mis limpiadoras necesitan descargarse una app de la App Store o crearse cuenta?
+              </h3>
+              <p className="text-xs text-[#57554F] leading-relaxed">
+                No. Cada limpiadora recibe su enlace mágico único (por ejemplo <code>/c/maria-7f9a</code>) por WhatsApp. Al abrirlo en el navegador de su teléfono ven su parte de trabajo del día, horas de check-in urgente, checklist en español y botón para tomar fotos de auditoría.
+              </p>
+            </div>
+
+            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-2">
+              <h3 className="font-bold text-base text-[#141413]">
+                ¿Cómo funciona la venta de Late Check-out y cobro de extras?
+              </h3>
+              <p className="text-xs text-[#57554F] leading-relaxed">
+                Turnexo detecta mediante el calendario iCal si el día de salida del huésped entra otra reserva o queda libre. Si queda libre, ofrece el Late Check-out hasta la tarde. Tú cobras el 100% del dinero directamente al huésped (por el centro de resoluciones de Airbnb, Bizum o tarjeta) sin que Turnexo te cobre ninguna comisión.
+              </p>
+            </div>
+
+            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-2">
+              <h3 className="font-bold text-base text-[#141413]">
+                ¿Puedo contratar solo la Guía Digital o solo la Operativa de Limpiezas?
+              </h3>
+              <p className="text-xs text-[#57554F] leading-relaxed">
+                Sí. Los módulos son totalmente independientes. Si ya tienes resuelta la limpieza y solo quieres la Guía Digital con vídeos para huéspedes y venta de extras, contratas el Módulo 2 (9€/mes). Si solo necesitas el cuadrante de limpiezas por iCal, el Módulo 1 (9€/mes). O ambos conectados por 14€/mes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER CORPORATIVO Y ENLACES */}
+      <footer className="border-t border-[#D5CFC0] bg-[#141413] text-[#F6F4EE] py-12 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs font-mono text-white/60">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 bg-[#C85A32] text-white flex items-center justify-center font-bold text-[10px]">
+              TX
+            </div>
+            <span className="font-bold text-white text-sm">Turnexo</span>
+            <span>· Plataforma para Alojamientos Vacacionales</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-6">
+            <a href="#modulos" className="hover:text-white transition">Módulos</a>
+            <a href="#precios" className="hover:text-white transition">Precios</a>
+            <a href="#faq" className="hover:text-white transition">FAQ</a>
+            <button type="button" onClick={onNavigateToApp} className="text-[#C85A32] font-bold hover:underline">
+              Panel /app
+            </button>
+          </div>
+        </div>
+        <p className="text-center font-mono text-[10px] text-white/35 mt-8">
+          © {new Date().getFullYear()} Turnexo. Todos los derechos reservados. Optimizado para Airbnb, Booking y Vrbo.
+        </p>
+      </footer>
     </div>
   );
 }

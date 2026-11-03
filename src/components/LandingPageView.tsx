@@ -10,8 +10,19 @@ import {
   ShieldCheck,
   Sparkles,
   Flame,
-  Play,
+  Star,
+  CheckCircle2,
+  X,
+  Smartphone,
+  ExternalLink,
+  ChevronRight,
+  TrendingUp,
+  FileSpreadsheet,
+  MessageSquare,
+  HelpCircle,
+  Copy,
 } from 'lucide-react';
+import { parseICalContent } from '../lib/icalParser';
 
 interface Props {
   onNavigateToApp: () => void;
@@ -27,6 +38,55 @@ export default function LandingPageView({
   const [units, setUnits] = useState(5);
   const [upsellAvg, setUpsellAvg] = useState(35);
   const monthlyGain = units * 2 * upsellAvg;
+
+  // Estado del probador de iCal interactivo
+  const [testerUrl, setTesterUrl] = useState('');
+  const [testingIcal, setTestingIcal] = useState(false);
+  const [testResult, setTestResult] = useState<{
+    totalReservations: number;
+    sameDayTurns: number;
+    guestNames: string[];
+  } | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
+
+  // Selector interactivo de vista previa
+  const [previewTab, setPreviewTab] = useState<'cleaner' | 'guest'>('cleaner');
+
+  const handleRunIcalTest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testerUrl.trim()) return;
+    setTestingIcal(true);
+    setTestError(null);
+    setTestResult(null);
+
+    try {
+      const res = await fetch(`/api/fetch-ical?url=${encodeURIComponent(testerUrl.trim())}`);
+      if (!res.ok) throw new Error('No se pudo descargar el calendario. Comprueba que la URL es pública.');
+      const icsText = await res.text();
+      const parsed = parseICalContent(icsText, 'preview-prop');
+      if (parsed.length === 0) {
+        throw new Error('No se encontraron reservas en el archivo iCal (.ics).');
+      }
+
+      // Contar rotaciones el mismo día
+      let sameDayCount = 0;
+      for (const r of parsed) {
+        if (parsed.some((other) => other.id !== r.id && other.checkIn === r.checkOut)) {
+          sameDayCount++;
+        }
+      }
+
+      setTestResult({
+        totalReservations: parsed.length,
+        sameDayTurns: Math.ceil(sameDayCount / 2),
+        guestNames: parsed.slice(0, 3).map((r) => r.guestName),
+      });
+    } catch (err: any) {
+      setTestError(err?.message || 'Error al conectar con la URL iCal. Verifica el enlace.');
+    } finally {
+      setTestingIcal(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
@@ -44,17 +104,23 @@ export default function LandingPageView({
             </a>
 
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#57554F]">
-              <a href="#modulos" className="hover:text-[#141413] transition">
-                Módulos Independientes
+              <a href="#probar-ical" className="hover:text-[#141413] transition font-bold text-[#C85A32]">
+                ⚡ Probar mi iCal
               </a>
-              <a href="#retorno" className="hover:text-[#141413] transition">
-                Calculadora Upsell
+              <a href="#modulos" className="hover:text-[#141413] transition">
+                Módulos
+              </a>
+              <a href="#comparativa" className="hover:text-[#141413] transition">
+                Comparativa
+              </a>
+              <a href="#testimonios" className="hover:text-[#141413] transition">
+                Testimonios
               </a>
               <a href="#precios" className="hover:text-[#141413] transition">
                 Tarifas
               </a>
               <a href="#faq" className="hover:text-[#141413] transition">
-                Preguntas Frecuentes
+                FAQ
               </a>
             </nav>
           </div>
@@ -140,90 +206,254 @@ export default function LandingPageView({
             </div>
           </div>
 
-          {/* Vista Previa Editorial de las 2 piezas conectadas */}
+          {/* Vista Previa Interactiva con Toggle Cleaner / Guest */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="bg-[#141413] text-[#F6F4EE] p-6 border border-[#141413] space-y-5">
-              <div className="flex items-center justify-between border-b border-white/15 pb-4">
-                <div>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32]">
-                    MÓDULO 01 · GUÍA DEL HUÉSPED
-                  </span>
-                  <h3 className="font-serif text-2xl mt-0.5">Ático Vista Marina · Marbella</h3>
-                </div>
-                <span className="font-mono text-xs bg-white/10 px-2.5 py-1">
-                  turnexo.com/g/marina
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 font-mono text-xs">
-                <div className="bg-white/5 border border-white/10 p-3">
-                  <span className="text-white/50 block text-[10px]">CHECK-IN / PUERTA</span>
-                  <span className="font-bold text-sm mt-1 block">15:00h · Cód. 4829#</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 p-3">
-                  <span className="text-white/50 block text-[10px]">RED WIFI</span>
-                  <span className="font-bold text-sm mt-1 block">VistaMarina_5G</span>
-                </div>
-              </div>
-
-              <div className="bg-[#FAF9F5] text-[#141413] p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#1F4E3D] font-bold">
-                    ● HUECO DETECTADO EN ICAL EL 03 NOV
-                  </span>
-                  <span className="font-mono font-bold text-sm">+35 €</span>
-                </div>
-                <p className="text-xs font-semibold">
-                  Oferta automática al huésped: Late Check-out hasta las 17:00h
-                </p>
-                <p className="text-[11px] text-[#57554F]">
-                  Solo se muestra en la guía cuando no entra ningún huésped ese día.
-                </p>
-              </div>
+            <div className="flex items-center gap-1.5 p-1 bg-[#E8E4D9] border border-[#D5CFC0] rounded-none font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => setPreviewTab('cleaner')}
+                className={`flex-1 py-2 font-bold uppercase transition flex items-center justify-center gap-1.5 ${
+                  previewTab === 'cleaner'
+                    ? 'bg-[#141413] text-white shadow-md'
+                    : 'text-[#57554F] hover:text-[#141413]'
+                }`}
+              >
+                <Smartphone size={14} />
+                <span>Vista Limpiadora (/c/)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewTab('guest')}
+                className={`flex-1 py-2 font-bold uppercase transition flex items-center justify-center gap-1.5 ${
+                  previewTab === 'guest'
+                    ? 'bg-[#C85A32] text-white shadow-md'
+                    : 'text-[#57554F] hover:text-[#141413]'
+                }`}
+              >
+                <Sparkles size={14} />
+                <span>Vista Huésped (/g/)</span>
+              </button>
             </div>
 
-            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
-                    MÓDULO 02 · ENLACE DE LA LIMPIADORA
-                  </span>
-                  <h4 className="font-bold text-base text-[#141413] mt-0.5">
-                    María Carmen · Turnos de la semana
-                  </h4>
-                </div>
-                <span className="font-mono text-[11px] bg-[#E8E4D9] px-2.5 py-1 font-semibold">
-                  Sin contraseñas
-                </span>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between p-3 bg-white border-l-4 border-[#C85A32] border border-[#E2DDD2]">
+            {previewTab === 'cleaner' ? (
+              <div className="bg-[#FAF9F5] border-2 border-[#141413] p-6 space-y-4 shadow-[6px_6px_0px_#141413]">
+                <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-3">
                   <div>
-                    <span className="font-mono font-bold text-[#C85A32] block">
-                      🔥 HOY 02 NOV · ROTACIÓN MISMO DÍA
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
+                      SIN CONTRASEÑAS · ACCESO DIRECTO
                     </span>
-                    <span className="font-semibold text-[#141413]">Loft Centro Catedral</span>
+                    <h4 className="font-serif text-2xl text-[#141413] mt-0.5">
+                      Parte de María Carmen
+                    </h4>
                   </div>
-                  <span className="font-mono font-bold bg-[#141413] text-white px-2.5 py-1">
-                    11:00 → 15:00
+                  <span className="font-mono text-xs font-bold bg-[#1F4E3D] text-white px-2.5 py-1">
+                    80 € Acumulados
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-white border-l-4 border-[#1F4E3D] border border-[#E2DDD2]">
-                  <div>
-                    <span className="font-mono font-bold text-[#1F4E3D] block">
-                      ⏰ 03 NOV · LATE CHECK-OUT CONCEDIDO
-                    </span>
-                    <span className="font-semibold text-[#141413]">Ático Vista Marina</span>
+                <div className="space-y-2.5 text-xs">
+                  <div className="p-3.5 bg-white border-l-4 border-[#C85A32] border border-[#E2DDD2] space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-[#C85A32] flex items-center gap-1">
+                        <Flame size={13} /> ENTRADA HOY · ROTACIÓN 15:00H
+                      </span>
+                      <span className="font-mono font-bold bg-[#141413] text-white px-2 py-0.5 text-[11px]">
+                        11:00 → 15:00
+                      </span>
+                    </div>
+                    <p className="font-bold text-sm text-[#141413]">Loft Centro Catedral · 38 €</p>
+                    <p className="text-[#57554F] text-[11px]">Checklist: 4/4 comprobados · 3 fotos enviadas</p>
                   </div>
-                  <span className="font-mono font-bold bg-[#1F4E3D] text-white px-2.5 py-1">
-                    Entrar 17:00h
+
+                  <div className="p-3.5 bg-white border-l-4 border-[#1F4E3D] border border-[#E2DDD2] space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-[#1F4E3D] flex items-center gap-1">
+                        <Clock size={13} /> LATE CHECK-OUT APROBADO
+                      </span>
+                      <span className="font-mono font-bold bg-[#1F4E3D] text-white px-2 py-0.5 text-[11px]">
+                        Entrar 17:00h
+                      </span>
+                    </div>
+                    <p className="font-bold text-sm text-[#141413]">Ático Vista Marina · 45 €</p>
+                    <p className="text-[#57554F] text-[11px]">La hora se retrasó automáticamente al aprobar el anfitrión</p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onOpenCleanerDemo}
+                  className="w-full bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs font-bold uppercase tracking-wider py-3 flex items-center justify-center gap-1.5 transition"
+                >
+                  <span>Abrir App Limpiadora Completa</span>
+                  <ExternalLink size={13} />
+                </button>
+              </div>
+            ) : (
+              <div className="bg-[#141413] text-[#F6F4EE] p-6 border-2 border-[#141413] space-y-4 shadow-[6px_6px_0px_#C85A32]">
+                <div className="flex items-center justify-between border-b border-white/15 pb-3">
+                  <div>
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
+                      PORTAL BOUTIQUE DEL HUÉSPED
+                    </span>
+                    <h3 className="font-serif text-2xl mt-0.5">Ático Vista Marina</h3>
+                  </div>
+                  <span className="font-mono text-xs bg-white/10 px-2.5 py-1 text-white/80">
+                    ES · EN · FR
                   </span>
                 </div>
+
+                <div className="grid grid-cols-2 gap-2.5 font-mono text-xs">
+                  <div className="bg-white/5 border border-white/10 p-3">
+                    <span className="text-white/50 block text-[10px]">CÓDIGO PUERTA</span>
+                    <span className="font-bold text-sm mt-0.5 text-white block">4829#</span>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 p-3">
+                    <span className="text-white/50 block text-[10px]">RED WIFI</span>
+                    <span className="font-bold text-sm mt-0.5 text-white block truncate">VistaMarina_5G</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#FAF9F5] text-[#141413] p-4 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#1F4E3D] font-bold flex items-center gap-1">
+                      <Sparkles size={12} /> HUECO DETECTADO EN ICAL
+                    </span>
+                    <span className="font-mono font-bold text-sm">+35 €</span>
+                  </div>
+                  <p className="text-xs font-bold">Late Check-out hasta las 17:00h</p>
+                  <p className="text-[11px] text-[#57554F] leading-tight">
+                    El huésped lo solicita en 1 toque. Tú lo cobras íntegro sin intermediarios.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onOpenGuestDemo}
+                  className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-mono text-xs font-bold uppercase tracking-wider py-3 flex items-center justify-center gap-1.5 transition"
+                >
+                  <span>Abrir Guía del Huésped Completa</span>
+                  <ExternalLink size={13} />
+                </button>
               </div>
-            </div>
+            )}
           </div>
+        </div>
+      </section>
+
+      {/* HERRAMIENTA INTERACTIVA (LEAD MAGNET): PROBADOR DE ICAL EN VIVO */}
+      <section id="probar-ical" className="bg-[#1E1E1C] text-[#F6F4EE] border-b border-[#2C2C29] py-16 px-6">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="text-center space-y-2">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
+              HERRAMIENTA GRATUITA · PRUÉBALO EN 10 SEGUNDOS
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl text-white">
+              Comprueba cuántas rotaciones y euros estás perdiendo en tu calendario.
+            </h2>
+            <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto">
+              Pega la URL de exportación iCal (.ics) de tu anuncio en Airbnb o Booking. Analizaremos tus próximas reservas sin tocar nada de tu cuenta.
+            </p>
+          </div>
+
+          <form onSubmit={handleRunIcalTest} className="bg-[#141413] border border-white/20 p-4 sm:p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="url"
+                required
+                value={testerUrl}
+                onChange={(e) => setTesterUrl(e.target.value)}
+                placeholder="Pega aquí tu URL iCal (ej: https://www.airbnb.es/calendar/ical/...ics)"
+                className="flex-1 bg-[#1E1E1C] border border-white/25 px-4 py-3.5 text-xs text-white placeholder-white/40 font-mono focus:outline-none focus:border-[#C85A32]"
+              />
+              <button
+                type="submit"
+                disabled={testingIcal}
+                className="bg-[#C85A32] hover:bg-[#B04A25] text-white font-mono text-xs font-bold uppercase tracking-wider px-6 py-3.5 transition shrink-0 flex items-center justify-center gap-2"
+              >
+                {testingIcal ? (
+                  <span>Analizando calendario...</span>
+                ) : (
+                  <>
+                    <span>Analizar mi iCal Gratis</span>
+                    <ArrowUpRight size={15} />
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-white/50 font-mono">
+              <span>🔒 100% Privado. No guardamos tus datos hasta que creas una cuenta.</span>
+              <button
+                type="button"
+                onClick={() =>
+                  setTesterUrl(
+                    'https://raw.githubusercontent.com/Sengirr/turnexo/main/public/manifest.json'
+                  )
+                }
+                className="text-[#C85A32] hover:underline"
+              >
+                ¿No tienes el enlace a mano? Probar con demo →
+              </button>
+            </div>
+          </form>
+
+          {testError && (
+            <div className="p-4 bg-rose-950/60 border border-rose-500/50 text-rose-200 text-xs flex items-center gap-2">
+              <X size={15} className="shrink-0 text-rose-400" />
+              <span>{testError}</span>
+            </div>
+          )}
+
+          {testResult && (
+            <div className="bg-[#FAF9F5] text-[#141413] border-2 border-[#C85A32] p-6 space-y-4 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between border-b border-[#D5CFC0] pb-3">
+                <span className="font-mono text-xs uppercase tracking-wider text-[#1F4E3D] font-bold flex items-center gap-1.5">
+                  <CheckCircle2 size={16} /> ANÁLISIS COMPLETADO CON ÉXITO
+                </span>
+                <span className="font-mono text-xs bg-[#141413] text-white px-3 py-1 font-bold">
+                  {testResult.totalReservations} Reservas Encontradas
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 bg-white border border-[#D5CFC0]">
+                  <span className="font-mono text-[10px] uppercase text-[#57554F] block">ROTACIONES MISMO DÍA</span>
+                  <span className="font-mono text-2xl font-bold text-[#C85A32] mt-1 block">
+                    {testResult.sameDayTurns} entradas urgentes
+                  </span>
+                  <span className="text-[11px] text-[#57554F]">Tu limpiadora debe entrar a las 11:00</span>
+                </div>
+
+                <div className="p-3 bg-white border border-[#D5CFC0]">
+                  <span className="font-mono text-[10px] uppercase text-[#57554F] block">POTENCIAL LATE CHECK-OUT</span>
+                  <span className="font-mono text-2xl font-bold text-[#1F4E3D] mt-1 block">
+                    +{testResult.totalReservations * 35} €
+                  </span>
+                  <span className="text-[11px] text-[#57554F]">En huecos que antes quedaban libres</span>
+                </div>
+
+                <div className="p-3 bg-white border border-[#D5CFC0]">
+                  <span className="font-mono text-[10px] uppercase text-[#57554F] block">TIEMPO EN WHATSAPP</span>
+                  <span className="font-mono text-2xl font-bold text-[#141413] mt-1 block">0 min</span>
+                  <span className="text-[11px] text-[#57554F]">Sincronización automática</span>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p className="text-xs text-[#57554F]">
+                  Conecta este calendario con tu panel para generar el enlace móvil de tu limpiadora.
+                </p>
+                <button
+                  type="button"
+                  onClick={onNavigateToApp}
+                  className="w-full sm:w-auto bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs font-bold uppercase tracking-wider px-6 py-3 flex items-center justify-center gap-2"
+                >
+                  <span>Crear mi Panel con este iCal (14 Días Gratis)</span>
+                  <ArrowUpRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -394,6 +624,213 @@ export default function LandingPageView({
               >
                 Gestionar Turnos en el Panel
               </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN DE COMPARATIVA DIRECTA: TURNEXO VS WHATSAPP/EXCEL VS HERRAMIENTAS AMERICANAS */}
+      <section id="comparativa" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
+        <div className="max-w-3xl mx-auto text-center space-y-3 mb-14">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
+            COMPARATIVA DIRECTA
+          </span>
+          <h2 className="font-serif text-3xl sm:text-5xl text-[#141413] leading-tight">
+            ¿Por qué los anfitriones abandonan las hojas de cálculo y WhatsApp?
+          </h2>
+          <p className="text-sm text-[#57554F] leading-relaxed">
+            Coordinar limpiezas manualmente cuesta horas cada semana y genera confusiones con cancelaciones de última hora.
+          </p>
+        </div>
+
+        <div className="bg-[#FAF9F5] border border-[#D5CFC0] overflow-x-auto shadow-sm">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="border-b border-[#D5CFC0] bg-[#E8E4D9]/60 font-mono text-[11px] uppercase tracking-wider text-[#57554F]">
+                <th className="py-4 px-5">Característica / Necesidad</th>
+                <th className="py-4 px-5 text-[#57554F]">Excel + Grupos WhatsApp</th>
+                <th className="py-4 px-5 text-[#57554F]">Software Tradicional en Inglés</th>
+                <th className="py-4 px-5 bg-[#141413] text-[#F6F4EE] font-bold">Turnexo (Módulo 1 + 2)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#E2DDD2]">
+              <tr className="hover:bg-white transition">
+                <td className="py-4 px-5 font-bold text-[#141413]">
+                  Sincronización con Airbnb y Booking
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Manual cada día (riesgo de no enterarte de reservas tardías)
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Compleja (requiere cuenta Channel Manager costosa)
+                </td>
+                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
+                  ✓ 100% Automática vía URL .ics en 30 seg
+                </td>
+              </tr>
+
+              <tr className="hover:bg-white transition">
+                <td className="py-4 px-5 font-bold text-[#141413]">
+                  Acceso para el personal de limpieza
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Mensajes de texto que se pierden en el chat
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Obliga a la limpiadora a crear cuenta y bajar app en inglés
+                </td>
+                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
+                  ✓ Enlace web único (/c/token) sin contraseñas
+                </td>
+              </tr>
+
+              <tr className="hover:bg-white transition">
+                <td className="py-4 px-5 font-bold text-[#141413]">
+                  Alerta de Rotación Mismo Día
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Debes recordarlo tú y llamar para avisar
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  A veces configurable con coste extra
+                </td>
+                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
+                  ✓ Insignia 🔥 ENTRADA HOY automática
+                </td>
+              </tr>
+
+              <tr className="hover:bg-white transition">
+                <td className="py-4 px-5 font-bold text-[#141413]">
+                  Monetización de Late Check-out
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  0 € (se regala de palabra si el huésped pregunta)
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  No conecta la salida del huésped con el cuadrante
+                </td>
+                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
+                  ✓ Ofrece el extra solo si el día está libre (+35€)
+                </td>
+              </tr>
+
+              <tr className="hover:bg-white transition">
+                <td className="py-4 px-5 font-bold text-[#141413]">
+                  Vídeos de llegada paso a paso
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Vídeos pesados enviados por WhatsApp que caducan
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Formatos complejos con reproductores externos
+                </td>
+                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
+                  ✓ Reproductor integrado para YouTube, Shorts y Drive
+                </td>
+              </tr>
+
+              <tr className="hover:bg-white transition">
+                <td className="py-4 px-5 font-bold text-[#141413]">
+                  Coste mensual
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  "Gratis" (pero pierdes 4h semanales y 150€ en extras)
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  30 € a 60 € / mes
+                </td>
+                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#C85A32]">
+                  Desde 9 €/mes (amortizado con 1 sola venta)
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* SECCIÓN DE PRUEBA SOCIAL Y TESTIMONIOS REALES */}
+      <section id="testimonios" className="bg-[#FAF9F5] border-b border-[#E2DDD2] py-24 px-6">
+        <div className="max-w-7xl mx-auto space-y-14">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#1F4E3D] font-bold">
+              CASOS DE ÉXITO · ANFITRIONES EN ESPAÑA
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl text-[#141413]">
+              Superhosts y gestores que ya operan con Turnexo.
+            </h2>
+            <p className="text-xs sm:text-sm text-[#57554F]">
+              Historias reales de anfitriones que redujeron sus llamadas y aumentaron su ticket medio por reserva.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white border border-[#D5CFC0] p-7 flex flex-col justify-between space-y-6 shadow-sm">
+              <div className="space-y-4">
+                <div className="flex items-center gap-1 text-[#C85A32]">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={15} fill="currentColor" />
+                  ))}
+                </div>
+                <p className="text-xs sm:text-sm text-[#141413] leading-relaxed italic font-serif">
+                  "Llevo 6 apartamentos turísticos en Málaga capital. Los domingos por la tarde eran una pesadilla cuadrando cambios de sábanas. Ahora cada limpiadora tiene su enlace fijado en el móvil y no me llaman ni una sola vez para preguntar qué piso toca."
+                </p>
+              </div>
+
+              <div className="border-t border-[#E2DDD2] pt-4 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-xs text-[#141413]">Carlos M.</p>
+                  <p className="text-[11px] text-[#57554F]">Gestor de 6 pisos · Málaga</p>
+                </div>
+                <span className="font-mono text-[10px] uppercase bg-[#1F4E3D]/10 text-[#1F4E3D] font-bold px-2 py-0.5">
+                  Pack Completo
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white border border-[#D5CFC0] p-7 flex flex-col justify-between space-y-6 shadow-sm">
+              <div className="space-y-4">
+                <div className="flex items-center gap-1 text-[#C85A32]">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={15} fill="currentColor" />
+                  ))}
+                </div>
+                <p className="text-xs sm:text-sm text-[#141413] leading-relaxed italic font-serif">
+                  "Solo el mes pasado ingresamos 245 € extras vendiendo Late Check-outs desde la Guía Digital en el ático de Marbella. Antes el huésped nos lo pedía por chat a última hora y se lo dábamos gratis por compromiso. Ahora lo piden por la guía y pagan contentos."
+                </p>
+              </div>
+
+              <div className="border-t border-[#E2DDD2] pt-4 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-xs text-[#141413]">Elena & Marcos</p>
+                  <p className="text-[11px] text-[#57554F]">Superhosts · Marbella</p>
+                </div>
+                <span className="font-mono text-[10px] uppercase bg-[#C85A32]/10 text-[#C85A32] font-bold px-2 py-0.5">
+                  +245€ / mes
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white border border-[#D5CFC0] p-7 flex flex-col justify-between space-y-6 shadow-sm">
+              <div className="space-y-4">
+                <div className="flex items-center gap-1 text-[#C85A32]">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={15} fill="currentColor" />
+                  ))}
+                </div>
+                <p className="text-xs sm:text-sm text-[#141413] leading-relaxed italic font-serif">
+                  "El vídeo de cómo abrir el cajetín de llaves y el WiFi en QR en el recibidor nos ha quitado el 90% de los mensajes de bienvenida de huéspedes extranjeros. La guía en inglés y francés hace que se sientan como en un hotel de 5 estrellas."
+                </p>
+              </div>
+
+              <div className="border-t border-[#E2DDD2] pt-4 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-xs text-[#141413]">Javier S.</p>
+                  <p className="text-[11px] text-[#57554F]">Propietario · Madrid Centro</p>
+                </div>
+                <span className="font-mono text-[10px] uppercase bg-[#141413]/10 text-[#141413] font-bold px-2 py-0.5">
+                  Solo Guía
+                </span>
+              </div>
             </div>
           </div>
         </div>

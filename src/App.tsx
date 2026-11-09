@@ -506,7 +506,6 @@ export default function App() {
             });
           }}
           onOpenLegal={(tab = 'privacy') => setLegalModalTab(tab)}
-          onOpenAdmin={() => navigate('/admin', { kind: 'admin' })}
         />
       )}
 
@@ -572,7 +571,6 @@ export default function App() {
           onDeleteCleaner={handleDeleteCleaner}
           onBackToLanding={() => navigate('/', { kind: 'landing' })}
           onResetDemo={handleResetDemo}
-          onOpenAdmin={() => navigate('/admin', { kind: 'admin' })}
         />
       )}
 

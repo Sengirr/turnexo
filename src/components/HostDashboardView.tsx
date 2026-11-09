@@ -75,7 +75,6 @@ interface Props {
   onDeleteCleaner?: (id: string) => void;
   onBackToLanding: () => void;
   onResetDemo: () => void;
-  onOpenAdmin?: () => void;
 }
 
 type BackofficeSection = 'overview' | 'schedule' | 'guests' | 'invoices' | 'team' | 'billing';
@@ -107,7 +106,6 @@ export default function HostDashboardView({
   onDeleteCleaner,
   onBackToLanding,
   onResetDemo,
-  onOpenAdmin,
 }: Props) {
   const [section, setSection] = useState<BackofficeSection>('schedule');
   const [newCleanerName, setNewCleanerName] = useState('');
@@ -476,22 +474,6 @@ export default function HostDashboardView({
                 </div>
               )}
             </div>
-          )}
-
-          {onOpenAdmin && (
-            <button
-              type="button"
-              onClick={onOpenAdmin}
-              className="w-full text-left px-3 py-2 text-xs font-mono font-bold bg-[#C85A32]/20 hover:bg-[#C85A32]/30 text-[#C85A32] hover:text-white border border-[#C85A32]/40 flex items-center justify-between transition"
-            >
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Panel Fundador</span>
-              </div>
-              <span className="text-[9px] uppercase tracking-wider bg-[#C85A32] text-white px-1.5 py-0.2 rounded">
-                KPIs
-              </span>
-            </button>
           )}
 
           <div className="flex items-center justify-between">

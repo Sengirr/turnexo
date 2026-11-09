@@ -19,6 +19,10 @@ import {
   Phone,
   Database,
   Plus,
+  Lock,
+  KeyRound,
+  LogOut,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   computeSaasMetrics,
@@ -33,7 +37,62 @@ interface Props {
   onBackToLanding: () => void;
 }
 
+const DEFAULT_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'turnexo2026!';
+const SESSION_AUTH_KEY = 'turnexo_admin_auth_v1';
+const STORED_PASSWORD_KEY = 'turnexo_admin_custom_password_v1';
+
 export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props) {
+  // Autenticación de Administrador en memoria de sesión (se borra al cerrar la pestaña)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem(SESSION_AUTH_KEY) === 'true';
+  });
+
+  const [passwordInput, setPasswordInput] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Modal para cambiar contraseña de admin
+  const [showChangePassModal, setShowChangePassModal] = useState(false);
+  const [newAdminPass, setNewAdminPass] = useState('');
+  const [passChangedMsg, setPassChangedMsg] = useState(false);
+
+  const getActivePassword = () => {
+    return localStorage.getItem(STORED_PASSWORD_KEY) || DEFAULT_ADMIN_PASSWORD;
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+
+    const validPassword = getActivePassword();
+    if (passwordInput.trim() === validPassword) {
+      sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+      setIsAuthenticated(true);
+      setPasswordInput('');
+    } else {
+      setAuthError('Contraseña incorrecta. Acceso restringido al fundador.');
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem(SESSION_AUTH_KEY);
+    setIsAuthenticated(false);
+  };
+
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newAdminPass.trim().length < 6) {
+      alert('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+    localStorage.setItem(STORED_PASSWORD_KEY, newAdminPass.trim());
+    setPassChangedMsg(true);
+    setTimeout(() => {
+      setPassChangedMsg(false);
+      setShowChangePassModal(false);
+      setNewAdminPass('');
+    }, 2000);
+  };
+
   const [users, setUsers] = useState<SaasUser[]>(() => {
     try {
       const stored = localStorage.getItem('turnexo_saas_users_v2');
@@ -122,6 +181,77 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
     return true;
   });
 
+  // SI NO ESTÁ AUTENTICADO: PANTALLA DE BLOQUEO DE ALTA SEGURIDAD
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#141413] text-[#F6F4EE] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-[#1E1E1C] border border-[#2C2C29] rounded-3xl p-8 space-y-6 shadow-2xl">
+          <div className="text-center space-y-3">
+            <div className="w-14 h-14 bg-red-500/10 text-red-400 border border-red-500/20 rounded-2xl flex items-center justify-center mx-auto">
+              <Lock size={26} />
+            </div>
+            <div>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-bold">
+                ÁREA PRIVADA CONFIDENCIAL
+              </span>
+              <h2 className="text-xl font-bold tracking-tight text-white mt-1">
+                Panel del Fundador Turnexo
+              </h2>
+              <p className="text-xs text-white/50 mt-1">
+                Introduce tu contraseña maestra para acceder a las métricas del negocio y directorio de usuarios.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-white/60 mb-1.5">
+                Contraseña de Administrador
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  placeholder="••••••••••••"
+                  autoFocus
+                  className="w-full bg-[#141413] border border-[#2C2C29] focus:border-red-500/60 rounded-xl px-4 py-3 text-sm text-white font-mono outline-none transition"
+                  required
+                />
+              </div>
+            </div>
+
+            {authError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-2 text-xs text-red-300">
+                <AlertTriangle size={15} className="shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-white hover:bg-slate-200 text-slate-900 text-xs font-mono font-bold uppercase rounded-xl transition shadow-lg"
+            >
+              Desbloquear Acceso Seguro
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-white/40">
+            <button
+              type="button"
+              onClick={onBackToLanding}
+              className="hover:text-white transition"
+            >
+              ← Volver a la web
+            </button>
+            <span className="font-mono text-[10px]">Turnexo Security Guard</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // SI ESTÁ AUTENTICADO: VISTA DEL PANEL
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413] p-4 sm:p-8 space-y-8 font-sans">
       {/* BARRA SUPERIOR / HEADER */}
@@ -133,32 +263,40 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
             </span>
             <span className="text-xs text-[#57554F] font-semibold flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Métricas en Vivo MicroSaaS
+              Sesión de Administrador Autenticada
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#141413] mt-1">
             Turnexo Founder Dashboard
           </h1>
           <p className="text-xs text-[#57554F] mt-0.5">
-            Monitor de captación, MRR, conversión de planes y usuarios registrados.
+            Monitor confidencial de captación, MRR, conversión de planes y usuarios registrados.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
-            onClick={onBackToLanding}
-            className="px-3.5 py-2 text-xs font-mono font-bold uppercase text-[#57554F] hover:text-[#141413] bg-white border border-[#D5CFC0] hover:bg-[#FAF9F5] transition"
+            onClick={() => setShowChangePassModal(true)}
+            className="px-3 py-2 text-xs font-mono font-bold uppercase text-[#57554F] hover:text-[#141413] bg-white border border-[#D5CFC0] hover:bg-[#FAF9F5] flex items-center gap-1.5 transition"
           >
-            Web Pública
+            <KeyRound size={13} />
+            <span>Cambiar Contraseña</span>
           </button>
           <button
             type="button"
             onClick={onBackToApp}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-mono font-bold uppercase transition shadow-sm"
+            className="px-3.5 py-2 text-xs font-mono font-bold uppercase text-[#57554F] hover:text-[#141413] bg-white border border-[#D5CFC0] hover:bg-[#FAF9F5] transition"
           >
-            <ArrowLeft size={13} />
-            <span>Volver a la App (Anfitrión)</span>
+            Ir a mi cuenta
+          </button>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-mono font-bold uppercase transition shadow-sm rounded-none"
+          >
+            <LogOut size={13} />
+            <span>Cerrar Sesión Admin</span>
           </button>
         </div>
       </div>
@@ -179,11 +317,11 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
                 {metrics.mrr} €
               </span>
               <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                +19% este mes
+                Recurrente
               </span>
             </div>
             <p className="text-[11px] text-[#57554F]">
-              Recurrente mensual de {metrics.payingUsers} anfitriones de pago
+              Ingresos mensuales de {metrics.payingUsers} anfitriones de pago
             </p>
           </div>
 
@@ -247,7 +385,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
           </div>
         </div>
 
-        {/* DISTRIBUCIÓN DE PLANES & ESTRATEGIA FREEMIUM */}
+        {/* DISTRIBUCIÓN DE PLANES */}
         <div className="bg-white border border-[#E2DDD2] p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -328,7 +466,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2DDD2] pb-4">
             <div>
               <span className="font-mono text-[10px] uppercase tracking-wider text-[#57554F] font-bold">
-                CLIENTES & PROPIETARIOS
+                BASE DE DATOS CONFIDENCIAL
               </span>
               <h3 className="text-base font-bold text-[#141413]">
                 Anfitriones Registrados ({filteredUsers.length})
@@ -543,6 +681,69 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
           </div>
         </div>
       </div>
+
+      {/* MODAL CAMBIAR CONTRASEÑA ADMIN */}
+      {showChangePassModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-base font-black text-slate-900">
+                  Cambiar Contraseña de Fundador
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Establece tu nueva clave secreta para entrar a /admin.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowChangePassModal(false)}
+                className="text-slate-400 hover:text-slate-700 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Nueva Contraseña (mínimo 6 caracteres)
+                </label>
+                <input
+                  type="password"
+                  placeholder="Tu nueva clave segura"
+                  value={newAdminPass}
+                  onChange={(e) => setNewAdminPass(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono"
+                  required
+                />
+              </div>
+
+              {passChangedMsg && (
+                <p className="text-xs text-emerald-700 font-bold">
+                  ✓ Contraseña actualizada correctamente.
+                </p>
+              )}
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowChangePassModal(false)}
+                  className="px-3 py-1.5 text-slate-500 font-bold hover:bg-slate-100 rounded-xl"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* MODAL PARA AÑADIR USUARIO MANUALMENTE */}
       {showAddUserModal && (

@@ -17,6 +17,7 @@ import {
   Layers,
   ArrowRight,
 } from 'lucide-react';
+import HeroPhoneMockup from './HeroPhoneMockup';
 
 interface Props {
   onNavigateToApp: () => void;
@@ -37,9 +38,6 @@ export default function LandingPageView({
 
   // Estado del acordeón de FAQ
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
-
-  // Selector interactivo de vista previa en el Hero (3 motores)
-  const [previewTab, setPreviewTab] = useState<'cleaner' | 'guest' | 'invoice'>('cleaner');
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
@@ -462,231 +460,12 @@ export default function LandingPageView({
             </div>
           </div>
 
-          {/* Vista Previa Interactiva con Toggle de los 3 Motores: Cleaner / Guest / Facturas IVA */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="grid grid-cols-3 gap-1 p-1 bg-[#E8E4D9] border border-[#D5CFC0] rounded-none font-mono text-[11px]">
-              <button
-                type="button"
-                onClick={() => setPreviewTab('cleaner')}
-                className={`py-2 px-1.5 font-bold uppercase transition flex items-center justify-center gap-1 ${
-                  previewTab === 'cleaner'
-                    ? 'bg-[#141413] text-white shadow-md'
-                    : 'text-[#57554F] hover:text-[#141413]'
-                }`}
-              >
-                <Smartphone size={13} />
-                <span>Limpiadora</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreviewTab('guest')}
-                className={`py-2 px-1.5 font-bold uppercase transition flex items-center justify-center gap-1 ${
-                  previewTab === 'guest'
-                    ? 'bg-[#C85A32] text-white shadow-md'
-                    : 'text-[#57554F] hover:text-[#141413]'
-                }`}
-              >
-                <Sparkles size={13} />
-                <span>Mini-Web</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreviewTab('invoice')}
-                className={`py-2 px-1.5 font-bold uppercase transition flex items-center justify-center gap-1 ${
-                  previewTab === 'invoice'
-                    ? 'bg-[#1F4E3D] text-white shadow-md'
-                    : 'text-[#57554F] hover:text-[#141413]'
-                }`}
-              >
-                <FileSpreadsheet size={13} />
-                <span>IVA 10%</span>
-              </button>
-            </div>
-
-            {previewTab === 'cleaner' && (
-              <div className="bg-[#FAF9F5] border-2 border-[#141413] p-6 space-y-4 shadow-[6px_6px_0px_#141413]">
-                <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-3">
-                  <div>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
-                      SIN CONTRASEÑAS · ACCESO DIRECTO MÓVIL
-                    </span>
-                    <h4 className="text-xl font-bold text-[#141413] mt-0.5">
-                      Parte de María Carmen
-                    </h4>
-                  </div>
-                  <span className="font-mono text-xs font-bold bg-[#1F4E3D] text-white px-2.5 py-1">
-                    2 de 3 Limpiezas completadas
-                  </span>
-                </div>
-
-                <div className="space-y-2.5 text-xs">
-                  <div className="p-3.5 bg-white border-l-4 border-[#C85A32] border border-[#E2DDD2] space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-[#C85A32] flex items-center gap-1">
-                        <Flame size={13} /> ENTRADA HOY · ROTACIÓN 15:00H
-                      </span>
-                      <span className="font-mono font-bold bg-[#141413] text-white px-2 py-0.5 text-[11px]">
-                        11:00 → 15:00
-                      </span>
-                    </div>
-                    <p className="font-bold text-sm text-[#141413]">Loft Centro Catedral · 38 €</p>
-
-                    <div className="bg-[#FAF9F5] p-2.5 border border-[#E2DDD2] space-y-1 font-mono text-[11px]">
-                      <div className="flex items-center justify-between text-[#1F4E3D] font-bold">
-                        <span>✓ Checklist: 4/4 completadas</span>
-                        <span>📸 3 fotos subidas</span>
-                      </div>
-                      <p className="text-[10px] text-[#57554F]">
-                        Sábanas cambiadas · Baño desinfectado · Salón ordenado · Llaves en cajetín
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-[11px] text-[#1F4E3D] font-bold">
-                      <CheckCircle2 size={13} />
-                      <span>Comprobado por ti desde el móvil: Todo impecable</span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-[#1F4E3D]/10 border border-[#1F4E3D]/30 text-[#1F4E3D] text-[11px] font-mono flex items-center gap-2">
-                    <Sparkles size={14} className="shrink-0" />
-                    <span>0 llamadas ni audios de WhatsApp: ella ve sus turnos y tú ves sus fotos.</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={onOpenCleanerDemo}
-                  className="w-full bg-[#141413] hover:bg-[#2C2C29] text-white font-sans text-xs sm:text-sm font-semibold py-3 flex items-center justify-center gap-1.5 transition"
-                >
-                  <span>Abrir App Limpiadora Completa</span>
-                  <ExternalLink size={13} />
-                </button>
-              </div>
-            )}
-
-            {previewTab === 'guest' && (
-              <div className="bg-[#141413] text-[#F6F4EE] p-6 border-2 border-[#141413] space-y-4 shadow-[6px_6px_0px_#C85A32]">
-                <div className="flex items-center justify-between border-b border-white/15 pb-3">
-                  <div>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                      MINI-WEB DEL ALOJAMIENTO · ENVÍALA POR LINK ANTES DE LLEGAR
-                    </span>
-                    <h3 className="text-xl font-bold mt-0.5">Ático Vista Marina</h3>
-                  </div>
-                  <span className="font-mono text-xs bg-white/10 px-2.5 py-1 text-white/80">
-                    ES · EN · FR
-                  </span>
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  <div className="p-2.5 bg-white/5 border border-white/10 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-[#C85A32] text-white flex items-center justify-center font-bold text-xs shrink-0">▶</span>
-                      <div>
-                        <p className="font-bold text-white text-xs">Vídeo Home Tour</p>
-                        <p className="text-[10px] text-white/60">El huésped ve cómo es el alojamiento desde su móvil antes de llegar</p>
-                      </div>
-                    </div>
-                    <span className="font-mono text-[10px] text-white/50">1:15 min</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-2 bg-white/5 border border-white/10 text-[11px]">
-                      <span className="text-[#C85A32] font-bold block">▶ VÍDEO CHECK-IN</span>
-                      <span className="text-white/70 text-[10px] block mt-0.5">Apertura portal y cajetín</span>
-                    </div>
-                    <div className="p-2 bg-white/5 border border-white/10 text-[11px]">
-                      <span className="text-emerald-400 font-bold block">▶ VÍDEO ELECTROD.</span>
-                      <span className="text-white/70 text-[10px] block mt-0.5">Vitro, Clima y Termo</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5 font-mono text-xs">
-                  <div className="bg-white/5 border border-white/10 p-2.5">
-                    <span className="text-white/50 block text-[9px]">CÓDIGO PUERTA</span>
-                    <span className="font-bold text-xs mt-0.5 text-white block">4829#</span>
-                  </div>
-                  <div className="bg-white/5 border border-white/10 p-2.5">
-                    <span className="text-white/50 block text-[9px]">RED WIFI (1 TOQUE)</span>
-                    <span className="font-bold text-xs mt-0.5 text-white block truncate">VistaMarina_5G</span>
-                  </div>
-                </div>
-
-                <div className="bg-[#FAF9F5] text-[#141413] p-3.5 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#1F4E3D] font-bold flex items-center gap-1">
-                      <Sparkles size={12} /> CROSS-SELLING AUTOMÁTICO
-                    </span>
-                    <span className="font-mono font-bold text-sm text-[#C85A32]">+35 € netos</span>
-                  </div>
-                  <p className="text-xs font-bold">Late Check-out hasta las 17:00h</p>
-                  <p className="text-[11px] text-[#57554F] leading-tight">
-                    El huésped lo solicita en 1 toque desde la Mini-Web. Tú lo cobras íntegro sin intermediarios.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={onOpenGuestDemo}
-                  className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans text-xs sm:text-sm font-semibold py-3 flex items-center justify-center gap-1.5 transition"
-                >
-                  <span>Ver Guía Digital en Vivo</span>
-                  <ExternalLink size={13} />
-                </button>
-              </div>
-            )}
-
-            {previewTab === 'invoice' && (
-              <div className="bg-[#FAF9F5] border-2 border-[#141413] p-6 space-y-4 shadow-[6px_6px_0px_#1F4E3D]">
-                <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-3">
-                  <div>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
-                      FACTURACIÓN IVA 10% · MODELO 303 GESTORÍA
-                    </span>
-                    <h4 className="text-xl font-bold text-[#141413] mt-0.5">
-                      Factura #F-2026-0042
-                    </h4>
-                  </div>
-                  <span className="font-mono text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 px-2.5 py-1">
-                    IVA 10% Desglosado
-                  </span>
-                </div>
-
-                <div className="bg-white border border-[#D5CFC0] p-4 space-y-3 text-xs font-mono">
-                  <div className="flex justify-between items-center border-b border-[#E2DDD2] pb-2">
-                    <span className="text-[#57554F]">Reserva sincronizada:</span>
-                    <span className="font-bold text-[#141413]">Thomas Müller (Airbnb · 4 noches)</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[#57554F]">Base Imponible Alojamiento:</span>
-                    <span className="font-bold text-[#141413]">400,00 €</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[#1F4E3D]">
-                    <span className="font-bold">Cuota IVA Hospedaje (10%):</span>
-                    <span className="font-bold">+40,00 €</span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-[#141413] pt-2 text-sm">
-                    <span className="font-bold text-[#141413]">TOTAL FACTURA OFICIAL:</span>
-                    <span className="font-extrabold text-[#141413]">440,00 €</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-[#1F4E3D]/10 border border-[#1F4E3D]/30 text-[#1F4E3D] text-[11px] font-mono flex items-center gap-2">
-                  <CheckCircle2 size={14} className="shrink-0" />
-                  <span>Al cerrar el trimestre, descargas el Libro Excel para que tu gestoría presente el Modelo 303 sin picar facturas a mano.</span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={onNavigateToApp}
-                  className="w-full bg-[#1F4E3D] hover:bg-[#16382B] text-white font-sans text-xs sm:text-sm font-semibold py-3 flex items-center justify-center gap-1.5 transition"
-                >
-                  <span>Probar Facturación y Libro IVA en el Panel</span>
-                  <ArrowUpRight size={14} />
-                </button>
-              </div>
-            )}
+          {/* Mockup Realista de Smartphone Interactivo (Vista Limpiadora / Vista Huésped) */}
+          <div className="lg:col-span-5">
+            <HeroPhoneMockup
+              onOpenCleanerDemo={onOpenCleanerDemo}
+              onOpenGuestDemo={onOpenGuestDemo}
+            />
           </div>
         </div>
       </section>

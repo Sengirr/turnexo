@@ -722,14 +722,14 @@ export default function LandingPageView({
         </div>
       </section>
 
-      {/* SECCIÓN 2: LOS 3 MOTORES (DOLOR QUE ELIMINA + BENEFICIOS REALES EN UN SOLO LUGAR) */}
+      {/* SECCIÓN 2: LOS 3 MOTORES (PROBLEMA QUE RESUELVE + BENEFICIOS REALES EN UN SOLO LUGAR) */}
       <section id="modulos" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
         <div className="max-w-3xl space-y-3 mb-14">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
             QUÉ HACE TURNEXO POR TI
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] leading-tight tracking-tight">
-            Los 3 dolores que te quitan tiempo cada semana, resueltos en una sola plataforma.
+            Las 3 tareas que más tiempo te quitan cada semana, automatizadas en una sola plataforma.
           </h2>
           <p className="text-sm text-[#57554F] leading-relaxed">
             Sin curva de aprendizaje ni instalaciones para tus huéspedes o tu limpiadora. Todo funciona con enlaces web directos desde el primer minuto.
@@ -749,10 +749,10 @@ export default function LandingPageView({
                 </span>
               </div>
 
-              {/* El dolor que quita */}
+              {/* Lo que te ahorras */}
               <div className="p-3.5 bg-rose-50 border border-rose-200/80 text-xs text-rose-950 leading-relaxed">
                 <strong className="font-mono uppercase text-[10px] text-rose-700 block mb-0.5">
-                  ❌ El dolor que elimina:
+                  ❌ Lo que te ahorras desde el primer día:
                 </strong>
                 Llamadas a las 23:30h porque el huésped no encuentra la entrada o el cajetín de llaves, mensajes preguntando cómo encender la vitrocerámica o el aire acondicionado, y salidas a las 11:00h sin monetizar.
               </div>
@@ -839,10 +839,10 @@ export default function LandingPageView({
                 </span>
               </div>
 
-              {/* El dolor que quita */}
+              {/* Lo que te ahorras */}
               <div className="p-3.5 bg-rose-50 border border-rose-200/80 text-xs text-rose-950 leading-relaxed">
                 <strong className="font-mono uppercase text-[10px] text-rose-700 block mb-0.5">
-                  ❌ El dolor que elimina:
+                  ❌ Lo que te ahorras desde el primer día:
                 </strong>
                 Audios eternos por WhatsApp cada domingo para avisar de qué días hay salida, olvidos ante reservas de última hora y la incertidumbre de no saber si el alojamiento ha quedado limpio antes del check-in.
               </div>
@@ -932,7 +932,7 @@ export default function LandingPageView({
 
             <div className="p-3.5 bg-rose-50 border border-rose-200/80 text-xs text-rose-950 leading-relaxed">
               <strong className="font-mono uppercase text-[10px] text-rose-700 block mb-0.5">
-                ❌ El dolor que elimina:
+                ❌ Lo que te ahorras desde el primer día:
               </strong>
               Perder tardes enteras al final de cada trimestre creando facturas una por una en Word o Excel con el 10% de IVA para enviárselas a tu gestor.
             </div>

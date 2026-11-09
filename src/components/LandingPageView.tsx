@@ -181,17 +181,17 @@ export default function LandingPageView({
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
-              Elimina las llamadas a deshoras pidiendo el WiFi, evita retrasos en las entradas con tu limpiadora y cumple con la nueva normativa fiscal de estancias turísticas sin pagar gestorías caras. Todo sincronizado en tiempo real con tus calendarios de Airbnb, Booking y Vrbo.
+              Elimina las llamadas a deshoras pidiendo el WiFi, evita retrasos en las entradas con tu limpiadora y emite tus facturas con IVA del 10% listas para tu gestor en 1 clic. Todo sincronizado en tiempo real con tus calendarios de Airbnb, Booking y Vrbo.
             </p>
 
             {/* Tarjeta de Solución Fiscal Positiva */}
             <div className="bg-[#FAF9F5] border-l-4 border-emerald-600 p-4 rounded-r-xl space-y-1 text-xs">
               <div className="flex items-center gap-1.5 font-bold text-emerald-950">
                 <ShieldCheck size={16} className="text-emerald-700 shrink-0" />
-                <span>Facturación legal con IVA 10% y Modelo 303 en 1 clic</span>
+                <span>Facturas con IVA 10% listas para tu gestor en 1 clic</span>
               </div>
               <p className="text-[#57554F] leading-relaxed">
-                Genera facturas oficiales de tus reservas con desglose automático de base imponible e IVA del 10%. Exporta el Libro de Facturas oficial listo para presentar a Hacienda o enviar a tu asesor contable.
+                Genera facturas oficiales de tus reservas con desglose automático de base imponible e IVA del 10%. Al final del trimestre, exporta el Libro de Facturas oficial en Excel listo para que tu gestoría presente el Modelo 303 en 2 minutos sin cálculos manuales.
               </p>
             </div>
 
@@ -498,7 +498,7 @@ export default function LandingPageView({
                   ❌ El dolor diario
                 </span>
                 <p className="text-xs text-rose-950 font-medium leading-relaxed">
-                  La nueva obligación de liquidar el 10% de IVA en estancias cortas. Hacer facturas a mano en Word es lento y contratar un software o gestor cuesta hasta 100€/mes.
+                  La nueva obligación de emitir facturas con el 10% de IVA. Hacerlas a mano en Word es lentísimo y enviar extractos desordenados al gestor genera errores y horas perdidas al cierre de cada trimestre.
                 </p>
               </div>
 
@@ -508,13 +508,13 @@ export default function LandingPageView({
                   ✓ La solución Turnexo
                 </span>
                 <p className="text-xs text-emerald-950 font-medium leading-relaxed">
-                  Emite facturas oficiales con desglose legal del 10% de IVA en 1 clic desde tu calendario. Descarga el Libro de IVA listo para el Modelo 303 de Hacienda con un botón.
+                  Generas cada factura legal con IVA del 10% en 1 clic. Al acabar el trimestre, descargas el Libro de IVA en Excel listo para que tu gestor presente el Modelo 303 en 2 minutos sin complicaciones.
                 </p>
               </div>
             </div>
 
             <div className="pt-2 border-t border-[#E2DDD2] font-mono text-[11px] text-[#1F4E3D] font-bold">
-              → Tranquilidad fiscal y 0 € en gestores caros
+              → Todo ordenado y listo para tu gestoría en 5 segundos
             </div>
           </div>
         </div>
@@ -1199,13 +1199,13 @@ export default function LandingPageView({
                   Facturación IVA 10% y Modelo 303 Hacienda
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  Facturas a mano en Word/Excel o pagar 80€/mes a gestoría
+                  Facturas a mano en Word/Excel y enviar extractos desordenados al gestor
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
                   Módulos ERP complejos que requieren parametrización costosa
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Facturas oficiales en 1 clic y descarga para Modelo 303
+                  ✓ Facturas oficiales en 1 clic y descarga de Libro de IVA listo para tu gestoría
                 </td>
               </tr>
 

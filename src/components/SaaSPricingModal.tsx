@@ -12,10 +12,10 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
       icon: QrCode,
       features: [
         '1 Alojamiento turístico conectado',
-        'Guía Digital del Huésped (Vídeo Home Tour, check-in y electrodomésticos)',
+        'Mini-Web del Piso (Vídeo Home Tour, check-in y electrodomésticos en vídeo)',
+        'Envío por link en WhatsApp/Airbnb antes de que llegue el huésped',
         'Sincronización iCal automática con Airbnb y Booking',
         'Cleaning App móvil con checklist y fotos de auditoría (sin contraseñas)',
-        'Cartel QR listo para imprimir en la mesita',
         'Fotos de limpieza guardadas durante 7 días',
         'Con sello sutil "Creado con Turnexo"',
       ],

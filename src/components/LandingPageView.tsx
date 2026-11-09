@@ -39,18 +39,9 @@ export default function LandingPageView({
   onOpenCleanerDemo,
   onOpenLegal,
 }: Props) {
-  const [units, setUnits] = useState(3);
-  const [upsellAvg, setUpsellAvg] = useState(35);
-  const monthlyGain = units * 2 * upsellAvg;
-  // Tramos cerrados (Tarifa plana por volumen)
-  const getFlatPlanCost = (numUnits: number) => {
-    if (numUnits <= 1) return 0;
-    if (numUnits <= 5) return 19;
-    return 39;
-  };
-  const platformCost = getFlatPlanCost(units);
-  const netProfit = monthlyGain - platformCost;
-  const hoursSaved = units * 6;
+  // Estado del menú SaaS superior (mega-menu y móvil)
+  const [openDropdown, setOpenDropdown] = useState<'product' | 'demos' | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Estado del simulador de flujo en vivo
   const [simStep, setSimStep] = useState<1 | 2 | 3 | 4>(1);
@@ -109,59 +100,384 @@ export default function LandingPageView({
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
-      {/* Navegación Editorial Limpia */}
-      <header className="sticky top-0 z-40 bg-[#F6F4EE]/90 backdrop-blur-md border-b border-[#E2DDD2]">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-10">
-            <a href="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-[#141413] text-[#F6F4EE] flex items-center justify-center font-mono font-bold text-xs tracking-tighter">
+      {/* NAVBAR SAAS B2B CON MEGA-MENÚ DE PRODUCTO Y SELECTOR DE DEMOS EN VIVO */}
+      <header
+        className="sticky top-0 z-50 bg-[#F6F4EE]/95 backdrop-blur-md border-b border-[#D5CFC0]"
+        onMouseLeave={() => setOpenDropdown(null)}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
+          {/* Izquierda: Identidad de Marca + Etiqueta de Categoría */}
+          <div className="flex items-center gap-6">
+            <a href="/" className="flex items-center gap-3 group">
+              <div className="w-9 h-9 bg-[#141413] text-[#F6F4EE] flex items-center justify-center font-mono font-extrabold text-xs tracking-tighter shadow-[2px_2px_0px_#C85A32] group-hover:bg-[#C85A32] group-hover:shadow-[2px_2px_0px_#141413] transition-all">
                 TX
               </div>
-              <span className="font-bold text-xl tracking-tight text-[#141413]">
-                Turnexo<span className="text-[#C85A32]">.</span>
-              </span>
+              <div className="flex flex-col">
+                <span className="font-extrabold text-xl tracking-tight text-[#141413] leading-none">
+                  Turnexo<span className="text-[#C85A32]">.</span>
+                </span>
+                <span className="font-mono text-[9px] uppercase tracking-widest text-[#57554F] mt-0.5 hidden sm:block">
+                  Operativa &amp; IVA Vacacional
+                </span>
+              </div>
             </a>
 
-            <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#57554F]">
-              <a href="#probar-ical" className="hover:text-[#141413] transition font-bold text-[#C85A32]">
-                ⚡ Probar mi iCal
+            <div className="hidden xl:block h-6 w-px bg-[#D5CFC0]" />
+
+            {/* Navegación Central SaaS (Desktop) */}
+            <nav className="hidden lg:flex items-center gap-1 text-sm font-semibold text-[#141413]">
+              {/* Dropdown 1: Producto (Mega-Menu) */}
+              <div
+                className="relative"
+                onMouseEnter={() => setOpenDropdown('product')}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(openDropdown === 'product' ? null : 'product')}
+                  className={`px-3.5 py-2 flex items-center gap-1.5 transition ${
+                    openDropdown === 'product'
+                      ? 'bg-[#141413] text-[#F6F4EE]'
+                      : 'hover:bg-[#E8E4D9]/80 text-[#141413]'
+                  }`}
+                >
+                  <span>Producto</span>
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform duration-150 ${
+                      openDropdown === 'product' ? 'rotate-180 text-[#C85A32]' : 'text-[#57554F]'
+                    }`}
+                  />
+                </button>
+
+                {openDropdown === 'product' && (
+                  <div className="absolute left-0 top-full pt-2 w-[540px] z-50">
+                    <div className="bg-[#FAF9F5] border-2 border-[#141413] shadow-[8px_8px_0px_#141413] p-5 space-y-4">
+                      <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-2.5">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold">
+                          PLATAFORMA TODO-EN-UNO PARA ANFITRIONES
+                        </span>
+                        <a
+                          href="#modulos"
+                          onClick={() => setOpenDropdown(null)}
+                          className="font-mono text-[10px] uppercase font-bold text-[#C85A32] hover:underline"
+                        >
+                          Ver arquitectura completa →
+                        </a>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2.5">
+                        <a
+                          href="#modulos"
+                          onClick={() => setOpenDropdown(null)}
+                          className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
+                        >
+                          <div className="w-9 h-9 bg-[#1F4E3D] text-white flex items-center justify-center shrink-0 mt-0.5">
+                            <Smartphone size={17} />
+                          </div>
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-[#141413] group-hover:text-[#1F4E3D]">
+                                Cleaning App (Sin contraseñas)
+                              </span>
+                              <span className="font-mono text-[9px] uppercase font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-1.5 py-0.5">
+                                0 WhatsApps
+                              </span>
+                            </div>
+                            <p className="text-xs text-[#57554F] font-normal leading-relaxed">
+                              Turnos automáticos por iCal, checklist por estancia y fotos en tiempo real para comprobar que todo está impecable.
+                            </p>
+                          </div>
+                        </a>
+
+                        <a
+                          href="#modulos"
+                          onClick={() => setOpenDropdown(null)}
+                          className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
+                        >
+                          <div className="w-9 h-9 bg-[#C85A32] text-white flex items-center justify-center shrink-0 mt-0.5">
+                            <Video size={17} />
+                          </div>
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-[#141413] group-hover:text-[#C85A32]">
+                                Guest App · Mini-Web del Alojamiento
+                              </span>
+                              <span className="font-mono text-[9px] uppercase font-bold bg-[#C85A32]/10 text-[#C85A32] px-1.5 py-0.5">
+                                Envío por Link
+                              </span>
+                            </div>
+                            <p className="text-xs text-[#57554F] font-normal leading-relaxed">
+                              Envíala antes de llegar con Vídeo Home Tour, check-in paso a paso en vídeo, guías de electrodomésticos y Late Check-out (+35 €).
+                            </p>
+                          </div>
+                        </a>
+
+                        <a
+                          href="#precios"
+                          onClick={() => setOpenDropdown(null)}
+                          className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
+                        >
+                          <div className="w-9 h-9 bg-[#141413] text-white flex items-center justify-center shrink-0 mt-0.5">
+                            <FileSpreadsheet size={17} />
+                          </div>
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-[#141413]">
+                                Facturación IVA 10% y Modelo 303
+                              </span>
+                              <span className="font-mono text-[9px] uppercase font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5">
+                                1 Clic Gestoría
+                              </span>
+                            </div>
+                            <p className="text-xs text-[#57554F] font-normal leading-relaxed">
+                              Emite facturas simplificadas u ordinarias con IVA del 10% y exporta el Libro trimestral en Excel para tu gestor.
+                            </p>
+                          </div>
+                        </a>
+                      </div>
+
+                      <div className="bg-[#141413] text-[#F6F4EE] p-3 flex items-center justify-between text-xs">
+                        <span className="font-mono text-[11px] text-white/80">
+                          ⚡ Prueba el motor con tu enlace iCal real en 10 seg
+                        </span>
+                        <a
+                          href="#probar-ical"
+                          onClick={() => setOpenDropdown(null)}
+                          className="font-mono text-[11px] uppercase font-bold text-[#C85A32] hover:underline shrink-0"
+                        >
+                          Analizar mi iCal →
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Dropdown 2: Demos Interactivas en Vivo */}
+              <div
+                className="relative"
+                onMouseEnter={() => setOpenDropdown('demos')}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(openDropdown === 'demos' ? null : 'demos')}
+                  className={`px-3.5 py-2 flex items-center gap-2 transition ${
+                    openDropdown === 'demos'
+                      ? 'bg-[#141413] text-[#F6F4EE]'
+                      : 'hover:bg-[#E8E4D9]/80 text-[#141413]'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                  <span>Demos en Vivo</span>
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform duration-150 ${
+                      openDropdown === 'demos' ? 'rotate-180 text-[#C85A32]' : 'text-[#57554F]'
+                    }`}
+                  />
+                </button>
+
+                {openDropdown === 'demos' && (
+                  <div className="absolute left-0 top-full pt-2 w-80 z-50">
+                    <div className="bg-[#FAF9F5] border-2 border-[#141413] shadow-[8px_8px_0px_#141413] p-4 space-y-2.5">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold block px-1">
+                        INTERACTÚA SIN REGISTRARTE
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpenDropdown(null);
+                          onOpenGuestDemo();
+                        }}
+                        className="w-full text-left p-3 bg-white border border-[#E2DDD2] hover:border-[#C85A32] transition flex items-center justify-between group"
+                      >
+                        <div>
+                          <p className="font-bold text-xs text-[#141413] group-hover:text-[#C85A32]">
+                            Mini-Web del Huésped
+                          </p>
+                          <p className="text-[11px] text-[#57554F] font-normal">
+                            Vídeo Home Tour, check-in y extras
+                          </p>
+                        </div>
+                        <ExternalLink size={14} className="text-[#C85A32] shrink-0" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpenDropdown(null);
+                          onOpenCleanerDemo();
+                        }}
+                        className="w-full text-left p-3 bg-white border border-[#E2DDD2] hover:border-[#1F4E3D] transition flex items-center justify-between group"
+                      >
+                        <div>
+                          <p className="font-bold text-xs text-[#141413] group-hover:text-[#1F4E3D]">
+                            App Móvil de Limpiadora
+                          </p>
+                          <p className="text-[11px] text-[#57554F] font-normal">
+                            Turnos, checklist y subida de fotos
+                          </p>
+                        </div>
+                        <ExternalLink size={14} className="text-[#1F4E3D] shrink-0" />
+                      </button>
+
+                      <a
+                        href="#probar-ical"
+                        onClick={() => setOpenDropdown(null)}
+                        className="block w-full text-left p-2.5 bg-[#141413] text-white font-mono text-[11px] font-bold uppercase text-center hover:bg-[#2C2C29] transition"
+                      >
+                        ⚡ Probar con mi URL iCal real →
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <a
+                href="#simulador"
+                className="px-3.5 py-2 text-[#57554F] hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
+              >
+                Cómo funciona
               </a>
-              <a href="#modulos" className="hover:text-[#141413] transition">
-                Módulos
-              </a>
-              <a href="#comparativa" className="hover:text-[#141413] transition">
+
+              <a
+                href="#comparativa"
+                className="px-3.5 py-2 text-[#57554F] hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
+              >
                 Comparativa
               </a>
-              <a href="#garantias" className="hover:text-[#141413] transition">
-                Garantías
+
+              <a
+                href="#precios"
+                className="px-3.5 py-2 text-[#57554F] hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition flex items-center gap-1.5"
+              >
+                <span>Precios</span>
+                <span className="font-mono text-[9px] uppercase font-bold bg-[#1F4E3D]/15 text-[#1F4E3D] px-1.5 py-0.5">
+                  1 Gratis
+                </span>
               </a>
-              <a href="#precios" className="hover:text-[#141413] transition">
-                Tarifas
-              </a>
-              <a href="#faq" className="hover:text-[#141413] transition">
+
+              <a
+                href="#faq"
+                className="px-3.5 py-2 text-[#57554F] hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
+              >
                 FAQ
               </a>
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Derecha: Acceso Clientes + CTA Principal + Toggle Móvil */}
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={onNavigateToApp}
-              className="text-sm font-semibold text-[#141413] hover:text-[#C85A32] px-3 py-2 transition"
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider font-bold text-[#141413] hover:text-[#C85A32] px-3.5 py-2.5 border border-transparent hover:border-[#D5CFC0] transition"
             >
-              Acceso Clientes
+              <span>Iniciar sesión</span>
             </button>
+
             <button
               type="button"
               onClick={onNavigateToApp}
-              className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-semibold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-sm"
+              className="bg-[#141413] hover:bg-[#C85A32] text-white text-xs font-mono font-bold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-[3px_3px_0px_#C85A32] hover:shadow-[3px_3px_0px_#141413]"
             >
-              <span>Probar 1 Alojamiento Gratis</span>
+              <span>Empezar Gratis</span>
               <ArrowUpRight size={15} />
+            </button>
+
+            {/* Botón Menú Móvil */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2.5 border border-[#141413] bg-white text-[#141413]"
+              aria-label="Abrir menú de navegación"
+            >
+              {mobileMenuOpen ? <X size={18} /> : <Layers size={18} />}
             </button>
           </div>
         </div>
+
+        {/* Drawer Móvil Desplegable */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-[#FAF9F5] border-t-2 border-[#141413] px-6 py-6 space-y-5 shadow-2xl">
+            <div className="space-y-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold block">
+                MÓDULOS DE LA PLATAFORMA
+              </span>
+              <a
+                href="#modulos"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block p-3 bg-white border border-[#D5CFC0] text-xs font-bold text-[#141413]"
+              >
+                🧹 Cleaning App · Turnos iCal, checklist y fotos
+              </a>
+              <a
+                href="#modulos"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block p-3 bg-white border border-[#D5CFC0] text-xs font-bold text-[#141413]"
+              >
+                📱 Guest App · Mini-Web del alojamiento con vídeos
+              </a>
+              <a
+                href="#precios"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block p-3 bg-white border border-[#D5CFC0] text-xs font-bold text-[#141413]"
+              >
+                🧾 Facturación IVA 10% y Libro Excel Modelo 303
+              </a>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#E2DDD2]">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenGuestDemo();
+                }}
+                className="p-2.5 bg-[#C85A32]/10 border border-[#C85A32]/30 text-[#C85A32] font-mono text-[11px] font-bold uppercase text-center"
+              >
+                Demo Mini-Web →
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenCleanerDemo();
+                }}
+                className="p-2.5 bg-[#1F4E3D]/10 border border-[#1F4E3D]/30 text-[#1F4E3D] font-mono text-[11px] font-bold uppercase text-center"
+              >
+                Demo Limpiadora →
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-[#E2DDD2] text-xs font-bold text-[#57554F]">
+              <a href="#probar-ical" onClick={() => setMobileMenuOpen(false)} className="text-[#C85A32]">
+                ⚡ Probar mi iCal
+              </a>
+              <a href="#comparativa" onClick={() => setMobileMenuOpen(false)}>
+                Comparativa
+              </a>
+              <a href="#precios" onClick={() => setMobileMenuOpen(false)}>
+                Precios (1 Gratis)
+              </a>
+              <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
+                FAQ
+              </a>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onNavigateToApp();
+              }}
+              className="w-full bg-[#141413] text-white font-mono text-xs font-bold uppercase py-3.5"
+            >
+              Iniciar sesión / Crear cuenta gratis →
+            </button>
+          </div>
+        )}
       </header>
 
       {/* HERO EDITORIAL + MAQUETA ARQUITECTÓNICA */}
@@ -1482,122 +1798,8 @@ export default function LandingPageView({
         </p>
       </section>
 
-      {/* CALCULADORA INTERACTIVA DE RETORNO */}
-      <section id="retorno" className="max-w-7xl mx-auto px-6 py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center bg-[#141413] text-[#F6F4EE] p-8 sm:p-14">
-          <div className="lg:col-span-7 space-y-6">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32]">
-              Calculadora de Retorno Inmediato
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight">
-              Calcula cuánto ganas en Late Check-outs y cuánto tiempo ahorras al mes.
-            </h2>
-            <p className="text-sm text-white/70 leading-relaxed max-w-xl">
-              Cuando un huésped tiene su vuelo por la tarde y ve en la Guía Digital que su apartamento no tiene entradas ese día, solicita quedarse hasta las 17:00h sin dudarlo. Tú lo cobras directamente por Airbnb o Bizum sin intermediarios.
-            </p>
-
-            <div className="space-y-5 pt-2 max-w-lg">
-              <div>
-                <div className="flex justify-between text-xs font-mono uppercase mb-2">
-                  <span className="text-white/70">Propiedades gestionadas</span>
-                  <span className="font-bold text-white">{units} alojamientos</span>
-                </div>
-                <input
-                  type="range"
-                  min={1}
-                  max={30}
-                  value={units}
-                  onChange={(e) => setUnits(Number(e.target.value))}
-                  className="w-full accent-[#C85A32]"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-mono uppercase mb-2">
-                  <span className="text-white/70">Importe por Late Check-out / Extra</span>
-                  <span className="font-bold text-white">{upsellAvg} €</span>
-                </div>
-                <input
-                  type="range"
-                  min={20}
-                  max={60}
-                  step={5}
-                  value={upsellAvg}
-                  onChange={(e) => setUpsellAvg(Number(e.target.value))}
-                  className="w-full accent-[#C85A32]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 bg-[#FAF9F5] text-[#141413] p-8 space-y-6 shadow-xl">
-            <div className="border-b border-[#E2DDD2] pb-5 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-[#57554F] block">
-                  BENEFICIO NETO ESTIMADO TRAS COSTE DE TURNEXO
-                </span>
-                <span className="font-mono text-[10px] uppercase font-bold px-2 py-0.5 bg-[#C85A32] text-white">
-                  {units === 1 ? 'Plan 100% Gratis' : `Tarifa Plana ${platformCost} €/mes`}
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <p className="font-mono text-5xl font-extrabold text-[#1F4E3D]">
-                  +{netProfit} €<span className="text-base font-normal text-[#57554F]">/mes</span>
-                </p>
-                <span className="font-mono text-xs font-bold uppercase bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
-                  {platformCost === 0 ? 'Coste 0 € · 100% Neto' : `+${Math.round((monthlyGain / platformCost) * 100)}% ROI`}
-                </span>
-              </div>
-              <p className="text-xs text-[#57554F]">
-                +{(netProfit * 12).toLocaleString()} € de beneficio extra anual neto para tu negocio.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-              <div className="bg-white border border-[#E2DDD2] p-3">
-                <span className="text-[10px] text-[#57554F] uppercase block">INGRESOS EXTRAS BRUTOS</span>
-                <span className="font-bold text-sm text-[#141413] mt-0.5 block">+{monthlyGain} €/mes</span>
-              </div>
-              <div className="bg-white border border-[#E2DDD2] p-3">
-                <span className="text-[10px] text-[#57554F] uppercase block">TIEMPO AHORRADO</span>
-                <span className="font-bold text-sm text-[#C85A32] mt-0.5 block">~{hoursSaved} h/mes</span>
-              </div>
-            </div>
-
-            {/* Tramos Cerrados de Tarifa Plana */}
-            <div className="space-y-2 text-xs">
-              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units === 1 ? 'bg-[#1F4E3D]/10 font-bold' : ''}`}>
-                <span className="font-semibold">1 Alojamiento</span>
-                <span className="font-mono font-bold text-[#1F4E3D]">0 € Plan Gratuito</span>
-              </div>
-              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units >= 2 && units <= 5 ? 'bg-emerald-500/10 font-bold' : ''}`}>
-                <span className="font-semibold text-[#141413]">Hasta 5 Alojamientos (Pro Fiscal)</span>
-                <span className="font-mono font-bold text-emerald-800">19 € / mes (tarifa plana total)</span>
-              </div>
-              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units >= 6 && units <= 10 ? 'bg-[#C85A32]/10 font-bold' : ''}`}>
-                <span className="font-semibold text-[#C85A32]">Hasta 10 Alojamientos (Microgestoras)</span>
-                <span className="font-mono font-bold text-[#C85A32]">39 € / mes (tarifa plana total)</span>
-              </div>
-              <div className={`flex justify-between py-2 px-2 ${units > 10 ? 'bg-[#141413]/10 font-bold' : ''}`}>
-                <span className="font-semibold text-[#57554F]">Más de 10 Alojamientos</span>
-                <span className="font-mono font-bold text-[#57554F]">59 € / mes (tarifa plana total)</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={onNavigateToApp}
-              className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-mono uppercase tracking-wider font-bold py-4 transition flex items-center justify-center gap-2 shadow-md group"
-            >
-              <span>Crear la Mini-Web de mi alojamiento gratis (Sin tarjeta)</span>
-              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* SECCIÓN FAQ INTERACTIVA PARA SEO Y RESOLUCIÓN DE OBJECIONES */}
-      <section id="faq" className="max-w-7xl mx-auto px-6 py-20 border-t border-[#E2DDD2]">
+      <section id="faq" className="max-w-7xl mx-auto px-6 py-20">
         <div className="max-w-3xl mx-auto space-y-12">
           <div className="text-center space-y-3">
             <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">

@@ -390,7 +390,7 @@ export default function LandingPageView({
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.08] tracking-tight text-[#141413]">
-              Controla tus limpiezas, la Mini-Web de tu alojamiento y tus facturas de IVA.{' '}
+              Controla tus limpiezas<span className="-ml-[0.03em]">,</span> la Mini-Web de tu alojamiento y tus facturas de IVA.{' '}
               <span className="text-[#C85A32]">En piloto automático.</span>
             </h1>
 
@@ -556,7 +556,7 @@ export default function LandingPageView({
                 <button
                   type="button"
                   onClick={onOpenCleanerDemo}
-                  className="w-full bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs font-bold uppercase tracking-wider py-3 flex items-center justify-center gap-1.5 transition"
+                  className="w-full bg-[#141413] hover:bg-[#2C2C29] text-white font-sans text-xs sm:text-sm font-semibold py-3 flex items-center justify-center gap-1.5 transition"
                 >
                   <span>Abrir App Limpiadora Completa</span>
                   <ExternalLink size={13} />
@@ -629,9 +629,9 @@ export default function LandingPageView({
                 <button
                   type="button"
                   onClick={onOpenGuestDemo}
-                  className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-mono text-xs font-bold uppercase tracking-wider py-3 flex items-center justify-center gap-1.5 transition"
+                  className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans text-xs sm:text-sm font-semibold py-3 flex items-center justify-center gap-1.5 transition"
                 >
-                  <span>Abrir Mini-Web del Alojamiento Completa</span>
+                  <span>Ver Guía Digital en Vivo</span>
                   <ExternalLink size={13} />
                 </button>
               </div>
@@ -680,7 +680,7 @@ export default function LandingPageView({
                 <button
                   type="button"
                   onClick={onNavigateToApp}
-                  className="w-full bg-[#1F4E3D] hover:bg-[#16382B] text-white font-mono text-xs font-bold uppercase tracking-wider py-3 flex items-center justify-center gap-1.5 transition"
+                  className="w-full bg-[#1F4E3D] hover:bg-[#16382B] text-white font-sans text-xs sm:text-sm font-semibold py-3 flex items-center justify-center gap-1.5 transition"
                 >
                   <span>Probar Facturación y Libro IVA en el Panel</span>
                   <ArrowUpRight size={14} />
@@ -813,16 +813,16 @@ export default function LandingPageView({
               <button
                 type="button"
                 onClick={onOpenGuestDemo}
-                className="text-xs font-mono uppercase tracking-wider font-bold text-[#C85A32] hover:underline"
+                className="text-xs sm:text-sm font-sans font-semibold text-[#C85A32] hover:underline"
               >
-                Ver Mini-Web en Vivo →
+                Ver Guía Digital en Vivo →
               </button>
               <button
                 type="button"
                 onClick={onNavigateToApp}
-                className="bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-semibold px-5 py-3 transition"
+                className="bg-[#141413] hover:bg-[#2C2C29] text-white text-xs sm:text-sm font-sans font-semibold px-5 py-3 transition"
               >
-                Crear Mini-Web Gratis
+                Crear Guía Huésped Gratis
               </button>
             </div>
           </div>
@@ -903,14 +903,14 @@ export default function LandingPageView({
               <button
                 type="button"
                 onClick={onOpenCleanerDemo}
-                className="text-xs font-mono uppercase tracking-wider font-bold text-[#1F4E3D] hover:underline"
+                className="text-xs sm:text-sm font-sans font-semibold text-[#1F4E3D] hover:underline"
               >
                 Abrir App de la Limpiadora →
               </button>
               <button
                 type="button"
                 onClick={onNavigateToApp}
-                className="bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-semibold px-5 py-3 transition"
+                className="bg-[#141413] hover:bg-[#2C2C29] text-white text-xs sm:text-sm font-sans font-semibold px-5 py-3 transition"
               >
                 Automatizar Limpiezas
               </button>
@@ -962,8 +962,8 @@ export default function LandingPageView({
             </div>
           </div>
 
-          <div className="lg:col-span-5 bg-[#141413] text-[#F6F4EE] p-6 border border-[#2C2C29] space-y-4 font-mono text-xs">
-            <div className="flex items-center justify-between border-b border-white/15 pb-3">
+          <div className="lg:col-span-5 bg-[#141413] text-[#F6F4EE] p-6 border border-[#2C2C29] space-y-4">
+            <div className="flex items-center justify-between border-b border-white/15 pb-3 font-mono">
               <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">
                 RESUMEN TRIMESTRAL · LIBRO IVA
               </span>
@@ -972,7 +972,7 @@ export default function LandingPageView({
               </span>
             </div>
 
-            <div className="space-y-2 bg-white/5 p-3.5 border border-white/10">
+            <div className="space-y-2 bg-white/5 p-3.5 border border-white/10 font-mono text-xs">
               <div className="flex justify-between text-white/70">
                 <span>Facturas emitidas (Airbnb + Booking):</span>
                 <span className="font-bold text-white">28 facturas</span>
@@ -990,9 +990,9 @@ export default function LandingPageView({
             <button
               type="button"
               onClick={onNavigateToApp}
-              className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-bold uppercase py-3.5 px-4 transition flex items-center justify-center gap-2"
+              className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans font-semibold text-sm py-3.5 px-5 transition flex items-center justify-center gap-2 shadow-sm"
             >
-              <FileSpreadsheet size={15} />
+              <FileSpreadsheet size={16} />
               <span>Probar Facturación e IVA en el Panel →</span>
             </button>
           </div>
@@ -1138,7 +1138,7 @@ export default function LandingPageView({
               name: 'Starter',
               units: '1 alojamiento',
               price: '0 €',
-              note: '/mes',
+              note: '/ mes',
               summary:
                 'Plan gratuito para 1 alojamiento. Enlace móvil de limpiadora, Mini-Web del alojamiento para enviar por link al huésped y retención de fotos a 7 días.',
               highlight: false,
@@ -1156,7 +1156,7 @@ export default function LandingPageView({
               name: 'Pro Fiscal',
               units: 'Hasta 5 alojamientos',
               price: '19 €',
-              note: '/mes en total (tarifa plana)',
+              note: '/ mes (tarifa plana)',
               summary:
                 'Todo el control operativo + facturación con IVA del 10% y exportación trimestral en 1 clic para tu gestoría.',
               highlight: true,
@@ -1173,7 +1173,7 @@ export default function LandingPageView({
               name: 'Microgestora',
               units: 'Hasta 10 alojamientos',
               price: '39 €',
-              note: '/mes en total (tarifa plana)',
+              note: '/ mes (tarifa plana)',
               summary:
                 'Para gestores con varias limpiadoras y rotación frecuente que necesitan control de pagos y auditoría multi-equipo.',
               highlight: false,
@@ -1206,10 +1206,12 @@ export default function LandingPageView({
                 <p className={`text-xs font-mono uppercase ${plan.highlight ? 'text-white/60' : 'text-[#57554F]'}`}>
                   {plan.units}
                 </p>
-                <p className="font-mono">
-                  <span className="text-5xl font-extrabold">{plan.price}</span>{' '}
-                  <span className={`text-sm ${plan.highlight ? 'text-white/60' : 'text-[#57554F]'}`}>{plan.note}</span>
-                </p>
+                <div className="flex items-baseline gap-2 flex-wrap font-sans">
+                  <span className="text-5xl font-extrabold tracking-tight whitespace-nowrap">{plan.price}</span>
+                  <span className={`text-sm font-medium whitespace-nowrap ${plan.highlight ? 'text-white/70' : 'text-[#57554F]'}`}>
+                    {plan.note}
+                  </span>
+                </div>
                 <p className={`text-xs leading-relaxed ${plan.highlight ? 'text-white/75' : 'text-[#57554F]'}`}>
                   {plan.summary}
                 </p>
@@ -1225,7 +1227,7 @@ export default function LandingPageView({
               <button
                 type="button"
                 onClick={onNavigateToApp}
-                className={`w-full font-mono uppercase tracking-wider font-bold text-xs py-4 transition flex items-center justify-center gap-2 ${
+                className={`w-full font-sans font-semibold text-sm py-3.5 transition flex items-center justify-center gap-2 ${
                   plan.highlight
                     ? 'bg-[#C85A32] hover:bg-[#B04A25] text-white shadow-md'
                     : 'bg-[#141413] hover:bg-[#2C2C29] text-white'

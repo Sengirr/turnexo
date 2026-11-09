@@ -1474,7 +1474,7 @@ export default function LandingPageView({
             <div className="space-y-2 text-xs">
               <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units === 1 ? 'bg-[#1F4E3D]/10 font-bold' : ''}`}>
                 <span className="font-semibold">1 Alojamiento</span>
-                <span className="font-mono font-bold text-[#1F4E3D]">0 € Gratis de por vida</span>
+                <span className="font-mono font-bold text-[#1F4E3D]">0 € Plan Gratuito</span>
               </div>
               <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units >= 2 && units <= 5 ? 'bg-emerald-500/10 font-bold' : ''}`}>
                 <span className="font-semibold text-[#141413]">Hasta 5 Alojamientos (Pro Fiscal)</span>
@@ -1530,7 +1530,7 @@ export default function LandingPageView({
               },
               {
                 q: '¿Cómo funcionan los planes y tarifas? ¿Hay plan gratuito?',
-                a: 'El plan Starter es 100% Gratis de por vida para anfitriones de 1 alojamiento (con marca de agua discreta y retención de fotos de auditoría a 7 días). Para anfitriones de hasta 5 alojamientos que necesitan facturación oficial con IVA del 10% y exportación para su gestor, el Plan Pro Fiscal cuesta 19 €/mes (tarifa plana total, no por piso). Y para pequeñas gestoras de hasta 10 alojamientos, el Plan Microgestora cuesta 39 €/mes.',
+                a: 'El Plan Gratuito (Starter) está diseñado para anfitriones de 1 alojamiento (con marca de agua discreta y retención de fotos de auditoría a 7 días). Para anfitriones de hasta 5 alojamientos que necesitan facturación oficial con IVA del 10% y exportación para su gestor, el Plan Pro Fiscal cuesta 19 €/mes (tarifa plana total, no por piso). Y para pequeñas gestoras de hasta 10 alojamientos, el Plan Microgestora cuesta 39 €/mes.',
               },
               {
                 q: '¿Cómo funcionan el Vídeo Home Tour y las vídeo-guías de electrodomésticos?',

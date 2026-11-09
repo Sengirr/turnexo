@@ -1839,19 +1839,19 @@ export default function HostDashboardView({
                         id: 'plan_starter',
                         title: '1 Alojamiento',
                         price: '0 € / mes',
-                        desc: 'Gratis de por vida para propietarios',
+                        desc: 'Plan gratuito para 1 alojamiento',
                       },
                       {
                         id: 'plan_pro',
-                        title: 'Hasta 4 Alojamientos',
-                        price: '29 € / mes',
-                        desc: 'Tarifa plana total (7,25€/piso)',
+                        title: 'Hasta 5 Alojamientos',
+                        price: '19 € / mes',
+                        desc: 'Pro Fiscal: Facturas IVA 10% y Modelo 303',
                       },
                       {
                         id: 'plan_manager',
-                        title: 'Hasta 8 Alojamientos',
-                        price: '49 € / mes',
-                        desc: 'Tarifa plana total (6,12€/piso)',
+                        title: 'Hasta 10 Alojamientos',
+                        price: '39 € / mes',
+                        desc: 'Tarifa plana para pequeñas gestoras',
                       },
                     ] as const
                   ).map((p) => {

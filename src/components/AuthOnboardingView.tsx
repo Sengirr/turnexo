@@ -173,7 +173,7 @@ export default function AuthOnboardingView({ onSuccess, onBackToLanding }: Props
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 bg-[#1F4E3D] text-white font-bold">
-                        1 PISO GRATIS DE POR VIDA
+                        PLAN GRATUITO 1 PISO
                       </span>
                       <span className="font-mono text-[11px] uppercase tracking-wider opacity-70">
                         SIN TARJETA DE CRÉDITO

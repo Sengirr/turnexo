@@ -388,32 +388,34 @@ export default function LandingPageView({
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.08] tracking-tight text-[#141413]">
-              Controla tus limpiezas<span className="-ml-[0.03em]">,</span> la Mini-Web de tu alojamiento y tus facturas de IVA.{' '}
-              <span className="text-[#C85A32]">En piloto automático.</span>
+              El día a día de tus alojamientos.{' '}
+              <span className="text-[#C85A32] block sm:inline">
+                Sin llamadas, sin WhatsApps y sin líos con el IVA.
+              </span>
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
-              Turnexo se conecta por iCal a tus anuncios de Airbnb y Booking y elimina el trabajo manual de cada reserva:
+              Conecta el calendario de tus anuncios en 30 segundos. Turnexo se encarga de coordinar a tu equipo de limpieza, resolver las dudas de tus viajeros y preparar los libros contables para tu gestoría.
             </p>
 
-            {/* 3 beneficios escaneables (uno por motor) */}
+            {/* 3 puntos con check (valor operativo) */}
             <ul className="space-y-3 max-w-2xl text-sm sm:text-base">
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
                 <span className="text-[#141413]">
-                  <strong>Limpiezas sin WhatsApp (Cleaning App):</strong> tu limpiadora ve sus turnos en su enlace móvil, sigue el checklist y sube fotos para comprobar que todo está impecable.
+                  <strong>Cuadrante de limpieza sin grupos de WhatsApp:</strong> Tu limpiadora entra con un enlace móvil sin contraseñas, marca las tareas y sube fotos del piso antes de cada check-in.
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
                 <span className="text-[#141413]">
-                  <strong>Mini-Web del alojamiento (Guest App):</strong> envíala por link antes de que lleguen con Vídeo Home Tour, vídeos de check-in, guías de electrodomésticos y venta de Late Check-out.
+                  <strong>Guía digital interactiva para el huésped:</strong> Clave WiFi en un toque, vídeos cortos de electrodomésticos para evitar llamadas a deshoras y venta directa de late check-out.
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
                 <span className="text-[#141413]">
-                  <strong>Facturas con IVA en 1 clic:</strong> y descarga del Libro trimestral en Excel listo para que tu gestoría presente el Modelo 303.
+                  <strong>Facturación e IVA del 10% en un solo clic:</strong> Convierte tus reservas de Airbnb y Booking en facturas oficiales y exporta el libro trimestral en Excel listo para el Modelo 303.
                 </span>
               </li>
             </ul>
@@ -423,10 +425,9 @@ export default function LandingPageView({
                 <button
                   type="button"
                   onClick={onNavigateToApp}
-                  className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-sm sm:text-base font-bold px-7 py-4 transition flex items-center gap-2.5 shadow-md group"
+                  className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-sm sm:text-base font-bold px-7 py-4 transition flex items-center gap-2 shadow-md group"
                 >
-                  <span>Probar 1 Alojamiento Gratis (Sin tarjeta)</span>
-                  <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  <span>Probar 1 Alojamiento Gratis →</span>
                 </button>
 
                 <button
@@ -440,7 +441,7 @@ export default function LandingPageView({
 
               <p className="text-xs font-mono text-[#57554F] flex items-center gap-1.5 pt-1">
                 <span className="text-[#1F4E3D] font-bold">✓</span>
-                <span>Plan Gratuito para 1 alojamiento · Sin tarjeta de crédito ni compromiso</span>
+                <span>Plan Gratuito para 1 alojamiento · Sin tarjeta de crédito ni permanencia</span>
               </p>
             </div>
 
@@ -455,7 +456,7 @@ export default function LandingPageView({
               </div>
               <div>
                 <p className="font-mono text-2xl font-bold text-[#1F4E3D]">100 %</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Guías personalizables</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Guías interactivas para el viajero</p>
               </div>
             </div>
           </div>

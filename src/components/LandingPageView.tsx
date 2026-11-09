@@ -102,288 +102,276 @@ export default function LandingPageView({
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
       {/* NAVBAR SAAS B2B CON MEGA-MENÚ DE PRODUCTO Y SELECTOR DE DEMOS EN VIVO */}
       <header
-        className="sticky top-0 z-50 bg-[#F6F4EE]/95 backdrop-blur-md border-b border-[#D5CFC0]"
+        className="sticky top-0 z-50 bg-[#F6F4EE]/95 backdrop-blur-md border-b border-[#E2DDD2]"
         onMouseLeave={() => setOpenDropdown(null)}
       >
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
-          {/* Izquierda: Identidad de Marca + Etiqueta de Categoría */}
-          <div className="flex items-center gap-6">
-            <a href="/" className="flex items-center gap-3 group">
-              <div className="w-9 h-9 bg-[#141413] text-[#F6F4EE] flex items-center justify-center font-mono font-extrabold text-xs tracking-tighter shadow-[2px_2px_0px_#C85A32] group-hover:bg-[#C85A32] group-hover:shadow-[2px_2px_0px_#141413] transition-all">
-                TX
-              </div>
-              <div className="flex flex-col">
-                <span className="font-extrabold text-xl tracking-tight text-[#141413] leading-none">
-                  Turnexo<span className="text-[#C85A32]">.</span>
-                </span>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-[#57554F] mt-0.5 hidden sm:block">
-                  Operativa &amp; IVA Vacacional
-                </span>
-              </div>
-            </a>
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
+          {/* Columna 1: Identidad de Marca (1 sola línea limpia) */}
+          <a href="/" className="flex items-center gap-2.5 shrink-0 whitespace-nowrap group">
+            <div className="w-8 h-8 bg-[#141413] text-[#F6F4EE] flex items-center justify-center font-mono font-extrabold text-xs tracking-tighter group-hover:bg-[#C85A32] transition-colors">
+              TX
+            </div>
+            <span className="font-extrabold text-xl tracking-tight text-[#141413]">
+              Turnexo<span className="text-[#C85A32]">.</span>
+            </span>
+          </a>
 
-            <div className="hidden xl:block h-6 w-px bg-[#D5CFC0]" />
-
-            {/* Navegación Central SaaS (Desktop) */}
-            <nav className="hidden lg:flex items-center gap-1 text-sm font-semibold text-[#141413]">
-              {/* Dropdown 1: Producto (Mega-Menu) */}
-              <div
-                className="relative"
-                onMouseEnter={() => setOpenDropdown('product')}
+          {/* Columna 2: Navegación Central SaaS (Todo en 1 sola línea sin saltos) */}
+          <nav className="hidden lg:flex items-center gap-1 text-sm font-medium text-[#57554F] whitespace-nowrap">
+            {/* Dropdown 1: Producto (Mega-Menu) */}
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown('product')}
+            >
+              <button
+                type="button"
+                onClick={() => setOpenDropdown(openDropdown === 'product' ? null : 'product')}
+                className={`px-3.5 py-2 rounded-none flex items-center gap-1.5 font-semibold whitespace-nowrap transition ${
+                  openDropdown === 'product'
+                    ? 'bg-[#141413] text-[#F6F4EE]'
+                    : 'text-[#141413] hover:bg-[#E8E4D9]/80'
+                }`}
               >
-                <button
-                  type="button"
-                  onClick={() => setOpenDropdown(openDropdown === 'product' ? null : 'product')}
-                  className={`px-3.5 py-2 flex items-center gap-1.5 transition ${
-                    openDropdown === 'product'
-                      ? 'bg-[#141413] text-[#F6F4EE]'
-                      : 'hover:bg-[#E8E4D9]/80 text-[#141413]'
+                <span>Producto</span>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-150 ${
+                    openDropdown === 'product' ? 'rotate-180 text-[#C85A32]' : 'text-[#57554F]'
                   }`}
-                >
-                  <span>Producto</span>
-                  <ChevronDown
-                    size={14}
-                    className={`transition-transform duration-150 ${
-                      openDropdown === 'product' ? 'rotate-180 text-[#C85A32]' : 'text-[#57554F]'
-                    }`}
-                  />
-                </button>
+                />
+              </button>
 
-                {openDropdown === 'product' && (
-                  <div className="absolute left-0 top-full pt-2 w-[540px] z-50">
-                    <div className="bg-[#FAF9F5] border-2 border-[#141413] shadow-[8px_8px_0px_#141413] p-5 space-y-4">
-                      <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-2.5">
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold">
-                          PLATAFORMA TODO-EN-UNO PARA ANFITRIONES
-                        </span>
-                        <a
-                          href="#modulos"
-                          onClick={() => setOpenDropdown(null)}
-                          className="font-mono text-[10px] uppercase font-bold text-[#C85A32] hover:underline"
-                        >
-                          Ver arquitectura completa →
-                        </a>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-2.5">
-                        <a
-                          href="#modulos"
-                          onClick={() => setOpenDropdown(null)}
-                          className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
-                        >
-                          <div className="w-9 h-9 bg-[#1F4E3D] text-white flex items-center justify-center shrink-0 mt-0.5">
-                            <Smartphone size={17} />
-                          </div>
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-[#141413] group-hover:text-[#1F4E3D]">
-                                Cleaning App (Sin contraseñas)
-                              </span>
-                              <span className="font-mono text-[9px] uppercase font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-1.5 py-0.5">
-                                0 WhatsApps
-                              </span>
-                            </div>
-                            <p className="text-xs text-[#57554F] font-normal leading-relaxed">
-                              Turnos automáticos por iCal, checklist por estancia y fotos en tiempo real para comprobar que todo está impecable.
-                            </p>
-                          </div>
-                        </a>
-
-                        <a
-                          href="#modulos"
-                          onClick={() => setOpenDropdown(null)}
-                          className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
-                        >
-                          <div className="w-9 h-9 bg-[#C85A32] text-white flex items-center justify-center shrink-0 mt-0.5">
-                            <Video size={17} />
-                          </div>
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-[#141413] group-hover:text-[#C85A32]">
-                                Guest App · Mini-Web del Alojamiento
-                              </span>
-                              <span className="font-mono text-[9px] uppercase font-bold bg-[#C85A32]/10 text-[#C85A32] px-1.5 py-0.5">
-                                Envío por Link
-                              </span>
-                            </div>
-                            <p className="text-xs text-[#57554F] font-normal leading-relaxed">
-                              Envíala antes de llegar con Vídeo Home Tour, check-in paso a paso en vídeo, guías de electrodomésticos y Late Check-out (+35 €).
-                            </p>
-                          </div>
-                        </a>
-
-                        <a
-                          href="#precios"
-                          onClick={() => setOpenDropdown(null)}
-                          className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
-                        >
-                          <div className="w-9 h-9 bg-[#141413] text-white flex items-center justify-center shrink-0 mt-0.5">
-                            <FileSpreadsheet size={17} />
-                          </div>
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-[#141413]">
-                                Facturación IVA 10% y Modelo 303
-                              </span>
-                              <span className="font-mono text-[9px] uppercase font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5">
-                                1 Clic Gestoría
-                              </span>
-                            </div>
-                            <p className="text-xs text-[#57554F] font-normal leading-relaxed">
-                              Emite facturas simplificadas u ordinarias con IVA del 10% y exporta el Libro trimestral en Excel para tu gestor.
-                            </p>
-                          </div>
-                        </a>
-                      </div>
-
-                      <div className="bg-[#141413] text-[#F6F4EE] p-3 flex items-center justify-between text-xs">
-                        <span className="font-mono text-[11px] text-white/80">
-                          ⚡ Prueba el motor con tu enlace iCal real en 10 seg
-                        </span>
-                        <a
-                          href="#probar-ical"
-                          onClick={() => setOpenDropdown(null)}
-                          className="font-mono text-[11px] uppercase font-bold text-[#C85A32] hover:underline shrink-0"
-                        >
-                          Analizar mi iCal →
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Dropdown 2: Demos Interactivas en Vivo */}
-              <div
-                className="relative"
-                onMouseEnter={() => setOpenDropdown('demos')}
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenDropdown(openDropdown === 'demos' ? null : 'demos')}
-                  className={`px-3.5 py-2 flex items-center gap-2 transition ${
-                    openDropdown === 'demos'
-                      ? 'bg-[#141413] text-[#F6F4EE]'
-                      : 'hover:bg-[#E8E4D9]/80 text-[#141413]'
-                  }`}
-                >
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                  <span>Demos en Vivo</span>
-                  <ChevronDown
-                    size={14}
-                    className={`transition-transform duration-150 ${
-                      openDropdown === 'demos' ? 'rotate-180 text-[#C85A32]' : 'text-[#57554F]'
-                    }`}
-                  />
-                </button>
-
-                {openDropdown === 'demos' && (
-                  <div className="absolute left-0 top-full pt-2 w-80 z-50">
-                    <div className="bg-[#FAF9F5] border-2 border-[#141413] shadow-[8px_8px_0px_#141413] p-4 space-y-2.5">
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold block px-1">
-                        INTERACTÚA SIN REGISTRARTE
+              {openDropdown === 'product' && (
+                <div className="absolute left-0 top-full pt-2 w-[520px] z-50 whitespace-normal">
+                  <div className="bg-[#FAF9F5] border-2 border-[#141413] shadow-[8px_8px_0px_#141413] p-5 space-y-4">
+                    <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-2.5">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold">
+                        PLATAFORMA TODO-EN-UNO PARA ANFITRIONES
                       </span>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpenDropdown(null);
-                          onOpenGuestDemo();
-                        }}
-                        className="w-full text-left p-3 bg-white border border-[#E2DDD2] hover:border-[#C85A32] transition flex items-center justify-between group"
+                      <a
+                        href="#modulos"
+                        onClick={() => setOpenDropdown(null)}
+                        className="font-mono text-[10px] uppercase font-bold text-[#C85A32] hover:underline"
                       >
-                        <div>
-                          <p className="font-bold text-xs text-[#141413] group-hover:text-[#C85A32]">
-                            Mini-Web del Huésped
-                          </p>
-                          <p className="text-[11px] text-[#57554F] font-normal">
-                            Vídeo Home Tour, check-in y extras
+                        Ver arquitectura completa →
+                      </a>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2.5">
+                      <a
+                        href="#modulos"
+                        onClick={() => setOpenDropdown(null)}
+                        className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
+                      >
+                        <div className="w-9 h-9 bg-[#1F4E3D] text-white flex items-center justify-center shrink-0 mt-0.5">
+                          <Smartphone size={17} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-[#141413] group-hover:text-[#1F4E3D]">
+                              Cleaning App (Sin contraseñas)
+                            </span>
+                            <span className="font-mono text-[9px] uppercase font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-1.5 py-0.5">
+                              0 WhatsApps
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#57554F] font-normal leading-relaxed">
+                            Turnos automáticos por iCal, checklist por estancia y fotos en tiempo real para comprobar que todo está impecable.
                           </p>
                         </div>
-                        <ExternalLink size={14} className="text-[#C85A32] shrink-0" />
-                      </button>
+                      </a>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpenDropdown(null);
-                          onOpenCleanerDemo();
-                        }}
-                        className="w-full text-left p-3 bg-white border border-[#E2DDD2] hover:border-[#1F4E3D] transition flex items-center justify-between group"
+                      <a
+                        href="#modulos"
+                        onClick={() => setOpenDropdown(null)}
+                        className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
                       >
-                        <div>
-                          <p className="font-bold text-xs text-[#141413] group-hover:text-[#1F4E3D]">
-                            App Móvil de Limpiadora
-                          </p>
-                          <p className="text-[11px] text-[#57554F] font-normal">
-                            Turnos, checklist y subida de fotos
+                        <div className="w-9 h-9 bg-[#C85A32] text-white flex items-center justify-center shrink-0 mt-0.5">
+                          <Video size={17} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-[#141413] group-hover:text-[#C85A32]">
+                              Guest App · Mini-Web del Alojamiento
+                            </span>
+                            <span className="font-mono text-[9px] uppercase font-bold bg-[#C85A32]/10 text-[#C85A32] px-1.5 py-0.5">
+                              Envío por Link
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#57554F] font-normal leading-relaxed">
+                            Envíala antes de llegar con Vídeo Home Tour, check-in paso a paso en vídeo, guías de electrodomésticos y Late Check-out (+35 €).
                           </p>
                         </div>
-                        <ExternalLink size={14} className="text-[#1F4E3D] shrink-0" />
-                      </button>
+                      </a>
 
+                      <a
+                        href="#modulos"
+                        onClick={() => setOpenDropdown(null)}
+                        className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
+                      >
+                        <div className="w-9 h-9 bg-[#141413] text-white flex items-center justify-center shrink-0 mt-0.5">
+                          <FileSpreadsheet size={17} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-[#141413]">
+                              Facturación IVA 10% y Modelo 303
+                            </span>
+                            <span className="font-mono text-[9px] uppercase font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5">
+                              1 Clic Gestoría
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#57554F] font-normal leading-relaxed">
+                            Emite facturas simplificadas u ordinarias con IVA del 10% y exporta el Libro trimestral en Excel para tu gestor.
+                          </p>
+                        </div>
+                      </a>
+                    </div>
+
+                    <div className="bg-[#141413] text-[#F6F4EE] p-3 flex items-center justify-between text-xs">
+                      <span className="font-mono text-[11px] text-white/80">
+                        ⚡ Prueba el motor con tu enlace iCal real en 10 seg
+                      </span>
                       <a
                         href="#probar-ical"
                         onClick={() => setOpenDropdown(null)}
-                        className="block w-full text-left p-2.5 bg-[#141413] text-white font-mono text-[11px] font-bold uppercase text-center hover:bg-[#2C2C29] transition"
+                        className="font-mono text-[11px] uppercase font-bold text-[#C85A32] hover:underline shrink-0"
                       >
-                        ⚡ Probar con mi URL iCal real →
+                        Analizar mi iCal →
                       </a>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+            </div>
 
-              <a
-                href="#simulador"
-                className="px-3.5 py-2 text-[#57554F] hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
+            {/* Dropdown 2: Demos Interactivas en Vivo */}
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown('demos')}
+            >
+              <button
+                type="button"
+                onClick={() => setOpenDropdown(openDropdown === 'demos' ? null : 'demos')}
+                className={`px-3.5 py-2 flex items-center gap-2 font-semibold whitespace-nowrap transition ${
+                  openDropdown === 'demos'
+                    ? 'bg-[#141413] text-[#F6F4EE]'
+                    : 'text-[#141413] hover:bg-[#E8E4D9]/80'
+                }`}
               >
-                Cómo funciona
-              </a>
+                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse shrink-0" />
+                <span>Demos en vivo</span>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-150 shrink-0 ${
+                    openDropdown === 'demos' ? 'rotate-180 text-[#C85A32]' : 'text-[#57554F]'
+                  }`}
+                />
+              </button>
 
-              <a
-                href="#comparativa"
-                className="px-3.5 py-2 text-[#57554F] hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
-              >
-                Comparativa
-              </a>
+              {openDropdown === 'demos' && (
+                <div className="absolute left-0 top-full pt-2 w-80 z-50 whitespace-normal">
+                  <div className="bg-[#FAF9F5] border-2 border-[#141413] shadow-[8px_8px_0px_#141413] p-4 space-y-2.5">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold block px-1">
+                      INTERACTÚA SIN REGISTRARTE
+                    </span>
 
-              <a
-                href="#precios"
-                className="px-3.5 py-2 text-[#57554F] hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition flex items-center gap-1.5"
-              >
-                <span>Precios</span>
-                <span className="font-mono text-[9px] uppercase font-bold bg-[#1F4E3D]/15 text-[#1F4E3D] px-1.5 py-0.5">
-                  1 Gratis
-                </span>
-              </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpenDropdown(null);
+                        onOpenGuestDemo();
+                      }}
+                      className="w-full text-left p-3 bg-white border border-[#E2DDD2] hover:border-[#C85A32] transition flex items-center justify-between group"
+                    >
+                      <div>
+                        <p className="font-bold text-xs text-[#141413] group-hover:text-[#C85A32]">
+                          Mini-Web del Huésped
+                        </p>
+                        <p className="text-[11px] text-[#57554F] font-normal">
+                          Vídeo Home Tour, check-in y extras
+                        </p>
+                      </div>
+                      <ExternalLink size={14} className="text-[#C85A32] shrink-0" />
+                    </button>
 
-              <a
-                href="#faq"
-                className="px-3.5 py-2 text-[#57554F] hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
-              >
-                FAQ
-              </a>
-            </nav>
-          </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpenDropdown(null);
+                        onOpenCleanerDemo();
+                      }}
+                      className="w-full text-left p-3 bg-white border border-[#E2DDD2] hover:border-[#1F4E3D] transition flex items-center justify-between group"
+                    >
+                      <div>
+                        <p className="font-bold text-xs text-[#141413] group-hover:text-[#1F4E3D]">
+                          App Móvil de Limpiadora
+                        </p>
+                        <p className="text-[11px] text-[#57554F] font-normal">
+                          Turnos, checklist y subida de fotos
+                        </p>
+                      </div>
+                      <ExternalLink size={14} className="text-[#1F4E3D] shrink-0" />
+                    </button>
 
-          {/* Derecha: Acceso Clientes + CTA Principal + Toggle Móvil */}
-          <div className="flex items-center gap-2.5">
+                    <a
+                      href="#probar-ical"
+                      onClick={() => setOpenDropdown(null)}
+                      className="block w-full text-left p-2.5 bg-[#141413] text-white font-mono text-[11px] font-bold uppercase text-center hover:bg-[#2C2C29] transition"
+                    >
+                      ⚡ Probar con mi URL iCal real →
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <a
+              href="#simulador"
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+            >
+              Cómo funciona
+            </a>
+
+            <a
+              href="#comparativa"
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+            >
+              Comparativa
+            </a>
+
+            <a
+              href="#precios"
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+            >
+              Precios
+            </a>
+
+            <a
+              href="#faq"
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+            >
+              FAQ
+            </a>
+          </nav>
+
+          {/* Columna 3: Acceso Clientes + CTA Principal (1 sola línea sin saltos) */}
+          <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
             <button
               type="button"
               onClick={onNavigateToApp}
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider font-bold text-[#141413] hover:text-[#C85A32] px-3.5 py-2.5 border border-transparent hover:border-[#D5CFC0] transition"
+              className="hidden sm:inline-flex items-center text-sm font-semibold text-[#141413] hover:text-[#C85A32] px-3 py-2 transition whitespace-nowrap"
             >
-              <span>Iniciar sesión</span>
+              Iniciar sesión
             </button>
 
             <button
               type="button"
               onClick={onNavigateToApp}
-              className="bg-[#141413] hover:bg-[#C85A32] text-white text-xs font-mono font-bold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-[3px_3px_0px_#C85A32] hover:shadow-[3px_3px_0px_#141413]"
+              className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-bold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-xs whitespace-nowrap"
             >
-              <span>Empezar Gratis</span>
-              <ArrowUpRight size={15} />
+              <span>Probar 1 Alojamiento Gratis</span>
+              <ArrowUpRight size={15} className="shrink-0" />
             </button>
 
             {/* Botón Menú Móvil */}

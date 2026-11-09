@@ -36,24 +36,64 @@
     <meta name="twitter:description" content="Automatiza los cuadrantes de limpieza con iCal y fotos efímeras, manual digital para huéspedes por QR y genera facturas con IVA para tu gestoría en 1 clic." />
     <meta name="twitter:image" content="https://turnexo.vercel.app/og-image.png" />
 
-    <!-- Schema.org JSON-LD para Google Search -->
+    <!-- Schema.org JSON-LD para Google Search (SoftwareApplication + FAQPage) -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Turnexo",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web, iOS, Android",
-      "description": "Software de operaciones para alquiler vacacional: cuadrante automático de limpiezas por sincronización iCal y guía digital para huéspedes.",
-      "url": "https://turnexo.vercel.app/",
-      "offers": {
-        "@type": "AggregateOffer",
-        "priceCurrency": "EUR",
-        "lowPrice": "9",
-        "highPrice": "14",
-        "offerCount": "3"
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Turnexo",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, iOS, Android",
+        "description": "Software de operaciones para alquiler vacacional: Cleaning App con sincronización iCal y checklist con fotos de auditoría, Guest App con Vídeo Home Tour, check-in y electrodomésticos en vídeo, y facturación con IVA del 10% lista para el Modelo 303 de tu gestoría.",
+        "url": "https://turnexo.vercel.app/",
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "EUR",
+          "lowPrice": "0",
+          "highPrice": "39",
+          "offerCount": "3"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "¿Cómo se conecta Turnexo con mis anuncios de Airbnb y Booking?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sin contraseñas de tus cuentas. Solo copias el enlace público de exportación iCal (.ics) que te da Airbnb o Booking en la sección de calendarios y lo pegas en Turnexo. En 30 segundos todas tus reservas quedan sincronizadas automáticamente."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Mis limpiadoras necesitan descargarse una app de la App Store o crearse cuenta?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Cada limpiadora recibe un enlace seguro y directo por WhatsApp. Al abrirlo en el navegador de su teléfono ve su parte de trabajo del día, horas de check-in urgente, checklist en español y botón para tomar fotos de auditoría sin necesidad de usuario ni contraseña."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Cómo funcionan las facturas con IVA del 10% y el Modelo 303 para mi gestoría?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Desde cada reserva de Airbnb o Booking generas la factura simplificada u ordinaria con el 10% de IVA desglosado en 1 clic. Al final del trimestre, exportas el Libro Registro de Facturas Emitidas en Excel o CSV para que tu asesoría presente el Modelo 303 sin picar datos a mano."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Cómo funcionan los planes y tarifas? ¿Hay plan gratuito?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "El Plan Gratuito (Starter) incluye 1 alojamiento por 0 €/mes sin tarjeta de crédito. El Plan Pro Fiscal cuesta 19 €/mes en tarifa plana total para hasta 5 alojamientos (incluyendo facturación con IVA 10% y exportación para gestoría). El Plan Microgestora cuesta 39 €/mes para hasta 10 alojamientos."
+            }
+          }
+        ]
       }
-    }
+    ]
     </script>
 
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
@@ -76,7 +116,7 @@
             <a href="#probar-ical">Probar iCal</a>
             <a href="#modulos">Módulos</a>
             <a href="#comparativa">Comparativa</a>
-            <a href="#testimonios">Testimonios</a>
+            <a href="#garantias">Garantías</a>
             <a href="#precios">Tarifas</a>
             <a href="#faq">FAQ</a>
           </nav>

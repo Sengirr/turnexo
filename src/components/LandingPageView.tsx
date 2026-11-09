@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Sparkles,
   Flame,
-  Star,
   CheckCircle2,
   X,
   Smartphone,
@@ -134,8 +133,8 @@ export default function LandingPageView({
               <a href="#comparativa" className="hover:text-[#141413] transition">
                 Comparativa
               </a>
-              <a href="#testimonios" className="hover:text-[#141413] transition">
-                Testimonios
+              <a href="#garantias" className="hover:text-[#141413] transition">
+                Garantías
               </a>
               <a href="#precios" className="hover:text-[#141413] transition">
                 Tarifas
@@ -181,19 +180,30 @@ export default function LandingPageView({
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
-              Ahorra toda la comunicación con tu limpiadora comprobando con fotos de checklist que todo esté impecable antes de cada entrada. Guía a tus huéspedes con vídeo Home Tour, check-in paso a paso y vídeo-guías de electrodomésticos para eliminar llamadas a deshoras. Y emite tus facturas con IVA del 10% listas para tu gestor en 1 clic.
+              Turnexo se conecta al calendario de Airbnb y Booking y hace el trabajo repetitivo por ti:
             </p>
 
-            {/* Tarjeta de Solución Fiscal Positiva */}
-            <div className="bg-[#FAF9F5] border-l-4 border-emerald-600 p-4 rounded-r-xl space-y-1 text-xs">
-              <div className="flex items-center gap-1.5 font-bold text-emerald-950">
-                <ShieldCheck size={16} className="text-emerald-700 shrink-0" />
-                <span>Facturas con IVA 10% listas para tu gestor en 1 clic</span>
-              </div>
-              <p className="text-[#57554F] leading-relaxed">
-                Genera facturas oficiales de tus reservas con desglose automático de base imponible e IVA del 10%. Al final del trimestre, exporta el Libro de Facturas oficial en Excel listo para que tu gestoría presente el Modelo 303 en 2 minutos sin cálculos manuales.
-              </p>
-            </div>
+            {/* 3 beneficios escaneables (uno por producto) */}
+            <ul className="space-y-3 max-w-2xl text-sm sm:text-base">
+              <li className="flex items-start gap-3">
+                <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
+                <span className="text-[#141413]">
+                  <strong>Limpiezas sin WhatsApp:</strong> tu limpiadora ve sus turnos en el móvil y te envía fotos del checklist antes de cada entrada.
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
+                <span className="text-[#141413]">
+                  <strong>Huéspedes sin llamadas:</strong> manual QR con vídeo del piso, del check-in y de los electrodomésticos. Y vende Late Check-out.
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
+                <span className="text-[#141413]">
+                  <strong>Facturas con IVA en 1 clic:</strong> y el libro trimestral en Excel listo para que tu gestoría presente el Modelo 303.
+                </span>
+              </li>
+            </ul>
 
             <div className="space-y-4 pt-2">
               <div className="flex flex-wrap items-center gap-4">
@@ -642,7 +652,7 @@ export default function LandingPageView({
                   onClick={onNavigateToApp}
                   className="w-full sm:w-auto bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs font-bold uppercase tracking-wider px-6 py-3 flex items-center justify-center gap-2"
                 >
-                  <span>Crear mi Panel con este iCal (14 Días Gratis)</span>
+                  <span>Crear mi Panel con este iCal (Gratis)</span>
                   <ArrowUpRight size={14} />
                 </button>
               </div>
@@ -1157,7 +1167,7 @@ export default function LandingPageView({
                 <th className="py-4 px-5">Característica / Necesidad</th>
                 <th className="py-4 px-5 text-[#57554F]">Excel + Grupos WhatsApp</th>
                 <th className="py-4 px-5 text-[#57554F]">Software Tradicional en Inglés</th>
-                <th className="py-4 px-5 bg-[#141413] text-[#F6F4EE] font-bold">Turnexo (Módulo 1 + 2)</th>
+                <th className="py-4 px-5 bg-[#141413] text-[#F6F4EE] font-bold">Turnexo</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2DDD2]">
@@ -1300,103 +1310,188 @@ export default function LandingPageView({
         </div>
       </section>
 
-      {/* SECCIÓN DE PRUEBA SOCIAL Y TESTIMONIOS REALES */}
-      <section id="testimonios" className="bg-[#FAF9F5] border-b border-[#E2DDD2] py-24 px-6">
-        <div className="max-w-7xl mx-auto space-y-14">
+      {/* GARANTÍAS DE RIESGO CERO (CONFIANZA REAL Y TRANSPARENCIA TÉCNICA) */}
+      <section id="garantias" className="bg-[#FAF9F5] border-b border-[#E2DDD2] py-20 px-6">
+        <div className="max-w-7xl mx-auto space-y-10">
           <div className="text-center space-y-3 max-w-2xl mx-auto">
             <span className="font-mono text-xs uppercase tracking-widest text-[#1F4E3D] font-bold">
-              CASOS DE ÉXITO · ANFITRIONES EN ESPAÑA
+              PRUÉBALO SIN RIESGO
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
-              Superhosts y gestores que ya operan con Turnexo.
+              Empezar no te cuesta nada. Ni dinero, ni contraseñas, ni permanencia.
             </h2>
-            <p className="text-sm text-[#57554F]">
-              Historias reales de anfitriones que redujeron sus llamadas y aumentaron su ticket medio por reserva.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white border border-[#D5CFC0] p-7 flex flex-col justify-between space-y-6 shadow-sm">
-              <div className="space-y-4">
-                <div className="flex items-center gap-1 text-[#C85A32]">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={15} fill="currentColor" />
-                  ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                icon: ShieldCheck,
+                title: 'No pedimos tu contraseña de Airbnb',
+                desc: 'Solo el enlace público del calendario (iCal). Tu cuenta de Airbnb o Booking no se toca.',
+              },
+              {
+                icon: Check,
+                title: 'Sin tarjeta de crédito',
+                desc: 'El plan de 1 alojamiento es gratuito. Solo pagas si añades más pisos o activas facturación.',
+              },
+              {
+                icon: Clock,
+                title: 'Funcionando en 5 minutos',
+                desc: 'Pegas el iCal, rellenas WiFi y códigos, y ya tienes el enlace para tu limpiadora y el QR para el huésped.',
+              },
+              {
+                icon: FileSpreadsheet,
+                title: 'Tus datos son tuyos',
+                desc: 'Exporta reservas, limpiezas y facturas en CSV cuando quieras. Cancelas con un clic.',
+              },
+            ].map((g) => {
+              const Icon = g.icon;
+              return (
+                <div key={g.title} className="bg-white border border-[#D5CFC0] p-6 space-y-2 shadow-sm">
+                  <Icon size={20} className="text-[#1F4E3D]" />
+                  <h3 className="font-bold text-sm text-[#141413]">{g.title}</h3>
+                  <p className="text-xs text-[#57554F] leading-relaxed">{g.desc}</p>
                 </div>
-                <p className="text-sm text-[#141413] leading-relaxed font-normal">
-                  "Llevo 6 apartamentos turísticos en Málaga capital. Los domingos por la tarde eran una pesadilla cuadrando cambios de sábanas. Ahora cada limpiadora tiene su enlace fijado en el móvil y no me llaman ni una sola vez para preguntar qué piso toca."
-                </p>
-              </div>
-
-              <div className="border-t border-[#E2DDD2] pt-4 flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-xs text-[#141413]">Carlos M.</p>
-                  <p className="text-[11px] text-[#57554F]">Gestor de 6 pisos · Málaga</p>
-                </div>
-                <span className="font-mono text-[10px] uppercase bg-[#1F4E3D]/10 text-[#1F4E3D] font-bold px-2 py-0.5">
-                  Pack Completo
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-white border border-[#D5CFC0] p-7 flex flex-col justify-between space-y-6 shadow-sm">
-              <div className="space-y-4">
-                <div className="flex items-center gap-1 text-[#C85A32]">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={15} fill="currentColor" />
-                  ))}
-                </div>
-                <p className="text-sm text-[#141413] leading-relaxed font-normal">
-                  "Solo el mes pasado ingresamos 245 € extras vendiendo Late Check-outs desde la Guía Digital en el ático de Marbella. Antes el huésped nos lo pedía por chat a última hora y se lo dábamos gratis por compromiso. Ahora lo piden por la guía y pagan contentos."
-                </p>
-              </div>
-
-              <div className="border-t border-[#E2DDD2] pt-4 flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-xs text-[#141413]">Elena & Marcos</p>
-                  <p className="text-[11px] text-[#57554F]">Superhosts · Marbella</p>
-                </div>
-                <span className="font-mono text-[10px] uppercase bg-[#C85A32]/10 text-[#C85A32] font-bold px-2 py-0.5">
-                  +245€ / mes
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-white border border-[#D5CFC0] p-7 flex flex-col justify-between space-y-6 shadow-sm">
-              <div className="space-y-4">
-                <div className="flex items-center gap-1 text-[#C85A32]">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={15} fill="currentColor" />
-                  ))}
-                </div>
-                <p className="text-sm text-[#141413] leading-relaxed font-normal">
-                  "El vídeo de cómo abrir el cajetín de llaves y el WiFi en QR en el recibidor nos ha quitado el 90% de los mensajes de bienvenida de huéspedes extranjeros. La guía en inglés y francés hace que se sientan como en un hotel de 5 estrellas."
-                </p>
-              </div>
-
-              <div className="border-t border-[#E2DDD2] pt-4 flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-xs text-[#141413]">Javier S.</p>
-                  <p className="text-[11px] text-[#57554F]">Propietario · Madrid Centro</p>
-                </div>
-                <span className="font-mono text-[10px] uppercase bg-[#141413]/10 text-[#141413] font-bold px-2 py-0.5">
-                  Solo Guía
-                </span>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* CALCULADORA DE RETORNO Y PRECIOS CLAROS */}
+      {/* PRECIOS CLAROS: 3 PLANES DE TARIFA PLANA */}
+      <section id="precios" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
+        <div className="text-center space-y-3 max-w-2xl mx-auto mb-12">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
+            PRECIOS · TARIFA PLANA, NO POR PISO
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
+            Empieza gratis. Paga solo cuando crezcas.
+          </h2>
+          <p className="text-sm text-[#57554F]">
+            Un solo Late Check-out al mes (+35 €) ya cubre el plan Pro Fiscal completo.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+          {[
+            {
+              name: 'Starter',
+              units: '1 alojamiento',
+              price: '0 €',
+              note: '/mes',
+              summary:
+                'Plan gratuito para 1 alojamiento. Enlace móvil de limpiadora, Guía del huésped con cartel QR y retención de fotos a 7 días.',
+              highlight: false,
+              cta: 'Empezar gratis (Sin tarjeta)',
+              features: [
+                'Cleaning App con checklist por estancia y fotos',
+                'Guest App con Vídeo Home Tour y guías en vídeo',
+                'Venta automática de Late Check-out (+35 €)',
+                'Sincronización iCal con Airbnb y Booking',
+                'Fotos de auditoría guardadas 7 días',
+                'Sello discreto "Creado con Turnexo" en la guía',
+              ],
+            },
+            {
+              name: 'Pro Fiscal',
+              units: 'Hasta 5 alojamientos',
+              price: '19 €',
+              note: '/mes en total (tarifa plana)',
+              summary:
+                'Todo el control operativo + facturación con IVA del 10% y exportación trimestral en 1 clic para tu gestoría.',
+              highlight: true,
+              cta: 'Activar Plan Pro Fiscal',
+              features: [
+                'Todo lo incluido en Starter para hasta 5 pisos',
+                'Facturas simplificadas y completas con IVA 10% en 1 clic',
+                'Libro de IVA trimestral en Excel listo para Modelo 303',
+                'Historial fotográfico ilimitado ante reclamaciones',
+                'Guía del huésped 100% marca blanca (sin sello Turnexo)',
+              ],
+            },
+            {
+              name: 'Microgestora',
+              units: 'Hasta 10 alojamientos',
+              price: '39 €',
+              note: '/mes en total (tarifa plana)',
+              summary:
+                'Para gestores con varias limpiadoras y rotación frecuente que necesitan control de pagos y auditoría multi-equipo.',
+              highlight: false,
+              cta: 'Activar Plan Microgestora',
+              features: [
+                'Todo lo incluido en Pro Fiscal para hasta 10 pisos',
+                'Múltiples limpiadoras con asignación por apartamento',
+                'Control y liquidación mensual de pagos de limpieza',
+                'Soporte prioritario directo',
+              ],
+            },
+          ].map((plan) => (
+            <div
+              key={plan.name}
+              className={`p-8 flex flex-col justify-between space-y-6 ${
+                plan.highlight
+                  ? 'bg-[#141413] text-[#F6F4EE] border-2 border-[#141413] shadow-[8px_8px_0px_#C85A32]'
+                  : 'bg-[#FAF9F5] text-[#141413] border border-[#D5CFC0]'
+              }`}
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-extrabold">{plan.name}</h3>
+                  {plan.highlight && (
+                    <span className="font-mono text-[10px] uppercase font-bold bg-[#C85A32] text-white px-2 py-0.5">
+                      Más elegido
+                    </span>
+                  )}
+                </div>
+                <p className={`text-xs font-mono uppercase ${plan.highlight ? 'text-white/60' : 'text-[#57554F]'}`}>
+                  {plan.units}
+                </p>
+                <p className="font-mono">
+                  <span className="text-5xl font-extrabold">{plan.price}</span>{' '}
+                  <span className={`text-sm ${plan.highlight ? 'text-white/60' : 'text-[#57554F]'}`}>{plan.note}</span>
+                </p>
+                <p className={`text-xs leading-relaxed ${plan.highlight ? 'text-white/75' : 'text-[#57554F]'}`}>
+                  {plan.summary}
+                </p>
+                <ul className="space-y-2.5 text-xs sm:text-sm pt-2 border-t border-current/10">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <Check size={16} className={`shrink-0 mt-0.5 ${plan.highlight ? 'text-[#C85A32]' : 'text-[#1F4E3D]'}`} />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button
+                type="button"
+                onClick={onNavigateToApp}
+                className={`w-full font-mono uppercase tracking-wider font-bold text-xs py-4 transition flex items-center justify-center gap-2 ${
+                  plan.highlight
+                    ? 'bg-[#C85A32] hover:bg-[#B04A25] text-white shadow-md'
+                    : 'bg-[#141413] hover:bg-[#2C2C29] text-white'
+                }`}
+              >
+                <span>{plan.cta}</span>
+                <ArrowRight size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-center text-xs text-[#57554F] mt-8">
+          ¿Gestionas más de 10 alojamientos? Tarifa plana de 59 €/mes o configuración a medida desde tu panel.
+        </p>
+      </section>
+
+      {/* CALCULADORA INTERACTIVA DE RETORNO */}
       <section id="retorno" className="max-w-7xl mx-auto px-6 py-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center bg-[#141413] text-[#F6F4EE] p-8 sm:p-14">
           <div className="lg:col-span-7 space-y-6">
             <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32]">
-              Retorno de Inversión Inmediato
+              Calculadora de Retorno Inmediato
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight">
-              Con un solo Late Check-out al mes, Turnexo te sale gratis.
+              Calcula cuánto ganas en Late Check-outs y cuánto tiempo ahorras al mes.
             </h2>
             <p className="text-sm text-white/70 leading-relaxed max-w-xl">
               Cuando un huésped tiene su vuelo por la tarde y ve en la Guía Digital que su apartamento no tiene entradas ese día, solicita quedarse hasta las 17:00h sin dudarlo. Tú lo cobras directamente por Airbnb o Bizum sin intermediarios.
@@ -1436,7 +1531,7 @@ export default function LandingPageView({
             </div>
           </div>
 
-          <div id="precios" className="lg:col-span-5 bg-[#FAF9F5] text-[#141413] p-8 space-y-6 shadow-xl">
+          <div className="lg:col-span-5 bg-[#FAF9F5] text-[#141413] p-8 space-y-6 shadow-xl">
             <div className="border-b border-[#E2DDD2] pb-5 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-[#57554F] block">
@@ -1617,7 +1712,7 @@ export default function LandingPageView({
               </>
             )}
             <button type="button" onClick={onNavigateToApp} className="text-[#C85A32] font-bold hover:underline">
-              Panel /app
+              Acceder al Panel
             </button>
           </div>
         </div>

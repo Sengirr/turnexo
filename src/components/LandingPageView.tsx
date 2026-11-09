@@ -172,12 +172,12 @@ export default function LandingPageView({
           <div className="lg:col-span-7 space-y-8 pt-2">
             <div className="inline-flex items-center gap-2.5 border border-emerald-300 bg-emerald-50 px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider text-emerald-900 font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-              <span>Adaptado a la ley: IVA del 10% obligatorio en estancias &lt; 30 días</span>
+              <span>LISTO PARA EL NUEVO MARCO FISCAL: FACTURAS SIMPLIFICADAS Y MODELO 303</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.08] tracking-tight text-[#141413]">
-              Operativa de limpiezas, atención al huésped y facturas con IVA del 10%.{' '}
-              <span className="text-[#C85A32]">En automático.</span>
+              Controla tus limpiezas, manuales QR y facturas de IVA.{' '}
+              <span className="text-[#C85A32]">En piloto automático.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
@@ -202,55 +202,37 @@ export default function LandingPageView({
                   onClick={onNavigateToApp}
                   className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-sm sm:text-base font-bold px-7 py-4 transition flex items-center gap-2.5 shadow-md group"
                 >
-                  <span>Probar 1 Piso 100% Gratis (Sin tarjeta)</span>
+                  <span>Probar 1 Piso Gratis (Sin tarjeta)</span>
                   <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </button>
 
                 <button
                   type="button"
                   onClick={onOpenGuestDemo}
-                  className="border border-[#141413] bg-transparent hover:bg-[#141413] hover:text-[#F6F4EE] text-[#141413] text-sm font-semibold px-6 py-4 transition flex items-center gap-2"
+                  className="border-2 border-[#141413] bg-transparent hover:bg-[#141413] hover:text-[#F6F4EE] text-[#141413] text-sm sm:text-base font-bold px-6 py-4 transition flex items-center gap-2"
                 >
-                  <span>Ver Guía Digital del Huésped</span>
-                  <span className="font-mono text-xs opacity-60">(/g/...)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={onOpenCleanerDemo}
-                  className="text-xs font-mono uppercase tracking-wider underline underline-offset-4 text-[#57554F] hover:text-[#141413] px-2 py-2"
-                >
-                  Ver App Limpiadora (/c/...) →
+                  <span>Ver Demo en Vivo</span>
                 </button>
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-[#57554F]">
-                <span className="flex items-center gap-1.5 text-[#1F4E3D] font-bold">
-                  <Check size={14} /> 1 alojamiento Gratis de por vida
-                </span>
-                <span>·</span>
-                <span className="flex items-center gap-1.5">
-                  <Check size={14} className="text-[#1F4E3D]" /> Sin tarjeta de crédito
-                </span>
-                <span>·</span>
-                <span className="flex items-center gap-1.5">
-                  <Check size={14} className="text-[#1F4E3D]" /> Facturas IVA 10% en 1 clic
-                </span>
-              </div>
+              <p className="text-xs font-mono text-[#57554F] flex items-center gap-1.5 pt-1">
+                <span className="text-[#1F4E3D] font-bold">✓</span>
+                <span>Plan Gratuito para 1 alojamiento · Sin tarjeta de crédito ni compromiso</span>
+              </p>
             </div>
 
             <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[#E2DDD2] max-w-xl">
               <div>
-                <p className="font-mono text-2xl font-bold text-[#141413]">0 msgs</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Con tu limpiadora</p>
+                <p className="font-mono text-2xl font-bold text-[#141413]">60 seg</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Sincronización automática iCal</p>
               </div>
               <div>
-                <p className="font-mono text-2xl font-bold text-[#C85A32]">Vídeos</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Tour, Check-in y Guías</p>
+                <p className="font-mono text-2xl font-bold text-emerald-700">1 clic</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Exportación oficial para tu gestoría</p>
               </div>
               <div>
-                <p className="font-mono text-2xl font-bold text-emerald-700">10% IVA</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Facturas para tu gestor</p>
+                <p className="font-mono text-2xl font-bold text-[#1F4E3D]">100 %</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Guías personalizables</p>
               </div>
             </div>
           </div>
@@ -268,7 +250,7 @@ export default function LandingPageView({
                 }`}
               >
                 <Smartphone size={14} />
-                <span>Vista Limpiadora (/c/)</span>
+                <span>Vista Limpiadora</span>
               </button>
               <button
                 type="button"
@@ -280,7 +262,7 @@ export default function LandingPageView({
                 }`}
               >
                 <Sparkles size={14} />
-                <span>Vista Huésped (/g/)</span>
+                <span>Vista Huésped</span>
               </button>
             </div>
 
@@ -289,14 +271,14 @@ export default function LandingPageView({
                 <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-3">
                   <div>
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
-                      SIN CONTRASEÑAS · ACCESO DIRECTO MÓVIL (/c/)
+                      SIN CONTRASEÑAS · ACCESO DIRECTO MÓVIL
                     </span>
                     <h4 className="text-xl font-bold text-[#141413] mt-0.5">
                       Parte de María Carmen
                     </h4>
                   </div>
                   <span className="font-mono text-xs font-bold bg-[#1F4E3D] text-white px-2.5 py-1">
-                    80 € Acumulados
+                    2 de 3 Limpiezas completadas
                   </span>
                 </div>
 
@@ -349,7 +331,7 @@ export default function LandingPageView({
                 <div className="flex items-center justify-between border-b border-white/15 pb-3">
                   <div>
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                      PORTAL BOUTIQUE DEL HUÉSPED (/g/)
+                      PORTAL BOUTIQUE DEL HUÉSPED
                     </span>
                     <h3 className="text-xl font-bold mt-0.5">Ático Vista Marina</h3>
                   </div>
@@ -689,8 +671,8 @@ export default function LandingPageView({
             {(
               [
                 { step: 1, num: '01', title: 'Reserva iCal Recibida', desc: 'Airbnb / Booking' },
-                { step: 2, num: '02', title: 'Cuadrante Limpiadora', desc: 'Enlace móvil /c/' },
-                { step: 3, num: '03', title: 'Upsell Late Check-out', desc: 'Guía digital /g/' },
+                { step: 2, num: '02', title: 'Cuadrante Limpiadora', desc: 'Enlace móvil directo' },
+                { step: 3, num: '03', title: 'Upsell Late Check-out', desc: 'Guía digital QR' },
                 { step: 4, num: '04', title: 'Sincronización Total', desc: '+35€ y hora retrasada' },
               ] as const
             ).map((item) => (
@@ -965,7 +947,7 @@ export default function LandingPageView({
             <div className="space-y-5">
               <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-4">
                 <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
-                  MÓDULO 1 · GUEST APP BOUTIQUE (/g/)
+                  MÓDULO 1 · GUEST APP BOUTIQUE
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
                   1 Piso Gratis · Pro desde 19€/mes
@@ -1061,7 +1043,7 @@ export default function LandingPageView({
             <div className="space-y-5">
               <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-4">
                 <span className="font-mono text-xs uppercase tracking-widest text-[#57554F]">
-                  MÓDULO 2 · CLEANING APP SIN CONTRASEÑAS (/c/)
+                  MÓDULO 2 · CLEANING APP SIN CONTRASEÑAS
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
                   1 Piso Gratis · Pro desde 19€/mes
@@ -1205,7 +1187,7 @@ export default function LandingPageView({
                   Obliga a la limpiadora a crear cuenta y bajar app en inglés
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Enlace web único (/c/token) sin contraseñas
+                  ✓ Enlace web directo al móvil sin contraseñas
                 </td>
               </tr>
 
@@ -1540,7 +1522,7 @@ export default function LandingPageView({
               },
               {
                 q: '¿Mis limpiadoras necesitan descargarse una app de la App Store o crearse cuenta?',
-                a: 'No. Cada limpiadora recibe su enlace mágico único (por ejemplo /c/maria-7f9a) por WhatsApp. Al abrirlo en el navegador de su teléfono ven su parte de trabajo del día, horas de check-in urgente, checklist en español y botón para tomar fotos de auditoría sin necesidad de usuario ni contraseña.',
+                a: 'No. Cada limpiadora recibe un enlace seguro y directo por WhatsApp. Al abrirlo en el navegador de su teléfono ve su parte de trabajo del día, horas de check-in urgente, checklist en español y botón para tomar fotos de auditoría sin necesidad de usuario ni contraseña.',
               },
               {
                 q: '¿Cómo funciona la venta de Late Check-out y cobro de extras?',
@@ -1556,7 +1538,7 @@ export default function LandingPageView({
               },
               {
                 q: '¿Cómo compruebo que la limpiadora ha terminado y que el piso está limpio?',
-                a: 'Tu personal de limpieza accede con su enlace móvil único (/c/). Sigue el checklist de tareas de cada habitación y toma fotos obligatorias con la cámara de su móvil al terminar. Las fotos se sincronizan al instante en tu panel de anfitrión para que verifiques desde tu sofá que todo está impecable antes del siguiente check-in.',
+                a: 'Tu personal de limpieza accede con su enlace móvil directo. Sigue el checklist de tareas de cada habitación y toma fotos obligatorias con la cámara de su móvil al terminar. Las fotos se sincronizan al instante en tu panel de anfitrión para que verifiques desde tu sofá que todo está impecable antes del siguiente check-in.',
               },
               {
                 q: '¿Tengo permanencia o tengo que poner mi tarjeta de crédito para probar?',

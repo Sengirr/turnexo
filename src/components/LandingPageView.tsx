@@ -172,26 +172,26 @@ export default function LandingPageView({
           <div className="lg:col-span-7 space-y-8 pt-2">
             <div className="inline-flex items-center gap-2.5 border border-emerald-300 bg-emerald-50 px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider text-emerald-900 font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-              <span>Adaptado a la ley: IVA 10% obligatorio en estancias &lt; 30 días</span>
+              <span>Adaptado a la ley: IVA del 10% obligatorio en estancias &lt; 30 días</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.08] tracking-tight text-[#141413]">
-              Gestión simple para propietarios de menos de{' '}
-              <span className="text-[#C85A32]">10 apartamentos.</span>
+              Operativa de limpiezas, atención al huésped y facturas con IVA del 10%.{' '}
+              <span className="text-[#C85A32]">En automático.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
-              La plataforma diseñada para particulares y pequeñas gestoras que no quieren perder horas en WhatsApp ni pagar 100€ a un asesor. Automatiza los turnos de limpieza de tus anuncios de Airbnb y Booking, ofrece una Guía Digital personalizable a tus huéspedes y emite <strong>Facturas Simplificadas legales con IVA del 10% en 1 clic sin pedir DNI</strong>.
+              Elimina las llamadas a deshoras pidiendo el WiFi, evita retrasos en las entradas con tu limpiadora y cumple con la nueva normativa fiscal de estancias turísticas sin pagar gestorías caras. Todo sincronizado en tiempo real con tus calendarios de Airbnb, Booking y Vrbo.
             </p>
 
-            {/* Banner de Tranquilidad Fiscal */}
+            {/* Tarjeta de Solución Fiscal Positiva */}
             <div className="bg-[#FAF9F5] border-l-4 border-emerald-600 p-4 rounded-r-xl space-y-1 text-xs">
               <div className="flex items-center gap-1.5 font-bold text-emerald-950">
                 <ShieldCheck size={16} className="text-emerald-700 shrink-0" />
-                <span>Facturas Simplificadas &lt; 3.000 € y Modelo 303 de Hacienda</span>
+                <span>Facturación legal con IVA 10% y Modelo 303 en 1 clic</span>
               </div>
               <p className="text-[#57554F] leading-relaxed">
-                Cumple la nueva normativa de IVA del 10% sin perseguir a tus huéspedes por WhatsApp para pedirles el DNI (Art. 4.2.f RD 1619/2012). Descarga el Libro de IVA para tu gestoría con 1 botón.
+                Genera facturas oficiales de tus reservas con desglose automático de base imponible e IVA del 10%. Exporta el Libro de Facturas oficial listo para presentar a Hacienda o enviar a tu asesor contable.
               </p>
             </div>
 
@@ -242,15 +242,15 @@ export default function LandingPageView({
             <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[#E2DDD2] max-w-xl">
               <div>
                 <p className="font-mono text-2xl font-bold text-[#141413]">60 seg</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Conexión iCal sin configurar nada</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Sincronización automática iCal</p>
               </div>
               <div>
                 <p className="font-mono text-2xl font-bold text-emerald-700">10% IVA</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Facturas simplificadas &lt; 3.000€</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Facturas legales al instante</p>
               </div>
               <div>
                 <p className="font-mono text-2xl font-bold text-[#1F4E3D]">100 %</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Personalizable por propiedad</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Guías personalizables</p>
               </div>
             </div>
           </div>
@@ -385,6 +385,137 @@ export default function LandingPageView({
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN DE DOLORES REALES VS BENEFICIOS TURNEXO */}
+      <section className="max-w-7xl mx-auto px-6 py-20 border-b border-[#E2DDD2]">
+        <div className="max-w-3xl mx-auto text-center space-y-3 mb-14">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
+            PROBLEMAS REALES · SOLUCIÓN DEFINITIVA
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight leading-tight">
+            Los 3 dolores que quitan tiempo y dinero a los anfitriones... y cómo Turnexo los elimina.
+          </h2>
+          <p className="text-sm text-[#57554F] leading-relaxed">
+            Menos mensajes en WhatsApp, cero retrasos en entradas y cumplimiento fiscal automático con la nueva ley del IVA.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* DOLOR 1: LIMPIEZAS */}
+          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-5 flex flex-col justify-between shadow-sm">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 bg-[#141413] text-white flex items-center justify-center font-mono font-bold text-xs">
+                  01
+                </span>
+                <span className="font-mono text-[10px] uppercase font-bold text-[#C85A32] bg-[#C85A32]/10 px-2 py-0.5">
+                  OPERATIVA DE LIMPIEZA
+                </span>
+              </div>
+
+              {/* El dolor */}
+              <div className="p-3.5 bg-rose-50 border border-rose-200/80 rounded-xl space-y-1">
+                <span className="text-[10px] font-mono font-bold uppercase text-rose-700 block">
+                  ❌ El dolor diario
+                </span>
+                <p className="text-xs text-rose-950 font-medium leading-relaxed">
+                  Llamadas cruzadas a última hora, avisar de rotaciones urgentes y el miedo constante a que un huésped llegue a las 15:00h y el piso no esté listo.
+                </p>
+              </div>
+
+              {/* El beneficio */}
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-xl space-y-1">
+                <span className="text-[10px] font-mono font-bold uppercase text-emerald-800 block">
+                  ✓ La solución Turnexo
+                </span>
+                <p className="text-xs text-emerald-950 font-medium leading-relaxed">
+                  Sincronización automática por iCal con Airbnb y Booking. Tu limpiadora ve su cuadrante en su móvil sin contraseñas, con alerta de rotación urgente y fotos obligatorias.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-[#E2DDD2] font-mono text-[11px] text-[#1F4E3D] font-bold">
+              → Ahorro estimado: ~5 horas a la semana
+            </div>
+          </div>
+
+          {/* DOLOR 2: ATENCIÓN AL HUÉSPED */}
+          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-5 flex flex-col justify-between shadow-sm">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 bg-[#141413] text-white flex items-center justify-center font-mono font-bold text-xs">
+                  02
+                </span>
+                <span className="font-mono text-[10px] uppercase font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5">
+                  ATENCIÓN AL HUÉSPED
+                </span>
+              </div>
+
+              {/* El dolor */}
+              <div className="p-3.5 bg-rose-50 border border-rose-200/80 rounded-xl space-y-1">
+                <span className="text-[10px] font-mono font-bold uppercase text-rose-700 block">
+                  ❌ El dolor diario
+                </span>
+                <p className="text-xs text-rose-950 font-medium leading-relaxed">
+                  Repetir 50 veces por WhatsApp la clave del WiFi, cómo abrir el portal o cómo funciona el aire acondicionado, incluso a medianoche.
+                </p>
+              </div>
+
+              {/* El beneficio */}
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-xl space-y-1">
+                <span className="text-[10px] font-mono font-bold uppercase text-emerald-800 block">
+                  ✓ La solución Turnexo
+                </span>
+                <p className="text-xs text-emerald-950 font-medium leading-relaxed">
+                  Guía Digital boutique personalizada: vídeos paso a paso de entrada, WiFi con 1 toque y venta automática de Late Check-out directa a tu cuenta (0% comisión).
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-[#E2DDD2] font-mono text-[11px] text-[#1F4E3D] font-bold">
+              → Ingresos extra: +35 € a +70 € por reserva
+            </div>
+          </div>
+
+          {/* DOLOR 3: FACTURACIÓN & IVA 10% */}
+          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-5 flex flex-col justify-between shadow-sm">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 bg-[#141413] text-white flex items-center justify-center font-mono font-bold text-xs">
+                  03
+                </span>
+                <span className="font-mono text-[10px] uppercase font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5">
+                  NUEVA LEY IVA 10%
+                </span>
+              </div>
+
+              {/* El dolor */}
+              <div className="p-3.5 bg-rose-50 border border-rose-200/80 rounded-xl space-y-1">
+                <span className="text-[10px] font-mono font-bold uppercase text-rose-700 block">
+                  ❌ El dolor diario
+                </span>
+                <p className="text-xs text-rose-950 font-medium leading-relaxed">
+                  La nueva obligación de liquidar el 10% de IVA en estancias cortas. Hacer facturas a mano en Word es lento y contratar un software o gestor cuesta hasta 100€/mes.
+                </p>
+              </div>
+
+              {/* El beneficio */}
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-xl space-y-1">
+                <span className="text-[10px] font-mono font-bold uppercase text-emerald-800 block">
+                  ✓ La solución Turnexo
+                </span>
+                <p className="text-xs text-emerald-950 font-medium leading-relaxed">
+                  Emite facturas oficiales con desglose legal del 10% de IVA en 1 clic desde tu calendario. Descarga el Libro de IVA listo para el Modelo 303 de Hacienda con un botón.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-[#E2DDD2] font-mono text-[11px] text-[#1F4E3D] font-bold">
+              → Tranquilidad fiscal y 0 € en gestores caros
+            </div>
           </div>
         </div>
       </section>
@@ -1065,6 +1196,21 @@ export default function LandingPageView({
 
               <tr className="hover:bg-white transition">
                 <td className="py-4 px-5 font-bold text-[#141413]">
+                  Facturación IVA 10% y Modelo 303 Hacienda
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Facturas a mano en Word/Excel o pagar 80€/mes a gestoría
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Módulos ERP complejos que requieren parametrización costosa
+                </td>
+                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
+                  ✓ Facturas oficiales en 1 clic y descarga para Modelo 303
+                </td>
+              </tr>
+
+              <tr className="hover:bg-white transition">
+                <td className="py-4 px-5 font-bold text-[#141413]">
                   Coste mensual
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
@@ -1074,7 +1220,7 @@ export default function LandingPageView({
                   30 € a 60 € / mes
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#C85A32]">
-                  1 piso Gratis · Hasta 4 pisos: 29 €/mes (tarifa plana)
+                  1 piso 100% Gratis · Hasta 5 pisos: 19 €/mes (tarifa plana)
                 </td>
               </tr>
             </tbody>

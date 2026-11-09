@@ -41,15 +41,14 @@ export default function LandingPageView({
   onOpenCleanerDemo,
   onOpenLegal,
 }: Props) {
-  const [units, setUnits] = useState(5);
+  const [units, setUnits] = useState(3);
   const [upsellAvg, setUpsellAvg] = useState(35);
   const monthlyGain = units * 2 * upsellAvg;
   // Tramos cerrados (Tarifa plana por volumen)
   const getFlatPlanCost = (numUnits: number) => {
     if (numUnits <= 1) return 0;
-    if (numUnits <= 4) return 29;
-    if (numUnits <= 8) return 49;
-    return 89;
+    if (numUnits <= 5) return 19;
+    return 39;
   };
   const platformCost = getFlatPlanCost(units);
   const netProfit = monthlyGain - platformCost;
@@ -171,19 +170,30 @@ export default function LandingPageView({
       <section className="max-w-7xl mx-auto px-6 pt-16 pb-24 border-b border-[#E2DDD2]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-7 space-y-8 pt-2">
-            <div className="inline-flex items-center gap-2.5 border border-[#D5CFC0] bg-[#FAF9F5] px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider text-[#57554F]">
-              <span className="w-2 h-2 rounded-full bg-[#1F4E3D]" />
-              <span>Compatible con Airbnb · Booking.com · Vrbo (.ics)</span>
+            <div className="inline-flex items-center gap-2.5 border border-emerald-300 bg-emerald-50 px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider text-emerald-900 font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+              <span>Adaptado a la ley: IVA 10% obligatorio en estancias &lt; 30 días</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.08] tracking-tight text-[#141413]">
-              Operativa de limpiezas y experiencia del huésped,{' '}
-              <span className="text-[#C85A32]">en sincronía.</span>
+              Gestión simple para propietarios de menos de{' '}
+              <span className="text-[#C85A32]">10 apartamentos.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
-              Dos herramientas especializadas para anfitriones y gestores que no quieren perder tiempo en WhatsApp. Conecta el enlace iCal de tus anuncios para automatizar los turnos de tu personal de limpieza y ofrece una Guía Digital a medida con vídeos del alojamiento y venta de Late Check-out.
+              La plataforma diseñada para particulares y pequeñas gestoras que no quieren perder horas en WhatsApp ni pagar 100€ a un asesor. Automatiza los turnos de limpieza de tus anuncios de Airbnb y Booking, ofrece una Guía Digital personalizable a tus huéspedes y emite <strong>Facturas Simplificadas legales con IVA del 10% en 1 clic sin pedir DNI</strong>.
             </p>
+
+            {/* Banner de Tranquilidad Fiscal */}
+            <div className="bg-[#FAF9F5] border-l-4 border-emerald-600 p-4 rounded-r-xl space-y-1 text-xs">
+              <div className="flex items-center gap-1.5 font-bold text-emerald-950">
+                <ShieldCheck size={16} className="text-emerald-700 shrink-0" />
+                <span>Facturas Simplificadas &lt; 3.000 € y Modelo 303 de Hacienda</span>
+              </div>
+              <p className="text-[#57554F] leading-relaxed">
+                Cumple la nueva normativa de IVA del 10% sin perseguir a tus huéspedes por WhatsApp para pedirles el DNI (Art. 4.2.f RD 1619/2012). Descarga el Libro de IVA para tu gestoría con 1 botón.
+              </p>
+            </div>
 
             <div className="space-y-4 pt-2">
               <div className="flex flex-wrap items-center gap-4">
@@ -192,7 +202,7 @@ export default function LandingPageView({
                   onClick={onNavigateToApp}
                   className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-sm sm:text-base font-bold px-7 py-4 transition flex items-center gap-2.5 shadow-md group"
                 >
-                  <span>Crear mi primer manual gratis (Sin tarjeta)</span>
+                  <span>Probar 1 Piso 100% Gratis (Sin tarjeta)</span>
                   <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </button>
 
@@ -201,7 +211,7 @@ export default function LandingPageView({
                   onClick={onOpenGuestDemo}
                   className="border border-[#141413] bg-transparent hover:bg-[#141413] hover:text-[#F6F4EE] text-[#141413] text-sm font-semibold px-6 py-4 transition flex items-center gap-2"
                 >
-                  <span>Ver Guía Digital en Vivo</span>
+                  <span>Ver Guía Digital del Huésped</span>
                   <span className="font-mono text-xs opacity-60">(/g/...)</span>
                 </button>
 
@@ -210,7 +220,7 @@ export default function LandingPageView({
                   onClick={onOpenCleanerDemo}
                   className="text-xs font-mono uppercase tracking-wider underline underline-offset-4 text-[#57554F] hover:text-[#141413] px-2 py-2"
                 >
-                  Ver Vista Limpiadora (/c/...) →
+                  Ver App Limpiadora (/c/...) →
                 </button>
               </div>
 
@@ -224,7 +234,7 @@ export default function LandingPageView({
                 </span>
                 <span>·</span>
                 <span className="flex items-center gap-1.5">
-                  <Check size={14} className="text-[#1F4E3D]" /> Listo en 60 segundos
+                  <Check size={14} className="text-[#1F4E3D]" /> Facturas IVA 10% en 1 clic
                 </span>
               </div>
             </div>
@@ -232,11 +242,11 @@ export default function LandingPageView({
             <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[#E2DDD2] max-w-xl">
               <div>
                 <p className="font-mono text-2xl font-bold text-[#141413]">60 seg</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Puesta en marcha vía URL .ics</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Conexión iCal sin configurar nada</p>
               </div>
               <div>
-                <p className="font-mono text-2xl font-bold text-[#141413]">0 %</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Comisión sobre tus extras vendidos</p>
+                <p className="font-mono text-2xl font-bold text-emerald-700">10% IVA</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Facturas simplificadas &lt; 3.000€</p>
               </div>
               <div>
                 <p className="font-mono text-2xl font-bold text-[#1F4E3D]">100 %</p>
@@ -1248,17 +1258,17 @@ export default function LandingPageView({
                 <span className="font-semibold">1 Alojamiento</span>
                 <span className="font-mono font-bold text-[#1F4E3D]">0 € Gratis de por vida</span>
               </div>
-              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units >= 2 && units <= 4 ? 'bg-[#C85A32]/10 font-bold' : ''}`}>
-                <span className="font-semibold text-[#141413]">Hasta 4 Alojamientos</span>
-                <span className="font-mono font-bold">29 € / mes (tarifa plana total)</span>
+              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units >= 2 && units <= 5 ? 'bg-emerald-500/10 font-bold' : ''}`}>
+                <span className="font-semibold text-[#141413]">Hasta 5 Alojamientos (Pro Fiscal)</span>
+                <span className="font-mono font-bold text-emerald-800">19 € / mes (tarifa plana total)</span>
               </div>
-              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units >= 5 && units <= 8 ? 'bg-[#C85A32]/10 font-bold' : ''}`}>
-                <span className="font-semibold text-[#C85A32]">Hasta 8 Alojamientos (Superhosts)</span>
-                <span className="font-mono font-bold text-[#C85A32]">49 € / mes (tarifa plana total)</span>
+              <div className={`flex justify-between py-2 border-b border-[#E2DDD2] px-2 ${units >= 6 && units <= 10 ? 'bg-[#C85A32]/10 font-bold' : ''}`}>
+                <span className="font-semibold text-[#C85A32]">Hasta 10 Alojamientos (Microgestoras)</span>
+                <span className="font-mono font-bold text-[#C85A32]">39 € / mes (tarifa plana total)</span>
               </div>
-              <div className={`flex justify-between py-2 px-2 ${units > 8 ? 'bg-[#141413]/10 font-bold' : ''}`}>
-                <span className="font-semibold text-[#57554F]">Más de 8 Alojamientos (Gestores Pro)</span>
-                <span className="font-mono font-bold text-[#57554F]">89 € / mes (tarifa plana total)</span>
+              <div className={`flex justify-between py-2 px-2 ${units > 10 ? 'bg-[#141413]/10 font-bold' : ''}`}>
+                <span className="font-semibold text-[#57554F]">Más de 10 Alojamientos</span>
+                <span className="font-mono font-bold text-[#57554F]">59 € / mes (tarifa plana total)</span>
               </div>
             </div>
 

@@ -8,6 +8,7 @@ import {
   Plus,
   Trash2,
   Save,
+  ExternalLink,
 } from 'lucide-react';
 import { Cleaner, Property, PropertyExtra, PropertyVideo } from '../lib/icalParser';
 
@@ -804,18 +805,28 @@ export default function PropertyCustomizerModal({
 
         {/* Pie de guardado */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4 shrink-0">
-          {onDelete ? (
-            <button
-              type="button"
-              onClick={() => onDelete(draft.id)}
-              className="px-3.5 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-1.5"
+          <div className="flex items-center gap-2">
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(draft.id)}
+                className="px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-1.5"
+              >
+                <Trash2 size={14} />
+                <span>Eliminar</span>
+              </button>
+            )}
+            <a
+              href={`/g/${draft.slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition"
             >
-              <Trash2 size={14} />
-              Eliminar Propiedad
-            </button>
-          ) : (
-            <div />
-          )}
+              <ExternalLink size={13} />
+              <span>Ver Guía Huésped en Vivo</span>
+            </a>
+          </div>
+
           <div className="flex items-center gap-2">
             <button
               type="button"

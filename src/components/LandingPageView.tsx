@@ -33,6 +33,7 @@ interface Props {
   onOpenGuestDemo: () => void;
   onOpenCleanerDemo: () => void;
   onOpenLegal?: (tab?: 'privacy' | 'terms' | 'legal') => void;
+  onOpenAdmin?: () => void;
 }
 
 export default function LandingPageView({
@@ -40,6 +41,7 @@ export default function LandingPageView({
   onOpenGuestDemo,
   onOpenCleanerDemo,
   onOpenLegal,
+  onOpenAdmin,
 }: Props) {
   const [units, setUnits] = useState(5);
   const [upsellAvg, setUpsellAvg] = useState(35);
@@ -1383,6 +1385,16 @@ export default function LandingPageView({
             <button type="button" onClick={onNavigateToApp} className="text-[#C85A32] font-bold hover:underline">
               Panel /app
             </button>
+            {onOpenAdmin && (
+              <button
+                type="button"
+                onClick={onOpenAdmin}
+                className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-400 hover:text-emerald-300 font-bold border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Panel Fundador</span>
+              </button>
+            )}
           </div>
         </div>
         <p className="text-center font-mono text-[10px] text-white/35 mt-8">

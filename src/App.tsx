@@ -14,11 +14,18 @@ import {
   INITIAL_PROPERTIES,
   INITIAL_RESERVATIONS,
 } from './lib/mockData';
+import {
+  DEFAULT_HOST_FISCAL_PROFILE,
+  HostFiscalProfile,
+  INITIAL_INVOICES,
+  Invoice,
+} from './lib/invoice';
 import HostDashboardView from './components/HostDashboardView';
 import CleanerMagicView from './components/CleanerMagicView';
 import GuestGuidePortalView from './components/GuestGuidePortalView';
 import LandingPageView from './components/LandingPageView';
 import AuthOnboardingView from './components/AuthOnboardingView';
+import AdminMetricsView from './components/AdminMetricsView';
 import LegalModal from './components/LegalModal';
 import CookieBanner from './components/CookieBanner';
 import {
@@ -38,6 +45,7 @@ import {
 type RouteState =
   | { kind: 'landing' }
   | { kind: 'app' }
+  | { kind: 'admin' }
   | { kind: 'cleaner'; token: string; fromApp?: boolean }
   | { kind: 'guest'; slug: string; fromApp?: boolean };
 
@@ -47,6 +55,8 @@ const STORAGE_KEYS = {
   cleaners: 'turnexo_cleaners_v2',
   reservations: 'turnexo_reservations_v2',
   taskOverrides: 'turnexo_tasks_v2',
+  invoices: 'turnexo_invoices_v2',
+  fiscalProfile: 'turnexo_fiscal_profile_v2',
 };
 
 function loadStored<T>(key: string, fallback: T): T {
@@ -62,6 +72,9 @@ function parseCurrentLocation(): RouteState {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
 
+  if (path.startsWith('/admin') || params.get('admin') !== null) {
+    return { kind: 'admin' };
+  }
   if (path.startsWith('/c/')) {
     return { kind: 'cleaner', token: path.replace('/c/', '').trim() };
   }
@@ -97,6 +110,12 @@ export default function App() {
   );
   const [taskOverrides, setTaskOverrides] = useState<CleaningTask[]>(() =>
     loadStored(STORAGE_KEYS.taskOverrides, [])
+  );
+  const [invoices, setInvoices] = useState<Invoice[]>(() =>
+    loadStored(STORAGE_KEYS.invoices, INITIAL_INVOICES)
+  );
+  const [fiscalProfile, setFiscalProfile] = useState<HostFiscalProfile>(() =>
+    loadStored(STORAGE_KEYS.fiscalProfile, DEFAULT_HOST_FISCAL_PROFILE)
   );
 
   const [selectedCleanerId, setSelectedCleanerId] = useState<string>(INITIAL_CLEANERS[0].id);
@@ -164,6 +183,24 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.taskOverrides, JSON.stringify(taskOverrides));
   }, [taskOverrides]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.invoices, JSON.stringify(invoices));
+  }, [invoices]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.fiscalProfile, JSON.stringify(fiscalProfile));
+  }, [fiscalProfile]);
+
+  const handleAddInvoice = (newInvoice: Invoice) => {
+    setInvoices((prev) => [newInvoice, ...prev]);
+    showToast(`Factura ${newInvoice.invoiceNumber} emitida correctamente.`);
+  };
+
+  const handleUpdateFiscalProfile = (updatedProfile: HostFiscalProfile) => {
+    setFiscalProfile(updatedProfile);
+    showToast('Datos fiscales actualizados.');
+  };
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -469,6 +506,7 @@ export default function App() {
             });
           }}
           onOpenLegal={(tab = 'privacy') => setLegalModalTab(tab)}
+          onOpenAdmin={() => navigate('/admin', { kind: 'admin' })}
         />
       )}
 
@@ -495,6 +533,10 @@ export default function App() {
           cleaners={cleaners}
           reservations={reservations}
           tasks={tasks}
+          invoices={invoices}
+          fiscalProfile={fiscalProfile}
+          onAddInvoice={handleAddInvoice}
+          onUpdateFiscalProfile={handleUpdateFiscalProfile}
           onImportIcalText={handleImportIcalText}
           onSyncIcalUrl={handleSyncIcalUrl}
           onAssignCleaner={handleAssignCleaner}
@@ -530,6 +572,7 @@ export default function App() {
           onDeleteCleaner={handleDeleteCleaner}
           onBackToLanding={() => navigate('/', { kind: 'landing' })}
           onResetDemo={handleResetDemo}
+          onOpenAdmin={() => navigate('/admin', { kind: 'admin' })}
         />
       )}
 
@@ -576,6 +619,13 @@ export default function App() {
           onUpdateReservation={handleUpdateReservation}
           onReportGuestIncident={handleReportGuestIncident}
           onBackToApp={() => navigate('/app', { kind: 'app' })}
+        />
+      )}
+
+      {route.kind === 'admin' && (
+        <AdminMetricsView
+          onBackToApp={() => navigate('/app', { kind: 'app' })}
+          onBackToLanding={() => navigate('/', { kind: 'landing' })}
         />
       )}
 

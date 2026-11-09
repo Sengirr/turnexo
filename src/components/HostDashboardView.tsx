@@ -35,7 +35,18 @@ import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
 import { HostAccount, isSupabaseConfigured, STRIPE_PAYMENT_LINKS } from '../lib/supabase';
 import PrintableQrPosterModal from './PrintableQrPosterModal';
 import PropertyCustomizerModal from './PropertyCustomizerModal';
-import { CreditCard, ShieldCheck, UserCheck } from 'lucide-react';
+import InvoicePrintModal from './InvoicePrintModal';
+import CreateInvoiceModal from './CreateInvoiceModal';
+import FiscalProfileModal from './FiscalProfileModal';
+import { CreditCard, ShieldCheck, UserCheck, FileText, Building2 } from 'lucide-react';
+import {
+  computeQuarterSummaries,
+  DEFAULT_HOST_FISCAL_PROFILE,
+  exportInvoicesToCsv,
+  HostFiscalProfile,
+  INITIAL_INVOICES,
+  Invoice,
+} from '../lib/invoice';
 
 interface Props {
   hostAccount?: HostAccount | null;
@@ -46,6 +57,10 @@ interface Props {
   cleaners: Cleaner[];
   reservations: Reservation[];
   tasks: CleaningTask[];
+  invoices?: Invoice[];
+  fiscalProfile?: HostFiscalProfile;
+  onAddInvoice?: (inv: Invoice) => void;
+  onUpdateFiscalProfile?: (prof: HostFiscalProfile) => void;
   onImportIcalText: (propertyId: string, icsText: string) => void;
   onSyncIcalUrl: (propertyId: string, url: string) => Promise<void>;
   onAssignCleaner: (taskId: string, cleanerId: string) => void;
@@ -60,9 +75,10 @@ interface Props {
   onDeleteCleaner?: (id: string) => void;
   onBackToLanding: () => void;
   onResetDemo: () => void;
+  onOpenAdmin?: () => void;
 }
 
-type BackofficeSection = 'overview' | 'schedule' | 'guests' | 'team' | 'billing';
+type BackofficeSection = 'overview' | 'schedule' | 'guests' | 'invoices' | 'team' | 'billing';
 
 export default function HostDashboardView({
   hostAccount,
@@ -73,6 +89,10 @@ export default function HostDashboardView({
   cleaners,
   reservations,
   tasks,
+  invoices,
+  fiscalProfile,
+  onAddInvoice,
+  onUpdateFiscalProfile,
   onImportIcalText,
   onSyncIcalUrl,
   onAssignCleaner,
@@ -87,8 +107,9 @@ export default function HostDashboardView({
   onDeleteCleaner,
   onBackToLanding,
   onResetDemo,
+  onOpenAdmin,
 }: Props) {
-  const [section, setSection] = useState<BackofficeSection>('overview');
+  const [section, setSection] = useState<BackofficeSection>('schedule');
   const [newCleanerName, setNewCleanerName] = useState('');
   const [newCleanerPhone, setNewCleanerPhone] = useState('+34 ');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -100,6 +121,21 @@ export default function HostDashboardView({
   const [showNewPropModal, setShowNewPropModal] = useState(false);
   const [qrModalProperty, setQrModalProperty] = useState<Property | null>(null);
   const [customizingProperty, setCustomizingProperty] = useState<Property | null>(null);
+
+  // Estados de Facturación & IVA 10%
+  const currentMonth = new Date().getMonth() + 1;
+  const initialQ: '1T' | '2T' | '3T' | '4T' =
+    currentMonth <= 3 ? '1T' : currentMonth <= 6 ? '2T' : currentMonth <= 9 ? '3T' : '4T';
+  const [selectedQuarter, setSelectedQuarter] = useState<'1T' | '2T' | '3T' | '4T'>(initialQ);
+  const [selectedInvoiceForPrint, setSelectedInvoiceForPrint] = useState<Invoice | null>(null);
+  const [showCreateInvoiceModal, setShowCreateInvoiceModal] = useState(false);
+  const [preselectedResIdForInvoice, setPreselectedResIdForInvoice] = useState<string | undefined>(undefined);
+  const [showFiscalProfileModal, setShowFiscalProfileModal] = useState(false);
+  const [invoiceSearch, setInvoiceSearch] = useState('');
+  const [invoicePropertyFilter, setInvoicePropertyFilter] = useState('all');
+
+  const allInvoices = invoices || INITIAL_INVOICES;
+  const currentFiscalProfile = fiscalProfile || DEFAULT_HOST_FISCAL_PROFILE;
 
   const [newPropName, setNewPropName] = useState('');
   const [newPropAddress, setNewPropAddress] = useState('');
@@ -341,11 +377,12 @@ export default function HostDashboardView({
           <nav className="space-y-1">
             {(
               [
-                { id: 'overview', label: 'Propiedades & Guías', icon: Home },
-                { id: 'schedule', label: 'Cuadrante Salidas iCal', icon: Calendar },
-                { id: 'guests', label: 'Llegadas & Extras Huésped', icon: UserCheck },
+                { id: 'schedule', label: 'Limpiezas & Salidas', icon: Calendar },
+                { id: 'guests', label: 'Guía del Huésped', icon: UserCheck },
+                { id: 'invoices', label: 'Facturas & IVA 10%', icon: FileText, badge: 'IVA 10%' },
+                { id: 'overview', label: 'Mis Alojamientos', icon: Home },
                 { id: 'team', label: 'Equipo de Limpieza', icon: Users },
-                { id: 'billing', label: 'Facturación & Módulos', icon: CreditCard },
+                { id: 'billing', label: 'Plan & Suscripción', icon: CreditCard },
               ] as const
             ).map((item) => {
               const Icon = item.icon;
@@ -355,14 +392,21 @@ export default function HostDashboardView({
                   key={item.id}
                   type="button"
                   onClick={() => setSection(item.id)}
-                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold flex items-center gap-3 transition ${
+                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold flex items-center justify-between transition ${
                     active
                       ? 'bg-[#C85A32] text-white'
                       : 'text-white/65 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <Icon size={15} />
-                  <span>{item.label}</span>
+                  <div className="flex items-center gap-3">
+                    <Icon size={15} />
+                    <span>{item.label}</span>
+                  </div>
+                  {'badge' in item && (
+                    <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-slate-950 px-1.5 py-0.5 rounded font-mono">
+                      {item.badge}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -372,6 +416,17 @@ export default function HostDashboardView({
             <p className="font-mono text-[10px] uppercase tracking-wider text-white/40">
               ACCIONES RÁPIDAS
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                setPreselectedResIdForInvoice(undefined);
+                setShowCreateInvoiceModal(true);
+              }}
+              className="w-full text-left px-3 py-2 text-xs font-mono text-emerald-300 hover:text-white bg-emerald-950/40 border border-emerald-800/40 hover:bg-emerald-900/60 flex items-center gap-2 transition"
+            >
+              <FileText size={13} className="text-emerald-400" />
+              <span>+ Emitir Factura 10%</span>
+            </button>
             <button
               type="button"
               onClick={() => setShowIcalModal(true)}
@@ -421,6 +476,22 @@ export default function HostDashboardView({
                 </div>
               )}
             </div>
+          )}
+
+          {onOpenAdmin && (
+            <button
+              type="button"
+              onClick={onOpenAdmin}
+              className="w-full text-left px-3 py-2 text-xs font-mono font-bold bg-[#C85A32]/20 hover:bg-[#C85A32]/30 text-[#C85A32] hover:text-white border border-[#C85A32]/40 flex items-center justify-between transition"
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Panel Fundador</span>
+              </div>
+              <span className="text-[9px] uppercase tracking-wider bg-[#C85A32] text-white px-1.5 py-0.2 rounded">
+                KPIs
+              </span>
+            </button>
           )}
 
           <div className="flex items-center justify-between">
@@ -904,15 +975,29 @@ export default function HostDashboardView({
                             )}
                           </td>
                           <td className="py-4 px-4 text-right">
-                            <button
-                              type="button"
-                              onClick={() => sendTaskWhatsApp(task)}
-                              title="Enviar detalles del turno por WhatsApp al limpiador"
-                              className="inline-flex items-center gap-1 bg-[#1F4E3D] hover:bg-[#163A2D] text-white px-2.5 py-1 font-mono text-[10px] font-bold uppercase transition"
-                            >
-                              <Send size={11} />
-                              <span>WhatsApp</span>
-                            </button>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPreselectedResIdForInvoice(task.reservationId);
+                                  setShowCreateInvoiceModal(true);
+                                }}
+                                title="Emitir Factura Simplificada con IVA 10%"
+                                className="inline-flex items-center gap-1 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-2 py-1 font-mono text-[10px] font-bold uppercase transition"
+                              >
+                                <FileText size={11} className="text-emerald-600" />
+                                <span>Factura 10%</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => sendTaskWhatsApp(task)}
+                                title="Enviar detalles del turno por WhatsApp al limpiador"
+                                className="inline-flex items-center gap-1 bg-[#1F4E3D] hover:bg-[#163A2D] text-white px-2.5 py-1 font-mono text-[10px] font-bold uppercase transition"
+                              >
+                                <Send size={11} />
+                                <span>WhatsApp</span>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1376,6 +1461,326 @@ export default function HostDashboardView({
           </div>
         )}
 
+        {/* VISTA FISCAL: FACTURAS A HUÉSPEDES & IVA 10% (MODELO 303) */}
+        {section === 'invoices' && (
+          <div className="space-y-8">
+            <div className="border-b border-[#E2DDD2] pb-4 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-emerald-800 bg-emerald-100 font-bold px-2 py-0.5 rounded">
+                    RÉGIMEN FISCAL ALOJAMIENTOS TURÍSTICOS
+                  </span>
+                  <span className="text-xs text-[#57554F] font-semibold">
+                    IVA 10% Obligatorio &lt; 30 días
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413] mt-1">
+                  Facturas a Huéspedes & Libro de IVA
+                </h2>
+                <p className="text-xs text-[#57554F] mt-0.5">
+                  Emisión legal de Facturas Simplificadas (&lt; 3.000 € sin DNI obligatorio) y resumen para el Modelo 303 de Hacienda.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowFiscalProfileModal(true)}
+                  className="bg-white hover:bg-[#FAF9F5] border border-[#D5CFC0] text-[#141413] px-3.5 py-2 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition"
+                >
+                  <Building2 size={14} className="text-[#57554F]" />
+                  <span>Mis Datos Fiscales</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreselectedResIdForInvoice(undefined);
+                    setShowCreateInvoiceModal(true);
+                  }}
+                  className="bg-[#141413] hover:bg-[#2C2C29] text-white px-4 py-2 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition shadow-sm"
+                >
+                  <Plus size={14} className="text-emerald-400" />
+                  <span>+ Emitir Factura</span>
+                </button>
+              </div>
+            </div>
+
+            {/* AVISO LEGAL Y TRANQUILIDAD CONTABLE */}
+            <div className="bg-emerald-50 border border-emerald-200/90 p-5 rounded-2xl flex flex-col sm:flex-row items-start gap-4">
+              <div className="p-2.5 bg-emerald-600 text-white rounded-xl shrink-0 mt-0.5">
+                <ShieldCheck size={20} />
+              </div>
+              <div className="space-y-1 text-xs">
+                <h3 className="font-bold text-emerald-950 text-sm">
+                  ¿Por qué puedes emitir Factura Simplificada sin pedir DNI al viajero?
+                </h3>
+                <p className="text-emerald-900 leading-relaxed">
+                  Conforme al <strong>Artículo 4.2.f del Real Decreto 1619/2012</strong>, en los servicios de hospedaje y alojamiento turístico se permite emitir <strong>Factura Simplificada hasta 3.000 €</strong> (IVA incluido). No estás obligado a solicitar el NIF ni el domicilio del huésped salvo que se trate de una empresa o autónomo que lo solicite para deducirse el gasto.
+                </p>
+                <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] font-mono text-emerald-800">
+                  <span>✓ 100% Válido ante la AEAT</span>
+                  <span>✓ Serie correlativa {currentFiscalProfile.simplifiedSeriesPrefix}-XXX</span>
+                  <span>✓ Cálculo automático del 10% de IVA</span>
+                </div>
+              </div>
+            </div>
+
+            {/* RESUMEN TRIMESTRAL PARA EL MODELO 303 DE HACIENDA */}
+            <div className="bg-white border border-[#E2DDD2] p-6 space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2DDD2] pb-4">
+                <div>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#57554F] font-bold">
+                    LIQUIDACIÓN TRIBUTARIA
+                  </span>
+                  <h3 className="text-base font-bold text-[#141413]">
+                    Resumen Trimestral para Hacienda (Modelo 303)
+                  </h3>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {(['1T', '2T', '3T', '4T'] as const).map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => setSelectedQuarter(q)}
+                      className={`px-3 py-1.5 font-mono text-xs font-bold transition ${
+                        selectedQuarter === q
+                          ? 'bg-[#141413] text-white shadow-sm'
+                          : 'bg-[#FAF9F5] text-[#57554F] border border-[#D5CFC0] hover:bg-white'
+                      }`}
+                    >
+                      {q}
+                    </button>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const qInvoices = allInvoices.filter(
+                        (inv) =>
+                          inv.status === 'issued' &&
+                          inv.issueDate.startsWith(String(new Date().getFullYear()))
+                      );
+                      exportInvoicesToCsv(qInvoices, `libro_iva_turnexo_${selectedQuarter}.csv`);
+                    }}
+                    className="ml-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1F4E3D] hover:bg-[#163A2D] text-white text-xs font-mono font-bold uppercase transition"
+                    title="Descargar libro de facturas para tu gestoría"
+                  >
+                    <Download size={13} />
+                    <span>Descargar CSV Gestor</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Tarjetas de Métricas del Trimestre */}
+              {(() => {
+                const summaries = computeQuarterSummaries(allInvoices);
+                const currentSummary = summaries.find((s) => s.quarter === selectedQuarter) || summaries[0];
+                return (
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="p-4 bg-[#FAF9F5] border border-[#E2DDD2]">
+                      <span className="font-mono text-[10px] uppercase text-[#57554F] font-semibold block">
+                        Facturas Emitidas ({selectedQuarter})
+                      </span>
+                      <span className="text-2xl font-extrabold text-[#141413] font-mono mt-1 block">
+                        {currentSummary.totalInvoices}
+                      </span>
+                      <span className="text-[10px] text-[#57554F]">Operaciones registradas</span>
+                    </div>
+
+                    <div className="p-4 bg-[#FAF9F5] border border-[#E2DDD2]">
+                      <span className="font-mono text-[10px] uppercase text-[#57554F] font-semibold block">
+                        Base Imponible Total
+                      </span>
+                      <span className="text-2xl font-extrabold text-[#141413] font-mono mt-1 block">
+                        {currentSummary.totalBase.toFixed(2)} €
+                      </span>
+                      <span className="text-[10px] text-[#57554F]">Casilla [01] Modelo 303</span>
+                    </div>
+
+                    <div className="p-4 bg-emerald-50 border border-emerald-200">
+                      <span className="font-mono text-[10px] uppercase text-emerald-800 font-bold block">
+                        Cuota IVA Devengado (10%)
+                      </span>
+                      <span className="text-2xl font-extrabold text-emerald-900 font-mono mt-1 block">
+                        {currentSummary.totalVat.toFixed(2)} €
+                      </span>
+                      <span className="text-[10px] text-emerald-700">Casilla [03] a ingresar</span>
+                    </div>
+
+                    <div className="p-4 bg-[#141413] text-white">
+                      <span className="font-mono text-[10px] uppercase text-white/50 font-semibold block">
+                        Total Facturado ({selectedQuarter})
+                      </span>
+                      <span className="text-2xl font-extrabold text-emerald-400 font-mono mt-1 block">
+                        {currentSummary.totalAmount.toFixed(2)} €
+                      </span>
+                      <span className="text-[10px] text-white/60">IVA incluido</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* TABLA DE FACTURAS EMITIDAS */}
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="relative">
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#57554F]" />
+                    <input
+                      type="text"
+                      placeholder="Buscar por factura o huésped..."
+                      value={invoiceSearch}
+                      onChange={(e) => setInvoiceSearch(e.target.value)}
+                      className="pl-8 pr-3 py-1.5 text-xs bg-white border border-[#D5CFC0] w-60 focus:outline-none"
+                    />
+                  </div>
+
+                  <select
+                    value={invoicePropertyFilter}
+                    onChange={(e) => setInvoicePropertyFilter(e.target.value)}
+                    className="py-1.5 px-3 text-xs bg-white border border-[#D5CFC0]"
+                  >
+                    <option value="all">Todos los alojamientos ({properties.length})</option>
+                    {properties.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <span className="font-mono text-xs text-[#57554F]">
+                  Mostrando {allInvoices.length} facturas registradas
+                </span>
+              </div>
+
+              {allInvoices.length === 0 ? (
+                <div className="bg-white border border-[#E2DDD2] p-12 text-center space-y-4">
+                  <div className="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center mx-auto">
+                    <FileText size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[#141413]">
+                      No tienes facturas emitidas todavía
+                    </h3>
+                    <p className="text-xs text-[#57554F] max-w-md mx-auto mt-1">
+                      Conecta tus salidas del calendario iCal o emite tu primera factura simplificada con IVA del 10% para cumplir con la normativa.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateInvoiceModal(true)}
+                    className="bg-[#141413] hover:bg-[#2C2C29] text-white px-5 py-2.5 text-xs font-mono font-bold uppercase transition"
+                  >
+                    + Emitir Mi Primera Factura
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-white border border-[#E2DDD2] overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-[#FAF9F5] border-b border-[#E2DDD2] font-mono text-[10px] text-[#57554F] uppercase">
+                        <th className="py-3 px-4">Nº Factura</th>
+                        <th className="py-3 px-4">Fecha Emisión</th>
+                        <th className="py-3 px-4">Alojamiento</th>
+                        <th className="py-3 px-4">Huésped / Cliente</th>
+                        <th className="py-3 px-4">Tipo</th>
+                        <th className="py-3 px-4 text-right">Base Imponible</th>
+                        <th className="py-3 px-4 text-right">IVA (10%)</th>
+                        <th className="py-3 px-4 text-right">Total Factura</th>
+                        <th className="py-3 px-4 text-right">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E2DDD2]">
+                      {allInvoices
+                        .filter((inv) => {
+                          if (
+                            invoicePropertyFilter !== 'all' &&
+                            inv.propertyId !== invoicePropertyFilter
+                          )
+                            return false;
+                          if (invoiceSearch.trim()) {
+                            const q = invoiceSearch.toLowerCase();
+                            const matchNum = inv.invoiceNumber.toLowerCase().includes(q);
+                            const matchGuest = inv.guestName.toLowerCase().includes(q);
+                            if (!matchNum && !matchGuest) return false;
+                          }
+                          return true;
+                        })
+                        .map((inv) => (
+                          <tr key={inv.id} className="hover:bg-[#FAF9F5] transition">
+                            <td className="py-3.5 px-4 font-mono font-bold text-[#141413]">
+                              <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">
+                                {inv.invoiceNumber}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 font-mono text-slate-600">
+                              {inv.issueDate}
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span className="font-semibold text-[#141413] block">
+                                {inv.propertyName}
+                              </span>
+                              <span className="text-[10px] text-slate-500 font-mono">
+                                {inv.stayStartDate} al {inv.stayEndDate} ({inv.nights} noches)
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span className="font-bold text-[#141413] block">
+                                {inv.guestName}
+                              </span>
+                              {inv.guestFiscalId ? (
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  NIF: {inv.guestFiscalId}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-slate-400 italic">
+                                  Simplificada (RD 1619/2012)
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4 font-mono text-[10px]">
+                              {inv.isSimplified ? (
+                                <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
+                                  Simplificada
+                                </span>
+                              ) : (
+                                <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">
+                                  Completa
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4 text-right font-mono font-medium text-slate-700">
+                              {inv.baseAmount.toFixed(2)} €
+                            </td>
+                            <td className="py-3.5 px-4 text-right font-mono font-semibold text-emerald-700">
+                              +{inv.vatAmount.toFixed(2)} €
+                            </td>
+                            <td className="py-3.5 px-4 text-right font-mono font-bold text-[#141413]">
+                              {inv.totalAmount.toFixed(2)} €
+                            </td>
+                            <td className="py-3.5 px-4 text-right">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedInvoiceForPrint(inv)}
+                                className="inline-flex items-center gap-1 bg-[#141413] hover:bg-[#2C2C29] text-white px-2.5 py-1 text-[11px] font-mono font-bold uppercase transition"
+                              >
+                                <Printer size={12} />
+                                <span>Ver / PDF</span>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* VISTA 5: FACTURACIÓN SELF-SERVICE & ESTADO DE INFRAESTRUCTURA 0€ */}
         {section === 'billing' && (
           <div className="space-y-8">
@@ -1723,6 +2128,43 @@ export default function HostDashboardView({
             onUpdateProperty(updated);
             setCustomizingProperty(null);
           }}
+        />
+      )}
+
+      {/* MODAL IMPRESIÓN Y DESCARGA PDF FACTURA */}
+      {selectedInvoiceForPrint && (
+        <InvoicePrintModal
+          invoice={selectedInvoiceForPrint}
+          onClose={() => setSelectedInvoiceForPrint(null)}
+        />
+      )}
+
+      {/* MODAL EMISIÓN DE FACTURA */}
+      {showCreateInvoiceModal && (
+        <CreateInvoiceModal
+          properties={properties}
+          reservations={reservations}
+          existingInvoices={allInvoices}
+          fiscalProfile={currentFiscalProfile}
+          initialReservationId={preselectedResIdForInvoice}
+          onSaveInvoice={(inv) => {
+            onAddInvoice?.(inv);
+          }}
+          onClose={() => {
+            setShowCreateInvoiceModal(false);
+            setPreselectedResIdForInvoice(undefined);
+          }}
+        />
+      )}
+
+      {/* MODAL PERFIL FISCAL ANFITRIÓN */}
+      {showFiscalProfileModal && (
+        <FiscalProfileModal
+          profile={currentFiscalProfile}
+          onSave={(updated) => {
+            onUpdateFiscalProfile?.(updated);
+          }}
+          onClose={() => setShowFiscalProfileModal(false)}
         />
       )}
     </div>

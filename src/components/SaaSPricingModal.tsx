@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Sparkles, ShieldCheck, Zap, QrCode, Users } from 'lucide-react';
+import { Check, Sparkles, ShieldCheck, Zap, QrCode, Users, FileText } from 'lucide-react';
 
 export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
   const plans = [
@@ -8,45 +8,56 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
       price: '0 €',
       period: '/mes de por vida',
       subtitle: 'Para 1 Alojamiento Turístico',
+      badge: '100% Gratis',
       icon: QrCode,
       features: [
-        'Guía Digital del Huésped completa (WiFi, códigos, vídeos, normas)',
+        '1 Alojamiento turístico conectado',
+        'Guía Digital del Huésped (WiFi, códigos de acceso, vídeos)',
         'Sincronización iCal automática con Airbnb y Booking',
-        'Enlace móvil en español para 1 limpiadora (sin contraseñas)',
-        'Catálogo de extras y venta de Late Check-out directa',
-        'Con sello "Powered by Turnexo"',
+        'Enlace móvil para tu personal de limpieza (sin contraseñas)',
+        'Cartel QR listo para imprimir en la mesita',
+        'Fotos de limpieza guardadas durante 7 días',
+        'Con sello sutil "Powered by Turnexo"',
       ],
       highlighted: false,
+      ctaText: 'Empezar Gratis sin Tarjeta',
     },
     {
-      name: 'Plan Pro',
-      price: '29 €',
+      name: 'Plan Pro Fiscal',
+      price: '19 €',
       period: '/mes tarifa plana total',
-      subtitle: 'Hasta 4 Alojamientos (~7,25€/piso)',
-      icon: Users,
+      subtitle: 'Hasta 5 Alojamientos (~3,80€/piso)',
+      badge: '⭐ El más elegido · Ley IVA 10%',
+      icon: FileText,
       features: [
-        'Hasta 4 alojamientos sincronizados por iCal',
-        'Guías Digitales 100% personalizadas sin marca Turnexo',
-        'Cuadrante automático de salidas y alertas de rotación',
-        'Limpiadoras ilimitadas con checklist y fotos WebP',
-        'Monetización de Late Check-out (0% comisión, 100% para ti)',
-      ],
-      highlighted: false,
-    },
-    {
-      name: 'Plan Gestor',
-      price: '49 €',
-      period: '/mes tarifa plana total',
-      subtitle: 'Hasta 8 Alojamientos (~6,12€/piso)',
-      icon: Sparkles,
-      features: [
-        'Hasta 8 alojamientos turísticos incluidos',
-        'Conexión total: reprogramación automática de turnos en 1 clic',
-        'Liquidación de honorarios y exportación de nóminas/pagos en CSV',
-        'Despacho de turnos por WhatsApp en un toque',
-        'Soporte prioritario para anfitriones y superhosts',
+        'Hasta 5 alojamientos turísticos',
+        'Emisión ilimitada de Facturas Simplificadas (< 3.000 €)',
+        'Cálculo automático de IVA 10% obligatorio (estancias < 30 días)',
+        'Libro de IVA y resumen para el Modelo 303 de Hacienda (CSV/Excel)',
+        'Guías Digitales 100% personalizadas SIN marca Turnexo',
+        'Histórico fotográfico de auditoría de limpieza durante 1 año',
+        'Alertas de rotación el mismo día y turnos por WhatsApp en 1 toque',
       ],
       highlighted: true,
+      ctaText: 'Activar Plan Pro (14 días gratis)',
+    },
+    {
+      name: 'Plan Pequeña Gestora',
+      price: '39 €',
+      period: '/mes tarifa plana total',
+      subtitle: 'Hasta 10 Alojamientos (~3,90€/piso)',
+      badge: 'Microgestores',
+      icon: Users,
+      features: [
+        'Hasta 10 alojamientos turísticos incluidos',
+        'Todo lo del Plan Pro Fiscal ilimitado',
+        'Multi-serie de facturación por propietario / NIF',
+        'Liquidación automática a personal de limpieza en CSV',
+        'Despacho masivo de turnos por WhatsApp',
+        'Soporte directo prioritario por WhatsApp',
+      ],
+      highlighted: false,
+      ctaText: 'Probar Gestora 14 días gratis',
     },
   ];
 
@@ -55,15 +66,15 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
       <div className="bg-white rounded-3xl max-w-4xl w-full p-6 md:p-8 space-y-6 shadow-2xl my-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
-              <Zap size={13} />
-              Módulos Independientes o Pack Completo
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              <ShieldCheck size={14} />
+              Adaptado a la nueva normativa de IVA 10% para estancias turísticas
             </span>
             <h2 className="text-2xl font-black text-slate-900 mt-2">
-              Elige solo el módulo que necesites o combínalos
+              Planes simples para propietarios particulares y pequeñas gestoras
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Con un solo Late Check-out o extra que vendas desde tu Guía Digital ya has pagado todo el mes.
+              Empieza 100% gratis con 1 piso. Activa el Plan Pro cuando necesites facturar legalmente con IVA 10% o gestionar varios alojamientos.
             </p>
           </div>
           <button
@@ -81,21 +92,27 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
             return (
               <div
                 key={p.name}
-                className={`rounded-3xl p-6 border flex flex-col justify-between ${
+                className={`rounded-3xl p-6 border flex flex-col justify-between transition-all ${
                   p.highlighted
-                    ? 'bg-slate-900 text-white border-indigo-500 shadow-xl scale-[1.02]'
+                    ? 'bg-slate-900 text-white border-emerald-500 shadow-2xl ring-2 ring-emerald-500/20 scale-[1.02]'
                     : 'bg-slate-50 text-slate-900 border-slate-200'
                 }`}
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                      <Icon size={15} className={p.highlighted ? 'text-indigo-400' : 'text-indigo-600'} />
+                      <Icon size={16} className={p.highlighted ? 'text-emerald-400' : 'text-indigo-600'} />
                       {p.name}
                     </span>
-                    {p.highlighted && (
-                      <span className="bg-indigo-500 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
-                        Recomendado
+                    {p.badge && (
+                      <span
+                        className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                          p.highlighted
+                            ? 'bg-emerald-500 text-slate-950 font-extrabold'
+                            : 'bg-slate-200 text-slate-800'
+                        }`}
+                      >
+                        {p.badge}
                       </span>
                     )}
                   </div>
@@ -107,7 +124,7 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
                     </span>
                     <p
                       className={`text-xs font-semibold mt-1 ${
-                        p.highlighted ? 'text-indigo-300' : 'text-indigo-600'
+                        p.highlighted ? 'text-emerald-400' : 'text-slate-600'
                       }`}
                     >
                       {p.subtitle}
@@ -136,11 +153,11 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
                   onClick={onClose}
                   className={`mt-6 w-full py-3 rounded-2xl text-xs font-black transition ${
                     p.highlighted
-                      ? 'bg-indigo-500 hover:bg-indigo-400 text-white'
+                      ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold shadow-lg shadow-emerald-500/20'
                       : 'bg-slate-900 hover:bg-slate-800 text-white'
                   }`}
                 >
-                  Probar 14 días gratis
+                  {p.ctaText}
                 </button>
               </div>
             );
@@ -150,7 +167,7 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between text-xs text-emerald-950">
           <span className="flex items-center gap-2 font-semibold">
             <ShieldCheck size={18} className="text-emerald-600 shrink-0" />
-            Sin permanencia ni soporte técnico complejo: pega tu enlace .ics de Airbnb o Booking y empieza en 1 minuto.
+            Sin permanencia ni configuraciones complejas. Emite facturas simplificadas legales al instante y exporta tu resumen para el Modelo 303 de Hacienda con 1 clic.
           </span>
         </div>
       </div>

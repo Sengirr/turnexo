@@ -13,6 +13,7 @@ import {
   INITIAL_CLEANERS,
   INITIAL_PROPERTIES,
   INITIAL_RESERVATIONS,
+  INITIAL_TASK_OVERRIDES,
 } from './lib/mockData';
 import {
   DEFAULT_HOST_FISCAL_PROFILE,
@@ -109,7 +110,7 @@ export default function App() {
     loadStored(STORAGE_KEYS.reservations, INITIAL_RESERVATIONS)
   );
   const [taskOverrides, setTaskOverrides] = useState<CleaningTask[]>(() =>
-    loadStored(STORAGE_KEYS.taskOverrides, [])
+    loadStored(STORAGE_KEYS.taskOverrides, INITIAL_TASK_OVERRIDES)
   );
   const [invoices, setInvoices] = useState<Invoice[]>(() =>
     loadStored(STORAGE_KEYS.invoices, INITIAL_INVOICES)

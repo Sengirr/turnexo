@@ -181,7 +181,7 @@ export default function LandingPageView({
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
-              Elimina las llamadas a deshoras pidiendo el WiFi, evita retrasos en las entradas con tu limpiadora y emite tus facturas con IVA del 10% listas para tu gestor en 1 clic. Todo sincronizado en tiempo real con tus calendarios de Airbnb, Booking y Vrbo.
+              Ahorra toda la comunicación con tu limpiadora comprobando con fotos de checklist que todo esté impecable antes de cada entrada. Guía a tus huéspedes con vídeo Home Tour, check-in paso a paso y vídeo-guías de electrodomésticos para eliminar llamadas a deshoras. Y emite tus facturas con IVA del 10% listas para tu gestor en 1 clic.
             </p>
 
             {/* Tarjeta de Solución Fiscal Positiva */}
@@ -241,16 +241,16 @@ export default function LandingPageView({
 
             <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[#E2DDD2] max-w-xl">
               <div>
-                <p className="font-mono text-2xl font-bold text-[#141413]">60 seg</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Sincronización automática iCal</p>
+                <p className="font-mono text-2xl font-bold text-[#141413]">0 msgs</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Con tu limpiadora</p>
+              </div>
+              <div>
+                <p className="font-mono text-2xl font-bold text-[#C85A32]">Vídeos</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Tour, Check-in y Guías</p>
               </div>
               <div>
                 <p className="font-mono text-2xl font-bold text-emerald-700">10% IVA</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Facturas legales al instante</p>
-              </div>
-              <div>
-                <p className="font-mono text-2xl font-bold text-[#1F4E3D]">100 %</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Guías personalizables</p>
+                <p className="text-xs text-[#57554F] mt-0.5">Facturas para tu gestor</p>
               </div>
             </div>
           </div>
@@ -289,7 +289,7 @@ export default function LandingPageView({
                 <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-3">
                   <div>
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
-                      SIN CONTRASEÑAS · ACCESO DIRECTO
+                      SIN CONTRASEÑAS · ACCESO DIRECTO MÓVIL (/c/)
                     </span>
                     <h4 className="text-xl font-bold text-[#141413] mt-0.5">
                       Parte de María Carmen
@@ -301,7 +301,7 @@ export default function LandingPageView({
                 </div>
 
                 <div className="space-y-2.5 text-xs">
-                  <div className="p-3.5 bg-white border-l-4 border-[#C85A32] border border-[#E2DDD2] space-y-1.5">
+                  <div className="p-3.5 bg-white border-l-4 border-[#C85A32] border border-[#E2DDD2] space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-mono font-bold text-[#C85A32] flex items-center gap-1">
                         <Flame size={13} /> ENTRADA HOY · ROTACIÓN 15:00H
@@ -311,20 +311,27 @@ export default function LandingPageView({
                       </span>
                     </div>
                     <p className="font-bold text-sm text-[#141413]">Loft Centro Catedral · 38 €</p>
-                    <p className="text-[#57554F] text-[11px]">Checklist: 4/4 comprobados · 3 fotos enviadas</p>
+
+                    {/* Checklist y fotos comprobadas */}
+                    <div className="bg-[#FAF9F5] p-2.5 border border-[#E2DDD2] space-y-1 font-mono text-[11px]">
+                      <div className="flex items-center justify-between text-[#1F4E3D] font-bold">
+                        <span>✓ Checklist: 4/4 completadas</span>
+                        <span>📸 3 fotos subidas</span>
+                      </div>
+                      <p className="text-[10px] text-[#57554F]">
+                        Sábanas cambiadas · Baño desinfectado · Salón ordenado · Llaves en cajetín
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-[11px] text-[#1F4E3D] font-bold">
+                      <CheckCircle2 size={13} />
+                      <span>Comprobado por ti desde el móvil: Todo impecable</span>
+                    </div>
                   </div>
 
-                  <div className="p-3.5 bg-white border-l-4 border-[#1F4E3D] border border-[#E2DDD2] space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-[#1F4E3D] flex items-center gap-1">
-                        <Clock size={13} /> LATE CHECK-OUT APROBADO
-                      </span>
-                      <span className="font-mono font-bold bg-[#1F4E3D] text-white px-2 py-0.5 text-[11px]">
-                        Entrar 17:00h
-                      </span>
-                    </div>
-                    <p className="font-bold text-sm text-[#141413]">Ático Vista Marina · 45 €</p>
-                    <p className="text-[#57554F] text-[11px]">La hora se retrasó automáticamente al aprobar el anfitrión</p>
+                  <div className="p-3 bg-[#1F4E3D]/10 border border-[#1F4E3D]/30 text-[#1F4E3D] text-[11px] font-mono flex items-center gap-2">
+                    <Sparkles size={14} className="shrink-0" />
+                    <span>0 llamadas ni audios de WhatsApp: ella ve sus turnos y tú ves sus fotos.</span>
                   </div>
                 </div>
 
@@ -342,7 +349,7 @@ export default function LandingPageView({
                 <div className="flex items-center justify-between border-b border-white/15 pb-3">
                   <div>
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                      PORTAL BOUTIQUE DEL HUÉSPED
+                      PORTAL BOUTIQUE DEL HUÉSPED (/g/)
                     </span>
                     <h3 className="text-xl font-bold mt-0.5">Ático Vista Marina</h3>
                   </div>
@@ -351,23 +358,48 @@ export default function LandingPageView({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5 font-mono text-xs">
-                  <div className="bg-white/5 border border-white/10 p-3">
-                    <span className="text-white/50 block text-[10px]">CÓDIGO PUERTA</span>
-                    <span className="font-bold text-sm mt-0.5 text-white block">4829#</span>
+                {/* Bloque de vídeos destacados en la preview */}
+                <div className="space-y-2 text-xs">
+                  <div className="p-2.5 bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-[#C85A32] text-white flex items-center justify-center font-bold text-xs shrink-0">▶</span>
+                      <div>
+                        <p className="font-bold text-white text-xs">Vídeo Home Tour</p>
+                        <p className="text-[10px] text-white/60">Recorrido del piso antes de llegar</p>
+                      </div>
+                    </div>
+                    <span className="font-mono text-[10px] text-white/50">1:15 min</span>
                   </div>
-                  <div className="bg-white/5 border border-white/10 p-3">
-                    <span className="text-white/50 block text-[10px]">RED WIFI</span>
-                    <span className="font-bold text-sm mt-0.5 text-white block truncate">VistaMarina_5G</span>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2 bg-white/5 border border-white/10 text-[11px]">
+                      <span className="text-[#C85A32] font-bold block">▶ VÍDEO CHECK-IN</span>
+                      <span className="text-white/70 text-[10px] block mt-0.5">Apertura portal y cajetín</span>
+                    </div>
+                    <div className="p-2 bg-white/5 border border-white/10 text-[11px]">
+                      <span className="text-emerald-400 font-bold block">▶ VÍDEO ELECTROD.</span>
+                      <span className="text-white/70 text-[10px] block mt-0.5">Vitro, Clima y Termo</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-[#FAF9F5] text-[#141413] p-4 space-y-1.5">
+                <div className="grid grid-cols-2 gap-2.5 font-mono text-xs">
+                  <div className="bg-white/5 border border-white/10 p-2.5">
+                    <span className="text-white/50 block text-[9px]">CÓDIGO PUERTA</span>
+                    <span className="font-bold text-xs mt-0.5 text-white block">4829#</span>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 p-2.5">
+                    <span className="text-white/50 block text-[9px]">RED WIFI (1 TOQUE)</span>
+                    <span className="font-bold text-xs mt-0.5 text-white block truncate">VistaMarina_5G</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#FAF9F5] text-[#141413] p-3.5 space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-[10px] uppercase tracking-wider text-[#1F4E3D] font-bold flex items-center gap-1">
-                      <Sparkles size={12} /> HUECO DETECTADO EN ICAL
+                      <Sparkles size={12} /> CROSS-SELLING AUTOMÁTICO
                     </span>
-                    <span className="font-mono font-bold text-sm">+35 €</span>
+                    <span className="font-mono font-bold text-sm text-[#C85A32]">+35 € netos</span>
                   </div>
                   <p className="text-xs font-bold">Late Check-out hasta las 17:00h</p>
                   <p className="text-[11px] text-[#57554F] leading-tight">
@@ -412,7 +444,7 @@ export default function LandingPageView({
                   01
                 </span>
                 <span className="font-mono text-[10px] uppercase font-bold text-[#C85A32] bg-[#C85A32]/10 px-2 py-0.5">
-                  OPERATIVA DE LIMPIEZA
+                  OPERATIVA CON TU LIMPIADORA
                 </span>
               </div>
 
@@ -422,7 +454,7 @@ export default function LandingPageView({
                   ❌ El dolor diario
                 </span>
                 <p className="text-xs text-rose-950 font-medium leading-relaxed">
-                  Llamadas cruzadas a última hora, avisar de rotaciones urgentes y el miedo constante a que un huésped llegue a las 15:00h y el piso no esté listo.
+                  "¿A qué hora entras hoy?", audios eternos en WhatsApp para cuadrar turnos y la incertidumbre de no saber si el apartamento ha quedado impecable hasta que llega la queja del huésped.
                 </p>
               </div>
 
@@ -432,13 +464,13 @@ export default function LandingPageView({
                   ✓ La solución Turnexo
                 </span>
                 <p className="text-xs text-emerald-950 font-medium leading-relaxed">
-                  Sincronización automática por iCal con Airbnb y Booking. Tu limpiadora ve su cuadrante en su móvil sin contraseñas, con alerta de rotación urgente y fotos obligatorias.
+                  Ahorra toda la comunicación con tu limpiadora. Ella ve sus turnos en su enlace móvil sin contraseñas, sigue el checklist de cada estancia y sube fotos de auditoría. Tú compruebas desde tu móvil que todo está impecable antes de la entrada.
                 </p>
               </div>
             </div>
 
             <div className="pt-2 border-t border-[#E2DDD2] font-mono text-[11px] text-[#1F4E3D] font-bold">
-              → Ahorro estimado: ~5 horas a la semana
+              → 0 WhatsApps cruzados y tranquilidad total antes del check-in
             </div>
           </div>
 
@@ -450,7 +482,7 @@ export default function LandingPageView({
                   02
                 </span>
                 <span className="font-mono text-[10px] uppercase font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5">
-                  ATENCIÓN AL HUÉSPED
+                  ATENCIÓN AL HUÉSPED (GUEST APP)
                 </span>
               </div>
 
@@ -460,7 +492,7 @@ export default function LandingPageView({
                   ❌ El dolor diario
                 </span>
                 <p className="text-xs text-rose-950 font-medium leading-relaxed">
-                  Repetir 50 veces por WhatsApp la clave del WiFi, cómo abrir el portal o cómo funciona el aire acondicionado, incluso a medianoche.
+                  Huéspedes llamando a las 23:30h perdidos en el portal, sin encontrar el cajetín de llaves, sin saber usar la vitrocerámica o sin entender el mando del aire acondicionado. Y salidas a las 11:00h sin monetizar.
                 </p>
               </div>
 
@@ -470,13 +502,13 @@ export default function LandingPageView({
                   ✓ La solución Turnexo
                 </span>
                 <p className="text-xs text-emerald-950 font-medium leading-relaxed">
-                  Guía Digital boutique personalizada: vídeos paso a paso de entrada, WiFi con 1 toque y venta automática de Late Check-out directa a tu cuenta (0% comisión).
+                  Guest App con Vídeo Home Tour para ver el piso antes de llegar, vídeos de check-in paso a paso, y vídeo-guías de electrodomésticos para resolver dudas al instante. Además, vende Late Check-out automático (+35 € netos directo a tu cuenta).
                 </p>
               </div>
             </div>
 
             <div className="pt-2 border-t border-[#E2DDD2] font-mono text-[11px] text-[#1F4E3D] font-bold">
-              → Ingresos extra: +35 € a +70 € por reserva
+              → Cero llamadas a medianoche y +35 € a +70 € extra por reserva
             </div>
           </div>
 
@@ -915,13 +947,16 @@ export default function LandingPageView({
 
       {/* SECCIÓN DE MÓDULOS INDEPENDIENTES O COMBINADOS */}
       <section id="modulos" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
-        <div className="max-w-2xl space-y-3 mb-14">
+        <div className="max-w-3xl space-y-3 mb-14">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
-            Arquitectura Modular
+            Arquitectura Modular Especializada
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] leading-tight tracking-tight">
-            Dos herramientas especializadas. Úsalas por separado o conéctalas.
+            Las dos herramientas clave que resuelven tu día a día como anfitrión.
           </h2>
+          <p className="text-sm text-[#57554F] leading-relaxed">
+            Guest App para una experiencia en vídeo y cross-selling, y Cleaning App para eliminar la comunicación con tu limpiadora y auditar la limpieza con fotos. Úsalas juntas o por separado.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -930,64 +965,74 @@ export default function LandingPageView({
             <div className="space-y-5">
               <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-4">
                 <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
-                  MÓDULO A · EXPERIENCIA & LLEGADA AUTÓNOMA
+                  MÓDULO 1 · GUEST APP BOUTIQUE (/g/)
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
-                  1 Piso Gratis · Desde 29€/mes
+                  1 Piso Gratis · Pro desde 19€/mes
                 </span>
               </div>
 
               <div className="space-y-2">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-[#C85A32] font-bold block">
-                  CERO MENSAJES A DESHORAS
+                  CERO LLAMADAS A DESHORAS · CROSS-SELLING DIRECTO
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                  El Wi-Fi, la llegada autónoma y las normas en 1 clic.
+                  Vídeo Home Tour, Check-in en vídeo, guías de electrodomésticos y venta de extras.
                 </h3>
               </div>
 
               <p className="text-sm text-[#57554F] leading-relaxed">
-                Evita que los huéspedes te llamen o te escriban a las 23:30h porque no encuentran el cajetín de llaves, no recuerdan la clave del Wi-Fi o no logran encender el aire acondicionado. Todo en un enlace web inmediato sin descargar apps, con cartel QR para el recibidor y venta de Late Check-out cuando el calendario lo permite.
+                Elimina las preguntas repetitivas a medianoche sobre cómo abrir el portal, cómo encender la vitrocerámica o cuál es la clave del WiFi. Y monetiza cada tarde libre de tu calendario sin comisiones. Todo en un portal web inmediato sin que el viajero tenga que descargar nada.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs">
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
-                    <CheckCircle2 size={14} className="text-[#1F4E3D]" />
-                    Llegada Autónoma y Wi-Fi en 1 toque
+                    <Video size={14} className="text-[#C85A32]" />
+                    Vídeo Home Tour de Bienvenida
                   </p>
                   <p className="text-[#57554F]">
-                    Códigos de cajetín y portal con desbloqueo guiado, y clave Wi-Fi con botón copiar y QR instantáneo.
+                    El huésped ve un vídeo completo del apartamento antes de llegar: ubica cada estancia y disfruta de una bienvenida premium.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
-                    <Video size={14} className="text-[#C85A32]" />
-                    Vídeos Cortos Paso a Paso
+                    <CheckCircle2 size={14} className="text-[#1F4E3D]" />
+                    Vídeos de Check-in Paso a Paso
                   </p>
                   <p className="text-[#57554F]">
-                    Inserta vídeos cortos de cómo abrir el portal, usar la vitrocerámica o localizar el parking sin dudas.
+                    Muestra exactamente cómo abrir el portal y el cajetín de llaves, con desbloqueo inteligente tras reproducir el vídeo.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Sparkles size={14} className="text-[#C85A32]" />
-                    Venta Automática de Late Check-out
+                    Vídeo-Guías de Electrodomésticos
                   </p>
                   <p className="text-[#57554F]">
-                    Si la tarde queda libre, ofrece al huésped quedarse hasta las 17:00h (+35€ cobrados 100% para ti).
+                    Vídeos cortos para la vitrocerámica, aire acondicionado o termo. El huésped lo resuelve en 15 segundos sin llamarte a las 23:30h.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
-                    <QrCode size={14} className="text-[#C85A32]" />
-                    Cartel QR Listo para Imprimir
+                    <Sparkles size={14} className="text-[#1F4E3D]" />
+                    Venta de Late Check-out (+35 €)
                   </p>
                   <p className="text-[#57554F]">
-                    Genera una lámina PDF con el QR del piso y los datos del Wi-Fi lista para enmarcar en el recibidor.
+                    Si la tarde queda libre en el iCal, ofrece quedarse hasta las 17:00h. Cobrado 100% íntegro directo a ti sin comisiones.
+                  </p>
+                </div>
+
+                <div className="border border-[#E2DDD2] bg-white p-4 space-y-1 sm:col-span-2">
+                  <p className="font-bold text-[#141413] flex items-center gap-1.5">
+                    <QrCode size={14} className="text-[#C85A32]" />
+                    WiFi en 1 Toque y Cartel QR para Enmarcar
+                  </p>
+                  <p className="text-[#57554F]">
+                    Botón copiar clave, conexión por código QR y generador de lámina PDF elegante para poner en la mesita del recibidor.
                   </p>
                 </div>
               </div>
@@ -1016,59 +1061,74 @@ export default function LandingPageView({
             <div className="space-y-5">
               <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-4">
                 <span className="font-mono text-xs uppercase tracking-widest text-[#57554F]">
-                  MÓDULO B · OPERACIONES & LIMPIEZA
+                  MÓDULO 2 · CLEANING APP SIN CONTRASEÑAS (/c/)
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
-                  1 Piso Gratis · Desde 29€/mes
+                  1 Piso Gratis · Pro desde 19€/mes
                 </span>
               </div>
 
-              <h3 className="text-2xl font-bold text-[#141413]">
-                Coordinación Automática de Limpiadoras vía iCal
-              </h3>
+              <div className="space-y-2">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[#1F4E3D] font-bold block">
+                  CERO WHATSAPPS · AUDITORÍA CON FOTOS
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
+                  Ahorra toda la comunicación con tu limpiadora y comprueba que todo esté impecable.
+                </h3>
+              </div>
 
               <p className="text-sm text-[#57554F] leading-relaxed">
-                Lee cada 15 minutos los calendarios de Airbnb y Booking.com. Tu limpiadora entra desde un enlace directo en su móvil (sin usuarios ni contraseñas) y ve exactamente qué pisos salen hoy.
+                Tu limpiadora entra desde un enlace directo en el navegador de su teléfono (sin apps ni contraseñas que olvidar). Sigue el checklist específico de cada piso y sube fotos reales de auditoría antes de que entre el siguiente huésped.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs">
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
-                    <Flame size={14} className="text-[#C85A32]" />
-                    Alerta de Rotación Mismo Día
+                    <Users size={14} className="text-[#1F4E3D]" />
+                    Ahorra toda la comunicación por WhatsApp
                   </p>
                   <p className="text-[#57554F]">
-                    Marca automáticamente como prioritarios los pisos donde entra otro huésped a las 15:00h.
+                    Se acabaron los mensajes de "¿a qué hora entro?". Ella ve sus turnos sincronizados en tiempo real según el iCal de Airbnb y Booking.
+                  </p>
+                </div>
+
+                <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
+                  <p className="font-bold text-[#141413] flex items-center gap-1.5">
+                    <CheckCircle2 size={14} className="text-[#1F4E3D]" />
+                    Checklist Habitación por Habitación
+                  </p>
+                  <p className="text-[#57554F]">
+                    Sábanas cambiadas, toallas limpias, desinfección de baño y reposición de amenities. Tareas claras para no dejar nada al azar.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <ShieldCheck size={14} className="text-[#1F4E3D]" />
-                    Checklist + Fotos de Auditoría
+                    Comprueba las Fotos desde tu Móvil
                   </p>
                   <p className="text-[#57554F]">
-                    Checklist personalizado por apartamento y subida de fotos reales desde la cámara del móvil.
+                    La limpiadora toma fotos con la cámara al terminar. Tú compruebas desde tu móvil que todo está impecable antes de la entrada.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
-                    <Calendar size={14} className="text-[#1F4E3D]" />
-                    Sincronización con Late Check-out
+                    <Flame size={14} className="text-[#C85A32]" />
+                    Alerta 🔥 ENTRADA HOY (Rotaciones)
                   </p>
                   <p className="text-[#57554F]">
-                    Si apruebas un Late Check-out a un huésped, la hora de la limpiadora cambia sola en su móvil.
+                    Marca en rojo las salidas a las 11:00h que tienen entrada a las 15:00h para priorizar la limpieza sin necesidad de llamarla.
                   </p>
                 </div>
 
-                <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
+                <div className="border border-[#E2DDD2] bg-white p-4 space-y-1 sm:col-span-2">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
-                    <Users size={14} className="text-[#1F4E3D]" />
-                    Liquidación Semanal y Roturas
+                    <ShieldCheck size={14} className="text-[#1F4E3D]" />
+                    Prueba Indiscutible ante Reclamaciones de Airbnb
                   </p>
                   <p className="text-[#57554F]">
-                    Calcula el importe acumulado por limpiadora y recibe avisos de desperfectos al instante.
+                    Registro fotográfico con fecha y hora de la limpieza como prueba contundente ante cualquier disputa o reclamación injustificada.
                   </p>
                 </div>
               </div>
@@ -1176,6 +1236,36 @@ export default function LandingPageView({
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
                   ✓ Ofrece el extra solo si el día está libre (+35€)
+                </td>
+              </tr>
+
+              <tr className="hover:bg-white transition">
+                <td className="py-4 px-5 font-bold text-[#141413]">
+                  Vídeo Home Tour y Guías de Electrodomésticos
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Textos largos o PDFs de 20 páginas que el huésped no lee
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  Formatos rígidos sin soporte para YouTube o Shorts
+                </td>
+                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
+                  ✓ Vídeo Home Tour, check-in y guías de vitro/clima/termo
+                </td>
+              </tr>
+
+              <tr className="hover:bg-white transition">
+                <td className="py-4 px-5 font-bold text-[#141413]">
+                  Auditoría fotográfica de limpieza
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  A ciegas (te enteras cuando el nuevo huésped se queja)
+                </td>
+                <td className="py-4 px-5 text-[#57554F]">
+                  No incluye fotos de comprobación en tiempo real
+                </td>
+                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
+                  ✓ Checklist por estancia y fotos que revisas desde tu móvil
                 </td>
               </tr>
 
@@ -1457,12 +1547,20 @@ export default function LandingPageView({
                 a: 'Turnexo detecta mediante el calendario iCal si el día de salida del huésped entra otra reserva o queda libre. Si queda libre, ofrece el Late Check-out hasta la tarde. Tú cobras el 100% del dinero directamente al huésped (por el centro de resoluciones de Airbnb, Bizum o tarjeta) sin que Turnexo te cobre ninguna comisión.',
               },
               {
-                q: '¿Puedo contratar solo la Guía Digital o solo la Operativa de Limpiezas?',
-                a: 'Sí. Los módulos son totalmente independientes. Si ya tienes resuelta la limpieza y solo quieres la Guía Digital con vídeos para huéspedes y venta de extras, contratas el Módulo 2 (9€/mes). Si solo necesitas el cuadrante de limpiezas por iCal, el Módulo 1 (9€/mes). O ambos conectados en el Pack por 14€/mes.',
+                q: '¿Cómo funcionan los planes y tarifas? ¿Hay plan gratuito?',
+                a: 'El plan Starter es 100% Gratis de por vida para anfitriones de 1 alojamiento (con marca de agua discreta y retención de fotos de auditoría a 7 días). Para anfitriones de hasta 5 alojamientos que necesitan facturación oficial con IVA del 10% y exportación para su gestor, el Plan Pro Fiscal cuesta 19 €/mes (tarifa plana total, no por piso). Y para pequeñas gestoras de hasta 10 alojamientos, el Plan Microgestora cuesta 39 €/mes.',
+              },
+              {
+                q: '¿Cómo funcionan el Vídeo Home Tour y las vídeo-guías de electrodomésticos?',
+                a: 'Al dar de alta tu piso en el panel, solo pegas los enlaces de tus vídeos (de YouTube, Shorts o Google Drive) para el Home Tour, el acceso al portal o el uso de la vitrocerámica y el aire acondicionado. En la Guía del Huésped se reproducen directamente sin descargas ni esperas, eliminando las dudas repetitivas a deshoras.',
+              },
+              {
+                q: '¿Cómo compruebo que la limpiadora ha terminado y que el piso está limpio?',
+                a: 'Tu personal de limpieza accede con su enlace móvil único (/c/). Sigue el checklist de tareas de cada habitación y toma fotos obligatorias con la cámara de su móvil al terminar. Las fotos se sincronizan al instante en tu panel de anfitrión para que verifiques desde tu sofá que todo está impecable antes del siguiente check-in.',
               },
               {
                 q: '¿Tengo permanencia o tengo que poner mi tarjeta de crédito para probar?',
-                a: 'Cero permanencia y cero tarjetas para empezar. Disfrutas de 14 días de prueba completa con tus alojamientos reales. Puedes cancelar o pausar tu cuenta en cualquier momento con un solo clic desde tu panel.',
+                a: 'Cero permanencia y cero tarjetas para empezar. Puedes usar el plan gratuito indefinidamente o probar los módulos con tus alojamientos reales sin compromiso. Cancelas o cambias de plan con un solo clic desde tu panel.',
               },
             ].map((faqItem, idx) => {
               const isOpen = activeFaq === idx;

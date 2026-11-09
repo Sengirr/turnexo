@@ -1,4 +1,4 @@
-import { Cleaner, Property, Reservation } from './icalParser';
+import { Cleaner, Property, Reservation, CleaningTask } from './icalParser';
 
 export const INITIAL_CLEANERS: Cleaner[] = [
   {
@@ -300,6 +300,34 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     checkIn: '2026-11-02',
     checkOut: '2026-11-06',
     requestedExtras: [],
+  },
+];
+
+export const INITIAL_TASK_OVERRIDES: CleaningTask[] = [
+  {
+    id: 'task-res-201',
+    propertyId: 'prop-2',
+    reservationId: 'res-201',
+    date: '2026-11-02',
+    cleanerId: 'cl-2',
+    sameDayCheckIn: true,
+    nextCheckInTime: '15:00',
+    scheduledCleaningTime: '11:00',
+    lateCheckoutActive: false,
+    status: 'completed',
+    photosUploaded: [
+      'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1000&q=80',
+    ],
+    checklist: [
+      { id: 'chk-1', label: 'Cambiar ropa de cama y toallas limpias', completed: true },
+      { id: 'chk-2', label: 'Desinfectar baño completo y reponer amenities', completed: true },
+      { id: 'chk-3', label: 'Revisar menaje de cocina y microondas', completed: true },
+      { id: 'chk-4', label: 'Comprobar llaves en cajetín 1904*', completed: true },
+    ],
+    incidents: [],
+    fee: 40,
   },
 ];
 

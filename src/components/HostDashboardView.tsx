@@ -29,6 +29,7 @@ import {
   CheckCheck,
   Send,
   FileSpreadsheet,
+  Camera,
 } from 'lucide-react';
 import { Cleaner, CleaningTask, Property, Reservation } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
@@ -119,6 +120,7 @@ export default function HostDashboardView({
   const [showNewPropModal, setShowNewPropModal] = useState(false);
   const [qrModalProperty, setQrModalProperty] = useState<Property | null>(null);
   const [customizingProperty, setCustomizingProperty] = useState<Property | null>(null);
+  const [inspectingTaskPhotos, setInspectingTaskPhotos] = useState<CleaningTask | null>(null);
 
   // Estados de Facturación & IVA 10%
   const currentMonth = new Date().getMonth() + 1;
@@ -946,9 +948,19 @@ export default function HostDashboardView({
                             </select>
                           </td>
                           <td className="py-4 px-4 font-mono text-[11px]">
-                            {task.status === 'completed' ? (
+                            {task.photosUploaded.length > 0 ? (
+                              <button
+                                type="button"
+                                onClick={() => setInspectingTaskPhotos(task)}
+                                className="inline-flex items-center gap-1.5 text-[#1F4E3D] hover:text-[#141413] font-bold underline underline-offset-2"
+                                title="Ver auditoría de fotos y checklist"
+                              >
+                                <Camera size={13} />
+                                <span>✓ VERIFICADA ({task.photosUploaded.length} FOTOS)</span>
+                              </button>
+                            ) : task.status === 'completed' ? (
                               <span className="text-[#1F4E3D] font-bold">
-                                ✓ COMPLETADA ({task.photosUploaded.length} FOTOS)
+                                ✓ COMPLETADA (0 FOTOS)
                               </span>
                             ) : (
                               <span className="text-[#57554F]">
@@ -1058,8 +1070,18 @@ export default function HostDashboardView({
 
                               <div className="flex items-center justify-between pt-2 border-t border-[#E2DDD2]">
                                 <span className="font-mono text-[10px] text-[#57554F]">
-                                  {task.status === 'completed' ? (
-                                    <strong className="text-[#1F4E3D]">✓ Completada ({task.photosUploaded.length} fotos)</strong>
+                                  {task.photosUploaded.length > 0 ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => setInspectingTaskPhotos(task)}
+                                      className="inline-flex items-center gap-1 text-[#1F4E3D] font-bold hover:underline"
+                                      title="Ver fotos y checklist"
+                                    >
+                                      <Camera size={11} />
+                                      <span>✓ Verificada ({task.photosUploaded.length} fotos)</span>
+                                    </button>
+                                  ) : task.status === 'completed' ? (
+                                    <strong className="text-[#1F4E3D]">✓ Completada (0 fotos)</strong>
                                   ) : (
                                     '⏳ Pendiente de realización'
                                   )}
@@ -2148,6 +2170,107 @@ export default function HostDashboardView({
           }}
           onClose={() => setShowFiscalProfileModal(false)}
         />
+      )}
+
+      {/* MODAL AUDITORÍA DE FOTOS Y CHECKLIST DE LIMPIEZA */}
+      {inspectingTaskPhotos && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#FAF9F5] border-2 border-[#141413] max-w-2xl w-full p-6 space-y-5 shadow-[8px_8px_0px_#141413] my-8 animate-in fade-in">
+            <div className="flex items-start justify-between border-b border-[#E2DDD2] pb-3">
+              <div>
+                <span className="font-mono text-[10px] uppercase font-bold text-[#1F4E3D] bg-[#1F4E3D]/10 px-2 py-0.5">
+                  AUDITORÍA DE LIMPIEZA CON FOTOS REALES
+                </span>
+                <h3 className="text-xl font-black text-[#141413] mt-1">
+                  {properties.find((p) => p.id === inspectingTaskPhotos.propertyId)?.name || 'Alojamiento'}
+                </h3>
+                <p className="font-mono text-xs text-[#57554F] mt-0.5">
+                  Fecha salida: {inspectingTaskPhotos.date} · Limpiadora:{' '}
+                  <strong>{cleaners.find((c) => c.id === inspectingTaskPhotos.cleanerId)?.name || 'Sin asignar'}</strong>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInspectingTaskPhotos(null)}
+                className="text-xs font-mono font-bold text-[#57554F] hover:text-[#141413] p-1.5"
+              >
+                ✕ CERRAR
+              </button>
+            </div>
+
+            {/* Estado del Checklist */}
+            <div className="bg-white border border-[#E2DDD2] p-4 space-y-2">
+              <div className="flex items-center justify-between font-mono text-xs font-bold text-[#1F4E3D]">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 size={14} /> Checklist Comprobado por la Limpiadora
+                </span>
+                <span>
+                  {inspectingTaskPhotos.checklist.filter((c) => c.completed).length} /{' '}
+                  {inspectingTaskPhotos.checklist.length} tareas
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                {inspectingTaskPhotos.checklist.map((item) => (
+                  <div key={item.id} className="flex items-center gap-2 text-[#141413] bg-[#FAF9F5] p-2 border border-[#E2DDD2]">
+                    <span className="text-[#1F4E3D] font-bold">✓</span>
+                    <span>{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Galería de fotos subidas por la limpiadora */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between font-mono text-xs font-bold text-[#141413]">
+                <span>Fotos Tomadas con la Cámara ({inspectingTaskPhotos.photosUploaded.length})</span>
+                <span className="text-[#57554F] font-normal text-[11px]">Auditoría antes de la llegada del huésped</span>
+              </div>
+              {inspectingTaskPhotos.photosUploaded.length === 0 ? (
+                <p className="text-xs text-[#57554F] italic p-4 bg-white border border-[#E2DDD2] text-center">
+                  Aún no se han subido fotos para este turno.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {inspectingTaskPhotos.photosUploaded.map((url, idx) => (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group relative block aspect-video sm:aspect-square bg-slate-900 overflow-hidden border border-[#D5CFC0] shadow-sm"
+                    >
+                      <img
+                        src={url}
+                        alt={`Foto verificación ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-mono text-[11px] font-bold">
+                        Ampliar foto ↗
+                      </div>
+                      <span className="absolute bottom-1.5 left-1.5 bg-black/80 text-white font-mono text-[9px] px-1.5 py-0.5">
+                        Habitación {idx + 1}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#E2DDD2]">
+              <span className="font-mono text-xs text-[#1F4E3D] font-bold flex items-center gap-1.5">
+                <CheckCircle2 size={16} />
+                <span>Todo comprobado: el piso está impecable para el nuevo huésped</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setInspectingTaskPhotos(null)}
+                className="w-full sm:w-auto bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs uppercase font-bold px-6 py-2.5 transition"
+              >
+                Conforme y Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

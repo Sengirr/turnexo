@@ -157,7 +157,7 @@ export default function LandingPageView({
               onClick={onNavigateToApp}
               className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-semibold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-sm"
             >
-              <span>Probar 1 Piso Gratis</span>
+              <span>Probar 1 Alojamiento Gratis</span>
               <ArrowUpRight size={15} />
             </button>
           </div>
@@ -174,7 +174,7 @@ export default function LandingPageView({
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.08] tracking-tight text-[#141413]">
-              Controla tus limpiezas, la Mini-Web de tu piso y tus facturas de IVA.{' '}
+              Controla tus limpiezas, la Mini-Web de tu alojamiento y tus facturas de IVA.{' '}
               <span className="text-[#C85A32]">En piloto automático.</span>
             </h1>
 
@@ -193,7 +193,7 @@ export default function LandingPageView({
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
                 <span className="text-[#141413]">
-                  <strong>Mini-Web del piso (Guest App):</strong> envíala por link antes de que lleguen con Vídeo Home Tour, vídeos de check-in, guías de electrodomésticos y venta de Late Check-out.
+                  <strong>Mini-Web del alojamiento (Guest App):</strong> envíala por link antes de que lleguen con Vídeo Home Tour, vídeos de check-in, guías de electrodomésticos y venta de Late Check-out.
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -211,7 +211,7 @@ export default function LandingPageView({
                   onClick={onNavigateToApp}
                   className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-sm sm:text-base font-bold px-7 py-4 transition flex items-center gap-2.5 shadow-md group"
                 >
-                  <span>Probar 1 Piso Gratis (Sin tarjeta)</span>
+                  <span>Probar 1 Alojamiento Gratis (Sin tarjeta)</span>
                   <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </button>
 
@@ -340,7 +340,7 @@ export default function LandingPageView({
                 <div className="flex items-center justify-between border-b border-white/15 pb-3">
                   <div>
                     <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                      MINI-WEB DEL PISO · ENVÍALA POR LINK ANTES DE LLEGAR
+                      MINI-WEB DEL ALOJAMIENTO · ENVÍALA POR LINK ANTES DE LLEGAR
                     </span>
                     <h3 className="text-xl font-bold mt-0.5">Ático Vista Marina</h3>
                   </div>
@@ -356,7 +356,7 @@ export default function LandingPageView({
                       <span className="w-6 h-6 rounded-full bg-[#C85A32] text-white flex items-center justify-center font-bold text-xs shrink-0">▶</span>
                       <div>
                         <p className="font-bold text-white text-xs">Vídeo Home Tour</p>
-                        <p className="text-[10px] text-white/60">El huésped ve cómo es el piso desde su móvil antes de llegar</p>
+                        <p className="text-[10px] text-white/60">El huésped ve cómo es el alojamiento desde su móvil antes de llegar</p>
                       </div>
                     </div>
                     <span className="font-mono text-[10px] text-white/50">1:15 min</span>
@@ -403,7 +403,7 @@ export default function LandingPageView({
                   onClick={onOpenGuestDemo}
                   className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-mono text-xs font-bold uppercase tracking-wider py-3 flex items-center justify-center gap-1.5 transition"
                 >
-                  <span>Abrir Mini-Web del Piso Completa</span>
+                  <span>Abrir Mini-Web del Alojamiento Completa</span>
                   <ExternalLink size={13} />
                 </button>
               </div>
@@ -473,7 +473,7 @@ export default function LandingPageView({
                   02
                 </span>
                 <span className="font-mono text-[10px] uppercase font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5">
-                  MINI-WEB DEL PISO (GUEST APP)
+                  MINI-WEB DEL ALOJAMIENTO (GUEST APP)
                 </span>
               </div>
 
@@ -483,7 +483,7 @@ export default function LandingPageView({
                   ❌ El dolor diario
                 </span>
                 <p className="text-xs text-rose-950 font-medium leading-relaxed">
-                  Huéspedes llamando a las 23:30h perdidos en el portal, sin encontrar el cajetín de llaves, sin saber usar la vitrocerámica o sin entender el mando del aire acondicionado. Y salidas a las 11:00h sin monetizar.
+                  Huéspedes llamando a las 23:30h perdidos en la entrada, sin encontrar el cajetín de llaves, sin saber usar la vitrocerámica o sin entender el mando del aire acondicionado. Y salidas a las 11:00h sin monetizar.
                 </p>
               </div>
 
@@ -493,7 +493,7 @@ export default function LandingPageView({
                   ✓ La solución Turnexo
                 </span>
                 <p className="text-xs text-emerald-950 font-medium leading-relaxed">
-                  Le envías el link de la Mini-Web de tu apartamento por WhatsApp o Airbnb antes de que llegue. El huésped ve el Vídeo Home Tour del piso por el camino, abre el portal con los vídeos de check-in paso a paso, consulta las vídeo-guías de electrodomésticos y compra Late Check-out (+35 € netos directo a tu cuenta).
+                  Le envías el link de la Mini-Web de tu alojamiento por WhatsApp o Airbnb antes de que llegue. El huésped ve el Vídeo Home Tour por el camino, accede con los vídeos de check-in paso a paso, consulta las vídeo-guías de electrodomésticos y compra Late Check-out (+35 € netos directo a tu cuenta).
                 </p>
               </div>
             </div>
@@ -681,7 +681,7 @@ export default function LandingPageView({
               [
                 { step: 1, num: '01', title: 'Reserva iCal Recibida', desc: 'Airbnb / Booking' },
                 { step: 2, num: '02', title: 'Cuadrante Limpiadora', desc: 'Enlace móvil directo' },
-                { step: 3, num: '03', title: 'Upsell Late Check-out', desc: 'Mini-Web del piso' },
+                { step: 3, num: '03', title: 'Upsell Late Check-out', desc: 'Mini-Web del alojamiento' },
                 { step: 4, num: '04', title: 'Sincronización Total', desc: '+35€ y hora retrasada' },
               ] as const
             ).map((item) => (
@@ -750,7 +750,7 @@ export default function LandingPageView({
                     El turno aparece en el móvil de tu limpiadora
                   </h3>
                   <p className="text-sm text-[#57554F] leading-relaxed">
-                    María Carmen abre su enlace único en el navegador de su teléfono. Ve la hora asignada, el checklist del piso y el botón para subir fotos de auditoría al terminar.
+                    María Carmen abre su enlace único en el navegador de su teléfono. Ve la hora asignada, el checklist del alojamiento y el botón para subir fotos de auditoría al terminar.
                   </p>
                   <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 space-y-2 font-mono text-xs">
                     <div className="flex justify-between border-b border-[#E2DDD2] pb-2">
@@ -775,10 +775,10 @@ export default function LandingPageView({
                     PASO 3 · OFERTA INTELIGENTE
                   </span>
                   <h3 className="text-2xl font-bold text-[#141413]">
-                    El huésped solicita Late Check-out desde su Guía
+                    El huésped solicita Late Check-out desde su Mini-Web
                   </h3>
                   <p className="text-sm text-[#57554F] leading-relaxed">
-                    Al ver que su vuelo sale por la tarde, Thomas abre la Guía Digital. El sistema detecta que el piso no tiene entrada ese día y le ofrece quedarse hasta las 17:00h por 35€.
+                    Al ver que su vuelo sale por la tarde, Thomas abre la Mini-Web del alojamiento. El sistema detecta que no hay entrada ese día y le ofrece quedarse hasta las 17:00h por 35€.
                   </p>
                   <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 space-y-2 font-mono text-xs">
                     <div className="flex justify-between border-b border-[#E2DDD2] pb-2">
@@ -956,10 +956,10 @@ export default function LandingPageView({
             <div className="space-y-5">
               <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-4">
                 <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
-                  MÓDULO 1 · GUEST APP (MINI-WEB DEL PISO)
+                  MÓDULO 1 · GUEST APP (MINI-WEB DEL ALOJAMIENTO)
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
-                  1 Piso Gratis · Pro desde 19€/mes
+                  1 Alojamiento Gratis · Pro desde 19€/mes
                 </span>
               </div>
 
@@ -968,12 +968,12 @@ export default function LandingPageView({
                   ENVÍALA POR LINK ANTES DE LLEGAR · CERO LLAMADAS · CROSS-SELLING
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                  Una Mini-Web exclusiva de tu apartamento con Vídeo Home Tour, Check-in en vídeo, electrodomésticos y extras.
+                  Una Mini-Web exclusiva de tu alojamiento con Vídeo Home Tour, Check-in en vídeo, electrodomésticos y extras.
                 </h3>
               </div>
 
               <p className="text-sm text-[#57554F] leading-relaxed">
-                Mucho más que un simple código QR: le envías el enlace directo por WhatsApp o por el chat de Airbnb antes de que llegue al apartamento. Sin descargar ninguna aplicación, el huésped ve cómo es el piso en vídeo por el camino, aprende a entrar al portal sin llamarte, consulta cómo funcionan los electrodomésticos y compra el Late Check-out en 1 toque.
+                Mucho más que un simple código QR: le envías el enlace directo por WhatsApp o por el chat de Airbnb antes de que llegue al alojamiento. Sin descargar ninguna aplicación, el huésped ve cómo es el alojamiento en vídeo por el camino, aprende a entrar sin llamarte, consulta cómo funcionan los electrodomésticos y compra el Late Check-out en 1 toque.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs">
@@ -983,7 +983,7 @@ export default function LandingPageView({
                     Vídeo Home Tour antes de llegar
                   </p>
                   <p className="text-[#57554F]">
-                    El huésped abre el link antes de salir hacia el piso y ve un vídeo completo del apartamento: ubica cada estancia y disfruta de una bienvenida de hotel boutique.
+                    El huésped abre el link antes de salir hacia el alojamiento y ve un vídeo completo: ubica cada estancia y disfruta de una bienvenida de hotel boutique.
                   </p>
                 </div>
 
@@ -993,7 +993,7 @@ export default function LandingPageView({
                     Vídeos de Check-in Paso a Paso
                   </p>
                   <p className="text-[#57554F]">
-                    Muestra exactamente cómo encontrar el portal y abrir el cajetín de llaves cuando está en la calle, con desbloqueo inteligente tras ver el vídeo.
+                    Muestra exactamente cómo encontrar la entrada y abrir el cajetín de llaves cuando está en la calle, con desbloqueo inteligente tras ver el vídeo.
                   </p>
                 </div>
 
@@ -1055,7 +1055,7 @@ export default function LandingPageView({
                   MÓDULO 2 · CLEANING APP SIN CONTRASEÑAS
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
-                  1 Piso Gratis · Pro desde 19€/mes
+                  1 Alojamiento Gratis · Pro desde 19€/mes
                 </span>
               </div>
 
@@ -1069,7 +1069,7 @@ export default function LandingPageView({
               </div>
 
               <p className="text-sm text-[#57554F] leading-relaxed">
-                Tu limpiadora entra desde un enlace directo en el navegador de su teléfono (sin apps ni contraseñas que olvidar). Sigue el checklist específico de cada piso y sube fotos reales de auditoría antes de que entre el siguiente huésped.
+                Tu limpiadora entra desde un enlace directo en el navegador de su teléfono (sin apps ni contraseñas que olvidar). Sigue el checklist específico de cada alojamiento y sube fotos reales de auditoría antes de que entre el siguiente huésped.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs">
@@ -1301,7 +1301,7 @@ export default function LandingPageView({
                   30 € a 60 € / mes
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#C85A32]">
-                  1 piso 100% Gratis · Hasta 5 pisos: 19 €/mes (tarifa plana)
+                  1 alojamiento 100% Gratis · Hasta 5 alojamientos: 19 €/mes (tarifa plana)
                 </td>
               </tr>
             </tbody>
@@ -1331,7 +1331,7 @@ export default function LandingPageView({
               {
                 icon: Check,
                 title: 'Sin tarjeta de crédito',
-                desc: 'El plan de 1 alojamiento es gratuito. Solo pagas si añades más pisos o activas facturación.',
+                desc: 'El plan de 1 alojamiento es gratuito. Solo pagas si añades más alojamientos o activas facturación.',
               },
               {
                 icon: Clock,
@@ -1361,7 +1361,7 @@ export default function LandingPageView({
       <section id="precios" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
         <div className="text-center space-y-3 max-w-2xl mx-auto mb-12">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
-            PRECIOS · TARIFA PLANA, NO POR PISO
+            PRECIOS · TARIFA PLANA, NO POR ALOJAMIENTO
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
             Empieza gratis. Paga solo cuando crezcas.
@@ -1379,12 +1379,12 @@ export default function LandingPageView({
               price: '0 €',
               note: '/mes',
               summary:
-                'Plan gratuito para 1 alojamiento. Enlace móvil de limpiadora, Mini-Web del piso para enviar por link al huésped y retención de fotos a 7 días.',
+                'Plan gratuito para 1 alojamiento. Enlace móvil de limpiadora, Mini-Web del alojamiento para enviar por link al huésped y retención de fotos a 7 días.',
               highlight: false,
               cta: 'Empezar gratis (Sin tarjeta)',
               features: [
                 'Cleaning App con checklist por estancia y fotos',
-                'Mini-Web del piso (Guest App) con Vídeo Home Tour y vídeos',
+                'Mini-Web del alojamiento (Guest App) con Vídeo Home Tour y vídeos',
                 'Venta automática de Late Check-out (+35 €)',
                 'Sincronización iCal con Airbnb y Booking',
                 'Fotos de auditoría guardadas 7 días',
@@ -1401,11 +1401,11 @@ export default function LandingPageView({
               highlight: true,
               cta: 'Activar Plan Pro Fiscal',
               features: [
-                'Todo lo incluido en Starter para hasta 5 pisos',
+                'Todo lo incluido en Starter para hasta 5 alojamientos',
                 'Facturas simplificadas y completas con IVA 10% en 1 clic',
                 'Libro de IVA trimestral en Excel listo para Modelo 303',
                 'Historial fotográfico ilimitado ante reclamaciones',
-                'Mini-Web del piso 100% marca blanca (sin sello Turnexo)',
+                'Mini-Web del alojamiento 100% marca blanca (sin sello Turnexo)',
               ],
             },
             {
@@ -1418,8 +1418,8 @@ export default function LandingPageView({
               highlight: false,
               cta: 'Activar Plan Microgestora',
               features: [
-                'Todo lo incluido en Pro Fiscal para hasta 10 pisos',
-                'Múltiples limpiadoras con asignación por apartamento',
+                'Todo lo incluido en Pro Fiscal para hasta 10 alojamientos',
+                'Múltiples limpiadoras con asignación por alojamiento',
                 'Control y liquidación mensual de pagos de limpieza',
                 'Soporte prioritario directo',
               ],
@@ -1589,7 +1589,7 @@ export default function LandingPageView({
               onClick={onNavigateToApp}
               className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-mono uppercase tracking-wider font-bold py-4 transition flex items-center justify-center gap-2 shadow-md group"
             >
-              <span>Crear la Mini-Web de mi piso gratis (Sin tarjeta)</span>
+              <span>Crear la Mini-Web de mi alojamiento gratis (Sin tarjeta)</span>
               <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
@@ -1620,19 +1620,19 @@ export default function LandingPageView({
               },
               {
                 q: '¿Cómo funciona la venta de Late Check-out y cobro de extras?',
-                a: 'Turnexo detecta mediante el calendario iCal si el día de salida del huésped entra otra reserva o queda libre. Si queda libre, ofrece el Late Check-out hasta la tarde en la Mini-Web del apartamento. Tú cobras el 100% del dinero directamente al huésped (por el centro de resoluciones de Airbnb, Bizum o tarjeta) sin que Turnexo te cobre ninguna comisión.',
+                a: 'Turnexo detecta mediante el calendario iCal si el día de salida del huésped entra otra reserva o queda libre. Si queda libre, ofrece el Late Check-out hasta la tarde en la Mini-Web del alojamiento. Tú cobras el 100% del dinero directamente al huésped (por el centro de resoluciones de Airbnb, Bizum o tarjeta) sin que Turnexo te cobre ninguna comisión.',
               },
               {
                 q: '¿Cómo funcionan los planes y tarifas? ¿Hay plan gratuito?',
-                a: 'El Plan Gratuito (Starter) está diseñado para anfitriones de 1 alojamiento (con marca de agua discreta y retención de fotos de auditoría a 7 días). Para anfitriones de hasta 5 alojamientos que necesitan facturación oficial con IVA del 10% y exportación para su gestor, el Plan Pro Fiscal cuesta 19 €/mes (tarifa plana total, no por piso). Y para pequeñas gestoras de hasta 10 alojamientos, el Plan Microgestora cuesta 39 €/mes.',
+                a: 'El Plan Gratuito (Starter) está diseñado para anfitriones de 1 alojamiento (con marca de agua discreta y retención de fotos de auditoría a 7 días). Para anfitriones de hasta 5 alojamientos que necesitan facturación oficial con IVA del 10% y exportación para su gestor, el Plan Pro Fiscal cuesta 19 €/mes (tarifa plana total, no por alojamiento). Y para pequeñas gestoras de hasta 10 alojamientos, el Plan Microgestora cuesta 39 €/mes.',
               },
               {
-                q: '¿Cómo recibe el huésped la Mini-Web del piso con el Vídeo Home Tour, el check-in y las vídeo-guías?',
-                a: 'No hace falta ni esperar a que escaneen un QR en el salón: puedes enviarle el link directo de la Mini-Web del apartamento por WhatsApp o en el mensaje de bienvenida de Airbnb antes de que llegue. Así ve cómo es el piso en vídeo por el camino, sigue el vídeo de check-in paso a paso cuando está frente al portal y consulta cómo usar la vitrocerámica o el aire acondicionado sin llamarte a deshoras.',
+                q: '¿Cómo recibe el huésped la Mini-Web del alojamiento con el Vídeo Home Tour, el check-in y las vídeo-guías?',
+                a: 'No hace falta ni esperar a que escaneen un QR en el salón: puedes enviarle el link directo de la Mini-Web del alojamiento por WhatsApp o en el mensaje de bienvenida de Airbnb antes de que llegue. Así ve cómo es el alojamiento en vídeo por el camino, sigue el vídeo de check-in paso a paso cuando está en la entrada y consulta cómo usar la vitrocerámica o el aire acondicionado sin llamarte a deshoras.',
               },
               {
-                q: '¿Cómo compruebo que la limpiadora ha terminado y que el piso está limpio?',
-                a: 'Tu personal de limpieza accede con su enlace móvil directo. Sigue el checklist de tareas de cada habitación y toma fotos obligatorias con la cámara de su móvil al terminar. Las fotos se sincronizan al instante en tu panel de anfitrión para que verifiques desde tu sofá que todo está impecable antes del siguiente check-in.',
+                q: '¿Cómo compruebo que la limpiadora ha terminado y que el alojamiento está limpio?',
+                a: 'Tu personal de limpieza accede con su enlace móvil directo. Sigue el checklist de tareas de cada estancia y toma fotos obligatorias con la cámara de su móvil al terminar. Las fotos se sincronizan al instante en tu panel de anfitrión para que verifiques desde tu sofá que todo está impecable antes del siguiente check-in.',
               },
               {
                 q: '¿Tengo permanencia o tengo que poner mi tarjeta de crédito para probar?',

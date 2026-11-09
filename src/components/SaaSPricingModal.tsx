@@ -12,7 +12,7 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
       icon: QrCode,
       features: [
         '1 Alojamiento turístico conectado',
-        'Mini-Web del Piso (Vídeo Home Tour, check-in y electrodomésticos en vídeo)',
+        'Mini-Web del Alojamiento (Vídeo Home Tour, check-in y electrodomésticos en vídeo)',
         'Envío por link en WhatsApp/Airbnb antes de que llegue el huésped',
         'Sincronización iCal automática con Airbnb y Booking',
         'Cleaning App móvil con checklist y fotos de auditoría (sin contraseñas)',
@@ -26,7 +26,7 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
       name: 'Plan Pro Fiscal',
       price: '19 €',
       period: '/mes tarifa plana total',
-      subtitle: 'Hasta 5 Alojamientos (~3,80€/piso)',
+      subtitle: 'Hasta 5 Alojamientos (~3,80€/alojamiento)',
       badge: '⭐ El más elegido · IVA 10%',
       icon: FileText,
       features: [
@@ -45,7 +45,7 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
       name: 'Plan Microgestora',
       price: '39 €',
       period: '/mes tarifa plana total',
-      subtitle: 'Hasta 10 Alojamientos (~3,90€/piso)',
+      subtitle: 'Hasta 10 Alojamientos (~3,90€/alojamiento)',
       badge: 'Microgestores',
       icon: Users,
       features: [
@@ -74,7 +74,7 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
               Planes simples para propietarios particulares y pequeñas gestoras
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Empieza 100% gratis con 1 piso. Activa el Plan Pro cuando necesites facturar legalmente con IVA 10% o gestionar varios alojamientos.
+              Empieza 100% gratis con 1 alojamiento. Activa el Plan Pro cuando necesites facturar legalmente con IVA 10% o gestionar varios alojamientos.
             </p>
           </div>
           <button

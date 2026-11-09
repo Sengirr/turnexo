@@ -59,8 +59,8 @@ export default function LandingPageView({
   } | null>(null);
   const [testError, setTestError] = useState<string | null>(null);
 
-  // Selector interactivo de vista previa
-  const [previewTab, setPreviewTab] = useState<'cleaner' | 'guest'>('cleaner');
+  // Selector interactivo de vista previa (3 pilares del producto)
+  const [previewTab, setPreviewTab] = useState<'cleaner' | 'guest' | 'invoice'>('cleaner');
 
   const handleRunIcalTest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -562,36 +562,48 @@ export default function LandingPageView({
             </div>
           </div>
 
-          {/* Vista Previa Interactiva con Toggle Cleaner / Guest */}
+          {/* Vista Previa Interactiva con Toggle de los 3 Motores: Cleaner / Guest / Facturas IVA */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="flex items-center gap-1.5 p-1 bg-[#E8E4D9] border border-[#D5CFC0] rounded-none font-mono text-xs">
+            <div className="grid grid-cols-3 gap-1 p-1 bg-[#E8E4D9] border border-[#D5CFC0] rounded-none font-mono text-[11px]">
               <button
                 type="button"
                 onClick={() => setPreviewTab('cleaner')}
-                className={`flex-1 py-2 font-bold uppercase transition flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-1.5 font-bold uppercase transition flex items-center justify-center gap-1 ${
                   previewTab === 'cleaner'
                     ? 'bg-[#141413] text-white shadow-md'
                     : 'text-[#57554F] hover:text-[#141413]'
                 }`}
               >
-                <Smartphone size={14} />
-                <span>Vista Limpiadora</span>
+                <Smartphone size={13} />
+                <span>Limpiadora</span>
               </button>
               <button
                 type="button"
                 onClick={() => setPreviewTab('guest')}
-                className={`flex-1 py-2 font-bold uppercase transition flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-1.5 font-bold uppercase transition flex items-center justify-center gap-1 ${
                   previewTab === 'guest'
                     ? 'bg-[#C85A32] text-white shadow-md'
                     : 'text-[#57554F] hover:text-[#141413]'
                 }`}
               >
-                <Sparkles size={14} />
-                <span>Vista Huésped</span>
+                <Sparkles size={13} />
+                <span>Mini-Web</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewTab('invoice')}
+                className={`py-2 px-1.5 font-bold uppercase transition flex items-center justify-center gap-1 ${
+                  previewTab === 'invoice'
+                    ? 'bg-[#1F4E3D] text-white shadow-md'
+                    : 'text-[#57554F] hover:text-[#141413]'
+                }`}
+              >
+                <FileSpreadsheet size={13} />
+                <span>IVA 10%</span>
               </button>
             </div>
 
-            {previewTab === 'cleaner' ? (
+            {previewTab === 'cleaner' && (
               <div className="bg-[#FAF9F5] border-2 border-[#141413] p-6 space-y-4 shadow-[6px_6px_0px_#141413]">
                 <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-3">
                   <div>
@@ -651,7 +663,9 @@ export default function LandingPageView({
                   <ExternalLink size={13} />
                 </button>
               </div>
-            ) : (
+            )}
+
+            {previewTab === 'guest' && (
               <div className="bg-[#141413] text-[#F6F4EE] p-6 border-2 border-[#141413] space-y-4 shadow-[6px_6px_0px_#C85A32]">
                 <div className="flex items-center justify-between border-b border-white/15 pb-3">
                   <div>
@@ -724,6 +738,88 @@ export default function LandingPageView({
                 </button>
               </div>
             )}
+
+            {previewTab === 'invoice' && (
+              <div className="bg-[#FAF9F5] border-2 border-[#141413] p-6 space-y-4 shadow-[6px_6px_0px_#1F4E3D]">
+                <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-3">
+                  <div>
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
+                      FACTURACIÓN IVA 10% · MODELO 303 GESTORÍA
+                    </span>
+                    <h4 className="text-xl font-bold text-[#141413] mt-0.5">
+                      Factura #F-2026-0042
+                    </h4>
+                  </div>
+                  <span className="font-mono text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 px-2.5 py-1">
+                    IVA 10% Desglosado
+                  </span>
+                </div>
+
+                <div className="bg-white border border-[#D5CFC0] p-4 space-y-3 text-xs font-mono">
+                  <div className="flex justify-between items-center border-b border-[#E2DDD2] pb-2">
+                    <span className="text-[#57554F]">Reserva sincronizada:</span>
+                    <span className="font-bold text-[#141413]">Thomas Müller (Airbnb · 4 noches)</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#57554F]">Base Imponible Alojamiento:</span>
+                    <span className="font-bold text-[#141413]">400,00 €</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[#1F4E3D]">
+                    <span className="font-bold">Cuota IVA Hospedaje (10%):</span>
+                    <span className="font-bold">+40,00 €</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#141413] pt-2 text-sm">
+                    <span className="font-bold text-[#141413]">TOTAL FACTURA OFICIAL:</span>
+                    <span className="font-extrabold text-[#141413]">440,00 €</span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-[#1F4E3D]/10 border border-[#1F4E3D]/30 text-[#1F4E3D] text-[11px] font-mono flex items-center gap-2">
+                  <CheckCircle2 size={14} className="shrink-0" />
+                  <span>Al cerrar el trimestre, descargas el Libro Excel para que tu gestoría presente el Modelo 303 sin picar facturas a mano.</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onNavigateToApp}
+                  className="w-full bg-[#1F4E3D] hover:bg-[#16382B] text-white font-mono text-xs font-bold uppercase tracking-wider py-3 flex items-center justify-center gap-1.5 transition"
+                >
+                  <span>Probar Facturación y Libro IVA en el Panel</span>
+                  <ArrowUpRight size={14} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* BARRA DE COMPATIBILIDAD UNIVERSAL & ECOSISTEMA (ESTILO SAAS LÍDERES) */}
+      <section className="bg-[#FAF9F5] border-b border-[#E2DDD2] py-6 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2.5 text-xs font-mono uppercase tracking-wider text-[#57554F] font-bold">
+            <span className="w-2 h-2 rounded-full bg-[#1F4E3D]" />
+            <span>Sincronización nativa vía enlace iCal (.ics) sin cambiar de plataforma ni dar contraseñas:</span>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 font-mono text-xs font-bold">
+            {[
+              { name: 'Airbnb', tag: 'iCal Sync' },
+              { name: 'Booking.com', tag: 'iCal Sync' },
+              { name: 'Vrbo', tag: 'iCal Sync' },
+              { name: 'Smoobu / Lodgify', tag: 'Compatible' },
+              { name: 'AvaiBook / Google Cal', tag: 'Compatible' },
+              { name: 'Libro IVA AEAT', tag: 'Modelo 303' },
+            ].map((p) => (
+              <div
+                key={p.name}
+                className="bg-white border border-[#D5CFC0] px-3 py-1.5 flex items-center gap-2 shadow-2xs"
+              >
+                <span className="text-[#141413]">{p.name}</span>
+                <span className="text-[9px] uppercase px-1.5 py-0.5 bg-[#E8E4D9] text-[#57554F]">
+                  {p.tag}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1256,13 +1352,13 @@ export default function LandingPageView({
       <section id="modulos" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
         <div className="max-w-3xl space-y-3 mb-14">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
-            Arquitectura Modular Especializada
+            Arquitectura Modular Todo-en-Uno
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] leading-tight tracking-tight">
-            Las dos herramientas clave que resuelven tu día a día como anfitrión.
+            Los 3 motores que resuelven tu operativa y tu fiscalidad como anfitrión.
           </h2>
           <p className="text-sm text-[#57554F] leading-relaxed">
-            Guest App para una experiencia en vídeo y cross-selling, y Cleaning App para eliminar la comunicación con tu limpiadora y auditar la limpieza con fotos. Úsalas juntas o por separado.
+            Guest App (Mini-Web enviada por link antes de llegar), Cleaning App (cero comunicación con tu limpiadora y auditoría con fotos) y Facturación IVA 10% lista para tu gestoría.
           </p>
         </div>
 
@@ -1456,6 +1552,172 @@ export default function LandingPageView({
               >
                 Gestionar Turnos en el Panel
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* MÓDULO 3 · FACTURACIÓN IVA 10% Y LIBRO EXCEL PARA GESTORÍA */}
+        <div className="mt-8 bg-[#FAF9F5] border-2 border-[#141413] p-8 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-[6px_6px_0px_#141413]">
+          <div className="lg:col-span-7 space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2DDD2] pb-4">
+              <span className="font-mono text-xs uppercase tracking-widest text-emerald-800 font-bold">
+                MÓDULO 3 · FACTURACIÓN IVA 10% Y EXPORTACIÓN MODELO 303
+              </span>
+              <span className="font-mono text-xs font-bold bg-emerald-100 text-emerald-900 px-2.5 py-0.5">
+                Incluido en Plan Pro Fiscal (19 €/mes)
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-emerald-800 font-bold block">
+                SIN HACER FACTURAS A MANO EN WORD · LISTO PARA TU ASESORÍA
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
+                Genera las facturas de tus estancias con el 10% de IVA y envíaselas a tu gestor en 1 clic.
+              </h3>
+            </div>
+
+            <p className="text-sm text-[#57554F] leading-relaxed">
+              Con el nuevo marco fiscal, cada reserva requiere su factura con IVA del 10% desglosado. En lugar de perder tardes enteras haciendo facturas en Word o Excel para pasárselas a tu gestoría, Turnexo las genera desde las reservas sincronizadas por iCal y exporta el Libro Registro trimestral listo para presentar el Modelo 303.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
+                <p className="font-bold text-[#141413]">Facturas Simplificadas y Completas</p>
+                <p className="text-[#57554F]">Numeración correlativa oficial, desglose automático de base + 10% IVA y PDF listo para el huésped.</p>
+              </div>
+              <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
+                <p className="font-bold text-[#141413]">Libro de IVA en Excel / CSV</p>
+                <p className="text-[#57554F]">Al cerrar el trimestre, descargas el archivo estructurado que tu gestor importa en 10 segundos.</p>
+              </div>
+              <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
+                <p className="font-bold text-[#141413]">Multi-Propietario / NIF</p>
+                <p className="text-[#57554F]">Configura tus datos fiscales por alojamiento para llevar la contabilidad separada sin errores.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5 bg-[#141413] text-[#F6F4EE] p-6 border border-[#2C2C29] space-y-4 font-mono text-xs">
+            <div className="flex items-center justify-between border-b border-white/15 pb-3">
+              <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">
+                RESUMEN TRIMESTRAL · 3T 2026
+              </span>
+              <span className="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 text-[10px] font-bold">
+                MODELO 303 LISTO
+              </span>
+            </div>
+
+            <div className="space-y-2 bg-white/5 p-3.5 border border-white/10">
+              <div className="flex justify-between text-white/70">
+                <span>Facturas emitidas (Airbnb + Booking):</span>
+                <span className="font-bold text-white">28 facturas</span>
+              </div>
+              <div className="flex justify-between text-white/70">
+                <span>Base imponible acumulada:</span>
+                <span className="font-bold text-white">11.420,00 €</span>
+              </div>
+              <div className="flex justify-between text-emerald-400 font-bold border-t border-white/10 pt-2">
+                <span>IVA repercutido al 10% (Casilla 07):</span>
+                <span>1.142,00 €</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onNavigateToApp}
+              className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-bold uppercase py-3.5 px-4 transition flex items-center justify-center gap-2"
+            >
+              <FileSpreadsheet size={15} />
+              <span>Probar Generador de Facturas e IVA →</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* CRONOLOGÍA VISUAL DE ROTACIÓN (ANTES VS DESPUÉS · ESTILO BREEZEWAY / HOSPITABLE) */}
+      <section className="bg-[#141413] text-[#F6F4EE] py-24 px-6 border-b border-[#2C2C29]">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="max-w-3xl mx-auto text-center space-y-3">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
+              UN VIERNES DE ROTACIÓN REAL (SALIDA 11:00H → ENTRADA 15:00H)
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Así cambia tu semana cuando dejas de coordinar por WhatsApp.
+            </h2>
+            <p className="text-sm text-white/70">
+              Compara lo que ocurre en un cambio de huéspedes habitual cuando lo gestionas a mano frente a cuando opera en piloto automático con Turnexo.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Columna Sin Turnexo */}
+            <div className="bg-[#1E1E1C] border border-white/15 p-7 space-y-5">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <span className="font-mono text-xs uppercase font-bold text-rose-400">
+                  ❌ SIN TURNEXO (GESTIÓN MANUAL)
+                </span>
+                <span className="font-mono text-[11px] bg-rose-500/20 text-rose-300 px-2.5 py-0.5">
+                  +45 min perdidos por reserva
+                </span>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-rose-400 shrink-0 w-14">09:30h</span>
+                  <p className="text-white/80">Mandas un audio por WhatsApp a tu limpiadora para recordarle que hoy sale un huésped y entra otro a las 15:00h.</p>
+                </div>
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-rose-400 shrink-0 w-14">13:45h</span>
+                  <p className="text-white/80">No sabes si ya ha terminado ni si ha repuesto papel y toallas. Tienes que escribirle otra vez para quedarte tranquilo.</p>
+                </div>
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-rose-400 shrink-0 w-14">16:15h</span>
+                  <p className="text-white/80">El nuevo huésped te llama desde la calle porque no entiende qué cajetín abrir ni cómo desbloquear el portal.</p>
+                </div>
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-rose-400 shrink-0 w-14">23:10h</span>
+                  <p className="text-white/80">Mensaje de noche: <em>"Perdona, ¿cómo se desbloquea la vitrocerámica y cuál es la clave del WiFi?"</em>.</p>
+                </div>
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-rose-400 shrink-0 w-14">Día 30</span>
+                  <p className="text-white/80">Tarde entera copiando reservas de Airbnb a un Excel para calcular el 10% de IVA y mandárselo a la gestoría.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Columna Con Turnexo */}
+            <div className="bg-[#FAF9F5] text-[#141413] border-2 border-[#C85A32] p-7 space-y-5 shadow-[6px_6px_0px_#C85A32]">
+              <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-4">
+                <span className="font-mono text-xs uppercase font-bold text-[#1F4E3D]">
+                  ✓ CON TURNEXO (EN PILOTO AUTOMÁTICO)
+                </span>
+                <span className="font-mono text-[11px] bg-[#1F4E3D] text-white font-bold px-2.5 py-0.5">
+                  0 llamadas · 0 WhatsApps
+                </span>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-[#C85A32] shrink-0 w-14">48h antes</span>
+                  <p className="text-[#141413]">Envías el link de la <strong>Mini-Web del alojamiento</strong>. El huésped ve el <strong>Vídeo Home Tour</strong> desde su casa y reserva Late Check-out (+35 €).</p>
+                </div>
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-[#1F4E3D] shrink-0 w-14">11:00h</span>
+                  <p className="text-[#141413]">Tu limpiadora abre su enlace móvil directo, ve la alerta <strong>🔥 ENTRADA HOY</strong> y marca el checklist habitación por habitación.</p>
+                </div>
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-[#1F4E3D] shrink-0 w-14">13:30h</span>
+                  <p className="text-[#141413]">Recibes las <strong>3 fotos obligatorias de auditoría</strong> en tu panel. Compruebas desde el sofá que el alojamiento está impecable.</p>
+                </div>
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-[#C85A32] shrink-0 w-14">15:00h</span>
+                  <p className="text-[#141413]">El huésped entra viendo el <strong>vídeo de check-in paso a paso</strong> y usa la vitro y el clima con las <strong>vídeo-guías de 15 seg</strong> sin llamarte.</p>
+                </div>
+                <div className="flex gap-3.5 items-start">
+                  <span className="font-mono font-bold text-[#1F4E3D] shrink-0 w-14">Día 30</span>
+                  <p className="text-[#141413]">Descargas el <strong>Libro de IVA 10% en Excel en 1 clic</strong> y se lo reenvías a tu gestoría para el Modelo 303.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1868,6 +2130,41 @@ export default function LandingPageView({
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN FINAL DE CIERRE DE CONVERSIÓN (BOTTOM CTA BANNER) */}
+      <section className="max-w-7xl mx-auto px-6 pb-24">
+        <div className="bg-[#141413] text-[#F6F4EE] border-2 border-[#141413] p-8 sm:p-14 shadow-[10px_10px_0px_#C85A32] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+          <div className="space-y-3 max-w-2xl">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
+              EMPIEZA EN MENOS DE 5 MINUTOS · SIN TARJETA
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              Pon tu primer alojamiento en piloto automático hoy mismo. Gratis.
+            </h2>
+            <p className="text-sm text-white/75 leading-relaxed">
+              Conecta tu enlace iCal de Airbnb o Booking, comparte el enlace móvil con tu limpiadora y envía la Mini-Web en vídeo a tu próximo huésped antes de que aterrice.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0">
+            <button
+              type="button"
+              onClick={onNavigateToApp}
+              className="bg-[#C85A32] hover:bg-[#B04A25] text-white font-mono text-xs sm:text-sm font-bold uppercase tracking-wider px-7 py-4 transition flex items-center justify-center gap-2 shadow-md"
+            >
+              <span>Probar 1 Alojamiento Gratis</span>
+              <ArrowUpRight size={17} />
+            </button>
+            <button
+              type="button"
+              onClick={onOpenGuestDemo}
+              className="border border-white/30 hover:border-white text-white font-mono text-xs font-bold uppercase tracking-wider px-5 py-4 transition text-center"
+            >
+              Ver Demo en Vivo
+            </button>
           </div>
         </div>
       </section>

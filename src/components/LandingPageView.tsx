@@ -436,22 +436,22 @@ export default function LandingPageView({
                 De reservas de Airbnb y Booking a facturas oficiales listas para tu gestor en un clic<span className="-ml-[0.03em]">.</span>
               </h3>
               <p className="text-sm text-[#57554F] leading-relaxed">
-                Olvídate de pasar tardes enteras al final del trimestre picando estancias a mano en una hoja de cálculo. Turnexo desglosa la base imponible y el 10% de IVA de cada reserva automáticamente.
+                Olvídate de perder tardes enteras al final del trimestre haciendo facturas una por una en Word o Excel. Turnexo calcula la base imponible y el 10% de IVA de cada reserva automáticamente.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
-                <p className="font-bold text-[#141413]">Facturas simplificadas y completas</p>
+                <p className="font-bold text-[#141413]">Facturas simplificadas y con NIF</p>
                 <p className="text-[#57554F]">Numeración correlativa oficial con desglose de IVA al 10% y descarga en PDF.</p>
               </div>
               <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
                 <p className="font-bold text-[#141413]">Exportación trimestral en Excel</p>
-                <p className="text-[#57554F]">Libro Registro estructurado para que tu asesoría liquide el Modelo 303 en minutos.</p>
+                <p className="text-[#57554F]">Libro Registro estructurado para que tu gestoría liquide el Modelo 303 en minutos.</p>
               </div>
               <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
-                <p className="font-bold text-[#141413]">Soporte Multi-NIF</p>
-                <p className="text-[#57554F]">Configura distintos titulares y series si gestionas alojamientos de varios propietarios.</p>
+                <p className="font-bold text-[#141413]">Varios propietarios (Multi-NIF)</p>
+                <p className="text-[#57554F]">Configura distintos titulares y series si gestionas alojamientos de varios dueños.</p>
               </div>
             </div>
           </div>
@@ -481,14 +481,22 @@ export default function LandingPageView({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onNavigateToApp}
-              className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans font-semibold text-sm py-3.5 px-5 transition flex items-center justify-center gap-2 shadow-sm"
-            >
-              <FileSpreadsheet size={16} />
-              <span>Probar Facturación e IVA en el Panel →</span>
-            </button>
+            <div className="grid grid-cols-2 gap-2.5 pt-1 font-mono text-[11px]">
+              <div className="bg-white/5 border border-white/10 px-3 py-2.5 flex items-center gap-2 text-white/90">
+                <FileSpreadsheet size={15} className="text-emerald-400 shrink-0" />
+                <div className="truncate">
+                  <p className="font-bold text-white truncate">Libro_IVA_3T.xlsx</p>
+                  <p className="text-[10px] text-white/55 truncate">Excel para gestoría</p>
+                </div>
+              </div>
+              <div className="bg-white/5 border border-white/10 px-3 py-2.5 flex items-center gap-2 text-white/90">
+                <CheckCircle2 size={15} className="text-emerald-400 shrink-0" />
+                <div className="truncate">
+                  <p className="font-bold text-white truncate">28 Facturas PDF</p>
+                  <p className="text-[10px] text-white/55 truncate">Serie F2026 correlativa</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

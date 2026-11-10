@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   ArrowUpRight,
   Check,
-  Clock,
   Users,
   Video,
   ShieldCheck,
@@ -743,41 +742,28 @@ export default function LandingPageView({
           ))}
         </div>
 
-        {/* Tira de Garantías integrada directamente bajo Precios (sin crear otra sección extra) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10 pt-10 border-t border-[#E2DDD2]">
-          {[
-            {
-              icon: ShieldCheck,
-              title: 'Sin dar contraseñas de Airbnb',
-              desc: 'Solo pegas el enlace público iCal (.ics). Tus cuentas no se tocan.',
-            },
-            {
-              icon: Check,
-              title: 'Sin tarjeta de crédito',
-              desc: 'Prueba el plan gratuito de 1 alojamiento sin introducir datos bancarios.',
-            },
-            {
-              icon: Clock,
-              title: 'Listo en 5 minutos',
-              desc: 'Conectas tu calendario iCal y compartes los enlaces con tu limpiadora y tus huéspedes.',
-            },
-            {
-              icon: FileSpreadsheet,
-              title: 'Sin permanencia',
-              desc: 'Cancela en 1 clic y exporta tus facturas y datos en Excel cuando quieras.',
-            },
-          ].map((g) => {
-            const Icon = g.icon;
-            return (
-              <div key={g.title} className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 space-y-1">
-                <div className="flex items-center gap-2">
-                  <Icon size={16} className="text-[#1F4E3D] shrink-0" />
-                  <h3 className="font-bold text-xs text-[#141413]">{g.title}</h3>
-                </div>
-                <p className="text-[11px] text-[#57554F] leading-relaxed">{g.desc}</p>
-              </div>
-            );
-          })}
+        {/* Bloque horizontal para Gestoras de +10 alojamientos */}
+        <div className="mt-8 bg-[#FAF9F5] border border-[#D5CFC0] p-6 sm:px-8 sm:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-wider font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
+                CARTERAS DE +10 ALOJAMIENTOS
+              </span>
+              <h3 className="font-extrabold text-sm sm:text-base text-[#141413]">
+                ¿Gestionas más de 10 alojamientos?
+              </h3>
+            </div>
+            <p className="text-xs sm:text-sm text-[#57554F]">
+              Contamos con planes de tarifa plana para gestoras de 15, 30 o más alojamientos e importación inicial asistida sin coste.
+            </p>
+          </div>
+          <a
+            href="mailto:hola@turnexo.com?subject=Consulta%20Plan%20Gestora%20(%2B10%20alojamientos)"
+            className="shrink-0 font-sans text-xs sm:text-sm font-bold text-[#141413] hover:text-[#C85A32] border border-[#141413] hover:border-[#C85A32] bg-white px-5 py-3 transition inline-flex items-center gap-1.5 whitespace-nowrap"
+          >
+            <span>Consultar tarifa a medida</span>
+            <ArrowUpRight size={15} />
+          </a>
         </div>
       </section>
 

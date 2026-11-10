@@ -356,18 +356,18 @@ export default function HeroPhoneMockup({
                 })}
               </div>
 
-              {/* Tarjeta monetizable de extra: Late Check-out */}
+              {/* Tarjeta monetizable de extras: Early Check-in, Late Check-out, Cunas... */}
               <div className="bg-[#FAF9F5] text-[#141413] p-3 rounded-2xl space-y-2 shadow-md">
                 <div className="flex items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase font-bold text-[#1F4E3D]">
-                    <Clock size={11} /> Extra disponible hoy
+                    <Clock size={11} /> Extras disponibles (0% comisión)
                   </span>
                   <span className="font-mono text-xs font-extrabold text-[#C85A32]">
-                    +35 €
+                    +15 € a +35 €
                   </span>
                 </div>
                 <p className="text-xs font-bold leading-snug">
-                  Late Check-out disponible hasta las 17:00h (+35 €)
+                  Early Check-in · Late Check-out · Cuna bebé · Parking
                 </p>
                 <button
                   type="button"
@@ -381,8 +381,8 @@ export default function HeroPhoneMockup({
                   <Sparkles size={13} />
                   <span>
                     {lateCheckoutBooked
-                      ? '✓ Salida a las 17:00h solicitada'
-                      : 'Reservar salida tarde'}
+                      ? '✓ Extra solicitado al anfitrión'
+                      : 'Solicitar extra para mi estancia'}
                   </span>
                 </button>
               </div>

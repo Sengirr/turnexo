@@ -191,7 +191,7 @@ export default function LandingPageView({
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
                 <span className="text-[#141413]">
-                  <strong>Guía digital interactiva para el huésped:</strong> Clave WiFi en un toque, vídeos cortos de electrodomésticos para evitar llamadas a deshoras y venta directa de late check-out.
+                  <strong>Guía digital interactiva para el huésped:</strong> Clave WiFi en un toque, vídeos cortos de electrodomésticos para evitar llamadas a deshoras y venta de extras (early check-in, late check-out, cunas o parking).
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -315,10 +315,10 @@ export default function LandingPageView({
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Sparkles size={14} className="text-[#1F4E3D]" />
-                    Ingresos extra por Late Check-out
+                    Venta de Extras Personalizados
                   </p>
                   <p className="text-[#57554F]">
-                    Si el calendario está libre esa tarde, permite contratar la salida a las 17:00h (+35 € íntegros para ti).
+                    Ofrece Early Check-in, Late Check-out (si el iCal está libre), cuna de bebé, parking o mascotas. Cobras el 100% sin comisiones.
                   </p>
                 </div>
               </div>
@@ -565,16 +565,16 @@ export default function LandingPageView({
 
               <tr className="hover:bg-white transition">
                 <td className="py-4 px-5 font-bold text-[#141413]">
-                  Venta de Late Check-out (+35 €)
+                  Venta de Extras (Early/Late Check-out, cunas, parking...)
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  0 € (se regala por compromiso si el huésped pregunta)
+                  0 € (se regala por compromiso o se coordina a mano por WhatsApp)
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
                   No cruza la disponibilidad con el horario de la limpiadora
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Lo ofrece solo si la tarde está libre y avisa a la limpiadora automáticamente
+                  ✓ Catálogo propio de extras (cuna, parking, Early/Late Check-out según iCal) 100% íntegro para ti
                 </td>
               </tr>
 
@@ -639,11 +639,11 @@ export default function LandingPageView({
               cta: 'Empezar gratis (Sin tarjeta)',
               features: [
                 'Cleaning App con checklist por estancia y fotos',
-                'Mini-Web del alojamiento (Guest App) con Vídeo Home Tour y vídeos',
-                'Venta automática de Late Check-out (+35 €)',
+                'Guía Digital del Huésped con Vídeo Home Tour y vídeos',
+                'Catálogo de extras (Early/Late Check-out, cuna, parking...)',
                 'Sincronización iCal con Airbnb y Booking',
                 'Fotos de auditoría guardadas 7 días',
-                'Sello discreto "Creado con Turnexo" en la Mini-Web',
+                'Sello discreto "Creado con Turnexo" en la Guía',
               ],
             },
             {

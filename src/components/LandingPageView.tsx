@@ -277,12 +277,12 @@ export default function LandingPageView({
                 <strong className="font-mono uppercase text-[10px] text-rose-700 block mb-0.5">
                   ❌ Lo que te ahorras desde el primer día:
                 </strong>
-                Llamadas a las 23:30h porque el viajero no atina con el cajetín de llaves, mensajes preguntando cómo encender la vitrocerámica o el aire acondicionado, y tardes libres sin rentabilizar.
+                Llamadas a las 23:30h porque el viajero no encuentra el cajetín de llaves o la cerradura inteligente, mensajes preguntando cómo encender la vitrocerámica o el aire acondicionado, y tardes libres sin rentabilizar.
               </div>
 
               <div className="space-y-2">
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                  Envía el enlace antes de que aterricen: llegan solos, no llaman por dudas y reservan salidas tarde.
+                  Envía el enlace antes de que aterricen: llegan solos, no llaman por dudas y reservan salidas tarde<span className="-ml-[0.03em]">.</span>
                 </h3>
                 <p className="text-sm text-[#57554F] leading-relaxed">
                   Olvídate de los manuales impresos o PDFs que nadie lee. Compartes el enlace por WhatsApp o Airbnb días antes de la llegada: el huésped ve el alojamiento en vídeo desde su móvil, entra paso a paso y solicita Late Check-out en un toque.
@@ -316,7 +316,7 @@ export default function LandingPageView({
                     Vídeos de Electrodomésticos
                   </p>
                   <p className="text-[#57554F]">
-                    Clips de 15 segundos para la vitrocerámica, climatización o termo que evitan llamadas a medianoche.
+                    Clips de 15 segundos para el aire acondicionado, vitrocerámica o caldera que evitan llamadas a medianoche.
                   </p>
                 </div>
 
@@ -367,7 +367,7 @@ export default function LandingPageView({
                 <strong className="font-mono uppercase text-[10px] text-rose-700 block mb-0.5">
                   ❌ Lo que te ahorras desde el primer día:
                 </strong>
-                Enviar capturas del calendario cada domingo por WhatsApp, olvidos cuando entra una reserva de última hora y la incertidumbre de no saber si el alojamiento está listo antes del check-in.
+                Enviar capturas del calendario cada domingo por WhatsApp, olvidos en reservas de última hora y la incertidumbre de no saber si el alojamiento está listo a tiempo.
               </div>
 
               <div className="space-y-2">

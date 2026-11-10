@@ -153,7 +153,7 @@ export default function HeroPhoneMockup({
                     Parte de hoy · Sin contraseñas
                   </span>
                   <h3 className="text-sm font-extrabold text-[#141413]">
-                    Turnos de María Carmen
+                    Limpiezas de María Carmen
                   </h3>
                 </div>
                 <span className="text-[10px] font-mono font-bold bg-[#1F4E3D] text-white px-2.5 py-1 rounded-full whitespace-nowrap">
@@ -255,7 +255,7 @@ export default function HeroPhoneMockup({
               <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
                 <div>
                   <span className="text-[10px] font-mono uppercase tracking-wider text-[#C85A32] font-bold block">
-                    Mini-Web del Alojamiento
+                    Guía Digital del Huésped
                   </span>
                   <h3 className="text-sm font-extrabold text-white">
                     Guía de Bienvenida · Loft Centro

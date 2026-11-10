@@ -185,7 +185,7 @@ export default function LandingPageView({
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
                 <span className="text-[#141413]">
-                  <strong>Cuadrante de limpieza sin grupos de WhatsApp:</strong> Tu limpiadora entra con un enlace móvil sin contraseñas, marca las tareas y sube fotos del piso antes de cada check-in.
+                  <strong>Cuadrante de limpieza sin grupos de WhatsApp:</strong> Tu limpiadora entra con un enlace móvil sin contraseñas, marca las tareas y sube fotos del alojamiento antes de cada check-in.
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -353,7 +353,7 @@ export default function LandingPageView({
 
               <div className="space-y-2.5">
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                  Tu equipo recibe sus turnos automáticamente y tú compruebas con fotos que todo está listo<span className="-ml-[0.03em]">.</span>
+                  Tu equipo recibe las limpiezas automáticamente y tú compruebas con fotos que todo está listo<span className="-ml-[0.03em]">.</span>
                 </h3>
                 <p className="text-sm text-[#57554F] leading-relaxed">
                   Cada cambio en tu calendario de Airbnb o Booking actualiza al instante el enlace móvil de tu limpiadora. Ve qué alojamiento toca hoy, si hay entrada esa misma tarde y sube fotos al terminar.
@@ -537,7 +537,7 @@ export default function LandingPageView({
                   Obliga a tu equipo a instalar apps, recordar claves y usar menús complejos
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Turnos actualizados al instante en un enlace móvil sin contraseñas
+                  ✓ Limpiezas actualizadas al instante en un enlace móvil sin contraseñas
                 </td>
               </tr>
 
@@ -579,7 +579,7 @@ export default function LandingPageView({
                   Se regalan por compromiso o se negocian uno por uno por WhatsApp
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  Comisiones por venta o sin cruzar con el turno real de limpieza
+                  Comisiones por venta o sin avisar automáticamente a la limpiadora
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
                   ✓ Catálogo propio (Early/Late según calendario, cunas, parking) 100% íntegro para ti

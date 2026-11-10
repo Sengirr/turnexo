@@ -775,7 +775,7 @@ export default function LandingPageView({
               PREGUNTAS FRECUENTES
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
-              Todo lo que necesitas saber antes de empezar.
+              Todo lo que necesitas saber antes de empezar<span className="-ml-[0.03em]">.</span>
             </h2>
           </div>
 
@@ -783,27 +783,27 @@ export default function LandingPageView({
             {[
               {
                 q: '¿Cómo se conecta con mis anuncios de Airbnb y Booking?',
-                a: 'Sin contraseñas de tus cuentas. Solo copias el enlace público de exportación iCal (.ics) que te da Airbnb o Booking en la sección de calendarios y lo pegas en Turnexo. En 30 segundos todas tus reservas quedan sincronizadas automáticamente.',
+                a: 'Sin dar las contraseñas de tus cuentas. Solo copias el enlace de calendario iCal (.ics) que te dan Airbnb, Booking o Vrbo y lo pegas en Turnexo. En 30 segundos todas tus reservas y cambios quedan sincronizados automáticamente.',
               },
               {
-                q: '¿Mis limpiadoras necesitan descargarse una app de la App Store o crearse cuenta?',
-                a: 'No. Cada limpiadora recibe un enlace seguro y directo por WhatsApp. Al abrirlo en el navegador de su teléfono ve sus limpiezas del día, horas de entrada urgente, checklist por habitación y botón para subir fotos de comprobación sin necesidad de usuario ni contraseña.',
+                q: '¿Mis limpiadoras necesitan descargarse una app o crearse cuenta?',
+                a: 'No. Cada limpiadora recibe un enlace privado y directo por WhatsApp. Al abrirlo en el navegador de su móvil ve qué alojamientos tienen salida hoy, si entra otro huésped esa misma tarde, marca el checklist por habitación y sube fotos con su cámara al terminar para que compruebes que todo está listo.',
               },
               {
-                q: '¿Cómo recibe el huésped la Guía Digital con el Vídeo Home Tour, el check-in y los electrodomésticos?',
-                a: 'No hace falta esperar a que escaneen un QR al llegar: puedes enviarle el enlace directo de la Guía Digital por WhatsApp o por el chat de Airbnb antes de que viaje. Así ve cómo es el alojamiento en vídeo por el camino, sigue el check-in paso a paso cuando está en la entrada y consulta cómo usar la placa o la calefacción sin llamarte a deshoras.',
+                q: '¿Cómo recibe el huésped la Guía Digital del alojamiento? ¿Tiene que descargar algo?',
+                a: 'Funciona directamente en el navegador de su móvil sin instalar nada. Le envías el enlace por WhatsApp o por el chat de Airbnb cuando confirma la reserva: así ve el alojamiento en vídeo antes de viajar, sigue el check-in paso a paso al llegar a la puerta y consulta vídeos cortos de la placa, calefacción o cafetera sin llamarte a deshoras.',
               },
               {
-                q: '¿Cómo compruebo que la limpiadora ha terminado y que el alojamiento está listo?',
-                a: 'Tu equipo de limpieza accede con su enlace móvil directo, marca el checklist de cada estancia y sube fotos con la cámara de su móvil al terminar. Las imágenes aparecen al instante en tu panel de anfitrión antes del siguiente check-in.',
+                q: '¿Cómo funciona la venta de extras (Early Check-in, Late Check-out, cuna o parking)?',
+                a: 'Tú configuras qué extras ofrecer en cada alojamiento y el precio de cada uno. Para las entradas antes de hora o salidas tarde, Turnexo revisa tu calendario iCal y solo las ofrece si ese día está libre. Cuando apruebas un extra, el horario de tu limpiadora se actualiza solo y tú cobras el 100% del importe sin comisiones.',
               },
               {
-                q: '¿Cómo funcionan las facturas con IVA del 10% para mi gestoría?',
-                a: 'Desde cada reserva generas la factura simplificada o completa con el 10% de IVA desglosado en 1 clic. Al acabar el trimestre, descargas el Libro de IVA en Excel para enviárselo a tu gestoría y que presenten el Modelo 303 sin que tengas que hacer facturas a mano.',
+                q: '¿Cómo funcionan las facturas con el 10% de IVA para mi gestoría?',
+                a: 'Desde cada reserva generas la factura simplificada o con NIF con el 10% de IVA desglosado en un clic. Si gestionas alojamientos de varios propietarios, puedes configurar distintos titulares y series (Multi-NIF). Al acabar el trimestre, descargas el Libro Registro en Excel listo para que tu gestoría presente el Modelo 303 en minutos.',
               },
               {
                 q: '¿Tengo permanencia o tengo que poner mi tarjeta de crédito para probar?',
-                a: 'Cero permanencia y cero tarjetas para empezar. El plan Starter para 1 alojamiento es gratuito, y puedes subir o bajar de plan con un solo clic desde tu panel.',
+                a: 'Cero permanencia y sin tarjeta de crédito para empezar. El plan Starter para 1 alojamiento es gratuito, y puedes cambiar de plan o cancelar en cualquier momento con un clic desde tu panel.',
               },
             ].map((faqItem, idx) => {
               const isOpen = activeFaq === idx;

@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
-  Calendar,
   Check,
-  KeyRound,
   Layers,
   Lock,
   Mail,
   Phone,
-  Sparkles,
   User,
 } from 'lucide-react';
 import { HostAccount, isSupabaseConfigured, supabase } from '../lib/supabase';
@@ -102,17 +99,6 @@ export default function AuthOnboardingView({
     }
   };
 
-  const handleInstantDemo = (plan: HostAccount['plan'] = 'pack_complete') => {
-    onSuccess({
-      id: 'demo-host',
-      email: 'demo@turnexo.com',
-      fullName: 'Iván · Demo Host',
-      companyName: 'Marbella & Málaga Stays',
-      plan,
-      trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
-    });
-  };
-
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col">
       {/* Cabecera */}
@@ -124,7 +110,7 @@ export default function AuthOnboardingView({
             className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-[#57554F] hover:text-[#141413] font-bold"
           >
             <ArrowLeft size={14} />
-            Volver a turnexo.com
+            Volver a Turnexo
           </button>
 
           <div className="flex items-center gap-2.5">
@@ -133,7 +119,7 @@ export default function AuthOnboardingView({
             </div>
             <span className="font-bold text-base tracking-tight">Turnexo</span>
             <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] border border-[#C85A32]/40 px-2 py-0.5">
-              SELF-SERVICE ONBOARDING
+              ACCESO ANFITRIONES
             </span>
           </div>
         </div>
@@ -298,26 +284,6 @@ export default function AuthOnboardingView({
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Acceso directo 1 clic para probar sin rellenar formulario */}
-          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[#C85A32] font-bold block">
-                ¿QUIERES EXPLORAR EL PANEL CON DATOS DE EJEMPLO?
-              </span>
-              <p className="text-xs text-[#57554F]">
-                Entra en 1 clic con 2 alojamientos de prueba ya configurados para ver cómo funciona por dentro.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleInstantDemo(selectedPlan)}
-              className="bg-[#1F4E3D] hover:bg-[#163A2D] text-white font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 shrink-0 flex items-center gap-1.5 transition"
-            >
-              <KeyRound size={13} />
-              Ver Panel de Ejemplo →
-            </button>
           </div>
         </div>
 

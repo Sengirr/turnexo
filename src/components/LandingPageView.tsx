@@ -508,10 +508,10 @@ export default function LandingPageView({
             COMPARATIVA DIRECTA
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] leading-tight tracking-tight">
-            ¿Por qué los anfitriones cambian el grupo de WhatsApp y el Excel por Turnexo?
+            Por qué los anfitriones dejan atrás el caos de WhatsApp y los programas caros<span className="-ml-[0.03em]">.</span>
           </h2>
           <p className="text-sm text-[#57554F] leading-relaxed">
-            Todo lo que antes hacías a mano entre llamadas, PDFs y hojas de cálculo, centralizado en piloto automático.
+            Ni perder horas cada semana coordinando todo a mano, ni pagar cuotas por alojamiento en herramientas pensadas para grandes hoteles.
           </p>
         </div>
 
@@ -519,100 +519,100 @@ export default function LandingPageView({
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-[#D5CFC0] bg-[#E8E4D9]/60 font-mono text-[11px] uppercase tracking-wider text-[#57554F]">
-                <th className="py-4 px-5">Necesidad diaria</th>
-                <th className="py-4 px-5 text-[#57554F]">Excel + Grupos WhatsApp</th>
-                <th className="py-4 px-5 text-[#57554F]">PMS Tradicional Complejo</th>
-                <th className="py-4 px-5 bg-[#141413] text-[#F6F4EE] font-bold">Turnexo</th>
+                <th className="py-4 px-5">Tarea del día a día</th>
+                <th className="py-4 px-5 text-[#57554F]">A mano (WhatsApp y Excel)</th>
+                <th className="py-4 px-5 text-[#57554F]">Software / PMS tradicional</th>
+                <th className="py-4 px-5 bg-[#141413] text-[#F6F4EE] font-bold">Con Turnexo</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2DDD2]">
               <tr className="hover:bg-white transition">
                 <td className="py-4 px-5 font-bold text-[#141413]">
-                  Comunicación con tu limpiadora
+                  Coordinación de limpiezas
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  Audios y mensajes constantes cada vez que entra o cambia una reserva
+                  Mensajes y capturas del calendario cada vez que entra o cambia una reserva
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  Obliga a la limpiadora a crear cuenta y bajar una app compleja
+                  Obliga a tu equipo a instalar apps, recordar claves y usar menús complejos
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ 0 WhatsApps: enlace móvil directo sin contraseñas sincronizado por iCal
+                  ✓ Turnos actualizados al instante en un enlace móvil sin contraseñas
                 </td>
               </tr>
 
               <tr className="hover:bg-white transition">
                 <td className="py-4 px-5 font-bold text-[#141413]">
-                  Comprobar que el alojamiento está limpio
+                  Revisión del alojamiento
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  A ciegas (te enteras cuando el nuevo huésped llega y se queja)
+                  A ciegas: te enteras de un olvido cuando llega el siguiente huésped
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  Solo marca "limpio" sin pruebas visuales por habitación
+                  Solo permite marcar «limpio», sin checklist visual por estancia
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Checklist por estancia y fotos reales que revisas desde tu móvil
+                  ✓ Checklist por habitación y fotos de comprobación antes del check-in
                 </td>
               </tr>
 
               <tr className="hover:bg-white transition">
                 <td className="py-4 px-5 font-bold text-[#141413]">
-                  Bienvenida, Check-in y Electrodomésticos
+                  Llegada y dudas del huésped
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  PDFs largos que nadie lee y llamadas a las 23:30h desde la calle
+                  PDFs que nadie lee y llamadas a deshoras por las llaves o la calefacción
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  Formularios pesados sin Vídeo Home Tour ni vídeo-guías
+                  Formularios pesados sin vídeos del acceso ni del equipamiento
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Mini-Web enviada por link antes de llegar con vídeos de todo el alojamiento
+                  ✓ Guía Digital en vídeo enviada por enlace antes de que el viajero salga de casa
                 </td>
               </tr>
 
               <tr className="hover:bg-white transition">
                 <td className="py-4 px-5 font-bold text-[#141413]">
-                  Venta de Extras (Early/Late Check-out, cunas, parking...)
+                  Venta de extras (Early/Late, cunas, parking)
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  0 € (se regala por compromiso o se coordina a mano por WhatsApp)
+                  Se regalan por compromiso o se negocian uno por uno por WhatsApp
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  No cruza la disponibilidad con el horario de la limpiadora
+                  Comisiones por venta o sin cruzar con el turno real de limpieza
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Catálogo propio de extras (cuna, parking, Early/Late Check-out según iCal) 100% íntegro para ti
+                  ✓ Catálogo propio (Early/Late según calendario, cunas, parking) 100% íntegro para ti
                 </td>
               </tr>
 
               <tr className="hover:bg-white transition">
                 <td className="py-4 px-5 font-bold text-[#141413]">
-                  Facturas IVA 10% y Modelo 303 Gestoría
+                  Facturas al 10% de IVA y gestoría
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  Facturas a mano en Word/Excel al final de cada trimestre
+                  Tardes enteras al final del trimestre pasando reservas a Word o Excel
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  Módulos contables caros pensados para grandes hoteles
+                  Módulos de contabilidad aparte con sobrecoste mensual
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Facturas con IVA 10% en 1 clic y descarga de Libro Excel para tu gestor
+                  ✓ Facturas oficiales en un clic y Libro Registro en Excel listo para el Modelo 303
                 </td>
               </tr>
 
               <tr className="hover:bg-white transition">
                 <td className="py-4 px-5 font-bold text-[#141413]">
-                  Coste mensual
+                  Precio mensual
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  "Gratis" (a cambio de perder horas cada semana)
+                  0 €, a cambio de tu tiempo libre y estar pendiente del teléfono
                 </td>
                 <td className="py-4 px-5 text-[#57554F]">
-                  30 € a 80 € / mes cobrando comisión por cada alojamiento
+                  Cuota base más recargo o comisión por cada alojamiento añadido
                 </td>
                 <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#C85A32]">
-                  1 alojamiento Gratis · Hasta 5 alojamientos: 19 €/mes (tarifa plana total)
+                  Plan gratuito (1 alojamiento) · Hasta 5 alojamientos por 19 €/mes (tarifa plana)
                 </td>
               </tr>
             </tbody>

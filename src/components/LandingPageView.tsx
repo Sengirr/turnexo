@@ -245,37 +245,6 @@ export default function LandingPageView({
         </div>
       </section>
 
-      {/* BARRA FINA DE COMPATIBILIDAD UNIVERSAL */}
-      <section className="bg-[#FAF9F5] border-b border-[#E2DDD2] py-5 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#57554F] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#1F4E3D]" />
-            <span>Compatible con cualquier calendario iCal (.ics) sin cambiar de plataforma ni dar contraseñas:</span>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-2.5 font-mono text-xs font-bold">
-            {[
-              { name: 'Airbnb', tag: 'iCal Sync' },
-              { name: 'Booking.com', tag: 'iCal Sync' },
-              { name: 'Vrbo', tag: 'iCal Sync' },
-              { name: 'Smoobu / Lodgify', tag: 'Compatible' },
-              { name: 'AvaiBook', tag: 'Compatible' },
-              { name: 'Libro IVA AEAT', tag: 'Modelo 303' },
-            ].map((p) => (
-              <div
-                key={p.name}
-                className="bg-white border border-[#D5CFC0] px-3 py-1.5 flex items-center gap-2"
-              >
-                <span className="text-[#141413]">{p.name}</span>
-                <span className="text-[9px] uppercase px-1.5 py-0.5 bg-[#E8E4D9] text-[#57554F]">
-                  {p.tag}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* SECCIÓN 2: LOS 3 MOTORES (PROBLEMA QUE RESUELVE + BENEFICIOS REALES EN UN SOLO LUGAR) */}
       <section id="modulos" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
         <div className="max-w-3xl space-y-3 mb-14">

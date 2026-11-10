@@ -495,25 +495,11 @@ export default function App() {
           onNavigateToApp={() => navigate('/app', { kind: 'app' })}
           onOpenGuestDemo={() => {
             const prop = properties[0];
-            const demoUrl = `/g/${prop.slug}?demo=1`;
-            const win = window.open(demoUrl, '_blank', 'noopener,noreferrer');
-            if (!win) {
-              setSelectedReservationId(reservations[0].id);
-              navigate(demoUrl, { kind: 'guest', slug: prop.slug, fromLanding: true });
-            }
+            window.open(`/g/${prop.slug}?demo=1`, '_blank');
           }}
           onOpenCleanerDemo={() => {
             const c = cleaners[0];
-            const demoUrl = `/c/${c.magicToken}?demo=1`;
-            const win = window.open(demoUrl, '_blank', 'noopener,noreferrer');
-            if (!win) {
-              setSelectedCleanerId(c.id);
-              navigate(demoUrl, {
-                kind: 'cleaner',
-                token: c.magicToken,
-                fromLanding: true,
-              });
-            }
+            window.open(`/c/${c.magicToken}?demo=1`, '_blank');
           }}
           onOpenLegal={(tab = 'privacy') => setLegalModalTab(tab)}
         />

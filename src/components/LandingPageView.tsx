@@ -627,10 +627,10 @@ export default function LandingPageView({
             PRECIOS · TARIFA PLANA, NO POR ALOJAMIENTO
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
-            Empieza gratis. Paga solo cuando crezcas.
+            Empieza gratis. Paga solo cuando crezcas<span className="-ml-[0.03em]">.</span>
           </h2>
           <p className="text-sm text-[#57554F]">
-            Un solo Late Check-out al mes (+35 €) ya cubre el plan Pro Fiscal completo.
+            Con un solo extra vendido al mes (Early Check-in, Late Check-out o parking) la suscripción se paga sola.
           </p>
         </div>
 
@@ -642,15 +642,15 @@ export default function LandingPageView({
               price: '0 €',
               note: '/ mes',
               summary:
-                'Plan gratuito para 1 alojamiento. Enlace móvil de limpiadora, Mini-Web del alojamiento para enviar por link al huésped y retención de fotos a 7 días.',
+                'Plan gratuito para probar Turnexo con 1 alojamiento real. Incluye la App de Limpiadora y la Guía Digital para tus viajeros.',
               highlight: false,
               cta: 'Empezar gratis (Sin tarjeta)',
               features: [
-                'Cleaning App con checklist por estancia y fotos',
-                'Guía Digital del Huésped con Vídeo Home Tour y vídeos',
-                'Catálogo de extras (Early/Late Check-out, cuna, parking...)',
-                'Sincronización iCal con Airbnb y Booking',
-                'Fotos de auditoría guardadas 7 días',
+                'App de Limpiadora con checklist por habitación y fotos',
+                'Guía Digital del Huésped con vídeos del alojamiento y check-in',
+                'Catálogo de extras a tu medida (Early/Late Check-out, cuna, parking...)',
+                'Sincronización iCal automática con Airbnb y Booking',
+                'Fotos de comprobación guardadas 7 días',
                 'Sello discreto "Creado con Turnexo" en la Guía',
               ],
             },
@@ -660,15 +660,16 @@ export default function LandingPageView({
               price: '19 €',
               note: '/ mes (tarifa plana)',
               summary:
-                'Todo el control operativo + facturación con IVA del 10% y exportación trimestral en 1 clic para tu gestoría.',
+                'Todo el control operativo más facturación oficial al 10% de IVA y exportación trimestral en 1 clic para tu gestoría.',
               highlight: true,
               cta: 'Activar Plan Pro Fiscal',
               features: [
                 'Todo lo incluido en Starter para hasta 5 alojamientos',
-                'Facturas simplificadas y completas con IVA 10% en 1 clic',
-                'Libro de IVA trimestral en Excel listo para Modelo 303',
+                'Facturas simplificadas y con NIF al 10% de IVA en 1 clic',
+                'Libro Registro trimestral en Excel listo para el Modelo 303',
+                'Soporte para varios propietarios (Multi-NIF)',
                 'Historial fotográfico ilimitado ante reclamaciones',
-                'Mini-Web del alojamiento 100% marca blanca (sin sello Turnexo)',
+                'Guía Digital 100% marca blanca (sin sello de Turnexo)',
               ],
             },
             {
@@ -677,13 +678,13 @@ export default function LandingPageView({
               price: '39 €',
               note: '/ mes (tarifa plana)',
               summary:
-                'Para gestores con varias limpiadoras y rotación frecuente que necesitan control de pagos y auditoría multi-equipo.',
+                'Para gestores con varias limpiadoras y múltiples propietarios que necesitan coordinar todas las salidas sin líos.',
               highlight: false,
               cta: 'Activar Plan Microgestora',
               features: [
                 'Todo lo incluido en Pro Fiscal para hasta 10 alojamientos',
                 'Múltiples limpiadoras con asignación por alojamiento',
-                'Control y liquidación mensual de pagos de limpieza',
+                'Control y resumen mensual de limpiezas por persona',
                 'Soporte prioritario directo',
               ],
             },
@@ -753,17 +754,17 @@ export default function LandingPageView({
             {
               icon: Check,
               title: 'Sin tarjeta de crédito',
-              desc: 'El plan de 1 alojamiento es gratuito sin límite de tiempo.',
+              desc: 'Prueba el plan gratuito de 1 alojamiento sin introducir datos bancarios.',
             },
             {
               icon: Clock,
               title: 'Listo en 5 minutos',
-              desc: 'Pegas el iCal, subes tus vídeos y compartes los links al instante.',
+              desc: 'Conectas tu calendario iCal y compartes los enlaces con tu limpiadora y tus huéspedes.',
             },
             {
               icon: FileSpreadsheet,
               title: 'Sin permanencia',
-              desc: 'Exporta tus facturas y datos en Excel/CSV cuando quieras.',
+              desc: 'Cancela en 1 clic y exporta tus facturas y datos en Excel cuando quieras.',
             },
           ].map((g) => {
             const Icon = g.icon;
@@ -800,15 +801,15 @@ export default function LandingPageView({
               },
               {
                 q: '¿Mis limpiadoras necesitan descargarse una app de la App Store o crearse cuenta?',
-                a: 'No. Cada limpiadora recibe un enlace seguro y directo por WhatsApp. Al abrirlo en el navegador de su teléfono ve su parte de trabajo del día, horas de check-in urgente, checklist en español y botón para tomar fotos de auditoría sin necesidad de usuario ni contraseña.',
+                a: 'No. Cada limpiadora recibe un enlace seguro y directo por WhatsApp. Al abrirlo en el navegador de su teléfono ve sus limpiezas del día, horas de entrada urgente, checklist por habitación y botón para subir fotos de comprobación sin necesidad de usuario ni contraseña.',
               },
               {
-                q: '¿Cómo recibe el huésped la Mini-Web del alojamiento con el Vídeo Home Tour, el check-in y las vídeo-guías?',
-                a: 'No hace falta ni esperar a que escaneen un QR en el salón: puedes enviarle el link directo de la Mini-Web del alojamiento por WhatsApp o en el mensaje de bienvenida de Airbnb antes de que llegue. Así ve cómo es el alojamiento en vídeo por el camino, sigue el vídeo de check-in paso a paso cuando está en la entrada y consulta cómo usar la vitrocerámica o el aire acondicionado sin llamarte a deshoras.',
+                q: '¿Cómo recibe el huésped la Guía Digital con el Vídeo Home Tour, el check-in y los electrodomésticos?',
+                a: 'No hace falta esperar a que escaneen un QR al llegar: puedes enviarle el enlace directo de la Guía Digital por WhatsApp o por el chat de Airbnb antes de que viaje. Así ve cómo es el alojamiento en vídeo por el camino, sigue el check-in paso a paso cuando está en la entrada y consulta cómo usar la placa o la calefacción sin llamarte a deshoras.',
               },
               {
-                q: '¿Cómo compruebo que la limpiadora ha terminado y que el alojamiento está limpio?',
-                a: 'Tu personal de limpieza accede con su enlace móvil directo. Sigue el checklist de tareas de cada estancia y toma fotos obligatorias con la cámara de su móvil al terminar. Las fotos se sincronizan al instante en tu panel de anfitrión para que verifiques desde tu sofá que todo está impecable antes del siguiente check-in.',
+                q: '¿Cómo compruebo que la limpiadora ha terminado y que el alojamiento está listo?',
+                a: 'Tu equipo de limpieza accede con su enlace móvil directo, marca el checklist de cada estancia y sube fotos con la cámara de su móvil al terminar. Las imágenes aparecen al instante en tu panel de anfitrión antes del siguiente check-in.',
               },
               {
                 q: '¿Cómo funcionan las facturas con IVA del 10% para mi gestoría?',
@@ -858,10 +859,10 @@ export default function LandingPageView({
               EMPIEZA EN MENOS DE 5 MINUTOS · SIN TARJETA
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Pon tu primer alojamiento en piloto automático hoy mismo. Gratis.
+              Pon tu primer alojamiento en piloto automático hoy mismo<span className="-ml-[0.03em]">.</span> Gratis<span className="-ml-[0.03em]">.</span>
             </h2>
             <p className="text-sm text-white/75 leading-relaxed">
-              Conecta tu enlace iCal de Airbnb o Booking, comparte el enlace móvil con tu limpiadora y envía la Mini-Web en vídeo a tu próximo huésped antes de que aterrice.
+              Conecta tu calendario iCal de Airbnb o Booking, comparte el enlace móvil con tu limpiadora y envía la Guía Digital en vídeo a tu próximo huésped antes de que viaje.
             </p>
           </div>
 

@@ -231,8 +231,8 @@ export default function HeroPhoneMockup({
                   <Camera size={14} className="text-[#C85A32]" />
                   <span>
                     {photoFeedback
-                      ? '✓ Foto añadida a la auditoría'
-                      : `📸 Subir fotos de auditoría (${photosCount} subidas)`}
+                      ? '✓ Foto añadida a la revisión'
+                      : `📸 Subir fotos de comprobación (${photosCount} subidas)`}
                   </span>
                 </button>
               </div>
@@ -362,8 +362,8 @@ export default function HeroPhoneMockup({
                   <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase font-bold text-[#1F4E3D]">
                     <Clock size={11} /> Extras disponibles (0% comisión)
                   </span>
-                  <span className="font-mono text-xs font-extrabold text-[#C85A32]">
-                    +15 € a +35 €
+                  <span className="font-mono text-[11px] font-extrabold text-[#C85A32]">
+                    100% para ti
                   </span>
                 </div>
                 <p className="text-xs font-bold leading-snug">

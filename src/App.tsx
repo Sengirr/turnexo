@@ -47,8 +47,8 @@ type RouteState =
   | { kind: 'landing' }
   | { kind: 'app' }
   | { kind: 'admin' }
-  | { kind: 'cleaner'; token: string; fromApp?: boolean }
-  | { kind: 'guest'; slug: string; fromApp?: boolean };
+  | { kind: 'cleaner'; token: string; fromApp?: boolean; fromLanding?: boolean }
+  | { kind: 'guest'; slug: string; fromApp?: boolean; fromLanding?: boolean };
 
 const STORAGE_KEYS = {
   host: 'turnexo_host_v2',
@@ -72,24 +72,25 @@ function loadStored<T>(key: string, fallback: T): T {
 function parseCurrentLocation(): RouteState {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
+  const isDemo = params.get('demo') === '1';
 
   if (path.startsWith('/admin') || params.get('admin') !== null) {
     return { kind: 'admin' };
   }
   if (path.startsWith('/c/')) {
-    return { kind: 'cleaner', token: path.replace('/c/', '').trim() };
+    return { kind: 'cleaner', token: path.replace('/c/', '').trim(), fromLanding: isDemo };
   }
   if (path.startsWith('/g/')) {
-    return { kind: 'guest', slug: path.replace('/g/', '').trim() };
+    return { kind: 'guest', slug: path.replace('/g/', '').trim(), fromLanding: isDemo };
   }
   if (path.startsWith('/app')) {
     return { kind: 'app' };
   }
   if (params.get('cleaner')) {
-    return { kind: 'cleaner', token: params.get('cleaner') || '' };
+    return { kind: 'cleaner', token: params.get('cleaner') || '', fromLanding: isDemo };
   }
   if (params.get('guide')) {
-    return { kind: 'guest', slug: params.get('guide') || '' };
+    return { kind: 'guest', slug: params.get('guide') || '', fromLanding: isDemo };
   }
   return { kind: 'landing' };
 }
@@ -494,17 +495,25 @@ export default function App() {
           onNavigateToApp={() => navigate('/app', { kind: 'app' })}
           onOpenGuestDemo={() => {
             const prop = properties[0];
-            setSelectedReservationId(reservations[0].id);
-            navigate(`/g/${prop.slug}`, { kind: 'guest', slug: prop.slug, fromApp: true });
+            const demoUrl = `/g/${prop.slug}?demo=1`;
+            const win = window.open(demoUrl, '_blank', 'noopener,noreferrer');
+            if (!win) {
+              setSelectedReservationId(reservations[0].id);
+              navigate(demoUrl, { kind: 'guest', slug: prop.slug, fromLanding: true });
+            }
           }}
           onOpenCleanerDemo={() => {
             const c = cleaners[0];
-            setSelectedCleanerId(c.id);
-            navigate(`/c/${c.magicToken}`, {
-              kind: 'cleaner',
-              token: c.magicToken,
-              fromApp: true,
-            });
+            const demoUrl = `/c/${c.magicToken}?demo=1`;
+            const win = window.open(demoUrl, '_blank', 'noopener,noreferrer');
+            if (!win) {
+              setSelectedCleanerId(c.id);
+              navigate(demoUrl, {
+                kind: 'cleaner',
+                token: c.magicToken,
+                fromLanding: true,
+              });
+            }
           }}
           onOpenLegal={(tab = 'privacy') => setLegalModalTab(tab)}
         />
@@ -584,10 +593,11 @@ export default function App() {
           onSelectCleaner={(id) => {
             const c = cleaners.find((item) => item.id === id) || cleaners[0];
             setSelectedCleanerId(c.id);
-            navigate(`/c/${c.magicToken}`, {
+            navigate(`/c/${c.magicToken}${route.fromLanding ? '?demo=1' : ''}`, {
               kind: 'cleaner',
               token: c.magicToken,
               fromApp: route.fromApp,
+              fromLanding: route.fromLanding,
             });
           }}
           tasks={tasks}
@@ -596,7 +606,11 @@ export default function App() {
           onAddPhoto={handleAddPhoto}
           onCompleteTask={handleCompleteTask}
           onAddIncident={handleAddIncident}
-          onBackToApp={() => navigate('/app', { kind: 'app' })}
+          onBackToApp={() =>
+            route.fromApp
+              ? navigate('/app', { kind: 'app' })
+              : navigate('/', { kind: 'landing' })
+          }
         />
       )}
 
@@ -611,13 +625,22 @@ export default function App() {
             const p = properties.find((item) => item.id === r?.propertyId);
             setSelectedReservationId(resId);
             if (p) {
-              navigate(`/g/${p.slug}`, { kind: 'guest', slug: p.slug, fromApp: route.fromApp });
+              navigate(`/g/${p.slug}${route.fromLanding ? '?demo=1' : ''}`, {
+                kind: 'guest',
+                slug: p.slug,
+                fromApp: route.fromApp,
+                fromLanding: route.fromLanding,
+              });
             }
           }}
           onRequestExtra={handleRequestExtra}
           onUpdateReservation={handleUpdateReservation}
           onReportGuestIncident={handleReportGuestIncident}
-          onBackToApp={() => navigate('/app', { kind: 'app' })}
+          onBackToApp={() =>
+            route.fromApp
+              ? navigate('/app', { kind: 'app' })
+              : navigate('/', { kind: 'landing' })
+          }
         />
       )}
 

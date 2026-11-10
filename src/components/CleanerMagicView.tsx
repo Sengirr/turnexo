@@ -82,7 +82,7 @@ export default function CleanerMagicView({
               className="inline-flex items-center gap-1.5 font-mono uppercase tracking-wider text-[#C85A32] hover:underline font-bold"
             >
               <ArrowLeft size={14} />
-              Volver al Panel (/app)
+              Volver a Turnexo
             </button>
 
             <select

@@ -739,7 +739,7 @@ export default function GuestGuidePortalView({
               className="inline-flex items-center gap-1.5 font-black uppercase tracking-wider text-primary-ivi hover:underline"
             >
               <ArrowLeft size={14} />
-              Volver al Panel (/app)
+              Volver a Turnexo
             </button>
 
             <select

@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
-  Layers,
   Lock,
   Mail,
   Phone,
@@ -15,18 +13,19 @@ interface Props {
   onSuccess: (account: HostAccount) => void;
   onBackToLanding: () => void;
   initialMode?: 'register' | 'login';
+  initialPlan?: 'plan_starter' | 'plan_pro' | 'plan_manager';
 }
 
 export default function AuthOnboardingView({
   onSuccess,
   onBackToLanding,
   initialMode = 'register',
+  initialPlan = 'plan_starter',
 }: Props) {
   const [mode, setMode] = useState<'register' | 'login'>(initialMode);
-  const [selectedPlan, setSelectedPlan] = useState<HostAccount['plan']>('plan_starter');
+  const [selectedPlan, setSelectedPlan] = useState<HostAccount['plan']>(initialPlan);
 
   const [fullName, setFullName] = useState('');
-  const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('+34 ');
   const [password, setPassword] = useState('');
@@ -47,7 +46,6 @@ export default function AuthOnboardingView({
             options: {
               data: {
                 full_name: fullName.trim(),
-                company_name: companyName.trim(),
                 whatsapp: whatsapp.trim(),
                 subscription_plan: selectedPlan,
               },
@@ -59,7 +57,7 @@ export default function AuthOnboardingView({
             id: userId,
             email: email.trim(),
             fullName: fullName.trim() || 'Anfitrión',
-            companyName: companyName.trim() || 'Mis Alojamientos',
+            companyName: 'Mis Alojamientos',
             plan: selectedPlan,
             trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
           });
@@ -76,19 +74,19 @@ export default function AuthOnboardingView({
             email: data.user?.email || email.trim(),
             fullName: meta.full_name || 'Anfitrión',
             companyName: meta.company_name || 'Mis Alojamientos',
-            plan: meta.subscription_plan || 'pack_complete',
+            plan: meta.subscription_plan || 'plan_starter',
             trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
           });
           return;
         }
       }
 
-      // Modo Autónomo Instantáneo (mientras no se hayan pegado las claves de Supabase en .env)
+      // Modo Autónomo Instantáneo
       onSuccess({
         id: `host-${Date.now()}`,
         email: email.trim() || 'info@turnexo.com',
         fullName: fullName.trim() || email.split('@')[0] || 'Anfitrión Turnexo',
-        companyName: companyName.trim() || 'Mis Alojamientos',
+        companyName: 'Mis Alojamientos',
         plan: selectedPlan,
         trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
       });
@@ -99,215 +97,78 @@ export default function AuthOnboardingView({
     }
   };
 
+  const plans = [
+    {
+      key: 'plan_starter' as const,
+      name: 'Starter',
+      price: '0 €/mes',
+      units: '1 alojamiento',
+    },
+    {
+      key: 'plan_pro' as const,
+      name: 'Pro Fiscal',
+      price: '19 €/mes',
+      units: 'Hasta 5 · IVA 10%',
+    },
+    {
+      key: 'plan_manager' as const,
+      name: 'Microgestora',
+      price: '39 €/mes',
+      units: 'Hasta 10 aloj.',
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col">
-      {/* Cabecera */}
-      <header className="border-b border-[#D5CFC0] bg-[#FAF9F5] px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col justify-between">
+      {/* Cabecera idéntica a la Landing Page */}
+      <header className="border-b border-[#E2DDD2] bg-[#F6F4EE]/95 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <button
             type="button"
             onClick={onBackToLanding}
-            className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-[#57554F] hover:text-[#141413] font-bold"
+            className="flex items-center gap-2.5 group"
           >
-            <ArrowLeft size={14} />
-            Volver a Turnexo
-          </button>
-
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-[#141413] text-[#F6F4EE] flex items-center justify-center font-mono font-bold text-xs">
+            <div className="w-8 h-8 bg-[#141413] text-[#F6F4EE] flex items-center justify-center font-mono font-extrabold text-xs tracking-tighter group-hover:bg-[#C85A32] transition-colors">
               TX
             </div>
-            <span className="font-bold text-base tracking-tight">Turnexo</span>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] border border-[#C85A32]/40 px-2 py-0.5">
-              ACCESO ANFITRIONES
+            <span className="font-extrabold text-xl tracking-tight text-[#141413]">
+              Turnexo<span className="text-[#C85A32]">.</span>
             </span>
+          </button>
+
+          <div className="flex items-center gap-3 text-xs sm:text-sm">
+            <span className="text-[#57554F] hidden sm:inline">
+              {mode === 'login' ? '¿Aún no tienes cuenta?' : '¿Ya tienes cuenta?'}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setErrorMsg(null);
+                setMode(mode === 'login' ? 'register' : 'login');
+              }}
+              className="font-bold text-[#141413] hover:text-[#C85A32] border border-[#D5CFC0] bg-white px-4 py-2 transition"
+            >
+              {mode === 'login' ? 'Crear cuenta gratis' : 'Iniciar sesión'}
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        {/* Columna Izquierda: Selección de Plan */}
-        <div className="lg:col-span-7 space-y-6">
-          <div>
-            <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
-              PASO 1 · ELIGE TU PLAN DE ACCESO
+      {/* Tarjeta Centrada de Login o Registro */}
+      <main className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md bg-[#FAF9F5] border-2 border-[#141413] p-7 sm:p-9 space-y-6 shadow-[8px_8px_0px_#C85A32]">
+          <div className="space-y-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
+              {mode === 'login' ? 'ACCESO ANFITRIONES' : 'EMPIEZA SIN TARJETA DE CRÉDITO'}
             </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-[1.08] mt-2">
-              Empieza gratis con 1 alojamiento. Crece cuando lo necesites<span className="-ml-[0.03em]">.</span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#141413]">
+              {mode === 'login' ? 'Iniciar sesión' : 'Crea tu cuenta en Turnexo'}
             </h1>
-            <p className="text-sm text-[#57554F] mt-2 leading-relaxed">
-              Sin tarjeta de crédito ni permanencia. Puedes cambiar de plan en un clic desde tu panel cuando añadas más alojamientos o necesites emitir facturas con el 10% de IVA.
+            <p className="text-xs text-[#57554F] leading-relaxed">
+              {mode === 'login'
+                ? 'Accede al panel de tus alojamientos, limpiezas y facturación.'
+                : 'Configura tu primer alojamiento en menos de 2 minutos. Sin permanencia.'}
             </p>
-          </div>
-
-          <div className="space-y-3.5">
-            {/* Opción 1: Plan Starter (1 Alojamiento Gratis) */}
-            <div
-              onClick={() => setSelectedPlan('plan_starter')}
-              className={`p-5 border-2 cursor-pointer transition ${
-                selectedPlan === 'plan_starter'
-                  ? 'border-[#141413] bg-[#141413] text-[#F6F4EE] shadow-xl'
-                  : 'border-[#D5CFC0] bg-[#FAF9F5] hover:border-[#141413]'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3.5">
-                  <div
-                    className={`w-6 h-6 mt-0.5 flex items-center justify-center border shrink-0 ${
-                      selectedPlan === 'plan_starter'
-                        ? 'bg-[#1F4E3D] border-[#1F4E3D] text-white'
-                        : 'border-[#141413]'
-                    }`}
-                  >
-                    {selectedPlan === 'plan_starter' && <Check size={14} />}
-                  </div>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 bg-[#1F4E3D] text-white font-bold">
-                        PLAN GRATUITO · 1 ALOJAMIENTO
-                      </span>
-                      <span className="font-mono text-[11px] uppercase tracking-wider opacity-70">
-                        SIN TARJETA DE CRÉDITO
-                      </span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1.5">
-                      Starter · 1 Alojamiento
-                    </h3>
-                    <p
-                      className={`text-xs mt-1 leading-relaxed ${
-                        selectedPlan === 'plan_starter' ? 'text-white/75' : 'text-[#57554F]'
-                      }`}
-                    >
-                      App de Limpiadora con checklist por habitación y fotos, Guía Digital del Huésped con vídeos del alojamiento, catálogo de extras y sincronización iCal con Airbnb y Booking.
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right font-mono shrink-0">
-                  <span className="text-2xl font-bold text-[#1F4E3D]">0 €</span>
-                  <span className="block text-[10px] opacity-60">/ mes</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Opción 2: Plan Pro Fiscal (Hasta 5 Alojamientos - 19€/mes) */}
-            <div
-              onClick={() => setSelectedPlan('plan_pro')}
-              className={`p-5 border-2 cursor-pointer transition ${
-                selectedPlan === 'plan_pro'
-                  ? 'border-[#141413] bg-[#141413] text-[#F6F4EE] shadow-xl'
-                  : 'border-[#D5CFC0] bg-[#FAF9F5] hover:border-[#141413]'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3.5">
-                  <div
-                    className={`w-6 h-6 mt-0.5 flex items-center justify-center border shrink-0 ${
-                      selectedPlan === 'plan_pro'
-                        ? 'bg-[#C85A32] border-[#C85A32] text-white'
-                        : 'border-[#141413]'
-                    }`}
-                  >
-                    {selectedPlan === 'plan_pro' && <Check size={14} />}
-                  </div>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 bg-[#C85A32] text-white font-bold">
-                        MÁS ELEGIDO · IVA 10% + MODELO 303
-                      </span>
-                      <span className="font-mono text-[11px] uppercase tracking-wider opacity-70">
-                        HASTA 5 ALOJAMIENTOS
-                      </span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1.5">
-                      Pro Fiscal · Hasta 5 Alojamientos
-                    </h3>
-                    <p
-                      className={`text-xs mt-1 leading-relaxed ${
-                        selectedPlan === 'plan_pro' ? 'text-white/75' : 'text-[#57554F]'
-                      }`}
-                    >
-                      Facturas simplificadas y con NIF al 10% de IVA en un clic, Libro Registro trimestral en Excel para el Modelo 303, soporte para varios propietarios (Multi-NIF) y Guía Digital 100% marca blanca.
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right font-mono shrink-0">
-                  <span className="text-2xl font-bold">19 €</span>
-                  <span className="block text-[10px] opacity-60">/ mes (tarifa plana)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Opción 3: Plan Microgestora (Hasta 10 Alojamientos - 39€/mes) */}
-            <div
-              onClick={() => setSelectedPlan('plan_manager')}
-              className={`p-5 border-2 cursor-pointer transition ${
-                selectedPlan === 'plan_manager'
-                  ? 'border-[#141413] bg-[#141413] text-[#F6F4EE] shadow-xl'
-                  : 'border-[#D5CFC0] bg-[#FAF9F5] hover:border-[#141413]'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3.5">
-                  <div
-                    className={`w-6 h-6 mt-0.5 flex items-center justify-center border shrink-0 ${
-                      selectedPlan === 'plan_manager'
-                        ? 'bg-[#C85A32] border-[#C85A32] text-white'
-                        : 'border-[#141413]'
-                    }`}
-                  >
-                    {selectedPlan === 'plan_manager' && <Check size={14} />}
-                  </div>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 bg-[#C85A32] text-white font-bold">
-                        GESTORAS Y MULTIPROPIETARIO
-                      </span>
-                      <span className="font-mono text-[11px] uppercase tracking-wider opacity-70">
-                        HASTA 10 ALOJAMIENTOS
-                      </span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1.5">
-                      Microgestora · Hasta 10 Alojamientos
-                    </h3>
-                    <p
-                      className={`text-xs mt-1 leading-relaxed ${
-                        selectedPlan === 'plan_manager' ? 'text-white/75' : 'text-[#57554F]'
-                      }`}
-                    >
-                      Todo lo incluido en Pro Fiscal para hasta 10 alojamientos, múltiples limpiadoras con asignación por alojamiento, resumen mensual de limpiezas por persona y soporte prioritario.
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right font-mono shrink-0">
-                  <span className="text-2xl font-bold">39 €</span>
-                  <span className="block text-[10px] opacity-60">/ mes (tarifa plana)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Columna Derecha: Formulario de Registro / Login */}
-        <div className="lg:col-span-5 bg-[#FAF9F5] border-2 border-[#141413] p-7 space-y-6 shadow-[8px_8px_0px_#141413]">
-          <div className="grid grid-cols-2 border border-[#D5CFC0] bg-[#F6F4EE] p-1 font-mono text-xs">
-            <button
-              type="button"
-              onClick={() => setMode('register')}
-              className={`py-2 font-bold uppercase transition ${
-                mode === 'register' ? 'bg-[#141413] text-white' : 'text-[#57554F]'
-              }`}
-            >
-              Crear Cuenta Gratis
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('login')}
-              className={`py-2 font-bold uppercase transition ${
-                mode === 'login' ? 'bg-[#141413] text-white' : 'text-[#57554F]'
-              }`}
-            >
-              Iniciar Sesión
-            </button>
           </div>
 
           {errorMsg && (
@@ -317,11 +178,56 @@ export default function AuthOnboardingView({
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+            {/* Selector compacto de plan solo en modo Registro */}
             {mode === 'register' && (
-              <>
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1.5">
+                  PLAN ELEGIDO (PUEDES CAMBIARLO CUANDO QUIERAS)
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {plans.map((p) => {
+                    const active = selectedPlan === p.key;
+                    return (
+                      <button
+                        key={p.key}
+                        type="button"
+                        onClick={() => setSelectedPlan(p.key)}
+                        className={`p-2.5 text-left border transition flex flex-col justify-between ${
+                          active
+                            ? 'bg-[#141413] text-white border-[#141413]'
+                            : 'bg-white text-[#141413] border-[#D5CFC0] hover:border-[#141413]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-bold text-xs truncate">{p.name}</span>
+                          {active && <Check size={12} className="text-[#C85A32] shrink-0" />}
+                        </div>
+                        <span
+                          className={`font-mono text-xs font-extrabold mt-1 ${
+                            active ? 'text-[#C85A32]' : 'text-[#1F4E3D]'
+                          }`}
+                        >
+                          {p.price}
+                        </span>
+                        <span
+                          className={`text-[10px] truncate mt-0.5 ${
+                            active ? 'text-white/70' : 'text-[#57554F]'
+                          }`}
+                        >
+                          {p.units}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {mode === 'register' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
-                    TU NOMBRE COMPLETO
+                    TU NOMBRE
                   </label>
                   <div className="relative">
                     <User
@@ -338,49 +244,30 @@ export default function AuthOnboardingView({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
-                      EMPRESA O MARCA (OPCIONAL)
-                    </label>
-                    <div className="relative">
-                      <Layers
-                        size={14}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#57554F]"
-                      />
-                      <input
-                        value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                        placeholder="Ej. Málaga Suites"
-                        className="w-full bg-white border border-[#D5CFC0] pl-9 pr-3 py-2.5 focus:outline-none focus:border-[#141413]"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
-                      WHATSAPP DE CONTACTO
-                    </label>
-                    <div className="relative">
-                      <Phone
-                        size={14}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#57554F]"
-                      />
-                      <input
-                        required
-                        value={whatsapp}
-                        onChange={(e) => setWhatsapp(e.target.value)}
-                        placeholder="+34 600 00 00 00"
-                        className="w-full bg-white border border-[#D5CFC0] pl-9 pr-3 py-2.5 font-mono focus:outline-none focus:border-[#141413]"
-                      />
-                    </div>
+                <div>
+                  <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
+                    WHATSAPP DE CONTACTO
+                  </label>
+                  <div className="relative">
+                    <Phone
+                      size={14}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[#57554F]"
+                    />
+                    <input
+                      required
+                      value={whatsapp}
+                      onChange={(e) => setWhatsapp(e.target.value)}
+                      placeholder="+34 600 00 00 00"
+                      className="w-full bg-white border border-[#D5CFC0] pl-9 pr-3 py-2.5 font-mono focus:outline-none focus:border-[#141413]"
+                    />
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
             <div>
               <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
-                EMAIL PROFESIONAL
+                EMAIL
               </label>
               <div className="relative">
                 <Mail
@@ -419,40 +306,66 @@ export default function AuthOnboardingView({
               </div>
             </div>
 
-            {mode === 'register' && (
-              <div className="bg-[#F6F4EE] border border-[#D5CFC0] p-3 font-mono text-[11px] flex items-center justify-between">
-                <span className="text-[#57554F]">PLAN SELECCIONADO:</span>
-                <span className="font-bold text-[#141413]">
-                  {selectedPlan === 'plan_starter'
-                    ? 'Starter · 1 Alojamiento (0 €/mes)'
-                    : selectedPlan === 'plan_pro'
-                    ? 'Pro Fiscal · Hasta 5 (19 €/mes)'
-                    : 'Microgestora · Hasta 10 (39 €/mes)'}
-                </span>
-              </div>
-            )}
-
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans text-sm font-bold py-4 flex items-center justify-center gap-2 transition shadow-md"
+              className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans text-sm font-bold py-3.5 flex items-center justify-center gap-2 transition shadow-md"
             >
               <span>
                 {loading
                   ? 'Accediendo a tu cuenta...'
                   : mode === 'register'
-                  ? 'Crear Cuenta Gratis'
-                  : 'Entrar a mi Panel'}
+                  ? 'Crear cuenta y entrar al panel'
+                  : 'Entrar a mi cuenta'}
               </span>
               <ArrowRight size={15} />
             </button>
           </form>
 
-          <p className="text-[11px] text-[#57554F] text-center leading-relaxed">
-            Sin permanencia ni tarjeta de crédito para empezar. Podrás añadir o quitar alojamientos cuando quieras.
-          </p>
+          <div className="pt-4 border-t border-[#E2DDD2] text-center text-xs text-[#57554F]">
+            {mode === 'login' ? (
+              <p>
+                ¿Aún no tienes cuenta en Turnexo?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErrorMsg(null);
+                    setMode('register');
+                  }}
+                  className="font-bold text-[#141413] hover:text-[#C85A32] underline underline-offset-4"
+                >
+                  Crear cuenta gratis
+                </button>
+              </p>
+            ) : (
+              <p>
+                ¿Ya tienes cuenta?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErrorMsg(null);
+                    setMode('login');
+                  }}
+                  className="font-bold text-[#141413] hover:text-[#C85A32] underline underline-offset-4"
+                >
+                  Iniciar sesión
+                </button>
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      </main>
+
+      {/* Pie mínimo */}
+      <footer className="py-5 px-6 text-center font-mono text-[11px] text-[#57554F]">
+        <button
+          type="button"
+          onClick={onBackToLanding}
+          className="hover:text-[#141413] transition underline underline-offset-4"
+        >
+          ← Volver a la página de inicio
+        </button>
+      </footer>
     </div>
   );
 }

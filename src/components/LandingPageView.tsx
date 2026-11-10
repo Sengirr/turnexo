@@ -18,7 +18,10 @@ import {
 import HeroPhoneMockup from './HeroPhoneMockup';
 
 interface Props {
-  onNavigateToApp: (mode?: 'login' | 'register') => void;
+  onNavigateToApp: (
+    mode?: 'login' | 'register',
+    plan?: 'plan_starter' | 'plan_pro' | 'plan_manager'
+  ) => void;
   onOpenGuestDemo: () => void;
   onOpenCleanerDemo: () => void;
   onOpenLegal?: (tab?: 'privacy' | 'terms' | 'legal') => void;
@@ -670,6 +673,7 @@ export default function LandingPageView({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {[
             {
+              planKey: 'plan_starter' as const,
               name: 'Starter',
               units: '1 alojamiento',
               price: '0 €',
@@ -688,6 +692,7 @@ export default function LandingPageView({
               ],
             },
             {
+              planKey: 'plan_pro' as const,
               name: 'Pro Fiscal',
               units: 'Hasta 5 alojamientos',
               price: '19 €',
@@ -706,6 +711,7 @@ export default function LandingPageView({
               ],
             },
             {
+              planKey: 'plan_manager' as const,
               name: 'Microgestora',
               units: 'Hasta 10 alojamientos',
               price: '39 €',
@@ -762,7 +768,7 @@ export default function LandingPageView({
               </div>
               <button
                 type="button"
-                onClick={() => onNavigateToApp('register')}
+                onClick={() => onNavigateToApp('register', plan.planKey)}
                 className={`w-full font-sans font-semibold text-sm py-3.5 transition flex items-center justify-center gap-2 ${
                   plan.highlight
                     ? 'bg-[#C85A32] hover:bg-[#B04A25] text-white shadow-md'

@@ -127,6 +127,7 @@ export default function App() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms' | 'legal' | null>(null);
   const [authInitialMode, setAuthInitialMode] = useState<'register' | 'login'>('register');
+  const [authInitialPlan, setAuthInitialPlan] = useState<'plan_starter' | 'plan_pro' | 'plan_manager'>('plan_starter');
 
   // Sincronización inicial y tiempo real con Supabase si está configurado en .env
   useEffect(() => {
@@ -495,8 +496,9 @@ export default function App() {
 
       {route.kind === 'landing' && (
         <LandingPageView
-          onNavigateToApp={(mode = 'register') => {
+          onNavigateToApp={(mode = 'register', plan = 'plan_starter') => {
             setAuthInitialMode(mode);
+            setAuthInitialPlan(plan);
             navigate('/app', { kind: 'app' });
           }}
           onOpenGuestDemo={() => {
@@ -514,6 +516,7 @@ export default function App() {
       {route.kind === 'app' && !hostAccount && (
         <AuthOnboardingView
           initialMode={authInitialMode}
+          initialPlan={authInitialPlan}
           onSuccess={handleAuthSuccess}
           onBackToLanding={() => navigate('/', { kind: 'landing' })}
         />

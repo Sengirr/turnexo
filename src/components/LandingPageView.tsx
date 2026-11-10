@@ -10,8 +10,6 @@ import {
   Flame,
   CheckCircle2,
   X,
-  Smartphone,
-  ExternalLink,
   ChevronDown,
   FileSpreadsheet,
   Layers,
@@ -32,8 +30,6 @@ export default function LandingPageView({
   onOpenCleanerDemo,
   onOpenLegal,
 }: Props) {
-  // Estado del menú SaaS superior (mega-menu y móvil)
-  const [openDropdown, setOpenDropdown] = useState<'product' | 'demos' | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Estado del acordeón de FAQ
@@ -41,13 +37,10 @@ export default function LandingPageView({
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
-      {/* NAVBAR SAAS B2B CON MEGA-MENÚ DE PRODUCTO Y SELECTOR DE DEMOS EN VIVO */}
-      <header
-        className="sticky top-0 z-50 bg-[#F6F4EE]/95 backdrop-blur-md border-b border-[#E2DDD2]"
-        onMouseLeave={() => setOpenDropdown(null)}
-      >
+      {/* NAVBAR SAAS DIRECTA Y LIMPIA (SIN DROPDOWNS QUE TAPEN EL HERO) */}
+      <header className="sticky top-0 z-50 bg-[#F6F4EE]/95 backdrop-blur-md border-b border-[#E2DDD2]">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
-          {/* Columna 1: Identidad de Marca (1 sola línea limpia) */}
+          {/* Columna 1: Identidad de Marca */}
           <a href="/" className="flex items-center gap-2.5 shrink-0 whitespace-nowrap group">
             <div className="w-8 h-8 bg-[#141413] text-[#F6F4EE] flex items-center justify-center font-mono font-extrabold text-xs tracking-tighter group-hover:bg-[#C85A32] transition-colors">
               TX
@@ -57,194 +50,14 @@ export default function LandingPageView({
             </span>
           </a>
 
-          {/* Columna 2: Navegación Central SaaS (Directa a las secciones clave) */}
-          <nav className="hidden lg:flex items-center gap-1 text-sm font-medium text-[#57554F] whitespace-nowrap">
-            {/* Dropdown 1: Producto (Mega-Menu) */}
-            <div
-              className="relative"
-              onMouseEnter={() => setOpenDropdown('product')}
+          {/* Columna 2: Navegación Directa a las 4 secciones de la página */}
+          <nav className="hidden lg:flex items-center gap-2 text-sm font-medium text-[#57554F] whitespace-nowrap">
+            <a
+              href="#modulos"
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
-              <button
-                type="button"
-                onClick={() => setOpenDropdown(openDropdown === 'product' ? null : 'product')}
-                className={`px-3.5 py-2 rounded-none flex items-center gap-1.5 font-semibold whitespace-nowrap transition ${
-                  openDropdown === 'product'
-                    ? 'bg-[#141413] text-[#F6F4EE]'
-                    : 'text-[#141413] hover:bg-[#E8E4D9]/80'
-                }`}
-              >
-                <span>Producto</span>
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform duration-150 ${
-                    openDropdown === 'product' ? 'rotate-180 text-[#C85A32]' : 'text-[#57554F]'
-                  }`}
-                />
-              </button>
-
-              {openDropdown === 'product' && (
-                <div className="absolute left-0 top-full pt-2 w-[520px] z-50 whitespace-normal">
-                  <div className="bg-[#FAF9F5] border-2 border-[#141413] shadow-[8px_8px_0px_#141413] p-5 space-y-4">
-                    <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-2.5">
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold">
-                        LOS 3 MOTORES DE TURNEXO
-                      </span>
-                      <a
-                        href="#modulos"
-                        onClick={() => setOpenDropdown(null)}
-                        className="font-mono text-[10px] uppercase font-bold text-[#C85A32] hover:underline"
-                      >
-                        Ver detalle completo →
-                      </a>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-2.5">
-                      <a
-                        href="#modulos"
-                        onClick={() => setOpenDropdown(null)}
-                        className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
-                      >
-                        <div className="w-9 h-9 bg-[#1F4E3D] text-white flex items-center justify-center shrink-0 mt-0.5">
-                          <Smartphone size={17} />
-                        </div>
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm text-[#141413] group-hover:text-[#1F4E3D]">
-                              Cleaning App (Sin contraseñas)
-                            </span>
-                            <span className="font-mono text-[9px] uppercase font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-1.5 py-0.5">
-                              0 WhatsApps
-                            </span>
-                          </div>
-                          <p className="text-xs text-[#57554F] font-normal leading-relaxed">
-                            Turnos automáticos por iCal, checklist por estancia y fotos en tiempo real para comprobar que todo está impecable.
-                          </p>
-                        </div>
-                      </a>
-
-                      <a
-                        href="#modulos"
-                        onClick={() => setOpenDropdown(null)}
-                        className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
-                      >
-                        <div className="w-9 h-9 bg-[#C85A32] text-white flex items-center justify-center shrink-0 mt-0.5">
-                          <Video size={17} />
-                        </div>
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm text-[#141413] group-hover:text-[#C85A32]">
-                              Guest App · Mini-Web del Alojamiento
-                            </span>
-                            <span className="font-mono text-[9px] uppercase font-bold bg-[#C85A32]/10 text-[#C85A32] px-1.5 py-0.5">
-                              Envío por Link
-                            </span>
-                          </div>
-                          <p className="text-xs text-[#57554F] font-normal leading-relaxed">
-                            Envíala antes de llegar con Vídeo Home Tour, check-in paso a paso en vídeo, guías de electrodomésticos y Late Check-out (+35 €).
-                          </p>
-                        </div>
-                      </a>
-
-                      <a
-                        href="#modulos"
-                        onClick={() => setOpenDropdown(null)}
-                        className="group p-3.5 bg-white border border-[#E2DDD2] hover:border-[#141413] transition flex items-start gap-3.5"
-                      >
-                        <div className="w-9 h-9 bg-[#141413] text-white flex items-center justify-center shrink-0 mt-0.5">
-                          <FileSpreadsheet size={17} />
-                        </div>
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm text-[#141413]">
-                              Facturación IVA 10% y Modelo 303
-                            </span>
-                            <span className="font-mono text-[9px] uppercase font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5">
-                              1 Clic Gestoría
-                            </span>
-                          </div>
-                          <p className="text-xs text-[#57554F] font-normal leading-relaxed">
-                            Emite facturas simplificadas u ordinarias con IVA del 10% y exporta el Libro trimestral en Excel para tu gestor.
-                          </p>
-                        </div>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Dropdown 2: Demos Interactivas en Vivo */}
-            <div
-              className="relative"
-              onMouseEnter={() => setOpenDropdown('demos')}
-            >
-              <button
-                type="button"
-                onClick={() => setOpenDropdown(openDropdown === 'demos' ? null : 'demos')}
-                className={`px-3.5 py-2 flex items-center gap-2 font-semibold whitespace-nowrap transition ${
-                  openDropdown === 'demos'
-                    ? 'bg-[#141413] text-[#F6F4EE]'
-                    : 'text-[#141413] hover:bg-[#E8E4D9]/80'
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse shrink-0" />
-                <span>Demos en vivo</span>
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform duration-150 shrink-0 ${
-                    openDropdown === 'demos' ? 'rotate-180 text-[#C85A32]' : 'text-[#57554F]'
-                  }`}
-                />
-              </button>
-
-              {openDropdown === 'demos' && (
-                <div className="absolute left-0 top-full pt-2 w-80 z-50 whitespace-normal">
-                  <div className="bg-[#FAF9F5] border-2 border-[#141413] shadow-[8px_8px_0px_#141413] p-4 space-y-2.5">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold block px-1">
-                      PRUEBA LAS APPS SIN REGISTRARTE
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        onOpenGuestDemo();
-                      }}
-                      className="w-full text-left p-3 bg-white border border-[#E2DDD2] hover:border-[#C85A32] transition flex items-center justify-between group"
-                    >
-                      <div>
-                        <p className="font-bold text-xs text-[#141413] group-hover:text-[#C85A32]">
-                          Mini-Web del Huésped
-                        </p>
-                        <p className="text-[11px] text-[#57554F] font-normal">
-                          Vídeo Home Tour, check-in y extras
-                        </p>
-                      </div>
-                      <ExternalLink size={14} className="text-[#C85A32] shrink-0" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        onOpenCleanerDemo();
-                      }}
-                      className="w-full text-left p-3 bg-white border border-[#E2DDD2] hover:border-[#1F4E3D] transition flex items-center justify-between group"
-                    >
-                      <div>
-                        <p className="font-bold text-xs text-[#141413] group-hover:text-[#1F4E3D]">
-                          App Móvil de Limpiadora
-                        </p>
-                        <p className="text-[11px] text-[#57554F] font-normal">
-                          Turnos, checklist y subida de fotos
-                        </p>
-                      </div>
-                      <ExternalLink size={14} className="text-[#1F4E3D] shrink-0" />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+              Qué incluye
+            </a>
 
             <a
               href="#comparativa"
@@ -268,7 +81,7 @@ export default function LandingPageView({
             </a>
           </nav>
 
-          {/* Columna 3: Acceso Clientes + CTA Principal (1 sola línea sin saltos) */}
+          {/* Columna 3: Acceso Clientes + CTA Principal */}
           <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
             <button
               type="button"
@@ -301,65 +114,34 @@ export default function LandingPageView({
 
         {/* Drawer Móvil Desplegable */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#FAF9F5] border-t-2 border-[#141413] px-6 py-6 space-y-5 shadow-2xl">
-            <div className="space-y-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold block">
-                MÓDULOS DE LA PLATAFORMA
-              </span>
+          <div className="lg:hidden bg-[#FAF9F5] border-t-2 border-[#141413] px-6 py-6 space-y-4 shadow-2xl">
+            <div className="grid grid-cols-2 gap-3 text-sm font-bold text-[#141413]">
               <a
                 href="#modulos"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block p-3 bg-white border border-[#D5CFC0] text-xs font-bold text-[#141413]"
+                className="p-3 bg-white border border-[#D5CFC0]"
               >
-                🧹 Cleaning App · Turnos iCal, checklist y fotos
+                Qué incluye
               </a>
               <a
-                href="#modulos"
+                href="#comparativa"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block p-3 bg-white border border-[#D5CFC0] text-xs font-bold text-[#141413]"
+                className="p-3 bg-white border border-[#D5CFC0]"
               >
-                📱 Guest App · Mini-Web del alojamiento con vídeos
-              </a>
-              <a
-                href="#modulos"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block p-3 bg-white border border-[#D5CFC0] text-xs font-bold text-[#141413]"
-              >
-                🧾 Facturación IVA 10% y Libro Excel Modelo 303
-              </a>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#E2DDD2]">
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenGuestDemo();
-                }}
-                className="p-2.5 bg-[#C85A32]/10 border border-[#C85A32]/30 text-[#C85A32] font-mono text-[11px] font-bold uppercase text-center"
-              >
-                Demo Mini-Web →
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenCleanerDemo();
-                }}
-                className="p-2.5 bg-[#1F4E3D]/10 border border-[#1F4E3D]/30 text-[#1F4E3D] font-mono text-[11px] font-bold uppercase text-center"
-              >
-                Demo Limpiadora →
-              </button>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-[#E2DDD2] text-xs font-bold text-[#57554F]">
-              <a href="#comparativa" onClick={() => setMobileMenuOpen(false)}>
                 Comparativa
               </a>
-              <a href="#precios" onClick={() => setMobileMenuOpen(false)}>
+              <a
+                href="#precios"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-3 bg-white border border-[#D5CFC0]"
+              >
                 Precios (1 Gratis)
               </a>
-              <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
+              <a
+                href="#faq"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-3 bg-white border border-[#D5CFC0]"
+              >
                 FAQ
               </a>
             </div>
@@ -370,7 +152,7 @@ export default function LandingPageView({
                 setMobileMenuOpen(false);
                 onNavigateToApp();
               }}
-              className="w-full bg-[#141413] text-white font-mono text-xs font-bold uppercase py-3.5"
+              className="w-full bg-[#141413] text-white font-sans text-xs font-bold uppercase py-3.5"
             >
               Iniciar sesión / Crear cuenta gratis →
             </button>

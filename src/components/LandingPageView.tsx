@@ -353,10 +353,10 @@ export default function LandingPageView({
 
               <div className="space-y-2.5">
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                  Tus limpiadoras saben qué día hay salida sin que tengas que escribirles por WhatsApp<span className="-ml-[0.03em]">.</span>
+                  Tu equipo recibe sus turnos automáticamente y tú compruebas con fotos que todo está listo<span className="-ml-[0.03em]">.</span>
                 </h3>
                 <p className="text-sm text-[#57554F] leading-relaxed">
-                  Cada cambio en tu calendario de Airbnb o Booking actualiza automáticamente la agenda móvil de tu equipo. Saben qué alojamiento toca hoy, a qué hora entra el siguiente viajero y qué tareas deben marcar.
+                  Cada cambio en tu calendario de Airbnb o Booking actualiza al instante el enlace móvil de tu limpiadora. Ve qué alojamiento toca hoy, si hay entrada esa misma tarde y sube fotos al terminar.
                 </p>
               </div>
 
@@ -409,7 +409,7 @@ export default function LandingPageView({
                 onClick={onOpenCleanerDemo}
                 className="text-xs sm:text-sm font-sans font-bold text-[#1F4E3D] hover:text-[#16382B] inline-flex items-center gap-1.5 group"
               >
-                <span>Ver ejemplo real del enlace de Limpiadora</span>
+                <span>Ver ejemplo real de la App de Limpiadora</span>
                 <ArrowUpRight
                   size={15}
                   className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"

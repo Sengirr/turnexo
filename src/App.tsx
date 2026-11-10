@@ -126,6 +126,7 @@ export default function App() {
   );
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms' | 'legal' | null>(null);
+  const [authInitialMode, setAuthInitialMode] = useState<'register' | 'login'>('register');
 
   // Sincronización inicial y tiempo real con Supabase si está configurado en .env
   useEffect(() => {
@@ -441,8 +442,8 @@ export default function App() {
   };
 
   const applyPlanToProperties = (plan: HostAccount['plan']) => {
-    const cleanings = plan === 'pack_complete' || plan === 'module_cleanings';
-    const guestGuide = plan === 'pack_complete' || plan === 'module_guide';
+    const cleanings = plan !== 'module_guide';
+    const guestGuide = plan !== 'module_cleanings';
     setProperties((prev) =>
       prev.map((p) => ({
         ...p,
@@ -462,11 +463,13 @@ export default function App() {
     setHostAccount({ ...hostAccount, plan });
     applyPlanToProperties(plan);
     const label =
-      plan === 'pack_complete'
-        ? 'Pack Completo (Módulo 1 + 2)'
-        : plan === 'module_cleanings'
-        ? 'Solo Módulo 1 (Limpiezas iCal)'
-        : 'Solo Módulo 2 (Guía Huésped)';
+      plan === 'plan_starter'
+        ? 'Starter (1 Alojamiento · 0 €/mes)'
+        : plan === 'plan_pro'
+        ? 'Pro Fiscal (Hasta 5 Alojamientos · 19 €/mes)'
+        : plan === 'plan_manager'
+        ? 'Microgestora (Hasta 10 Alojamientos · 39 €/mes)'
+        : 'Pack Completo';
     showToast(`Plan actualizado a: ${label}`);
   };
 
@@ -492,7 +495,10 @@ export default function App() {
 
       {route.kind === 'landing' && (
         <LandingPageView
-          onNavigateToApp={() => navigate('/app', { kind: 'app' })}
+          onNavigateToApp={(mode = 'register') => {
+            setAuthInitialMode(mode);
+            navigate('/app', { kind: 'app' });
+          }}
           onOpenGuestDemo={() => {
             const prop = properties[0];
             window.open(`/g/${prop.slug}?demo=1`, '_blank');
@@ -507,6 +513,7 @@ export default function App() {
 
       {route.kind === 'app' && !hostAccount && (
         <AuthOnboardingView
+          initialMode={authInitialMode}
           onSuccess={handleAuthSuccess}
           onBackToLanding={() => navigate('/', { kind: 'landing' })}
         />

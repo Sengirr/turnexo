@@ -83,9 +83,9 @@ export default function LegalModal({ onClose, initialTab = 'privacy' }: Props) {
                 Turnexo proporciona herramientas de sincronización de calendarios bajo demanda y generación de guías interactivas para huéspedes. El usuario es responsable de la veracidad de los datos introducidos sobre sus alojamientos.
               </p>
 
-              <h3 className="font-bold text-sm text-[#141413]">2. Periodo de Prueba y Cancelación</h3>
+              <h3 className="font-bold text-sm text-[#141413]">2. Planes y Cancelación</h3>
               <p>
-                Todos los planes incluyen 14 días de prueba gratuita. El usuario puede cancelar su suscripción en cualquier momento sin permanencia ni penalización.
+                El plan Starter para 1 alojamiento es gratuito sin necesidad de tarjeta de crédito. En los planes de pago, el usuario puede cancelar su suscripción en cualquier momento sin permanencia ni penalización.
               </p>
 
               <h3 className="font-bold text-sm text-[#141413]">3. Cobro de Extras</h3>
@@ -99,7 +99,7 @@ export default function LegalModal({ onClose, initialTab = 'privacy' }: Props) {
             <>
               <h3 className="font-bold text-sm text-[#141413]">1. Titularidad del Sitio Web</h3>
               <p>
-                Plataforma tecnológica Turnexo. Para cualquier consulta legal o técnica, puede contactarse a través del canal oficial hola@turnexo.com.
+                Plataforma tecnológica Turnexo. Para cualquier consulta legal o técnica, puede contactarse a través del canal oficial info@turnexo.com.
               </p>
 
               <h3 className="font-bold text-sm text-[#141413]">2. Política de Cookies</h3>

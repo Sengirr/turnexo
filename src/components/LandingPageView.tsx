@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import {
   ArrowUpRight,
   Check,
@@ -13,11 +13,12 @@ import {
   FileSpreadsheet,
   Layers,
   ArrowRight,
+  Mail,
 } from 'lucide-react';
 import HeroPhoneMockup from './HeroPhoneMockup';
 
 interface Props {
-  onNavigateToApp: () => void;
+  onNavigateToApp: (mode?: 'login' | 'register') => void;
   onOpenGuestDemo: () => void;
   onOpenCleanerDemo: () => void;
   onOpenLegal?: (tab?: 'privacy' | 'terms' | 'legal') => void;
@@ -33,6 +34,39 @@ export default function LandingPageView({
 
   // Estado del acordeón de FAQ
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
+
+  // Estado del Modal de Contacto integrado
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [contactUnits, setContactUnits] = useState('Más de 10 alojamientos');
+  const [contactName, setContactName] = useState('');
+  const [contactChannel, setContactChannel] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSubmitted, setContactSubmitted] = useState(false);
+
+  const openContactModal = (defaultUnits = '1 a 5 alojamientos') => {
+    setContactUnits(defaultUnits);
+    setContactSubmitted(false);
+    setContactModalOpen(true);
+  };
+
+  const handleContactSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      const existing = JSON.parse(localStorage.getItem('turnexo_contact_leads_v1') || '[]');
+      existing.unshift({
+        id: `lead-${Date.now()}`,
+        name: contactName.trim(),
+        contact: contactChannel.trim(),
+        units: contactUnits,
+        message: contactMessage.trim(),
+        createdAt: new Date().toISOString(),
+      });
+      localStorage.setItem('turnexo_contact_leads_v1', JSON.stringify(existing));
+    } catch {
+      // ignore storage errors
+    }
+    setContactSubmitted(true);
+  };
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
@@ -84,7 +118,7 @@ export default function LandingPageView({
           <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
             <button
               type="button"
-              onClick={onNavigateToApp}
+              onClick={() => onNavigateToApp('login')}
               className="hidden sm:inline-flex items-center text-sm font-semibold text-[#141413] hover:text-[#C85A32] px-3 py-2 transition whitespace-nowrap"
             >
               Iniciar sesión
@@ -92,7 +126,7 @@ export default function LandingPageView({
 
             <button
               type="button"
-              onClick={onNavigateToApp}
+              onClick={() => onNavigateToApp('register')}
               className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-bold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-xs whitespace-nowrap"
             >
               <span>Probar 1 Alojamiento Gratis</span>
@@ -205,7 +239,7 @@ export default function LandingPageView({
               <div className="flex flex-wrap items-center gap-4">
                 <button
                   type="button"
-                  onClick={onNavigateToApp}
+                  onClick={() => onNavigateToApp('register')}
                   className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-sm sm:text-base font-bold px-7 py-4 transition flex items-center gap-2 shadow-md group"
                 >
                   <span>Probar 1 Alojamiento Gratis →</span>
@@ -728,7 +762,7 @@ export default function LandingPageView({
               </div>
               <button
                 type="button"
-                onClick={onNavigateToApp}
+                onClick={() => onNavigateToApp('register')}
                 className={`w-full font-sans font-semibold text-sm py-3.5 transition flex items-center justify-center gap-2 ${
                   plan.highlight
                     ? 'bg-[#C85A32] hover:bg-[#B04A25] text-white shadow-md'
@@ -757,13 +791,14 @@ export default function LandingPageView({
               Contamos con planes de tarifa plana para gestoras de 15, 30 o más alojamientos e importación inicial asistida sin coste.
             </p>
           </div>
-          <a
-            href="mailto:hola@turnexo.com?subject=Consulta%20Plan%20Gestora%20(%2B10%20alojamientos)"
+          <button
+            type="button"
+            onClick={() => openContactModal('Más de 10 alojamientos')}
             className="shrink-0 font-sans text-xs sm:text-sm font-bold text-[#141413] hover:text-[#C85A32] border border-[#141413] hover:border-[#C85A32] bg-white px-5 py-3 transition inline-flex items-center gap-1.5 whitespace-nowrap"
           >
             <span>Consultar tarifa a medida</span>
             <ArrowUpRight size={15} />
-          </a>
+          </button>
         </div>
       </section>
 
@@ -855,7 +890,7 @@ export default function LandingPageView({
           <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0">
             <button
               type="button"
-              onClick={onNavigateToApp}
+              onClick={() => onNavigateToApp('register')}
               className="bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans text-sm sm:text-base font-bold px-7 py-4 transition flex items-center justify-center gap-2 shadow-md"
             >
               <span>Probar 1 Alojamiento Gratis →</span>
@@ -864,55 +899,290 @@ export default function LandingPageView({
         </div>
       </section>
 
-      {/* FOOTER CORPORATIVO Y ENLACES */}
-      <footer className="border-t border-[#D5CFC0] bg-[#141413] text-[#F6F4EE] py-12 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs font-mono text-white/60">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-[#C85A32] text-white flex items-center justify-center font-bold text-[10px]">
-              TX
+      {/* FOOTER CORPORATIVO ESTRUCTURADO Y MODAL DE CONTACTO */}
+      <footer className="border-t border-[#D5CFC0] bg-[#141413] text-[#F6F4EE] pt-14 pb-10 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 pb-10 border-b border-white/10">
+          {/* Columna 1: Marca + Contacto directo */}
+          <div className="md:col-span-5 space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 bg-[#C85A32] text-white flex items-center justify-center font-mono font-extrabold text-xs">
+                TX
+              </div>
+              <span className="font-extrabold text-white text-lg tracking-tight">
+                Turnexo<span className="text-[#C85A32]">.</span>
+              </span>
             </div>
-            <span className="font-bold text-white text-sm">Turnexo</span>
-            <span>· Plataforma para Alojamientos Vacacionales</span>
+            <p className="text-xs text-white/65 leading-relaxed max-w-sm">
+              Coordinación de limpiezas por iCal, Guía Digital del Huésped en vídeo y facturación oficial al 10% de IVA lista para el Modelo 303 de tu gestoría.
+            </p>
+            <div className="pt-1 flex flex-wrap items-center gap-3 text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => openContactModal('1 a 5 alojamientos')}
+                className="bg-white/10 hover:bg-[#C85A32] text-white px-3.5 py-2 transition inline-flex items-center gap-1.5 font-bold"
+              >
+                <Mail size={13} />
+                <span>Escribir a soporte / Contacto</span>
+              </button>
+              <a
+                href="mailto:info@turnexo.com"
+                className="text-white/60 hover:text-white transition underline underline-offset-4"
+              >
+                info@turnexo.com
+              </a>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6">
-            <a href="#modulos" className="hover:text-white transition">Módulos</a>
-            <a href="#precios" className="hover:text-white transition">Precios</a>
-            <a href="#faq" className="hover:text-white transition">FAQ</a>
-            {onOpenLegal && (
-              <>
+          {/* Columna 2: Producto y Ejemplos */}
+          <div className="md:col-span-4 space-y-3 text-xs">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-white/45 font-bold">
+              Producto y Ejemplos Reales
+            </p>
+            <ul className="space-y-2.5 text-white/75">
+              <li>
+                <a href="#modulos" className="hover:text-white transition">
+                  Qué incluye Turnexo
+                </a>
+              </li>
+              <li>
+                <a href="#comparativa" className="hover:text-white transition">
+                  Comparativa con WhatsApp y PMS
+                </a>
+              </li>
+              <li>
+                <a href="#precios" className="hover:text-white transition">
+                  Precios y Plan Gratuito (1 alojamiento)
+                </a>
+              </li>
+              <li>
+                <a href="#faq" className="hover:text-white transition">
+                  Preguntas frecuentes (FAQ)
+                </a>
+              </li>
+              <li>
                 <button
                   type="button"
-                  onClick={() => onOpenLegal('privacy')}
-                  className="hover:text-white transition"
+                  onClick={onOpenGuestDemo}
+                  className="text-[#C85A32] hover:underline inline-flex items-center gap-1 font-semibold"
                 >
-                  Privacidad
+                  <span>Ver ejemplo de Guía del Huésped</span>
+                  <ArrowUpRight size={13} />
                 </button>
+              </li>
+              <li>
                 <button
                   type="button"
-                  onClick={() => onOpenLegal('terms')}
-                  className="hover:text-white transition"
+                  onClick={onOpenCleanerDemo}
+                  className="text-emerald-400 hover:underline inline-flex items-center gap-1 font-semibold"
                 >
-                  Términos
+                  <span>Ver ejemplo de App de Limpiadora</span>
+                  <ArrowUpRight size={13} />
                 </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Columna 3: Acceso y Legal */}
+          <div className="md:col-span-3 space-y-3 text-xs">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-white/45 font-bold">
+              Cuenta y Legal
+            </p>
+            <ul className="space-y-2.5 text-white/75">
+              <li>
                 <button
                   type="button"
-                  onClick={() => onOpenLegal('legal')}
+                  onClick={() => onNavigateToApp('login')}
+                  className="hover:text-white transition font-semibold"
+                >
+                  Iniciar sesión en mi cuenta
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToApp('register')}
+                  className="text-[#C85A32] hover:underline font-bold"
+                >
+                  Crear cuenta gratis (1 alojamiento) →
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => openContactModal('1 a 5 alojamientos')}
                   className="hover:text-white transition"
                 >
-                  Aviso Legal
+                  Contacto y atención a gestoras
                 </button>
-              </>
-            )}
-            <button type="button" onClick={onNavigateToApp} className="text-[#C85A32] font-bold hover:underline">
-              Acceder al Panel
-            </button>
+              </li>
+              {onOpenLegal && (
+                <>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => onOpenLegal('privacy')}
+                      className="hover:text-white transition"
+                    >
+                      Política de Privacidad
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => onOpenLegal('terms')}
+                      className="hover:text-white transition"
+                    >
+                      Términos de Servicio
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => onOpenLegal('legal')}
+                      className="hover:text-white transition"
+                    >
+                      Aviso Legal y Cookies
+                    </button>
+                  </li>
+                </>
+              )}
+            </ul>
           </div>
         </div>
-        <p className="text-center font-mono text-[10px] text-white/35 mt-8">
-          © {new Date().getFullYear()} Turnexo. Todos los derechos reservados. Optimizado para Airbnb, Booking y Vrbo.
-        </p>
+
+        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-white/40">
+          <p>© {new Date().getFullYear()} Turnexo. Todos los derechos reservados.</p>
+          <p>Compatible con calendarios iCal de Airbnb, Booking y Vrbo.</p>
+        </div>
       </footer>
+
+      {/* MODAL DE CONTACTO INTEGRADO (SIN DEPENDER DE CLIENTE DE CORREO EXTERNO) */}
+      {contactModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FAF9F5] border-2 border-[#141413] max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-[10px_10px_0px_#C85A32]">
+            <div className="flex items-start justify-between gap-4 border-b border-[#E2DDD2] pb-4">
+              <div>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
+                  CONTACTO DIRECTO · TURNEXO
+                </span>
+                <h3 className="text-xl font-extrabold text-[#141413] mt-0.5">
+                  ¿En qué podemos ayudarte?
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setContactModalOpen(false)}
+                className="w-8 h-8 border border-[#D5CFC0] bg-white flex items-center justify-center text-[#141413] hover:bg-[#141413] hover:text-white transition"
+                aria-label="Cerrar contacto"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {contactSubmitted ? (
+              <div className="space-y-4 py-3">
+                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs space-y-1.5">
+                  <p className="font-bold text-sm flex items-center gap-1.5">
+                    <CheckCircle2 size={16} className="text-[#1F4E3D]" />
+                    <span>¡Mensaje recibido correctamente!</span>
+                  </p>
+                  <p className="text-[#57554F] leading-relaxed">
+                    Hemos registrado tu consulta para <strong>{contactUnits}</strong> y te responderemos en menos de 24 horas a <strong>{contactChannel}</strong>.
+                  </p>
+                </div>
+                <p className="text-xs text-[#57554F]">
+                  También puedes escribirnos directamente cuando quieras a{' '}
+                  <a href="mailto:info@turnexo.com" className="font-mono font-bold text-[#141413] underline">
+                    info@turnexo.com
+                  </a>
+                  .
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setContactModalOpen(false)}
+                  className="w-full bg-[#141413] text-white font-sans font-bold text-xs uppercase tracking-wider py-3.5"
+                >
+                  Cerrar ventana
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="space-y-4 text-xs">
+                <div>
+                  <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
+                    TU NOMBRE
+                  </label>
+                  <input
+                    required
+                    value={contactName}
+                    onChange={(e) => setContactName(e.target.value)}
+                    placeholder="Ej. Laura Gómez"
+                    className="w-full bg-white border border-[#D5CFC0] px-3.5 py-2.5 text-[#141413] focus:outline-none focus:border-[#141413]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
+                      TU EMAIL O WHATSAPP
+                    </label>
+                    <input
+                      required
+                      value={contactChannel}
+                      onChange={(e) => setContactChannel(e.target.value)}
+                      placeholder="tu@email.com o +34 600..."
+                      className="w-full bg-white border border-[#D5CFC0] px-3.5 py-2.5 text-[#141413] focus:outline-none focus:border-[#141413]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
+                      ALOJAMIENTOS QUE GESTIONAS
+                    </label>
+                    <select
+                      value={contactUnits}
+                      onChange={(e) => setContactUnits(e.target.value)}
+                      className="w-full bg-white border border-[#D5CFC0] px-3 py-2.5 text-[#141413] focus:outline-none focus:border-[#141413]"
+                    >
+                      <option value="1 alojamiento">1 alojamiento</option>
+                      <option value="2 a 5 alojamientos">2 a 5 alojamientos</option>
+                      <option value="6 a 10 alojamientos">6 a 10 alojamientos</option>
+                      <option value="Más de 10 alojamientos">Más de 10 alojamientos</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
+                    ¿QUÉ NECESITAS?
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={contactMessage}
+                    onChange={(e) => setContactMessage(e.target.value)}
+                    placeholder="Cuéntanos cuántos alojamientos tienes o cualquier duda sobre limpiezas, guías o facturación..."
+                    className="w-full bg-white border border-[#D5CFC0] p-3.5 text-[#141413] focus:outline-none focus:border-[#141413]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans font-bold text-sm py-3.5 transition flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <span>Enviar consulta</span>
+                  <ArrowRight size={15} />
+                </button>
+
+                <p className="text-[11px] text-[#57554F] text-center">
+                  O escríbenos directamente a{' '}
+                  <a href="mailto:info@turnexo.com" className="font-mono font-bold text-[#141413] underline">
+                    info@turnexo.com
+                  </a>
+                </p>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

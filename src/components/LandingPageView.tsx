@@ -211,14 +211,6 @@ export default function LandingPageView({
                 >
                   <span>Probar 1 Alojamiento Gratis →</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={onOpenGuestDemo}
-                  className="border-2 border-[#141413] bg-transparent hover:bg-[#141413] hover:text-[#F6F4EE] text-[#141413] text-sm sm:text-base font-bold px-6 py-4 transition flex items-center gap-2"
-                >
-                  <span>Ver Demo en Vivo</span>
-                </button>
               </div>
 
               <p className="text-xs font-mono text-[#57554F] flex items-center gap-1.5 pt-1">
@@ -377,7 +369,7 @@ export default function LandingPageView({
                 onClick={onOpenGuestDemo}
                 className="text-xs sm:text-sm font-sans font-semibold text-[#C85A32] hover:underline"
               >
-                Ver Guía Digital en Vivo →
+                Abrir Guía Digital del Huésped ↗
               </button>
               <button
                 type="button"
@@ -467,7 +459,7 @@ export default function LandingPageView({
                 onClick={onOpenCleanerDemo}
                 className="text-xs sm:text-sm font-sans font-semibold text-[#1F4E3D] hover:underline"
               >
-                Abrir App de la Limpiadora →
+                Abrir Enlace Móvil de la Limpiadora ↗
               </button>
               <button
                 type="button"
@@ -929,17 +921,9 @@ export default function LandingPageView({
             <button
               type="button"
               onClick={onNavigateToApp}
-              className="bg-[#C85A32] hover:bg-[#B04A25] text-white font-mono text-xs sm:text-sm font-bold uppercase tracking-wider px-7 py-4 transition flex items-center justify-center gap-2 shadow-md"
+              className="bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans text-sm sm:text-base font-bold px-7 py-4 transition flex items-center justify-center gap-2 shadow-md"
             >
-              <span>Probar 1 Alojamiento Gratis</span>
-              <ArrowUpRight size={17} />
-            </button>
-            <button
-              type="button"
-              onClick={onOpenGuestDemo}
-              className="border border-white/30 hover:border-white text-white font-mono text-xs font-bold uppercase tracking-wider px-5 py-4 transition text-center"
-            >
-              Ver Demo en Vivo
+              <span>Probar 1 Alojamiento Gratis →</span>
             </button>
           </div>
         </div>

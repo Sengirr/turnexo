@@ -400,14 +400,20 @@ export default function HeroPhoneMockup({
           onClick={handleOpenFullDemo}
           className="font-sans text-xs sm:text-sm font-bold text-[#141413] hover:text-[#C85A32] transition inline-flex items-center gap-1.5 group"
         >
-          <span>Abrir demo real en pantalla completa</span>
+          <span>
+            {activeRole === 'cleaner'
+              ? 'Abrir enlace real de la Limpiadora'
+              : 'Abrir Guía Digital real del Huésped'}
+          </span>
           <ArrowUpRight
             size={15}
             className="text-[#C85A32] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
           />
         </button>
         <p className="text-[11px] text-[#57554F]">
-          Pruébalo sin registro ni descargas
+          {activeRole === 'cleaner'
+            ? 'Así lo ve tu limpiadora en su móvil sin instalar nada'
+            : 'Así recibe tu huésped el enlace del alojamiento antes de llegar'}
         </p>
       </div>
     </div>

@@ -260,32 +260,24 @@ export default function LandingPageView({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* MOTOR 1: GUÍA DIGITAL INTERACTIVA DEL HUÉSPED */}
-          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-8 sm:p-10 flex flex-col justify-between space-y-8">
+          {/* MOTOR 1: EXPERIENCIA DEL HUÉSPED */}
+          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-8 sm:p-10 flex flex-col justify-between space-y-7">
             <div className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2DDD2] pb-4">
                 <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold whitespace-nowrap">
-                  01 · GUÍA DIGITAL DEL HUÉSPED
+                  01 · EXPERIENCIA DEL HUÉSPED
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2.5 py-0.5 whitespace-nowrap">
-                  Envío por link antes de viajar
+                  Sin apps ni descargas
                 </span>
               </div>
 
-              {/* Lo que te ahorras */}
-              <div className="p-3.5 bg-rose-50 border border-rose-200/80 text-xs text-rose-950 leading-relaxed">
-                <strong className="font-mono uppercase text-[10px] text-rose-700 block mb-0.5">
-                  ❌ Lo que te ahorras desde el primer día:
-                </strong>
-                Llamadas a las 23:30h porque el viajero no encuentra el cajetín de llaves o la cerradura inteligente, mensajes preguntando cómo encender la vitrocerámica o el aire acondicionado, y tardes libres sin rentabilizar.
-              </div>
-
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                  Envía el enlace antes de que aterricen: llegan solos, no llaman por dudas y reservan salidas tarde<span className="-ml-[0.03em]">.</span>
+                  Todo tu alojamiento explicado en vídeo antes de que el huésped llegue a la puerta<span className="-ml-[0.03em]">.</span>
                 </h3>
                 <p className="text-sm text-[#57554F] leading-relaxed">
-                  Olvídate de los manuales impresos o PDFs que nadie lee. Compartes el enlace por WhatsApp o Airbnb días antes de la llegada: el huésped ve el alojamiento en vídeo desde su móvil, entra paso a paso y solicita Late Check-out en un toque.
+                  Le mandas un enlace por WhatsApp o por el chat de Airbnb en cuanto confirma la reserva. Desde su móvil resuelve el check-in, consulta cómo funcionan los aparatos de la casa y contrata extras sin llamarte.
                 </p>
               </div>
 
@@ -293,89 +285,78 @@ export default function LandingPageView({
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Video size={14} className="text-[#C85A32]" />
-                    Home Tour antes de llegar
+                    Vídeo Home Tour
                   </p>
                   <p className="text-[#57554F]">
-                    Recorrido en vídeo por cada estancia del alojamiento para que el viajero se ubique antes de salir de casa.
+                    Un recorrido visual por las estancias para que conozca el alojamiento por dentro antes de viajar.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <CheckCircle2 size={14} className="text-[#1F4E3D]" />
-                    Check-in en Vídeo Paso a Paso
+                    Llegada y llaves paso a paso
                   </p>
                   <p className="text-[#57554F]">
-                    Instrucciones visuales desde el portal hasta la apertura del cajetín o cerradura inteligente.
+                    Vídeo desde la calle hasta el portal y código de apertura del cajetín o cerradura digital.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Sparkles size={14} className="text-[#C85A32]" />
-                    Vídeos de Electrodomésticos
+                    Manual en vídeo de equipamiento
                   </p>
                   <p className="text-[#57554F]">
-                    Clips de 15 segundos para el aire acondicionado, vitrocerámica o caldera que evitan llamadas a medianoche.
+                    Clips de 15 segundos para aire acondicionado, placa, calefacción o cafetera que evitan llamadas nocturnas.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Sparkles size={14} className="text-[#1F4E3D]" />
-                    Venta de Late Check-out (+35 €)
+                    Ingresos extra por Late Check-out
                   </p>
                   <p className="text-[#57554F]">
-                    Si no entra nadie esa tarde en tu iCal, ofrece salir a las 17:00h. Cobras el 100% sin comisiones.
+                    Si el calendario está libre esa tarde, permite contratar la salida a las 17:00h (+35 € íntegros para ti).
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-[#E2DDD2]">
+            <div className="pt-4 border-t border-[#E2DDD2]">
               <button
                 type="button"
                 onClick={onOpenGuestDemo}
-                className="text-xs sm:text-sm font-sans font-semibold text-[#C85A32] hover:underline"
+                className="text-xs sm:text-sm font-sans font-bold text-[#C85A32] hover:text-[#B04A25] inline-flex items-center gap-1.5 group"
               >
-                Abrir Guía Digital del Huésped ↗
-              </button>
-              <button
-                type="button"
-                onClick={onNavigateToApp}
-                className="bg-[#141413] hover:bg-[#2C2C29] text-white text-xs sm:text-sm font-sans font-semibold px-5 py-3 transition"
-              >
-                Crear Guía Huésped Gratis
+                <span>Ver ejemplo real de Guía del Huésped</span>
+                <ArrowUpRight
+                  size={15}
+                  className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                />
               </button>
             </div>
           </div>
 
-          {/* MOTOR 2: CUADRANTE MÓVIL DE LIMPIEZA */}
-          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-8 sm:p-10 flex flex-col justify-between space-y-8">
+          {/* MOTOR 2: OPERATIVA DE LIMPIEZA */}
+          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-8 sm:p-10 flex flex-col justify-between space-y-7">
             <div className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2DDD2] pb-4">
                 <span className="font-mono text-xs uppercase tracking-widest text-[#1F4E3D] font-bold whitespace-nowrap">
-                  02 · CUADRANTE MÓVIL DE LIMPIEZA
+                  02 · OPERATIVA DE LIMPIEZA
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2.5 py-0.5 whitespace-nowrap">
-                  Sin contraseñas · Fotos en vivo
+                  Acceso móvil sin contraseñas
                 </span>
               </div>
 
-              {/* Lo que te ahorras */}
-              <div className="p-3.5 bg-rose-50 border border-rose-200/80 text-xs text-rose-950 leading-relaxed">
-                <strong className="font-mono uppercase text-[10px] text-rose-700 block mb-0.5">
-                  ❌ Lo que te ahorras desde el primer día:
-                </strong>
-                Enviar capturas del calendario cada domingo por WhatsApp, olvidos en reservas de última hora y la incertidumbre de no saber si el alojamiento está listo a tiempo.
-              </div>
-
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                  Tu equipo sabe qué día entra cada reserva y tú verificas el resultado con fotos desde el móvil.
+                  Tus limpiadoras saben qué día hay salida sin que tengas que escribirles por WhatsApp<span className="-ml-[0.03em]">.</span>
                 </h3>
                 <p className="text-sm text-[#57554F] leading-relaxed">
-                  Sin instalar aplicaciones ni recordar contraseñas. Tu limpiadora abre su enlace fijo en el teléfono, consulta las salidas actualizadas en tiempo real desde tu iCal, marca las tareas y sube fotos al terminar.
+                  Cada cambio en tu calendario de Airbnb o Booking actualiza automáticamente la agenda móvil de tu equipo. Saben qué alojamiento toca hoy, a qué hora entra el siguiente viajero y qué tareas deben marcar.
                 </p>
               </div>
 
@@ -383,104 +364,94 @@ export default function LandingPageView({
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Users size={14} className="text-[#1F4E3D]" />
-                    Turnos Sincronizados por iCal
+                    Agenda conectada por iCal
                   </p>
                   <p className="text-[#57554F]">
-                    Si entra una reserva nueva o una cancelación en Airbnb o Booking, su agenda se actualiza sola al instante.
+                    Las nuevas reservas, modificaciones o cancelaciones se reflejan en su teléfono al instante.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <CheckCircle2 size={14} className="text-[#1F4E3D]" />
-                    Checklist por Estancia
+                    Checklist por habitación
                   </p>
                   <p className="text-[#57554F]">
-                    Sábanas cambiadas, baño desinfectado, toallas y amenities repuestos paso a paso sin olvidos.
+                    Puntos de control claros para dormitorio, baño, cocina y reposición de básicos en cada salida.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <ShieldCheck size={14} className="text-[#1F4E3D]" />
-                    Verificación Fotográfica
+                    Fotos de comprobación
                   </p>
                   <p className="text-[#57554F]">
-                    Revisa las fotos reales de cada limpieza desde tu móvil antes de que entre el siguiente huésped.
+                    Recibe las fotos del alojamiento recién limpio en tu panel antes de que entre el siguiente huésped.
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Flame size={14} className="text-[#C85A32]" />
-                    Aviso de Rotación en el Día
+                    Aviso de rotación en el día
                   </p>
                   <p className="text-[#57554F]">
-                    Destaca automáticamente las limpiezas prioritarias con entrada el mismo día (11:00h → 15:00h).
+                    Marca como prioritarias las salidas de las 11:00h que tienen nueva entrada esa misma tarde.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-[#E2DDD2]">
+            <div className="pt-4 border-t border-[#E2DDD2]">
               <button
                 type="button"
                 onClick={onOpenCleanerDemo}
-                className="text-xs sm:text-sm font-sans font-semibold text-[#1F4E3D] hover:underline"
+                className="text-xs sm:text-sm font-sans font-bold text-[#1F4E3D] hover:text-[#16382B] inline-flex items-center gap-1.5 group"
               >
-                Abrir Enlace Móvil de la Limpiadora ↗
-              </button>
-              <button
-                type="button"
-                onClick={onNavigateToApp}
-                className="bg-[#141413] hover:bg-[#2C2C29] text-white text-xs sm:text-sm font-sans font-semibold px-5 py-3 transition"
-              >
-                Automatizar Limpiezas
+                <span>Ver ejemplo real del enlace de Limpiadora</span>
+                <ArrowUpRight
+                  size={15}
+                  className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                />
               </button>
             </div>
           </div>
         </div>
 
-        {/* MOTOR 3: FACTURACIÓN IVA 10% Y LIBRO EXCEL PARA GESTORÍA */}
+        {/* MOTOR 3: FACTURACIÓN Y GESTORÍA */}
         <div className="mt-8 bg-[#FAF9F5] border border-[#D5CFC0] p-8 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2DDD2] pb-4">
               <span className="font-mono text-xs uppercase tracking-widest text-emerald-800 font-bold whitespace-nowrap">
-                03 · FACTURACIÓN IVA 10% Y MODELO 303
+                03 · FACTURACIÓN Y GESTORÍA
               </span>
               <span className="font-mono text-xs font-bold bg-emerald-100 text-emerald-900 px-2.5 py-0.5 whitespace-nowrap">
-                Listo para tu gestoría en 1 clic
+                IVA 10% · Modelo 303
               </span>
             </div>
 
-            <div className="p-3.5 bg-rose-50 border border-rose-200/80 text-xs text-rose-950 leading-relaxed">
-              <strong className="font-mono uppercase text-[10px] text-rose-700 block mb-0.5">
-                ❌ Lo que te ahorras desde el primer día:
-              </strong>
-              Perder el último fin de semana de cada trimestre picando reservas una por una en Excel o Word para cuadrar el 10% de IVA con tu asesoría.
-            </div>
-
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                Tus reservas convertidas en facturas oficiales con el 10% de IVA, listas para tu gestor en 1 clic.
+                De reservas de Airbnb y Booking a facturas oficiales listas para tu gestor en un clic<span className="-ml-[0.03em]">.</span>
               </h3>
               <p className="text-sm text-[#57554F] leading-relaxed">
-                Turnexo calcula automáticamente la base imponible y el 10% de IVA de cada estancia sincronizada de Airbnb y Booking. Al cerrar el trimestre, descargas el Libro Registro en Excel listo para presentar el Modelo 303 sin errores.
+                Olvídate de pasar tardes enteras al final del trimestre picando estancias a mano en una hoja de cálculo. Turnexo desglosa la base imponible y el 10% de IVA de cada reserva automáticamente.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
-                <p className="font-bold text-[#141413]">Facturas en 1 Clic</p>
-                <p className="text-[#57554F]">Numeración correlativa oficial, desglose automático base + 10% IVA y descarga en PDF.</p>
+                <p className="font-bold text-[#141413]">Facturas simplificadas y completas</p>
+                <p className="text-[#57554F]">Numeración correlativa oficial con desglose de IVA al 10% y descarga en PDF.</p>
               </div>
               <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
-                <p className="font-bold text-[#141413]">Libro Excel Modelo 303</p>
-                <p className="text-[#57554F]">Archivo trimestral estructurado que tu gestoría importa sin picar datos a mano.</p>
+                <p className="font-bold text-[#141413]">Exportación trimestral en Excel</p>
+                <p className="text-[#57554F]">Libro Registro estructurado para que tu asesoría liquide el Modelo 303 en minutos.</p>
               </div>
               <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
-                <p className="font-bold text-[#141413]">Multi-NIF por Alojamiento</p>
-                <p className="text-[#57554F]">Separa series y titulares si gestionas alojamientos de distintos propietarios.</p>
+                <p className="font-bold text-[#141413]">Soporte Multi-NIF</p>
+                <p className="text-[#57554F]">Configura distintos titulares y series si gestionas alojamientos de varios propietarios.</p>
               </div>
             </div>
           </div>

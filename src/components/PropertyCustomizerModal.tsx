@@ -720,7 +720,7 @@ export default function PropertyCustomizerModal({
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
-                      {isEn ? 'Extras & Paid Upsell for Guests' : 'Extras y Servicios para Huéspedes (Upsell)'}
+                      {isEn ? 'Extras & Services for Guests' : 'Extras y Servicios para Huéspedes'}
                     </span>
                     <span className="text-[11px] text-slate-500">
                       {isEn ? 'All items guests can order through their digital guide.' : 'Todo lo que el huésped puede contratar desde su Guía Digital.'}
@@ -855,7 +855,7 @@ export default function PropertyCustomizerModal({
                 {/* Formulario rápido para añadir cualquier extra */}
                 <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 mt-2">
                   <p className="font-bold text-slate-800 text-xs">
-                    {isEn ? 'Add new extra / upsell' : 'Añadir nuevo extra al alojamiento'}
+                    {isEn ? 'Add new extra' : 'Añadir nuevo extra al alojamiento'}
                   </p>
                   <div className="flex gap-2">
                     <input

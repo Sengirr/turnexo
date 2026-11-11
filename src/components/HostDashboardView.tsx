@@ -720,7 +720,7 @@ export default function HostDashboardView({
 
           <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-2 hover:border-slate-300 transition">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-              {lang === 'en' ? 'Upsell & Extra Revenue' : 'Ingresos Extras & Upsell'}
+              {lang === 'en' ? 'Extra Revenue' : 'Ingresos por Extras'}
             </span>
             <div className="flex items-baseline justify-between mt-1">
               <span className="text-3xl font-extrabold text-emerald-700 tracking-tight">

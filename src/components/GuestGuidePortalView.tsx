@@ -1005,6 +1005,33 @@ export default function GuestGuidePortalView({
                 </div>
               </Card>
             )}
+
+            {/* Recomendaciones Destacadas de la Zona */}
+            {property.localRecommendations && property.localRecommendations.length > 0 && (
+              <Card>
+                <div className="flex items-center justify-between mb-3">
+                  <SectionTitle
+                    icon={Compass}
+                    title={t('guide.neighborhood_title')}
+                    iconClass="bg-blue-50 text-blue-500"
+                  />
+                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200/60 px-2 py-0.5 rounded-full">
+                    {property.localRecommendations.length} {property.localRecommendations.length === 1 ? 'sitio' : 'sitios'}
+                  </span>
+                </div>
+                <div className="space-y-2.5">
+                  {property.localRecommendations.map((rec, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100"
+                    >
+                      <MapPin size={16} className="text-blue-500 shrink-0 mt-0.5" />
+                      <span className="text-xs font-bold text-gray-700 leading-snug">{rec}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
           </div>
         )}
 

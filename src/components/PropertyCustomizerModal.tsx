@@ -18,6 +18,7 @@ import {
   Camera,
   RotateCcw,
   Check,
+  Compass,
 } from 'lucide-react';
 import {
   Cleaner,
@@ -627,52 +628,89 @@ export default function PropertyCustomizerModal({
                     </button>
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                  <label className="block font-bold text-slate-700">
-                    {isEn ? 'Local Recommendations (Restaurants, Supermarket)' : 'Recomendaciones de la Zona (Restaurantes, Supermercado)'}
-                  </label>
-                  <div className="space-y-1.5">
-                    {draft.localRecommendations.map((rec, i) => (
-                      <div key={i} className="flex items-center justify-between bg-white border border-slate-200 px-3 py-1.5 rounded-xl">
-                        <span>📍 {rec}</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDraft({
-                              ...draft,
-                              localRecommendations: draft.localRecommendations.filter((_, idx) => idx !== i),
-                            })
-                          }
-                          className="text-rose-500 hover:text-rose-700"
-                        >
-                          <Trash2 size={13} />
-                        </button>
+              {/* SECCIÓN INDEPENDIENTE: RECOMENDACIONES DE LA ZONA */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                    <Compass size={14} className="text-blue-600" />
+                    {isEn ? 'Neighborhood & Local Recommendations' : 'Recomendaciones de la Zona (Restaurantes, Ocio, Supermercados)'}
+                  </span>
+                  <span className="text-[10px] font-extrabold bg-blue-100 text-blue-900 px-2 py-0.5 rounded-full">
+                    {draft.localRecommendations?.length || 0} {isEn ? 'places' : 'lugares'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  {isEn
+                    ? 'Suggestions shown to guests in their guide (favorite tapas, pharmacies, beaches, transport).'
+                    : 'Tus sitios recomendados para que el huésped disfrute de la estancia (restaurantes, farmacias 24h, playas, transporte).'}
+                </p>
+
+                <div className="space-y-1.5">
+                  {(draft.localRecommendations || []).map((rec, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between bg-white border border-slate-200/90 hover:border-slate-300 px-3 py-2 rounded-xl transition shadow-2xs"
+                    >
+                      <div className="flex items-center gap-2 flex-1 min-w-0 pr-2">
+                        <span className="text-blue-500 shrink-0">📍</span>
+                        <span className="text-xs font-semibold text-slate-800 break-words">{rec}</span>
                       </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      placeholder={isEn ? 'e.g. Supermarket Dia 100m away' : 'Ej. Supermercado Día a 100m hacia la derecha'}
-                      value={newRec}
-                      onChange={(e) => setNewRec(e.target.value)}
-                      className="flex-1 border border-slate-200 bg-white rounded-xl px-3 py-1.5 text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDraft({
+                            ...draft,
+                            localRecommendations: draft.localRecommendations.filter((_, idx) => idx !== i),
+                          })
+                        }
+                        className="text-slate-400 hover:text-rose-600 p-1 rounded-lg transition shrink-0"
+                        title={isEn ? 'Remove recommendation' : 'Eliminar recomendación'}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))}
+                  {(draft.localRecommendations || []).length === 0 && (
+                    <p className="text-slate-400 text-xs italic py-1">
+                      {isEn ? 'No recommendations added yet.' : 'No has añadido recomendaciones aún. Añade una abajo:'}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <input
+                    placeholder={isEn ? 'e.g. Chiringuito El Ancla (150m): best seafood and paella' : 'Ej. Chiringuito El Ancla (a 150m): el mejor espeto y arroz'}
+                    value={newRec}
+                    onChange={(e) => setNewRec(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
                         if (!newRec.trim()) return;
                         setDraft({
                           ...draft,
-                          localRecommendations: [...draft.localRecommendations, newRec.trim()],
+                          localRecommendations: [...(draft.localRecommendations || []), newRec.trim()],
                         });
                         setNewRec('');
-                      }}
-                      className="bg-slate-900 text-white font-bold px-3 py-1.5 rounded-xl text-xs"
-                    >
-                      + {isEn ? 'Add' : 'Añadir'}
-                    </button>
-                  </div>
+                      }
+                    }}
+                    className="flex-1 border border-slate-200 bg-white rounded-xl px-3 py-1.5 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newRec.trim()) return;
+                      setDraft({
+                        ...draft,
+                        localRecommendations: [...(draft.localRecommendations || []), newRec.trim()],
+                      });
+                      setNewRec('');
+                    }}
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-1.5 rounded-xl text-xs shrink-0 transition"
+                  >
+                    + {isEn ? 'Add' : 'Añadir'}
+                  </button>
                 </div>
               </div>
             </div>

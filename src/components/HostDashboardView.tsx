@@ -44,7 +44,7 @@ import PropertyCustomizerModal from './PropertyCustomizerModal';
 import InvoicePrintModal from './InvoicePrintModal';
 import CreateInvoiceModal from './CreateInvoiceModal';
 import FiscalProfileModal from './FiscalProfileModal';
-import { CreditCard, ShieldCheck, UserCheck, FileText, Building2 } from 'lucide-react';
+import { CreditCard, ShieldCheck, FileText, Building2 } from 'lucide-react';
 import {
   computeQuarterSummaries,
   DEFAULT_HOST_FISCAL_PROFILE,
@@ -92,7 +92,7 @@ interface Props {
   onResetDemo: () => void;
 }
 
-type BackofficeSection = 'overview' | 'schedule' | 'guests' | 'invoices' | 'team' | 'billing';
+type BackofficeSection = 'overview' | 'schedule' | 'invoices' | 'team' | 'billing';
 
 export default function HostDashboardView({
   hostAccount,
@@ -186,8 +186,6 @@ export default function HostDashboardView({
   const [schedulePropertyFilter, setSchedulePropertyFilter] = useState('all');
   const [scheduleStatusFilter, setScheduleStatusFilter] = useState<'all' | 'urgent' | 'late' | 'completed' | 'pending'>('all');
   const [scheduleSearch, setScheduleSearch] = useState('');
-  const [guestSearch, setGuestSearch] = useState('');
-  const [guestPropertyFilter, setGuestPropertyFilter] = useState('all');
   const [copiedSettlementCleanerId, setCopiedSettlementCleanerId] = useState<string | null>(null);
   const [isAnnualBilling, setIsAnnualBilling] = useState(true);
   const [showStripeNoticeModal, setShowStripeNoticeModal] = useState(false);
@@ -340,18 +338,6 @@ export default function HostDashboardView({
     document.body.removeChild(link);
   };
 
-  // Enviar guía del huésped por WhatsApp
-  const sendGuestGuideWhatsApp = (res: Reservation) => {
-    const prop = properties.find((p) => p.id === res.propertyId);
-    if (!prop) return;
-    const guideUrl = `${window.location.origin}/g/${prop.slug}`;
-    const msg = `¡Hola ${res.guestName.split(' ')[0]}! Te damos la bienvenida a ${prop.name}.\n` +
-      `📱 Aquí tienes tu Guía Digital con los vídeos para entrar, clave del WiFi, instrucciones y solicitud de extras:\n` +
-      `👉 ${guideUrl}\n\n` +
-      `¡Que disfrutes mucho de tu estancia!`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-  };
-
   const handleCreateProperty = (e: React.FormEvent) => {
     e.preventDefault();
     if (properties.length >= maxAllowedProperties) {
@@ -454,8 +440,6 @@ export default function HostDashboardView({
               ? t.nav.overview
               : section === 'schedule' || section === 'team'
               ? t.nav.schedule
-              : section === 'guests'
-              ? t.nav.guests
               : section === 'invoices'
               ? t.nav.invoices
               : t.nav.billing}
@@ -566,7 +550,6 @@ export default function HostDashboardView({
             {[
               { id: 'overview' as const, label: t.nav.overview, icon: Home },
               { id: 'schedule' as const, label: t.nav.schedule, icon: Calendar },
-              { id: 'guests' as const, label: t.nav.guests, icon: UserCheck },
               {
                 id: 'invoices' as const,
                 label: t.nav.invoices,
@@ -1600,193 +1583,7 @@ export default function HostDashboardView({
       </div>
     )}
 
-        {/* VISTA 4: HUÉSPEDES, HORARIOS PREVISTOS & EXTRAS SOLICITADOS */}
-        {section === 'guests' && (
-          <div className="space-y-6">
-            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
-              <div>
-                <span className="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200/60 px-2.5 py-0.5 rounded-full inline-block">
-                  Datos en vivo desde la Guía del Huésped (/g/:slug)
-                </span>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1">
-                  Horarios de Llegada/Salida, Confirmaciones y Extras
-                </h2>
-              </div>
-            </div>
 
-            {/* Barra de Filtros Huéspedes */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search size={14} className="absolute left-3 top-3 text-slate-400" />
-                <input
-                  type="text"
-                  value={guestSearch}
-                  onChange={(e) => setGuestSearch(e.target.value)}
-                  placeholder="Buscar huésped por nombre..."
-                  className="w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <select
-                value={guestPropertyFilter}
-                onChange={(e) => setGuestPropertyFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-medium text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                <option value="all">Todos los alojamientos ({properties.length})</option>
-                {properties.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    <th className="py-3.5 px-5">Huésped / Canal</th>
-                    <th className="py-3.5 px-4">Alojamiento</th>
-                    <th className="py-3.5 px-4">Hora Llegada / Salida</th>
-                    <th className="py-3.5 px-4">Extras Solicitados</th>
-                    <th className="py-3.5 px-4">Estado Guía</th>
-                    <th className="py-3.5 px-5 text-center">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {reservations
-                    .filter((r) => {
-                      if (guestPropertyFilter !== 'all' && r.propertyId !== guestPropertyFilter) return false;
-                      if (guestSearch.trim()) {
-                        const q = guestSearch.toLowerCase();
-                        const prop = properties.find((p) => p.id === r.propertyId);
-                        if (!r.guestName.toLowerCase().includes(q) && !prop?.name.toLowerCase().includes(q)) return false;
-                      }
-                      return true;
-                    })
-                    .map((res) => {
-                    const prop = properties.find((p) => p.id === res.propertyId);
-                    const reqCount = (res.requestedExtras || []).length;
-
-                    return (
-                      <tr key={res.id} className="hover:bg-slate-50/60 transition">
-                        <td className="py-4 px-5">
-                          <span className="font-bold text-slate-900 block">{res.guestName}</span>
-                          <span className="text-xs text-slate-500">
-                            {res.source} · {res.checkIn} → {res.checkOut}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 font-semibold text-slate-800">
-                          {prop?.name}
-                        </td>
-                        <td className="py-4 px-4 text-xs">
-                          <span className="block text-slate-800">
-                            In: <strong>{res.estimatedArrivalTime || prop?.checkInTime || '15:00'}h</strong>
-                          </span>
-                          <span className="block text-slate-500">
-                            Out:{' '}
-                            <strong>
-                              {res.lateCheckoutApproved
-                                ? `${prop?.lateCheckoutUntil}h (Late)`
-                                : `${res.estimatedDepartureTime || prop?.checkOutTime || '11:00'}h`}
-                            </strong>
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 text-xs">
-                          <div className="space-y-1.5">
-                            {res.lateCheckoutApproved ? (
-                              <span className="inline-block px-2.5 py-0.5 font-semibold text-xs rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                ✓ Late Check-out activo
-                              </span>
-                            ) : res.lateCheckoutRequested ? (
-                              <div className="flex items-center gap-1.5">
-                                <span className="px-2 py-0.5 font-semibold text-xs rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
-                                  Late Check-out pedido
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => onApproveLateCheckout(res.id)}
-                                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-2.5 py-0.5 text-xs rounded-md shadow-sm transition"
-                                >
-                                  Aprobar
-                                </button>
-                              </div>
-                            ) : null}
-
-                            {(res.requestedExtras || []).map((extraId) => {
-                              const ext = prop?.extras?.find((e) => e.id === extraId);
-                              const isApproved = res.approvedExtras?.includes(extraId);
-                              if (!ext || ext.onlyWhenFreeNextDay) return null;
-                              return (
-                                <div key={extraId} className="flex items-center gap-1.5 pt-0.5">
-                                  <span
-                                    className={`px-2 py-0.5 font-semibold text-xs rounded-md ${
-                                      isApproved
-                                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                        : 'bg-indigo-50 text-indigo-800 border border-indigo-200'
-                                    }`}
-                                  >
-                                    {ext.title} ({ext.price}€) {isApproved ? '✓' : ''}
-                                  </span>
-                                  {!isApproved && onApproveExtra && (
-                                    <button
-                                      type="button"
-                                      onClick={() => onApproveExtra(res.id, extraId)}
-                                      className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-2 py-0.5 text-xs rounded-md shadow-sm transition"
-                                    >
-                                      Aprobar
-                                    </button>
-                                  )}
-                                </div>
-                              );
-                            })}
-
-                            {!res.lateCheckoutApproved &&
-                              !res.lateCheckoutRequested &&
-                              reqCount === 0 && (
-                                <span className="text-slate-400">Ninguno aún</span>
-                              )}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 text-xs space-y-1">
-                          {res.guestArrivedAt ? (
-                            <span className="block text-emerald-700 font-semibold">
-                              ✓ Llegó a las {res.guestArrivedAt}
-                            </span>
-                          ) : res.arrivalInstructionsConfirmed ? (
-                            <span className="block text-slate-800 font-medium">
-                              ✓ Instrucciones leídas
-                            </span>
-                          ) : (
-                            <span className="block text-slate-400">Pendiente de lectura</span>
-                          )}
-                        </td>
-                        <td className="py-4 px-5 space-y-1.5 min-w-[140px]">
-                          <button
-                            type="button"
-                            onClick={() => onOpenGuestPreview(res.id)}
-                            className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition text-center shadow-sm"
-                          >
-                            Abrir Guía
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => sendGuestGuideWhatsApp(res)}
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 transition shadow-sm"
-                            title="Enviar enlace directo de la guía por WhatsApp al huésped"
-                          >
-                            <Send size={11} />
-                            <span>WhatsApp Guía</span>
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
 
         {/* VISTA FISCAL: FACTURAS A HUÉSPEDES & IVA 10% (MODELO 303) */}
         {section === 'invoices' && !hasFiscalAccess && (

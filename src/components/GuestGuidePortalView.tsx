@@ -613,16 +613,24 @@ export default function GuestGuidePortalView({
     ? properties.find((p) => p.slug === activePropertySlug)
     : undefined;
 
-  const selectedRes = reservations.find((r) => r.id === selectedReservationId);
-  const reservation =
-    (slugMatchedProperty && selectedRes?.propertyId !== slugMatchedProperty.id
-      ? reservations.find((r) => r.propertyId === slugMatchedProperty.id)
-      : selectedRes) || reservations[0];
+  const matchedReservation = slugMatchedProperty
+    ? reservations.find((r) => r.propertyId === slugMatchedProperty.id)
+    : reservations.find((r) => r.id === selectedReservationId) || reservations[0];
 
   const property =
     slugMatchedProperty ||
-    properties.find((p) => p.id === reservation?.propertyId) ||
+    properties.find((p) => p.id === matchedReservation?.propertyId) ||
     properties[0];
+
+  const reservation: Reservation = matchedReservation || {
+    id: `preview-${property?.id || 'res'}`,
+    propertyId: property?.id || '',
+    guestName: 'Huésped',
+    checkIn: new Date().toISOString().split('T')[0],
+    checkOut: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+    source: 'Directo',
+    requestedExtras: [],
+  };
 
   const [language, setLanguage] = useState<Language>('es');
   const { t } = useGuestTranslation(language);

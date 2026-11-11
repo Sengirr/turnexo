@@ -959,16 +959,15 @@ export default function HostDashboardView({
                           <span>{t.overview.customizeBtn}</span>
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            propReservations[0] && onOpenGuestPreview(propReservations[0].id)
-                          }
-                          className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition"
+                        <a
+                          href={`/g/${prop.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition text-xs font-medium"
                         >
                           <ExternalLink size={13} />
                           <span>{t.overview.viewGuideBtn}</span>
-                        </button>
+                        </a>
 
                         <button
                           type="button"

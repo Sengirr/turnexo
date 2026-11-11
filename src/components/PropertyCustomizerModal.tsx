@@ -15,8 +15,19 @@ import {
   Wifi,
   Key,
   DollarSign,
+  Camera,
+  RotateCcw,
+  Check,
 } from 'lucide-react';
-import { Cleaner, Property, PropertyExtra, PropertyVideo } from '../lib/icalParser';
+import {
+  Cleaner,
+  Property,
+  PropertyExtra,
+  PropertyVideo,
+  PropertyCleaningItem,
+  DEFAULT_IVI_CHECKLIST,
+  normalizeCleaningChecklist,
+} from '../lib/icalParser';
 
 interface Props {
   property: Property;
@@ -28,6 +39,8 @@ interface Props {
 }
 
 type EditorTab = 'general' | 'guide' | 'services';
+
+const CLEANING_CATEGORIES = ['Cocina', 'Salón', 'Dormitorio', 'Baño', 'Extras', 'General'];
 
 const CHECKOUT_HOURS = [
   '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00'
@@ -82,6 +95,7 @@ export default function PropertyCustomizerModal({
         ...extras,
       ];
     }
+    p.customChecklist = normalizeCleaningChecklist(p.customChecklist);
     return p;
   });
   const [tab, setTab] = useState<EditorTab>('general');
@@ -99,6 +113,49 @@ export default function PropertyCustomizerModal({
   const [newRule, setNewRule] = useState('');
   const [newRec, setNewRec] = useState('');
   const [newCheckItem, setNewCheckItem] = useState('');
+  const [newCheckCategory, setNewCheckCategory] = useState('Cocina');
+  const [newCheckPhotoRequired, setNewCheckPhotoRequired] = useState(false);
+  const [checklistCategoryFilter, setChecklistCategoryFilter] = useState<string>('all');
+
+  const addCheckItem = () => {
+    if (!newCheckItem.trim()) return;
+    const newItem: PropertyCleaningItem = {
+      id: `chk-${Date.now()}`,
+      category: newCheckCategory || 'General',
+      item: newCheckItem.trim(),
+      photoRequired: newCheckPhotoRequired,
+    };
+    setDraft({
+      ...draft,
+      customChecklist: [...(draft.customChecklist || []), newItem],
+    });
+    setNewCheckItem('');
+    setNewCheckPhotoRequired(false);
+  };
+
+  const toggleCheckPhotoRequired = (itemId: string) => {
+    setDraft({
+      ...draft,
+      customChecklist: (draft.customChecklist || []).map((it) =>
+        it.id === itemId ? { ...it, photoRequired: !it.photoRequired } : it
+      ),
+    });
+  };
+
+  const resetToIviChecklist = () => {
+    if (
+      window.confirm(
+        isEn
+          ? 'Reset all cleaning tasks to official IVI ERP standard (36 tasks with required photos)?'
+          : '¿Restablecer todo el checklist a las 36 tareas estándar de la ERP de IVI con sus fotos obligatorias?'
+      )
+    ) {
+      setDraft({
+        ...draft,
+        customChecklist: JSON.parse(JSON.stringify(DEFAULT_IVI_CHECKLIST)),
+      });
+    }
+  };
 
   const addVideo = () => {
     if (!newVideoTitle.trim() || !newVideoUrl.trim()) return;
@@ -793,58 +850,177 @@ export default function PropertyCustomizerModal({
                 </div>
               </div>
 
-              {/* Checklist para la Limpiadora */}
-              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
-                    {isEn ? 'Cleaner Task Checklist' : 'Checklist de Limpieza (App Limpiadora)'}
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    {isEn ? 'Tasks shown on cleaner mobile magic link' : 'Tareas que marca la limpiadora desde su enlace móvil'}
-                  </span>
-                </div>
-
-                <div className="space-y-1.5">
-                  {(draft.customChecklist || []).map((item, i) => (
-                    <div key={i} className="flex items-center justify-between bg-white border border-slate-200 px-3 py-2 rounded-xl">
-                      <span className="font-medium text-slate-800">☑️ {item}</span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setDraft({
-                            ...draft,
-                            customChecklist: draft.customChecklist.filter((_, idx) => idx !== i),
-                          })
-                        }
-                        className="text-rose-500 hover:text-rose-700"
-                      >
-                        <Trash2 size={13} />
-                      </button>
+              {/* Checklist para la Limpiadora con soporte de Foto Obligatoria (IVI ERP) */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 pb-3">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
+                        {isEn ? 'Cleaner Task Checklist' : 'Checklist de Limpieza (App Limpiadora)'}
+                      </span>
+                      <span className="text-[10px] font-extrabold bg-orange-100 text-orange-900 px-2 py-0.5 rounded-full">
+                        {draft.customChecklist?.length || 0} {isEn ? 'tasks' : 'tareas'}
+                      </span>
+                      <span className="text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300/80 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Camera size={10} />
+                        {draft.customChecklist?.filter((c) => c.photoRequired).length || 0} {isEn ? 'photos required' : 'con foto obligatoria'}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      {isEn
+                        ? 'Protocol configured from IVI ERP. Mark which tasks require a verification photo from the cleaner.'
+                        : 'Protocolo basado en la ERP de IVI. Señala qué tareas exigen foto de comprobación a la limpiadora y cuáles no.'}
+                    </p>
+                  </div>
 
-                <div className="flex gap-2">
-                  <input
-                    placeholder={isEn ? 'New cleaning task (e.g. Check terrace windows)' : 'Nueva tarea (ej. Comprobar termo eléctrico o limpiar terraza)'}
-                    value={newCheckItem}
-                    onChange={(e) => setNewCheckItem(e.target.value)}
-                    className="flex-1 border border-slate-200 bg-white rounded-xl px-3 py-1.5 text-xs"
-                  />
                   <button
                     type="button"
-                    onClick={() => {
-                      if (!newCheckItem.trim()) return;
-                      setDraft({
-                        ...draft,
-                        customChecklist: [...(draft.customChecklist || []), newCheckItem.trim()],
-                      });
-                      setNewCheckItem('');
-                    }}
-                    className="bg-slate-900 text-white font-bold px-4 py-1.5 rounded-xl text-xs shrink-0"
+                    onClick={resetToIviChecklist}
+                    className="text-[11px] font-bold text-slate-700 hover:text-orange-600 bg-white border border-slate-200 hover:border-orange-300 px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+                    title={isEn ? 'Restore default IVI ERP checklist' : 'Restablecer al checklist por defecto de IVI ERP'}
                   >
-                    + {isEn ? 'Add' : 'Añadir'}
+                    <RotateCcw size={12} />
+                    <span>{isEn ? 'Reset IVI ERP Defaults' : 'Restablecer Plantilla IVI ERP'}</span>
                   </button>
+                </div>
+
+                {/* Filtro por categorías */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+                  <button
+                    type="button"
+                    onClick={() => setChecklistCategoryFilter('all')}
+                    className={`px-3 py-1 rounded-xl font-bold transition shrink-0 ${
+                      checklistCategoryFilter === 'all'
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {isEn ? 'All' : 'Todas'} ({draft.customChecklist?.length || 0})
+                  </button>
+                  {CLEANING_CATEGORIES.map((cat) => {
+                    const count = (draft.customChecklist || []).filter((c) => (c.category || 'General') === cat).length;
+                    if (count === 0 && cat === 'General') return null;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setChecklistCategoryFilter(cat)}
+                        className={`px-3 py-1 rounded-xl font-bold transition shrink-0 flex items-center gap-1.5 ${
+                          checklistCategoryFilter === cat
+                            ? 'bg-slate-900 text-white'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>{cat}</span>
+                        <span className="text-[10px] opacity-75 font-mono">({count})</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Lista de tareas */}
+                <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                  {(draft.customChecklist || [])
+                    .filter(
+                      (item) =>
+                        checklistCategoryFilter === 'all' ||
+                        (item.category || 'General') === checklistCategoryFilter
+                    )
+                    .map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between gap-3 bg-white border border-slate-200/90 hover:border-slate-300 p-2.5 rounded-xl transition shadow-2xs"
+                      >
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                          <span className="text-[10px] font-extrabold uppercase bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md shrink-0">
+                            {item.category || 'General'}
+                          </span>
+                          <span className="text-xs font-semibold text-slate-800 truncate">
+                            {item.item}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          {/* Botón interactivo para señalar si requiere foto o no */}
+                          <button
+                            type="button"
+                            onClick={() => toggleCheckPhotoRequired(item.id)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 border ${
+                              item.photoRequired
+                                ? 'bg-amber-100/90 text-amber-900 border-amber-300 hover:bg-amber-200 shadow-2xs'
+                                : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200 hover:text-slate-700'
+                            }`}
+                            title={
+                              item.photoRequired
+                                ? (isEn ? 'Photo required. Click to make optional.' : 'Foto obligatoria. Clic para quitar requerimiento de foto.')
+                                : (isEn ? 'Photo optional. Click to make required.' : 'Sin foto. Clic para exigir foto obligatoria a la limpiadora.')
+                            }
+                          >
+                            <Camera size={12} className={item.photoRequired ? 'text-amber-700' : 'text-slate-400'} />
+                            <span>{item.photoRequired ? (isEn ? 'Photo Required' : 'Con Foto') : (isEn ? 'No Photo' : 'Sin Foto')}</span>
+                          </button>
+
+                          {/* Botón eliminar tarea */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setDraft({
+                                ...draft,
+                                customChecklist: (draft.customChecklist || []).filter((it) => it.id !== item.id),
+                              })
+                            }
+                            className="text-slate-400 hover:text-rose-600 p-1 rounded-lg transition"
+                            title={isEn ? 'Delete task' : 'Eliminar tarea'}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
+                {/* Formulario para añadir nueva tarea personalizada */}
+                <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 mt-2">
+                  <p className="font-bold text-slate-800 text-xs">
+                    {isEn ? 'Add new task to checklist' : 'Añadir nueva tarea al checklist'}
+                  </p>
+                  <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center">
+                    <select
+                      value={newCheckCategory}
+                      onChange={(e) => setNewCheckCategory(e.target.value)}
+                      className="border border-slate-200 bg-slate-50 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700"
+                    >
+                      {CLEANING_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+
+                    <input
+                      placeholder={isEn ? 'Task name (e.g. Check terrace awning or safe)' : 'Nombre de la tarea (ej. Comprobar toldo terraza o caja fuerte)'}
+                      value={newCheckItem}
+                      onChange={(e) => setNewCheckItem(e.target.value)}
+                      className="flex-1 border border-slate-200 bg-white rounded-xl px-3 py-1.5 text-xs"
+                    />
+
+                    <label className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl cursor-pointer select-none text-xs text-slate-700 font-semibold shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={newCheckPhotoRequired}
+                        onChange={(e) => setNewCheckPhotoRequired(e.target.checked)}
+                        className="rounded text-orange-600 focus:ring-orange-500"
+                      />
+                      <Camera size={13} className="text-amber-600" />
+                      <span>{isEn ? 'Photo' : 'Exigir Foto'}</span>
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={addCheckItem}
+                      className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-1.5 rounded-xl text-xs shrink-0 transition"
+                    >
+                      + {isEn ? 'Add' : 'Añadir'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

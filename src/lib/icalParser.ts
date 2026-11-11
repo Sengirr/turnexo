@@ -38,7 +38,91 @@ export interface Reservation {
 export interface ChecklistItem {
   id: string;
   label: string; // 100 % en español y personalizable por piso
+  category?: string;
+  photoRequired?: boolean;
   completed: boolean;
+}
+
+export interface PropertyCleaningItem {
+  id: string;
+  category: string;
+  item: string;
+  photoRequired: boolean;
+}
+
+export const DEFAULT_IVI_CHECKLIST: PropertyCleaningItem[] = [
+  // --- COCINA ---
+  { id: 'coc-1', category: 'Cocina', item: 'Nevera/Congelador (Sin escarcha)', photoRequired: true },
+  { id: 'coc-2', category: 'Cocina', item: 'Cafetera/Hervidor', photoRequired: true },
+  { id: 'coc-3', category: 'Cocina', item: 'Sartenes y Ollas', photoRequired: true },
+  { id: 'coc-4', category: 'Cocina', item: 'Cajon Cubiertos', photoRequired: true },
+  { id: 'coc-5', category: 'Cocina', item: 'Cajon Menaje', photoRequired: true },
+  { id: 'coc-6', category: 'Cocina', item: 'Mueble Vasos/Copas Vino', photoRequired: true },
+  { id: 'coc-7', category: 'Cocina', item: 'Mueble Platos', photoRequired: true },
+  { id: 'coc-8', category: 'Cocina', item: 'Tostadora', photoRequired: false },
+  { id: 'coc-9', category: 'Cocina', item: 'Horno', photoRequired: true },
+  { id: 'coc-10', category: 'Cocina', item: 'Microondas', photoRequired: false },
+  { id: 'coc-11', category: 'Cocina', item: 'Lavavajillas', photoRequired: false },
+  { id: 'coc-12', category: 'Cocina', item: 'Bayetas+Estropajo+Trapo Cocina', photoRequired: false },
+  { id: 'coc-13', category: 'Cocina', item: 'Productos limpieza+Bolsa Basura', photoRequired: true },
+  { id: 'coc-14', category: 'Cocina', item: 'Dosificador Fairy lleno', photoRequired: false },
+
+  // --- SALÓN ---
+  { id: 'sal-1', category: 'Salón', item: 'Sofa', photoRequired: true },
+  { id: 'sal-2', category: 'Salón', item: 'Colchon Sofa + protector', photoRequired: true },
+  { id: 'sal-3', category: 'Salón', item: 'Wifi + Guia', photoRequired: false },
+
+  // --- DORMITORIO ---
+  { id: 'dor-1', category: 'Dormitorio', item: 'Cama con toallas', photoRequired: true },
+  { id: 'dor-2', category: 'Dormitorio', item: 'Interior armario: Almohadas, Sabanas, Toallas y Nordico con funda', photoRequired: true },
+  { id: 'dor-3', category: 'Dormitorio', item: 'Protector Colchon', photoRequired: false },
+  { id: 'dor-4', category: 'Dormitorio', item: 'Cajones', photoRequired: false },
+  { id: 'dor-5', category: 'Dormitorio', item: 'Cortinas y Persianas (Ver si funciona)', photoRequired: false },
+  { id: 'dor-6', category: 'Dormitorio', item: 'Cuna + colchon', photoRequired: true },
+
+  // --- BAÑO ---
+  { id: 'ban-1', category: 'Baño', item: 'Lavabo + Espejo', photoRequired: false },
+  { id: 'ban-2', category: 'Baño', item: 'WC + Papel', photoRequired: false },
+  { id: 'ban-3', category: 'Baño', item: 'Railes Mampara', photoRequired: true },
+  { id: 'ban-4', category: 'Baño', item: 'Botes jabon, gel y champu', photoRequired: false },
+  { id: 'ban-5', category: 'Baño', item: 'Escobilla wc', photoRequired: false },
+  { id: 'ban-6', category: 'Baño', item: 'Papelera bolsa', photoRequired: false },
+  { id: 'ban-7', category: 'Baño', item: 'Secador', photoRequired: false },
+  { id: 'ban-8', category: 'Baño', item: 'Plancha', photoRequired: false },
+  { id: 'ban-9', category: 'Baño', item: 'Desague ducha', photoRequired: false },
+  { id: 'ban-10', category: 'Baño', item: 'Lavadora (Cajón limpio y sin ropa dentro + pastilla)', photoRequired: false },
+
+  // --- EXTRAS ---
+  { id: 'ext-1', category: 'Extras', item: 'Fregona, cubo, escoba', photoRequired: true },
+  { id: 'ext-2', category: 'Extras', item: 'Mopa', photoRequired: true },
+  { id: 'ext-3', category: 'Extras', item: 'Mesa terraza y sillas', photoRequired: false },
+  { id: 'ext-4', category: 'Extras', item: 'Tendedero', photoRequired: false },
+  { id: 'ext-5', category: 'Extras', item: 'Luces y AC apagado', photoRequired: false },
+  { id: 'ext-6', category: 'Extras', item: 'Mandos TV y AC (limpios)', photoRequired: true },
+  { id: 'ext-7', category: 'Extras', item: 'Cajetin llave', photoRequired: true },
+  { id: 'ext-8', category: 'Extras', item: 'Raixer', photoRequired: false },
+];
+
+export function normalizeCleaningChecklist(rawList?: (string | PropertyCleaningItem)[]): PropertyCleaningItem[] {
+  if (!rawList || rawList.length === 0) {
+    return JSON.parse(JSON.stringify(DEFAULT_IVI_CHECKLIST));
+  }
+  return rawList.map((raw, idx) => {
+    if (typeof raw === 'string') {
+      return {
+        id: `chk-${idx + 1}`,
+        category: 'General',
+        item: raw,
+        photoRequired: false,
+      };
+    }
+    return {
+      id: raw.id || `chk-${idx + 1}`,
+      category: raw.category || 'General',
+      item: raw.item || '',
+      photoRequired: Boolean(raw.photoRequired),
+    };
+  });
 }
 
 export interface CleaningIncident {
@@ -100,7 +184,7 @@ export interface Property {
   houseRules: string[];
   appliancesGuide: string;
   localRecommendations: string[];
-  customChecklist: string[];
+  customChecklist: PropertyCleaningItem[];
   modulesEnabled: {
     cleanings: boolean;
     guestGuide: boolean;
@@ -177,19 +261,12 @@ export function parseICalContent(
 }
 
 export function createChecklistFromProperty(prop?: Property): ChecklistItem[] {
-  const items = prop?.customChecklist?.length
-    ? prop.customChecklist
-    : [
-        'Ventilar todas las estancias y revisar olores',
-        'Cambiar sábanas y dejar 2 toallas por huésped',
-        'Desinfectar baño, mampara y reponer papel/gel',
-        'Revisar interior de nevera, microondas y cafetera',
-        'Comprobar que no hay objetos olvidados ni roturas',
-      ];
-
-  return items.map((label, idx) => ({
-    id: `chk-${idx + 1}`,
-    label,
+  const items = normalizeCleaningChecklist(prop?.customChecklist);
+  return items.map((it, idx) => ({
+    id: it.id || `chk-${idx + 1}`,
+    label: it.item,
+    category: it.category || 'General',
+    photoRequired: Boolean(it.photoRequired),
     completed: false,
   }));
 }

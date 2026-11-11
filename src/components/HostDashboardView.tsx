@@ -36,7 +36,7 @@ import {
   AlertTriangle,
   Sparkles,
 } from 'lucide-react';
-import { Cleaner, CleaningTask, Property, Reservation } from '../lib/icalParser';
+import { Cleaner, CleaningTask, Property, Reservation, DEFAULT_IVI_CHECKLIST } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
 import { HostAccount, isSupabaseConfigured, STRIPE_PAYMENT_LINKS, getStripePaymentLink } from '../lib/supabase';
 import PrintableQrPosterModal from './PrintableQrPosterModal';
@@ -408,14 +408,7 @@ export default function HostDashboardView({
       appliancesGuide:
         'Aire acondicionado con mando en el salón. Cafetera de cápsulas disponible.',
       localRecommendations: ['Supermercado y farmacia a menos de 200 metros.'],
-      customChecklist: [
-        'Ventilar todas las habitaciones',
-        'Cambiar sábanas y toallas limpias',
-        'Desinfectar baño y cocina a fondo',
-        'Reponer papel higiénico, bolsas y jabón',
-        'Revisar que no queden objetos personales',
-        'Comprobar luces y aire acondicionado apagados',
-      ],
+      customChecklist: JSON.parse(JSON.stringify(DEFAULT_IVI_CHECKLIST)),
       departureChecklist: [
         'Apagar luces y climatización',
         'Tirar la basura en los contenedores',
@@ -2940,9 +2933,23 @@ export default function HostDashboardView({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
                 {inspectingTaskPhotos.checklist.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2 text-slate-800 bg-white p-2.5 rounded-xl border border-slate-200/70 shadow-2xs">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span>{item.label}</span>
+                  <div key={item.id} className="flex items-center justify-between gap-2 text-slate-800 bg-white p-2.5 rounded-xl border border-slate-200/70 shadow-2xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-emerald-600 font-bold shrink-0">✓</span>
+                      <div className="truncate">
+                        {item.category && item.category !== 'General' && (
+                          <span className="text-[10px] text-slate-400 font-medium mr-1.5 uppercase tracking-wide">
+                            [{item.category}]
+                          </span>
+                        )}
+                        <span className="font-medium text-slate-900">{item.label}</span>
+                      </div>
+                    </div>
+                    {item.photoRequired && (
+                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                        <Camera size={10} /> Foto
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

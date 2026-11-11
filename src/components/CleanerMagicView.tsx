@@ -189,31 +189,70 @@ export default function CleanerMagicView({
                   </div>
 
                   {/* Checklist */}
-                  <div className="bg-white border border-[#E2DDD2] p-4 space-y-2.5">
-                    <p className="font-mono text-[10px] font-bold text-[#57554F] uppercase tracking-wider">
-                      PROTOCOLO DE REVISIÓN
-                    </p>
-                    {task.checklist.map((item) => (
-                      <label
-                        key={item.id}
-                        className="flex items-start gap-2.5 py-1 cursor-pointer select-none"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={item.completed}
-                          onChange={() => onToggleChecklistItem(task.id, item.id)}
-                          className="mt-0.5 h-4 w-4 accent-[#141413]"
-                        />
-                        <span
-                          className={`text-xs leading-snug ${
-                            item.completed
-                              ? 'line-through text-[#57554F]/60'
-                              : 'text-[#141413] font-medium'
-                          }`}
-                        >
-                          {item.label}
+                  <div className="bg-white border border-[#E2DDD2] p-4 space-y-3">
+                    <div className="flex items-center justify-between pb-1 border-b border-[#E2DDD2]">
+                      <p className="font-mono text-[10px] font-bold text-[#57554F] uppercase tracking-wider">
+                        PROTOCOLO DE REVISIÓN ({task.checklist.filter((c) => c.completed).length}/{task.checklist.length})
+                      </p>
+                      {task.checklist.some((c) => c.photoRequired) && (
+                        <span className="font-mono text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 inline-flex items-center gap-1">
+                          <Camera size={11} /> {task.checklist.filter((c) => c.photoRequired).length} fotos requeridas
                         </span>
-                      </label>
+                      )}
+                    </div>
+
+                    {/* Group by category if present */}
+                    {Object.entries(
+                      task.checklist.reduce((acc, item) => {
+                        const cat = item.category || 'General';
+                        if (!acc[cat]) acc[cat] = [];
+                        acc[cat].push(item);
+                        return acc;
+                      }, {} as Record<string, typeof task.checklist>)
+                    ).map(([cat, items]) => (
+                      <div key={cat} className="space-y-1.5 pt-1">
+                        {cat !== 'General' && (
+                          <div className="text-[10px] font-mono font-bold text-[#141413] uppercase tracking-widest bg-[#FAF9F5] px-2 py-1 border-l-2 border-[#141413]">
+                            {cat}
+                          </div>
+                        )}
+                        {items.map((item) => (
+                          <label
+                            key={item.id}
+                            className="flex items-center justify-between gap-2.5 py-1.5 px-2 hover:bg-[#FAF9F5] cursor-pointer select-none rounded transition"
+                          >
+                            <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                              <input
+                                type="checkbox"
+                                checked={item.completed}
+                                onChange={() => onToggleChecklistItem(task.id, item.id)}
+                                className="mt-0.5 h-4 w-4 accent-[#141413] shrink-0"
+                              />
+                              <span
+                                className={`text-xs leading-snug ${
+                                  item.completed
+                                    ? 'line-through text-[#57554F]/60'
+                                    : 'text-[#141413] font-medium'
+                                }`}
+                              >
+                                {item.label}
+                              </span>
+                            </div>
+                            {item.photoRequired && (
+                              <span
+                                className={`font-mono text-[10px] font-bold px-2 py-0.5 border shrink-0 inline-flex items-center gap-1 ${
+                                  item.completed
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                    : 'bg-amber-100 text-amber-900 border-amber-300'
+                                }`}
+                              >
+                                <Camera size={10} />
+                                <span>{item.completed ? 'Verificado' : 'Foto'}</span>
+                              </span>
+                            )}
+                          </label>
+                        ))}
+                      </div>
                     ))}
                   </div>
 

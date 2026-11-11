@@ -1,4 +1,4 @@
-import { Cleaner, Property, Reservation, CleaningTask } from './icalParser';
+import { Cleaner, Property, Reservation, CleaningTask, DEFAULT_IVI_CHECKLIST } from './icalParser';
 
 export const INITIAL_CLEANERS: Cleaner[] = [
   {
@@ -145,13 +145,7 @@ export const INITIAL_PROPERTIES: Property[] = [
       'Supermercado Mercadona en Av. Ricardo Soriano 18 (abierto de 09:00 a 21:30).',
       'Farmacia 24h en Paseo Marítimo esquina C/ Virgen del Carmen.',
     ],
-    customChecklist: [
-      'Ventilar todas las estancias y revisar terraza',
-      'Cambiar sábanas y dejar 2 toallas por huésped',
-      'Desinfectar baños, mampara y reponer papel/gel',
-      'Revisar interior de nevera, horno, microondas y Nespresso',
-      'Dejar mando del aire acondicionado y llaves en su soporte',
-    ],
+    customChecklist: JSON.parse(JSON.stringify(DEFAULT_IVI_CHECKLIST)),
     modulesEnabled: {
       cleanings: true,
       guestGuide: true,
@@ -241,11 +235,7 @@ export const INITIAL_PROPERTIES: Property[] = [
       'El Pimpi (a 4 min andando): vinos locales y tapas imprescindibles.',
       'Café Central en Plaza de la Constitución para desayunar.',
     ],
-    customChecklist: [
-      'Cambiar ropa de cama y toallas',
-      'Revisar sofá-cama y aspirar alfombra',
-      'Comprobar que las llaves quedan en el cajetín 1904*',
-    ],
+    customChecklist: JSON.parse(JSON.stringify(DEFAULT_IVI_CHECKLIST)),
     modulesEnabled: {
       cleanings: true,
       guestGuide: true,

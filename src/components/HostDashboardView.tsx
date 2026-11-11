@@ -109,6 +109,7 @@ export default function HostDashboardView({
   onResetDemo,
 }: Props) {
   const [section, setSection] = useState<BackofficeSection>('schedule');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCleanerName, setNewCleanerName] = useState('');
   const [newCleanerPhone, setNewCleanerPhone] = useState('+34 ');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -354,11 +355,46 @@ export default function HostDashboardView({
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col lg:flex-row overflow-x-hidden">
+      {/* BARRA SUPERIOR PARA MÓVIL */}
+      <div className="lg:hidden bg-[#141413] text-[#F6F4EE] px-4 py-3 border-b border-[#2C2C29] flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-[#C85A32] text-white flex items-center justify-center font-mono font-bold text-xs">
+            TX
+          </div>
+          <span className="font-bold text-sm tracking-tight">Turnexo</span>
+          <span className="text-white/40 text-xs">·</span>
+          <span className="text-xs text-white/80 font-medium truncate max-w-[140px]">
+            {section === 'schedule'
+              ? 'Limpiezas'
+              : section === 'guests'
+              ? 'Guías'
+              : section === 'invoices'
+              ? 'Facturas'
+              : section === 'overview'
+              ? 'Alojamientos'
+              : section === 'team'
+              ? 'Equipo'
+              : 'Plan'}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-bold px-3 py-1.5 flex items-center gap-1.5 border border-white/20"
+        >
+          {mobileMenuOpen ? 'Cerrar ✕' : 'Menú ☰'}
+        </button>
+      </div>
+
       {/* BARRA LATERAL IZQUIERDA ESTILO SOFTWARE PROFESIONAL */}
-      <aside className="w-full lg:w-64 bg-[#141413] text-[#F6F4EE] shrink-0 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#2C2C29]">
+      <aside
+        className={`${
+          mobileMenuOpen ? 'flex' : 'hidden'
+        } lg:flex w-full lg:w-64 bg-[#141413] text-[#F6F4EE] shrink-0 flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#2C2C29]`}
+      >
         <div className="p-6 space-y-8">
-          <div className="flex items-center justify-between">
+          <div className="hidden lg:flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 bg-[#C85A32] text-white flex items-center justify-center font-mono font-bold text-xs">
                 TX
@@ -391,7 +427,10 @@ export default function HostDashboardView({
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setSection(item.id)}
+                  onClick={() => {
+                    setSection(item.id);
+                    setMobileMenuOpen(false);
+                  }}
                   className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold flex items-center justify-between transition ${
                     active
                       ? 'bg-[#C85A32] text-white'

@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, Sparkles, ShieldCheck, Zap, QrCode, Users, FileText } from 'lucide-react';
 
 export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+
   const plans = [
     {
       name: 'Plan Starter',
-      price: '0 €',
-      period: '/mes · Plan gratuito',
+      priceMonthly: '0 €',
+      priceYearly: '0 €',
+      periodMonthly: '/mes · Plan gratuito',
+      periodYearly: '/año · Plan gratuito',
       subtitle: 'Para 1 Alojamiento Turístico',
       badge: 'Plan Gratuito',
+      savings: '100% gratis para siempre',
       icon: QrCode,
       features: [
         '1 Alojamiento turístico conectado',
@@ -24,10 +29,13 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
     },
     {
       name: 'Plan Pro Fiscal',
-      price: '19 €',
-      period: '/mes tarifa plana total',
-      subtitle: 'Hasta 5 Alojamientos (~3,80€/alojamiento)',
+      priceMonthly: '19 €',
+      priceYearly: '15 €',
+      periodMonthly: '/mes tarifa plana',
+      periodYearly: '/mes (180 € al año)',
+      subtitle: 'Hasta 5 Alojamientos (~3€/alojamiento)',
       badge: '⭐ El más elegido · IVA 10%',
+      savings: 'Ahorras 48 € al año (2,5 meses gratis)',
       icon: FileText,
       features: [
         'Hasta 5 alojamientos turísticos',
@@ -43,10 +51,13 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
     },
     {
       name: 'Plan Microgestora',
-      price: '39 €',
-      period: '/mes tarifa plana total',
-      subtitle: 'Hasta 10 Alojamientos (~3,90€/alojamiento)',
+      priceMonthly: '39 €',
+      priceYearly: '31 €',
+      periodMonthly: '/mes tarifa plana',
+      periodYearly: '/mes (372 € al año)',
+      subtitle: 'Hasta 10 Alojamientos (~3,10€/alojamiento)',
       badge: 'Microgestores',
+      savings: 'Ahorras 96 € al año (2,5 meses gratis)',
       icon: Users,
       features: [
         'Hasta 10 alojamientos turísticos incluidos',
@@ -86,9 +97,50 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
+        {/* SELECTOR FACTURACIÓN MENSUAL / ANUAL */}
+        <div className="flex items-center justify-center gap-3">
+          <div className="inline-flex items-center p-1 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-3.5 py-1.5 rounded-lg transition-all ${
+                billingCycle === 'monthly'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Pago Mensual
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                billingCycle === 'yearly'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>Pago Anual</span>
+              <span className="bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded font-black">
+                -20%
+              </span>
+            </button>
+          </div>
+          {billingCycle === 'yearly' && (
+            <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+              🎁 2 meses gratis incluidos
+            </span>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {plans.map((p) => {
             const Icon = p.icon;
+            const isYearly = billingCycle === 'yearly';
+            const price = isYearly ? p.priceYearly : p.priceMonthly;
+            const period = isYearly ? p.periodYearly : p.periodMonthly;
+            const showCrossedOut = isYearly && p.priceYearly !== p.priceMonthly;
+
             return (
               <div
                 key={p.name}
@@ -118,13 +170,25 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
                   </div>
 
                   <div>
-                    <span className="text-4xl font-black">{p.price}</span>
-                    <span className={`text-xs ${p.highlighted ? 'text-slate-400' : 'text-slate-500'}`}>
-                      {p.period}
-                    </span>
+                    <div className="flex items-baseline gap-2">
+                      {showCrossedOut && (
+                        <span className={`text-xl font-bold line-through ${p.highlighted ? 'text-slate-500' : 'text-slate-400'}`}>
+                          {p.priceMonthly}
+                        </span>
+                      )}
+                      <span className="text-4xl font-black">{price}</span>
+                      <span className={`text-xs ${p.highlighted ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {period}
+                      </span>
+                    </div>
+                    {isYearly && (
+                      <p className={`text-[11px] font-bold mt-1 ${p.highlighted ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                        ✓ {p.savings}
+                      </p>
+                    )}
                     <p
                       className={`text-xs font-semibold mt-1 ${
-                        p.highlighted ? 'text-emerald-400' : 'text-slate-600'
+                        p.highlighted ? 'text-slate-300' : 'text-slate-600'
                       }`}
                     >
                       {p.subtitle}

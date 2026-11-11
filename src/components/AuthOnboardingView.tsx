@@ -152,7 +152,7 @@ export default function AuthOnboardingView({
   ];
 
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col justify-between">
+    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col justify-between overflow-x-hidden">
       {/* Cabecera idéntica a la Landing Page */}
       <header className="border-b border-[#E2DDD2] bg-[#F6F4EE]/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">

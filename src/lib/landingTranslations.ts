@@ -106,12 +106,19 @@ export interface LandingTranslations {
     title: string;
     subtitle: string;
     mostChosenBadge: string;
+    billingMonthly: string;
+    billingYearly: string;
+    yearlyDiscountBadge: string;
+    billedYearlyNote: string;
     plans: Array<{
       planKey: 'plan_starter' | 'plan_pro' | 'plan_manager';
       name: string;
       units: string;
       price: string;
+      priceYearly: string;
       note: string;
+      noteYearly: string;
+      savingsText?: string;
       summary: string;
       highlight: boolean;
       cta: string;

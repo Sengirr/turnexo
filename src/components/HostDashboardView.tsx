@@ -857,11 +857,11 @@ export default function HostDashboardView({
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50/70 border-t border-slate-100 p-3 text-xs font-medium">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-50/70 border-t border-slate-100 p-3 text-xs font-medium">
                         <button
                           type="button"
                           onClick={() => setCustomizingProperty(prop)}
-                          className="bg-slate-900 hover:bg-slate-800 text-white py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
+                          className="bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition"
                         >
                           <Settings size={13} className="text-orange-400" />
                           <span>Personalizar</span>
@@ -872,7 +872,7 @@ export default function HostDashboardView({
                           onClick={() =>
                             propReservations[0] && onOpenGuestPreview(propReservations[0].id)
                           }
-                          className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
+                          className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition"
                         >
                           <ExternalLink size={13} />
                           <span>Ver Guía</span>
@@ -880,17 +880,8 @@ export default function HostDashboardView({
 
                         <button
                           type="button"
-                          onClick={() => cleaner && onOpenCleanerPreview(cleaner.id)}
-                          className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
-                        >
-                          <Users size={13} />
-                          <span>App Limpieza</span>
-                        </button>
-
-                        <button
-                          type="button"
                           onClick={() => setQrModalProperty(prop)}
-                          className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition font-semibold"
+                          className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition font-semibold"
                         >
                           <Printer size={13} />
                           <span>Cartel QR</span>

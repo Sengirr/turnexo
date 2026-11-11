@@ -1047,34 +1047,6 @@ export default function GuestGuidePortalView({
                 </div>
               )}
 
-              {/* Confirmation Button / Thank you message */}
-              {!reservation.arrivalInstructionsConfirmed ? (
-                <Button
-                  variant="primary"
-                  className="w-full shadow-xl shadow-primary-ivi/20"
-                  onClick={() =>
-                    onUpdateReservation?.(
-                      { ...reservation, arrivalInstructionsConfirmed: true },
-                      'Instrucciones de llegada confirmadas por el huésped.'
-                    )
-                  }
-                >
-                  <CheckCircle2 className="mr-2 shrink-0" size={18} />
-                  <span>{t('arrival.instructions_confirm_btn')}</span>
-                </Button>
-              ) : (
-                <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 shadow-lg shadow-emerald-100/50">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shrink-0 shadow-md shadow-emerald-200">
-                      <CheckCircle2 size={20} className="text-white" />
-                    </div>
-                    <p className="text-xs font-bold text-emerald-800 leading-relaxed">
-                      {t('arrival.instructions_confirm_thanks')}
-                    </p>
-                  </div>
-                </div>
-              )}
-
               {/* Main Hero Check-in Video (First Clip) */}
               {checkinClips.length > 0 && (
                 <>

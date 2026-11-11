@@ -11,7 +11,7 @@ create table if not exists public.hosts (
   full_name text,
   company_name text,
   whatsapp text,
-  subscription_plan text not null default 'pack_complete' check (subscription_plan in ('module_cleanings', 'module_guide', 'pack_complete')),
+  subscription_plan text not null default 'plan_starter' check (subscription_plan in ('plan_starter', 'plan_pro', 'plan_manager', 'module_cleanings', 'module_guide', 'pack_complete')),
   subscription_status text not null default 'trialing' check (subscription_status in ('trialing', 'active', 'past_due', 'canceled')),
   trial_ends_at timestamptz not null default (now() + interval '14 days'),
   stripe_customer_id text,

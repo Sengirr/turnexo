@@ -261,12 +261,14 @@ export default function PropertyCustomizerModal({
                     {isEn ? 'Calendar Sync (iCal)' : 'Sincronización de Calendarios (iCal)'}
                   </span>
                   <span className="text-[10px] text-slate-400">
-                    {isEn ? 'Leave empty for manual mode' : 'Deja vacío si gestionas reservas manualmente'}
+                    {isEn ? 'Optional · Fill only the platforms you use' : 'Opcional · Rellena solo las que uses'}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-600 mb-1">URL iCal Airbnb (.ics)</label>
+                    <label className="block font-semibold text-slate-600 mb-1">
+                      {isEn ? 'Airbnb iCal URL (.ics)' : 'URL iCal Airbnb (.ics)'} <span className="font-normal text-[10px] text-slate-400">({isEn ? 'Optional' : 'Opcional'})</span>
+                    </label>
                     <input
                       value={draft.airbnbIcalUrl || ''}
                       onChange={(e) => setDraft({ ...draft, airbnbIcalUrl: e.target.value })}
@@ -275,7 +277,9 @@ export default function PropertyCustomizerModal({
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold text-slate-600 mb-1">URL iCal Booking (.ics)</label>
+                    <label className="block font-semibold text-slate-600 mb-1">
+                      {isEn ? 'Booking iCal URL (.ics)' : 'URL iCal Booking (.ics)'} <span className="font-normal text-[10px] text-slate-400">({isEn ? 'Optional' : 'Opcional'})</span>
+                    </label>
                     <input
                       value={draft.bookingIcalUrl || ''}
                       onChange={(e) => setDraft({ ...draft, bookingIcalUrl: e.target.value })}

@@ -501,14 +501,17 @@ export default function App() {
   const handleAuthSuccess = (account: HostAccount) => {
     setHostAccount(account);
     applyPlanToProperties(account.plan);
+    syncHostToSupabase(account);
     navigate('/app', { kind: 'app' });
     showToast(`Bienvenido a Turnexo, ${account.fullName}.`);
   };
 
   const handleChangePlan = (plan: HostAccount['plan']) => {
     if (!hostAccount) return;
-    setHostAccount({ ...hostAccount, plan });
+    const updated = { ...hostAccount, plan };
+    setHostAccount(updated);
     applyPlanToProperties(plan);
+    syncHostToSupabase(updated);
     const label =
       plan === 'plan_starter'
         ? 'Starter (1 Alojamiento · 0 €/mes)'

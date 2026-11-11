@@ -93,8 +93,8 @@ export default function PropertyCustomizerModal({
         id: `ext-late-${p.id}`,
         title: `Late Check-out hasta las ${p.lateCheckoutUntil || '17:00'}h`,
         description: isEn
-          ? 'Offered only when no other guest is checking in the same day via iCal.'
-          : 'Se ofrece al huésped solo si no entra otra reserva el mismo día en el iCal.',
+          ? 'Requested by guest from guide, subject to host confirmation in dashboard.'
+          : 'El huésped lo solicita desde la guía y tú decides si confirmarlo en tu panel.',
         price: p.lateCheckoutPrice || 35,
         priceUnit: 'reserva',
         icon: 'clock',
@@ -200,8 +200,8 @@ export default function PropertyCustomizerModal({
         newExtraDesc.trim() ||
         (isLate
           ? (isEn
-              ? 'Offered only when no other guest is checking in the same day via iCal.'
-              : 'Se ofrece al huésped solo si no entra otra reserva el mismo día en el iCal.')
+              ? 'Requested by guest from guide, subject to host confirmation in dashboard.'
+              : 'El huésped lo solicita desde la guía y tú decides si confirmarlo en tu panel.')
           : (isEn ? 'Requested via digital guide' : 'Solicitado desde la guía')),
       price: newExtraPrice,
       priceUnit: newExtraUnit,
@@ -945,15 +945,15 @@ export default function PropertyCustomizerModal({
                                 <span className="font-bold text-slate-900 text-xs">{ext.title}</span>
                                 {isLateCheckout && (
                                   <span className="text-[10px] font-extrabold uppercase bg-amber-100 text-amber-900 border border-amber-200/60 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                                    <span>⚡ {isEn ? 'Smart Late Check-out' : 'Salida Tarde Inteligente'}</span>
+                                    <span>⚡ {isEn ? 'On Request (Host Confirmation)' : 'Bajo Petición (Confirmación del Anfitrión)'}</span>
                                   </span>
                                 )}
                               </div>
                               <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
                                 {isLateCheckout
                                   ? (isEn
-                                      ? 'Offered only when no other guest is checking in the same day via iCal.'
-                                      : 'Se ofrece al huésped solo si no entra otra reserva el mismo día en el iCal.')
+                                      ? 'Requested by guest from guide, subject to host confirmation in dashboard.'
+                                      : 'El huésped lo solicita desde la guía digital y tú decides si confirmarlo en tu panel.')
                                   : ext.description}
                               </p>
 

@@ -676,10 +676,10 @@ export default function GuestGuidePortalView({
       title: `Late Check-out hasta las ${property.lateCheckoutUntil || '17:00'}h`,
       description:
         language === 'en'
-          ? 'Afternoon departure at your own pace subject to calendar availability.'
+          ? 'Afternoon departure on request. Subject to host confirmation.'
           : language === 'fr'
-          ? 'Départ dans l’après-midi sans stress selon disponibilité.'
-          : 'Salida por la tarde sin prisas sujeta a disponibilidad.',
+          ? 'Départ l’après-midi sur demande. Sous réserve de confirmation par l’hôte.'
+          : 'Salida por la tarde bajo petición. Sujeto a confirmación del anfitrión.',
       price: property.lateCheckoutPrice || 35,
       priceUnit: 'reserva',
       icon: 'clock',
@@ -1360,9 +1360,13 @@ export default function GuestGuidePortalView({
                   (isLateCheckout && reservation.lateCheckoutApproved) ||
                   reservation.approvedExtras?.includes(extra.id);
 
-                const whatsappLink = `https://wa.me/${cleanWhatsappPhone}?text=${encodeURIComponent(
-                  `Hola, estoy en ${property.name} (${reservation.guestName}) y he solicitado desde la guía el extra: "${extra.title}" (${extra.price}€ / ${extra.priceUnit}).`
-                )}`;
+                const whatsappLink = isLateCheckout
+                  ? `https://wa.me/${cleanWhatsappPhone}?text=${encodeURIComponent(
+                      `Hola, estoy en ${property.name} (${reservation.guestName}) y me gustaría solicitar el Late Check-out (salida hasta las ${property.lateCheckoutUntil || '17:00'}h por ${extra.price}€). ¿Sería posible confirmarlo? Muchas gracias.`
+                    )}`
+                  : `https://wa.me/${cleanWhatsappPhone}?text=${encodeURIComponent(
+                      `Hola, estoy en ${property.name} (${reservation.guestName}) y he solicitado desde la guía el extra: "${extra.title}" (${extra.price}€ / ${extra.priceUnit}).`
+                    )}`;
 
                 return (
                   <Card
@@ -1376,7 +1380,14 @@ export default function GuestGuidePortalView({
                       <div className="flex-1 space-y-3">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <h3 className="font-black text-gray-900 italic">{extra.title}</h3>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="font-black text-gray-900 italic">{extra.title}</h3>
+                              {isLateCheckout && (
+                                <span className="text-[9px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                                  <span>{language === 'en' ? 'On Request' : language === 'fr' ? 'Sur Demande' : 'Bajo Petición'}</span>
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-pre-line leading-relaxed mt-0.5">
                               {extra.description}
                             </p>
@@ -1390,7 +1401,11 @@ export default function GuestGuidePortalView({
                           <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
                             <ShieldCheck size={16} />
                             {isLateCheckout
-                              ? t('extras.approved_badge', { time: property.lateCheckoutUntil })
+                              ? (language === 'en'
+                                  ? `Confirmed by host ✓ Departure extended until ${property.lateCheckoutUntil || '17:00'}h`
+                                  : language === 'fr'
+                                  ? `Confirmé par l'hôte ✓ Départ repoussé à ${property.lateCheckoutUntil || '17:00'}h`
+                                  : `Confirmado por el anfitrión ✓ Salida permitida hasta las ${property.lateCheckoutUntil || '17:00'}h`)
                               : language === 'en'
                               ? 'Confirmed by host ✓'
                               : language === 'fr'
@@ -1400,7 +1415,13 @@ export default function GuestGuidePortalView({
                         ) : alreadyRequested ? (
                           <div className="space-y-2">
                             <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-black uppercase tracking-widest text-center">
-                              {t('extras.requested_badge')}
+                              {isLateCheckout
+                                ? (language === 'en'
+                                    ? 'Late Check-out requested · Pending host confirmation'
+                                    : language === 'fr'
+                                    ? 'Départ tardif demandé · En attente de confirmation de l’hôte'
+                                    : 'Solicitud enviada · Pendiente de confirmación del anfitrión')
+                                : t('extras.requested_badge')}
                             </div>
                             <a
                               href={whatsappLink}
@@ -1408,19 +1429,14 @@ export default function GuestGuidePortalView({
                               rel="noopener noreferrer"
                               className="inline-flex w-full h-10 items-center justify-center rounded-2xl bg-[#25D366] text-white text-xs font-black uppercase tracking-widest hover:opacity-95 transition-all shadow-md"
                             >
-                              {t('extras.whatsapp_confirm')}
+                              {isLateCheckout
+                                ? (language === 'en'
+                                    ? 'Ask host on WhatsApp'
+                                    : language === 'fr'
+                                    ? 'Consulter l’hôte sur WhatsApp'
+                                    : 'Avisar al anfitrión por WhatsApp')
+                                : t('extras.whatsapp_confirm')}
                             </a>
-                          </div>
-                        ) : isLateCheckout && hasSameDayCheckIn ? (
-                          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 text-xs flex items-center justify-center gap-2 text-center">
-                            <Clock size={15} className="text-slate-400 shrink-0" />
-                            <span className="font-semibold text-[11px]">
-                              {language === 'en'
-                                ? 'Not available for your departure date (same-day guest arrival)'
-                                : language === 'fr'
-                                ? 'Non disponible pour votre date de départ (autre arrivée le même jour)'
-                                : 'No disponible para tu fecha de salida (otra reserva entra hoy)'}
-                            </span>
                           </div>
                         ) : (
                           <Button
@@ -1429,7 +1445,13 @@ export default function GuestGuidePortalView({
                             className="w-full"
                             onClick={() => onRequestExtra(reservation.id, extra)}
                           >
-                            {t('extras.request_btn')} · {extra.price} €
+                            {isLateCheckout
+                              ? (language === 'en'
+                                  ? `Request Late Check-out · ${extra.price} €`
+                                  : language === 'fr'
+                                  ? `Demander un départ tardif · ${extra.price} €`
+                                  : `Solicitar Late Check-out · ${extra.price} €`)
+                              : `${t('extras.request_btn')} · ${extra.price} €`}
                           </Button>
                         )}
                       </div>

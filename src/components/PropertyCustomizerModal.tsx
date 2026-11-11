@@ -83,6 +83,9 @@ export default function PropertyCustomizerModal({
         onlyWhenFreeNextDay: true,
         price: extras[lateExtIdx].price || p.lateCheckoutPrice || 35,
         title: extras[lateExtIdx].title || `Late Check-out hasta las ${p.lateCheckoutUntil || '17:00'}h`,
+        description: isEn
+          ? 'Requested by guest from guide, subject to host confirmation in dashboard.'
+          : 'El huésped lo solicita desde la guía y tú decides si confirmarlo en tu panel.',
       };
       // Eliminar duplicados si hubiera más de un extra de late checkout
       p.extras = extras.filter(

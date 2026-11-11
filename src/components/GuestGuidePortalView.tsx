@@ -1354,7 +1354,17 @@ export default function GuestGuidePortalView({
 
             <div className="space-y-4">
               {availableExtras.map((extra) => {
-                const isLateCheckout = Boolean(extra.onlyWhenFreeNextDay);
+                const isLateCheckout = Boolean(
+                  extra.onlyWhenFreeNextDay || extra.id === 'ext-late' || /late/i.test(extra.title)
+                );
+                const extraDescription = isLateCheckout
+                  ? (language === 'en'
+                      ? 'Afternoon departure on request. Subject to host confirmation.'
+                      : language === 'fr'
+                      ? 'Départ l’après-midi sur demande. Sous réserve de confirmation par l’hôte.'
+                      : 'Salida por la tarde bajo petición y confirmación del anfitrión.')
+                  : extra.description;
+
                 const alreadyRequested =
                   (isLateCheckout && reservation.lateCheckoutRequested) ||
                   reservation.requestedExtras?.includes(extra.id);
@@ -1391,7 +1401,7 @@ export default function GuestGuidePortalView({
                               )}
                             </div>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-pre-line leading-relaxed mt-0.5">
-                              {extra.description}
+                              {extraDescription}
                             </p>
                           </div>
                           <span className="px-2.5 py-1 rounded-xl bg-primary-ivi-light text-primary-ivi font-black text-xs shrink-0">
@@ -1608,26 +1618,6 @@ export default function GuestGuidePortalView({
         )}
 
         <footer className="pt-8 pb-14 text-center space-y-3">
-          <div>
-            <button
-              type="button"
-              onClick={() => {
-                setIncidentSent(false);
-                setIsIncidentModalOpen(true);
-              }}
-              className="text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-gray-100"
-            >
-              <AlertCircle size={13} className="text-gray-400" />
-              <span>
-                {language === 'en'
-                  ? 'Report an incident or issue'
-                  : language === 'fr'
-                  ? 'Signaler un problème'
-                  : '¿Algún problema? Reportar incidencia'}
-              </span>
-            </button>
-          </div>
-
           <div className="w-12 h-1 bg-gray-200 mx-auto rounded-full" />
           {!isWhiteLabel && (
             <div>

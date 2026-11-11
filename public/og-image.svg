@@ -1,40 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#141413"/>
-  <rect x="40" y="40" width="1120" height="550" rx="24" fill="#1E1E1C" stroke="#2C2C29" stroke-width="2"/>
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect x="40" y="40" width="1120" height="550" rx="28" fill="#1e293b" stroke="#334155" stroke-width="2"/>
   
   <!-- Logo Badge -->
-  <g transform="translate(100, 110)">
-    <rect width="64" height="64" rx="12" fill="#C85A32"/>
-    <text x="32" y="42" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" fill="#FFFFFF" text-anchor="middle">TX</text>
-    <text x="85" y="44" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="36" fill="#F6F4EE">Turnexo<tspan fill="#C85A32">.</tspan></text>
+  <g transform="translate(90, 95)">
+    <rect width="56" height="56" rx="16" fill="#ea580c"/>
+    <text x="28" y="36" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="900" font-size="24" fill="#FFFFFF" text-anchor="middle">TX</text>
+    <text x="75" y="38" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="800" font-size="36" fill="#F8FAFC">Turnexo<tspan fill="#ea580c">.</tspan></text>
   </g>
 
-  <!-- Tagline Badge -->
-  <g transform="translate(100, 210)">
-    <rect width="520" height="40" rx="8" fill="#1F4E3D" opacity="0.3"/>
-    <rect width="520" height="40" rx="8" fill="none" stroke="#1F4E3D" stroke-width="1.5"/>
-    <text x="20" y="25" font-family="monospace" font-weight="700" font-size="14" fill="#34D399" letter-spacing="1">LISTO PARA EL NUEVO MARCO FISCAL: IVA 10% Y MODELO 303</text>
+  <!-- Fiscal Badge -->
+  <g transform="translate(620, 105)">
+    <rect width="490" height="36" rx="18" fill="#10b981" fill-opacity="0.12" stroke="#10b981" stroke-opacity="0.35" stroke-width="1.5"/>
+    <text x="245" y="23" font-family="monospace" font-weight="800" font-size="12" fill="#34d399" letter-spacing="0.5" text-anchor="middle">LISTO PARA EL NUEVO MARCO FISCAL: IVA 10% Y MODELO 303</text>
   </g>
 
   <!-- Main Headline -->
-  <text x="100" y="320" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="52" fill="#F6F4EE" letter-spacing="-1">
-    Controla tus limpiezas, manuales QR
+  <text x="90" y="270" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="900" font-size="46" fill="#F8FAFC" letter-spacing="-1">
+    Controla tus limpiezas, Guías Digitales
   </text>
-  <text x="100" y="385" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="52" fill="#F6F4EE" letter-spacing="-1">
-    y facturas de IVA. <tspan fill="#C85A32">En piloto automático.</tspan>
+  <text x="90" y="330" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="900" font-size="46" fill="#F8FAFC" letter-spacing="-1">
+    y facturas de IVA. <tspan fill="#ea580c">En piloto automático.</tspan>
   </text>
 
   <!-- Subtitle -->
-  <text x="100" y="450" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="22" fill="#A1A1AA">
-    Cuadrantes automáticos por iCal, verificación con fotos y manuales boutique con vídeos.
+  <text x="90" y="405" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="400" font-size="20" fill="#94A3B8">
+    Cuadrantes por iCal con fotos de verificación, manuales en vídeo para huéspedes y exportación trimestral.
   </text>
 
+  <!-- Divider Line -->
+  <line x1="90" y1="465" x2="1110" y2="465" stroke="#334155" stroke-width="1"/>
+
   <!-- Value Badges -->
-  <g transform="translate(100, 500)">
-    <text x="0" y="20" font-family="monospace" font-weight="700" font-size="18" fill="#34D399">✓ 1 Piso Gratis</text>
-    <text x="180" y="20" font-family="monospace" font-weight="700" font-size="18" fill="#F6F4EE">·</text>
-    <text x="210" y="20" font-family="monospace" font-weight="700" font-size="18" fill="#E4E4E7">60 seg Sincronización</text>
-    <text x="460" y="20" font-family="monospace" font-weight="700" font-size="18" fill="#F6F4EE">·</text>
-    <text x="490" y="20" font-family="monospace" font-weight="700" font-size="18" fill="#C85A32">1 clic Facturas Gestoría</text>
+  <g transform="translate(90, 520)">
+    <text x="0" y="0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="700" font-size="17" fill="#34d399">✓ 1 Alojamiento Gratis</text>
+    <text x="240" y="0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="700" font-size="17" fill="#64748B">•</text>
+    <text x="270" y="0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="700" font-size="17" fill="#CBD5E1">60 seg Sincronización iCal</text>
+    <text x="560" y="0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="700" font-size="17" fill="#64748B">•</text>
+    <text x="590" y="0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-weight="700" font-size="17" fill="#FB923C">1 Clic Facturas Gestoría (Modelo 303)</text>
   </g>
 </svg>

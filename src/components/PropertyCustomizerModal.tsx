@@ -167,7 +167,7 @@ export default function PropertyCustomizerModal({
                     />
                     <div>
                       <p className="font-black text-slate-900">Módulo 1: Limpiezas por iCal</p>
-                      <p className="text-[11px] text-slate-500">Turnos automáticos y fotos</p>
+                      <p className="text-[11px] text-slate-500">Limpiezas automáticas y fotos</p>
                     </div>
                   </label>
 
@@ -401,7 +401,7 @@ export default function PropertyCustomizerModal({
           {tab === 'videos' && (
             <div className="space-y-4">
               <p className="text-slate-500">
-                Añade vídeos de YouTube, Shorts, Google Drive o enlaces directos para explicar el Check-in paso a paso, enseñar el Home Tour del piso o cómo funcionan los electrodomésticos.
+                Añade vídeos de YouTube, Shorts, Google Drive o enlaces directos para explicar el Check-in paso a paso, enseñar el Home Tour del alojamiento o cómo funcionan los electrodomésticos.
               </p>
 
               <div className="space-y-2">

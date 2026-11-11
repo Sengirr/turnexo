@@ -161,6 +161,14 @@ export default function HostDashboardView({
   const [guestSearch, setGuestSearch] = useState('');
   const [guestPropertyFilter, setGuestPropertyFilter] = useState('all');
   const [copiedSettlementCleanerId, setCopiedSettlementCleanerId] = useState<string | null>(null);
+  const [isAnnualBilling, setIsAnnualBilling] = useState(true);
+
+  const maxAllowedProperties =
+    hostAccount?.plan === 'plan_manager'
+      ? 10
+      : hostAccount?.plan === 'plan_pro'
+      ? 5
+      : 1;
 
   const urgentCount = tasks.filter((t) => t.sameDayCheckIn).length;
   const upsellRevenue = reservations.reduce(
@@ -192,7 +200,7 @@ export default function HostDashboardView({
     });
   }, [tasks, schedulePropertyFilter, scheduleStatusFilter, scheduleSearch, properties, reservations, cleaners]);
 
-  // Enviar parte de turno por WhatsApp al personal de limpieza
+  // Enviar parte de limpieza por WhatsApp al personal de limpieza
   const sendTaskWhatsApp = (task: CleaningTask) => {
     const cleaner = cleaners.find((c) => c.id === task.cleanerId);
     const prop = properties.find((p) => p.id === task.propertyId);
@@ -200,8 +208,8 @@ export default function HostDashboardView({
     const phoneClean = cleaner.phone.replace(/[^0-9]/g, '');
     const cleanerUrl = `${window.location.origin}/c/${cleaner.magicToken}`;
     const msg = `Hola ${cleaner.name.split(' ')[0]}!\n` +
-      `📋 *Turno de Limpieza - ${task.date}*\n` +
-      `🏠 *Propiedad:* ${prop.name}\n` +
+      `📋 *Limpieza Programada - ${task.date}*\n` +
+      `🏠 *Alojamiento:* ${prop.name}\n` +
       `📍 *Dirección:* ${prop.address}\n` +
       `⏰ *Hora limpieza:* ${task.scheduledCleaningTime}h\n` +
       (task.sameDayCheckIn ? `🔥 *URGENTE:* Entrada nuevo huésped hoy a las ${task.nextCheckInTime}h\n` : '') +
@@ -224,7 +232,7 @@ export default function HostDashboardView({
       `Total servicios: ${cleanerTasks.length}`,
       `Total devengado: ${totalFee} €`,
       ``,
-      `DETALLE DE TURNOS:`,
+      `DETALLE DE LIMPIEZAS:`,
       ...cleanerTasks.map((t, idx) => {
         const p = properties.find((prop) => prop.id === t.propertyId);
         const res = reservations.find((r) => r.id === t.reservationId);
@@ -520,10 +528,9 @@ export default function HostDashboardView({
                     onChange={(e) => onChangePlan(e.target.value as HostAccount['plan'])}
                     className="w-full bg-[#141413] border border-white/20 text-white font-mono text-[10px] px-2 py-1.5 focus:outline-none focus:border-[#C85A32]"
                   >
-                    <option value="plan_starter">Plan 1 Piso (0€ Gratis)</option>
-                    <option value="plan_pro">Plan Pro 4 Pisos (29€/mes)</option>
-                    <option value="plan_manager">Plan Gestor 8 Pisos (49€/mes)</option>
-                    <option value="pack_complete">Tarifa Plana Completa</option>
+                    <option value="plan_starter">Starter (1 Alojamiento · 0€)</option>
+                    <option value="plan_pro">Pro Fiscal (Hasta 5 Alojamientos · 19€/mes)</option>
+                    <option value="plan_manager">Microgestora (Hasta 10 Alojamientos · 39€/mes)</option>
                   </select>
                 </div>
               )}
@@ -571,21 +578,22 @@ export default function HostDashboardView({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-[#D5CFC0] border border-[#D5CFC0]">
           <div className="bg-[#FAF9F5] p-5">
             <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F]">
-              PROPIEDADES ACTIVAS (ICAL)
+              ALOJAMIENTOS ACTIVOS (ICAL)
             </span>
             <div className="flex items-baseline justify-between mt-2">
               <span className="font-mono text-3xl font-bold text-[#141413]">
                 0{properties.length}
+                <span className="text-sm font-normal text-[#57554F]"> / {maxAllowedProperties}</span>
               </span>
               <span className="font-mono text-[11px] text-[#1F4E3D] font-semibold">
-                ● Sincronizadas
+                ● Sincronizados
               </span>
             </div>
           </div>
 
           <div className="bg-[#FAF9F5] p-5">
             <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F]">
-              ROTACIONES MISMO DÍA
+              ROTACIONES HOY (MISMO DÍA)
             </span>
             <div className="flex items-baseline justify-between mt-2">
               <span className="font-mono text-3xl font-bold text-[#C85A32]">
@@ -599,26 +607,26 @@ export default function HostDashboardView({
 
           <div className="bg-[#FAF9F5] p-5">
             <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F]">
-              INGRESOS LATE CHECK-OUT
+              INGRESOS EXTRAS & LATE CHECK-OUT
             </span>
             <div className="flex items-baseline justify-between mt-2">
               <span className="font-mono text-3xl font-bold text-[#1F4E3D]">
                 +{upsellRevenue} €
               </span>
               <span className="font-mono text-[11px] text-[#57554F]">
-                0% comisión (Directo)
+                0% comisión (100% tuyo)
               </span>
             </div>
           </div>
         </div>
 
-        {/* VISTA 1: PROPIEDADES Y PERSONALIZACIÓN DE GUÍA */}
+        {/* VISTA 1: ALOJAMIENTOS Y PERSONALIZACIÓN DE GUÍA */}
         {section === 'overview' && (
           <div className="space-y-6">
             <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E2DDD2] pb-4">
               <div>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                  GESTIÓN POR PROPIEDAD
+                  GESTIÓN POR ALOJAMIENTO
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#141413] mt-0.5">
                   Alojamientos, Guías Digitales y Enlaces iCal
@@ -630,7 +638,7 @@ export default function HostDashboardView({
                 className="bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex items-center gap-2"
               >
                 <Plus size={14} />
-                Nueva Propiedad
+                Nuevo Alojamiento
               </button>
             </div>
 
@@ -669,7 +677,7 @@ export default function HostDashboardView({
                         </div>
                       </div>
 
-                      {/* Estado de los 2 módulos en este piso */}
+                      {/* Estado de los módulos en este alojamiento */}
                       <div className="grid grid-cols-2 gap-3 text-xs font-mono">
                         <div className="bg-white border border-[#E2DDD2] p-3">
                           <span className="text-[10px] text-[#57554F] uppercase block">
@@ -729,7 +737,7 @@ export default function HostDashboardView({
                       </div>
                     </div>
 
-                    {/* Acciones del piso */}
+                    {/* Acciones del alojamiento */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[#D5CFC0] border-t border-[#D5CFC0] font-mono text-[11px] font-bold uppercase">
                       <button
                         type="button"
@@ -828,7 +836,7 @@ export default function HostDashboardView({
                     type="text"
                     value={scheduleSearch}
                     onChange={(e) => setScheduleSearch(e.target.value)}
-                    placeholder="Buscar por huésped, piso o limpiador..."
+                    placeholder="Buscar por huésped, alojamiento o personal de limpieza..."
                     className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#D5CFC0] text-xs font-medium text-[#141413] focus:outline-none focus:border-[#141413]"
                   />
                   {scheduleSearch && (
@@ -848,7 +856,7 @@ export default function HostDashboardView({
                   onChange={(e) => setSchedulePropertyFilter(e.target.value)}
                   className="bg-white border border-[#D5CFC0] px-3 py-1.5 font-semibold text-[#141413] text-xs"
                 >
-                  <option value="all">Todas las propiedades ({properties.length})</option>
+                  <option value="all">Todos los alojamientos ({properties.length})</option>
                   {properties.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -1008,10 +1016,10 @@ export default function HostDashboardView({
                                 type="button"
                                 onClick={() => setInspectingTaskPhotos(task)}
                                 className="inline-flex items-center gap-1.5 text-[#1F4E3D] hover:text-[#141413] font-bold underline underline-offset-2"
-                                title="Ver auditoría de fotos y checklist"
+                                title="Ver comprobación de fotos y checklist"
                               >
                                 <Camera size={13} />
-                                <span>✓ VERIFICADA ({task.photosUploaded.length} FOTOS)</span>
+                                <span>✓ FOTOS COMPROBADAS ({task.photosUploaded.length})</span>
                               </button>
                             ) : task.status === 'completed' ? (
                               <span className="text-[#1F4E3D] font-bold">
@@ -1040,7 +1048,7 @@ export default function HostDashboardView({
                               <button
                                 type="button"
                                 onClick={() => sendTaskWhatsApp(task)}
-                                title="Enviar detalles del turno por WhatsApp al limpiador"
+                                title="Enviar detalles de la limpieza por WhatsApp al personal"
                                 className="inline-flex items-center gap-1 bg-[#1F4E3D] hover:bg-[#163A2D] text-white px-2.5 py-1 font-mono text-[10px] font-bold uppercase transition"
                               >
                                 <Send size={11} />
@@ -1069,7 +1077,7 @@ export default function HostDashboardView({
                           </span>
                         </div>
                         <span className="font-mono text-[10px] uppercase bg-white border border-[#D5CFC0] px-2 py-0.5 font-bold text-[#57554F]">
-                          {dayTasks.length} {dayTasks.length === 1 ? 'Turno' : 'Turnos'}
+                          {dayTasks.length} {dayTasks.length === 1 ? 'Limpieza' : 'Limpiezas'}
                         </span>
                       </div>
 
@@ -1265,7 +1273,7 @@ export default function HostDashboardView({
                           type="button"
                           onClick={() => {
                             const phoneClean = c.phone.replace(/[^0-9]/g, '');
-                            const msg = `Hola ${c.name.split(' ')[0]}, aquí tienes tu enlace directo de limpiezas Turnexo actualizado en tiempo real con tus turnos:\n👉 ${cleanerUrl}`;
+                            const msg = `Hola ${c.name.split(' ')[0]}, aquí tienes tu enlace directo de limpiezas Turnexo actualizado en tiempo real con tus limpiezas asignadas:\n👉 ${cleanerUrl}`;
                             window.open(
                               `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`,
                               '_blank'
@@ -1843,13 +1851,44 @@ export default function HostDashboardView({
         {/* VISTA 5: FACTURACIÓN SELF-SERVICE & ESTADO DE INFRAESTRUCTURA 0€ */}
         {section === 'billing' && (
           <div className="space-y-8">
-            <div className="border-b border-[#E2DDD2] pb-3">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                SUSCRIPCIÓN SELF-SERVICE SIN PERMANENCIA
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413]">
-                Facturación, Módulos Contratados y Nube
-              </h2>
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E2DDD2] pb-4">
+              <div>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
+                  PLANES TRANSPARENTES SIN PERMANENCIA
+                </span>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413] mt-0.5">
+                  Facturación, Plan de Suscripción y Nube
+                </h2>
+              </div>
+
+              {/* Selector Mensual / Anual con descuento */}
+              <div className="flex items-center gap-2 bg-[#E8E4D9] p-1 border border-[#D5CFC0]">
+                <button
+                  type="button"
+                  onClick={() => setIsAnnualBilling(false)}
+                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition ${
+                    !isAnnualBilling
+                      ? 'bg-[#141413] text-white shadow-sm'
+                      : 'text-[#57554F] hover:text-[#141413]'
+                  }`}
+                >
+                  Pago Mensual
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsAnnualBilling(true)}
+                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
+                    isAnnualBilling
+                      ? 'bg-[#C85A32] text-white shadow-sm'
+                      : 'text-[#57554F] hover:text-[#141413]'
+                  }`}
+                >
+                  <span>Pago Anual</span>
+                  <span className="bg-emerald-500 text-slate-950 text-[9px] px-1 py-0.2 rounded font-black font-mono">
+                    -20%
+                  </span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1862,12 +1901,10 @@ export default function HostDashboardView({
                     </span>
                     <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1">
                       {hostAccount?.plan === 'plan_starter'
-                        ? 'Plan Starter · 1 Alojamiento (0€ Gratis)'
-                        : hostAccount?.plan === 'plan_pro'
-                        ? 'Plan Pro · Hasta 4 Alojamientos (29€/mes)'
+                        ? 'Starter · 1 Alojamiento (0€ Gratis)'
                         : hostAccount?.plan === 'plan_manager'
-                        ? 'Plan Gestor · Hasta 8 Alojamientos (49€/mes)'
-                        : 'Plan Pro Turnexo · Tarifa Plana'}
+                        ? `Microgestora · Hasta 10 Alojamientos (${isAnnualBilling ? '31€/mes · 372€/año' : '39€/mes'})`
+                        : `Pro Fiscal · Hasta 5 Alojamientos (${isAnnualBilling ? '15€/mes · 180€/año' : '19€/mes'})`}
                     </h3>
                     <p className="text-xs text-white/65 mt-1">
                       Estado:{' '}
@@ -1878,57 +1915,124 @@ export default function HostDashboardView({
                   </div>
                   <div className="text-right font-mono">
                     <span className="text-3xl font-bold text-white">
-                      {properties.length <= 1 ? 0 : properties.length <= 4 ? 29 : properties.length <= 8 ? 49 : 89}{' '}
+                      {hostAccount?.plan === 'plan_starter'
+                        ? '0'
+                        : hostAccount?.plan === 'plan_manager'
+                        ? (isAnnualBilling ? '31' : '39')
+                        : (isAnnualBilling ? '15' : '19')}{' '}
                       €
                     </span>
                     <span className="block text-[10px] text-white/50">
-                      / mes tarifa plana total ({properties.length} alojamientos)
+                      / mes ({isAnnualBilling ? 'pago anual · 2 meses gratis' : 'facturación mensual'})
                     </span>
                   </div>
                 </div>
 
+                {/* Quota de Alojamientos del Plan */}
+                <div className="bg-white/5 border border-white/10 p-4 space-y-2">
+                  <div className="flex items-center justify-between font-mono text-xs">
+                    <span className="text-white/60">Alojamientos utilizados en tu cuenta:</span>
+                    <span className="font-bold text-white">
+                      {properties.length} / {maxAllowedProperties} alojamientos
+                    </span>
+                  </div>
+                  <div className="w-full bg-white/10 h-2 overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        properties.length >= maxAllowedProperties ? 'bg-[#C85A32]' : 'bg-emerald-500'
+                      }`}
+                      style={{
+                        width: `${Math.min(100, (properties.length / Math.max(1, maxAllowedProperties)) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  {properties.length >= maxAllowedProperties && hostAccount?.plan !== 'plan_manager' && (
+                    <p className="text-[11px] text-amber-300 pt-1">
+                      ⚠️ Has alcanzado el límite de tu plan ({properties.length}/{maxAllowedProperties} alojamientos). Selecciona un plan superior para sincronizar más propiedades.
+                    </p>
+                  )}
+                </div>
+
+                {/* Comparador interactivo de los 3 planes oficiales */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
                   {(
                     [
                       {
                         id: 'plan_starter',
-                        title: '1 Alojamiento',
-                        price: '0 € / mes',
-                        desc: 'Plan gratuito para 1 alojamiento',
+                        title: 'Starter',
+                        limit: '1 Alojamiento',
+                        price: '0 €',
+                        period: '/ mes',
+                        saving: '100% gratis',
+                        desc: 'Para probar Turnexo con 1 alojamiento real sin tarjeta.',
                       },
                       {
                         id: 'plan_pro',
-                        title: 'Hasta 5 Alojamientos',
-                        price: '19 € / mes',
-                        desc: 'Pro Fiscal: Facturas IVA 10% y Modelo 303',
+                        title: 'Pro Fiscal',
+                        limit: 'Hasta 5 Alojamientos',
+                        price: isAnnualBilling ? '15 €' : '19 €',
+                        period: isAnnualBilling ? '/ mes (180€/año)' : '/ mes',
+                        saving: isAnnualBilling ? 'Ahorras 48€ (2 meses gratis)' : 'Más elegido',
+                        desc: 'Facturas IVA 10%, Modelo 303 en 1 clic y soporte Multi-NIF.',
                       },
                       {
                         id: 'plan_manager',
-                        title: 'Hasta 10 Alojamientos',
-                        price: '39 € / mes',
-                        desc: 'Tarifa plana para pequeñas gestoras',
+                        title: 'Microgestora',
+                        limit: 'Hasta 10 Alojamientos',
+                        price: isAnnualBilling ? '31 €' : '39 €',
+                        period: isAnnualBilling ? '/ mes (372€/año)' : '/ mes',
+                        saving: isAnnualBilling ? 'Ahorras 96€ (2 meses gratis)' : 'Para gestores',
+                        desc: 'Múltiples limpiadoras, liquidaciones por persona y soporte directo.',
                       },
                     ] as const
                   ).map((p) => {
-                    const isCurrent = (hostAccount?.plan || 'plan_pro') === p.id;
+                    const isCurrent = (hostAccount?.plan || 'plan_starter') === p.id;
                     return (
                       <button
                         key={p.id}
                         type="button"
                         onClick={() => onChangePlan?.(p.id)}
-                        className={`p-4 text-left border transition ${
+                        className={`p-4 text-left border transition flex flex-col justify-between ${
                           isCurrent
-                            ? 'border-[#C85A32] bg-[#1E1E1C]'
-                            : 'border-white/15 hover:border-white/40'
+                            ? 'border-[#C85A32] bg-[#1E1E1C] ring-1 ring-[#C85A32]'
+                            : 'border-white/15 hover:border-white/40 bg-white/[0.02]'
                         }`}
                       >
-                        <span className="text-[10px] uppercase text-[#C85A32] font-bold block">
-                          {p.price}
-                        </span>
-                        <span className="font-bold text-white block mt-1">{p.title}</span>
-                        <span className="text-[11px] text-white/55 font-sans block mt-1">
-                          {p.desc}
-                        </span>
+                        <div>
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="text-[10px] uppercase font-bold text-emerald-400">
+                              {p.saving}
+                            </span>
+                            {isCurrent && (
+                              <span className="text-[9px] uppercase px-1.5 py-0.5 bg-[#C85A32] text-white font-bold">
+                                ACTIVO
+                              </span>
+                            )}
+                          </div>
+                          <span className="font-extrabold text-white text-sm block">{p.title}</span>
+                          <span className="text-[11px] text-[#C85A32] font-bold block mt-0.5">
+                            {p.limit}
+                          </span>
+                          <div className="mt-2">
+                            <span className="text-xl font-black text-white">{p.price}</span>
+                            <span className="text-[10px] text-white/50 block">{p.period}</span>
+                          </div>
+                          <span className="text-[11px] text-white/60 font-sans block mt-2 leading-relaxed">
+                            {p.desc}
+                          </span>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-white/10 text-center">
+                          <span
+                            className={`block py-1.5 text-[10px] font-bold uppercase tracking-wider ${
+                              isCurrent
+                                ? 'bg-white/10 text-white'
+                                : 'bg-[#C85A32] hover:bg-[#B04A25] text-white'
+                            }`}
+                          >
+                            {isCurrent ? '✓ Plan Actual' : 'Seleccionar'}
+                          </span>
+                        </div>
                       </button>
                     );
                   })}
@@ -1936,20 +2040,20 @@ export default function HostDashboardView({
 
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-xs text-white/60">
-                    El cobro se ajusta automáticamente según el número de alojamientos activos.
+                    Sin permanencia. Cancela o cambia de plan en cualquier momento desde tu panel.
                   </p>
                   <button
                     type="button"
                     onClick={() => {
-                      const planKey = hostAccount?.plan || 'pack_complete';
-                      const stripeUrl = (STRIPE_PAYMENT_LINKS as Record<string, string>)[planKey] || STRIPE_PAYMENT_LINKS.pack_complete;
+                      const planKey = hostAccount?.plan || 'plan_pro';
+                      const stripeUrl = (STRIPE_PAYMENT_LINKS as Record<string, string>)[planKey] || STRIPE_PAYMENT_LINKS.plan_pro || STRIPE_PAYMENT_LINKS.pack_complete;
                       if (stripeUrl) {
                         window.open(stripeUrl, '_blank');
                       } else {
                         onActivateSubscription?.();
                       }
                     }}
-                    className="bg-[#C85A32] hover:bg-[#B04A25] text-white font-mono text-xs font-bold uppercase tracking-wider px-5 py-3 transition"
+                    className="bg-[#C85A32] hover:bg-[#B04A25] text-white font-mono text-xs font-bold uppercase tracking-wider px-5 py-3 transition shadow-md"
                   >
                     {hostAccount?.subscriptionStatus === 'active'
                       ? '✓ Suscripción Stripe Activa'
@@ -2227,14 +2331,14 @@ export default function HostDashboardView({
         />
       )}
 
-      {/* MODAL AUDITORÍA DE FOTOS Y CHECKLIST DE LIMPIEZA */}
+      {/* MODAL COMPROBACIÓN DE FOTOS Y CHECKLIST DE LIMPIEZA */}
       {inspectingTaskPhotos && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-[#FAF9F5] border-2 border-[#141413] max-w-2xl w-full p-6 space-y-5 shadow-[8px_8px_0px_#141413] my-8 animate-in fade-in">
             <div className="flex items-start justify-between border-b border-[#E2DDD2] pb-3">
               <div>
                 <span className="font-mono text-[10px] uppercase font-bold text-[#1F4E3D] bg-[#1F4E3D]/10 px-2 py-0.5">
-                  AUDITORÍA DE LIMPIEZA CON FOTOS REALES
+                  COMPROBACIÓN DE FOTOS Y CHECKLIST EN TIEMPO REAL
                 </span>
                 <h3 className="text-xl font-black text-[#141413] mt-1">
                   {properties.find((p) => p.id === inspectingTaskPhotos.propertyId)?.name || 'Alojamiento'}
@@ -2278,11 +2382,11 @@ export default function HostDashboardView({
             <div className="space-y-2">
               <div className="flex items-center justify-between font-mono text-xs font-bold text-[#141413]">
                 <span>Fotos Tomadas con la Cámara ({inspectingTaskPhotos.photosUploaded.length})</span>
-                <span className="text-[#57554F] font-normal text-[11px]">Auditoría antes de la llegada del huésped</span>
+                <span className="text-[#57554F] font-normal text-[11px]">Comprobación antes de la llegada del huésped</span>
               </div>
               {inspectingTaskPhotos.photosUploaded.length === 0 ? (
                 <p className="text-xs text-[#57554F] italic p-4 bg-white border border-[#E2DDD2] text-center">
-                  Aún no se han subido fotos para este turno.
+                  Aún no se han subido fotos para esta limpieza.
                 </p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -2314,7 +2418,7 @@ export default function HostDashboardView({
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#E2DDD2]">
               <span className="font-mono text-xs text-[#1F4E3D] font-bold flex items-center gap-1.5">
                 <CheckCircle2 size={16} />
-                <span>Todo comprobado: el piso está impecable para el nuevo huésped</span>
+                <span>Todo comprobado: el alojamiento está impecable para el nuevo huésped</span>
               </span>
               <button
                 type="button"

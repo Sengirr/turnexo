@@ -124,7 +124,7 @@ export function exportUsersToCsv(users: SaasUser[], fileName = 'usuarios_turnexo
     'WhatsApp',
     'Plan',
     'Gasto Mensual (€)',
-    'Nº Pisos',
+    'Nº Alojamientos',
     'Estado',
     'Fecha Registro',
     'Última Actividad',

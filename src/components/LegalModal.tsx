@@ -66,7 +66,7 @@ export default function LegalModal({ onClose, initialTab = 'privacy' }: Props) {
 
               <h3 className="font-bold text-sm text-[#141413]">2. Datos que tratamos</h3>
               <p>
-                Tratamos únicamente los datos necesarios para la prestación del servicio: nombre, correo de registro, identificadores anónimos de reservas sincronizadas mediante iCal público (.ics) y fotografías de auditoría de limpieza subidas voluntariamente por los usuarios autorizados.
+                Tratamos únicamente los datos necesarios para la prestación del servicio: nombre, correo de registro, identificadores anónimos de reservas sincronizadas mediante iCal público (.ics) y fotografías de comprobación de limpieza subidas voluntariamente por los usuarios autorizados.
               </p>
 
               <h3 className="font-bold text-sm text-[#141413]">3. Sin almacenamiento de datos bancarios</h3>

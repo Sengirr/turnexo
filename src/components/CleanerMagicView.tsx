@@ -217,7 +217,7 @@ export default function CleanerMagicView({
                     ))}
                   </div>
 
-                  {/* Fotos de auditoría */}
+                  {/* Fotos de comprobación */}
                   <div className="space-y-2.5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="font-mono text-[10px] font-bold text-[#57554F] uppercase tracking-wider">

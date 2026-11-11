@@ -302,7 +302,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
       </div>
 
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* TARJETAS DE KPIS PRINCIPALES (MRR, ARR, USUARIOS, PISOS) */}
+        {/* TARJETAS DE KPIS PRINCIPALES (MRR, ARR, USUARIOS, ALOJAMIENTOS) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* MRR */}
           <div className="bg-white border border-[#E2DDD2] p-5 space-y-2 shadow-sm">
@@ -369,7 +369,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
           <div className="bg-white border border-[#E2DDD2] p-5 space-y-2 shadow-sm">
             <div className="flex items-center justify-between text-slate-500">
               <span className="font-mono text-[10px] uppercase tracking-wider font-bold">
-                Pisos / Alojamientos
+                Alojamientos Conectados
               </span>
               <Building size={16} className="text-[#1F4E3D]" />
             </div>
@@ -380,7 +380,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
               <span className="text-[11px] font-mono text-slate-400">conectados</span>
             </div>
             <p className="text-[11px] text-[#57554F]">
-              Media de {(metrics.totalProperties / Math.max(1, metrics.totalUsers)).toFixed(1)} pisos por cuenta
+              Media de {(metrics.totalProperties / Math.max(1, metrics.totalUsers)).toFixed(1)} alojamientos por cuenta
             </p>
           </div>
         </div>
@@ -533,7 +533,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
                   <th className="py-3 px-4">Anfitrión / Email</th>
                   <th className="py-3 px-4">WhatsApp Directo</th>
                   <th className="py-3 px-4">Plan Actual</th>
-                  <th className="py-3 px-4 text-center">Pisos</th>
+                  <th className="py-3 px-4 text-center">Alojamientos</th>
                   <th className="py-3 px-4 text-right">Cuota Mensual</th>
                   <th className="py-3 px-4">Estado</th>
                   <th className="py-3 px-4">Alta / Actividad</th>
@@ -828,7 +828,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Nº Pisos</label>
+                  <label className="block font-bold text-slate-700 mb-1">Nº Alojamientos</label>
                   <input
                     type="number"
                     min="1"

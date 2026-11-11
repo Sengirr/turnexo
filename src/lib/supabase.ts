@@ -21,6 +21,9 @@ export interface HostAccount {
 }
 
 export const STRIPE_PAYMENT_LINKS = {
+  plan_starter: '',
+  plan_pro: import.meta.env.VITE_STRIPE_LINK_PRO || import.meta.env.VITE_STRIPE_LINK_PACK || '',
+  plan_manager: import.meta.env.VITE_STRIPE_LINK_MANAGER || '',
   pack_complete: import.meta.env.VITE_STRIPE_LINK_PACK || '',
   module_cleanings: import.meta.env.VITE_STRIPE_LINK_CLEANINGS || '',
   module_guide: import.meta.env.VITE_STRIPE_LINK_GUIDE || '',

@@ -1609,7 +1609,7 @@ export default function GuestGuidePortalView({
           <div className="w-12 h-1 bg-gray-200 mx-auto rounded-full" />
           <div>
             <a
-              href="https://turnexo.com"
+              href="https://turnexo.app"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/5 hover:bg-black/10 text-gray-500 hover:text-gray-900 text-[11px] font-bold transition shadow-sm"

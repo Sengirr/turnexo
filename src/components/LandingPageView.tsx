@@ -115,6 +115,14 @@ export default function LandingPageView({
             >
               FAQ
             </a>
+
+            <button
+              type="button"
+              onClick={() => openContactModal('Cabecera')}
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+            >
+              Contacto
+            </button>
           </nav>
 
           {/* Columna 3: Acceso Clientes + CTA Principal */}
@@ -180,6 +188,16 @@ export default function LandingPageView({
               >
                 FAQ
               </a>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openContactModal('Menú móvil');
+                }}
+                className="p-3 bg-[#E8E4D9] text-[#141413] border border-[#D5CFC0] text-left"
+              >
+                Contacto
+              </button>
             </div>
 
             <button
@@ -931,10 +949,10 @@ export default function LandingPageView({
                 <span>Escribir a soporte / Contacto</span>
               </button>
               <a
-                href="mailto:info@turnexo.com"
+                href="mailto:info@turnexo.app"
                 className="text-white/60 hover:text-white transition underline underline-offset-4"
               >
-                info@turnexo.com
+                info@turnexo.app
               </a>
             </div>
           </div>
@@ -1098,8 +1116,8 @@ export default function LandingPageView({
                 </div>
                 <p className="text-xs text-[#57554F]">
                   También puedes escribirnos directamente cuando quieras a{' '}
-                  <a href="mailto:info@turnexo.com" className="font-mono font-bold text-[#141413] underline">
-                    info@turnexo.com
+                  <a href="mailto:info@turnexo.app" className="font-mono font-bold text-[#141413] underline">
+                    info@turnexo.app
                   </a>
                   .
                 </p>
@@ -1180,8 +1198,8 @@ export default function LandingPageView({
 
                 <p className="text-[11px] text-[#57554F] text-center">
                   O escríbenos directamente a{' '}
-                  <a href="mailto:info@turnexo.com" className="font-mono font-bold text-[#141413] underline">
-                    info@turnexo.com
+                  <a href="mailto:info@turnexo.app" className="font-mono font-bold text-[#141413] underline">
+                    info@turnexo.app
                   </a>
                 </p>
               </form>

@@ -1,4 +1,4 @@
-# Turnexo (`turnexo.com`)
+# Turnexo (`turnexo.app`)
 
 **Hospitality Operations & Digital Guestbooks** — Plataforma SaaS self-service para anfitriones y gestores de alquiler vacacional.
 

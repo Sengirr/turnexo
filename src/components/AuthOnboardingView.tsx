@@ -84,7 +84,7 @@ export default function AuthOnboardingView({
       // Modo Autónomo Instantáneo
       onSuccess({
         id: `host-${Date.now()}`,
-        email: email.trim() || 'info@turnexo.com',
+        email: email.trim() || 'info@turnexo.app',
         fullName: fullName.trim() || email.split('@')[0] || 'Anfitrión Turnexo',
         companyName: 'Mis Alojamientos',
         plan: selectedPlan,

@@ -13,7 +13,7 @@ export default async function handler(req: any, res: any) {
   try {
     const upstream = await fetch(targetUrl, {
       headers: {
-        'User-Agent': 'Turnexo-iCal-Sync/1.0 (+https://turnexo.com)',
+        'User-Agent': 'Turnexo-iCal-Sync/1.0 (+https://turnexo.app)',
         Accept: 'text/calendar, text/plain, */*',
       },
     });

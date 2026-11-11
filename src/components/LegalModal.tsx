@@ -99,7 +99,7 @@ export default function LegalModal({ onClose, initialTab = 'privacy' }: Props) {
             <>
               <h3 className="font-bold text-sm text-[#141413]">1. Titularidad del Sitio Web</h3>
               <p>
-                Plataforma tecnológica Turnexo. Para cualquier consulta legal o técnica, puede contactarse a través del canal oficial info@turnexo.com.
+                Plataforma tecnológica Turnexo. Para cualquier consulta legal o técnica, puede contactarse a través del canal oficial info@turnexo.app.
               </p>
 
               <h3 className="font-bold text-sm text-[#141413]">2. Política de Cookies</h3>

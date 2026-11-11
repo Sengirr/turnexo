@@ -22,6 +22,18 @@ interface Props {
 
 type EditorTab = 'general' | 'videos' | 'extras' | 'rules' | 'checklist';
 
+const CHECKOUT_HOURS = [
+  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00'
+];
+
+const CHECKIN_HOURS = [
+  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '19:00', '20:00'
+];
+
+const LATE_CHECKOUT_HOURS = [
+  '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
+];
+
 export default function PropertyCustomizerModal({
   property,
   cleaners = [],
@@ -220,22 +232,38 @@ export default function PropertyCustomizerModal({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Hora Check-in</label>
-                  <input
-                    type="time"
-                    value={draft.checkInTime}
+                  <select
+                    value={draft.checkInTime || '15:00'}
                     onChange={(e) => setDraft({ ...draft, checkInTime: e.target.value })}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 font-bold"
-                  />
+                    className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xs"
+                  >
+                    {draft.checkInTime && !CHECKIN_HOURS.includes(draft.checkInTime) && (
+                      <option value={draft.checkInTime}>{draft.checkInTime}</option>
+                    )}
+                    {CHECKIN_HOURS.map((h) => (
+                      <option key={h} value={h}>
+                        {h} {h === '15:00' ? '(Estándar)' : ''}
+                      </option>
+                    ))}
+                  </select>
                   <span className="text-[11px] text-slate-400 block mt-1">Llegada nuevo huésped</span>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Hora Check-out</label>
-                  <input
-                    type="time"
-                    value={draft.checkOutTime}
+                  <select
+                    value={draft.checkOutTime || '11:00'}
                     onChange={(e) => setDraft({ ...draft, checkOutTime: e.target.value })}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 font-bold"
-                  />
+                    className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xs"
+                  >
+                    {draft.checkOutTime && !CHECKOUT_HOURS.includes(draft.checkOutTime) && (
+                      <option value={draft.checkOutTime}>{draft.checkOutTime}</option>
+                    )}
+                    {CHECKOUT_HOURS.map((h) => (
+                      <option key={h} value={h}>
+                        {h} {h === '11:00' ? '(Estándar)' : ''}
+                      </option>
+                    ))}
+                  </select>
                   <span className="text-[11px] text-slate-400 block mt-1">Salida / inicio limpieza</span>
                 </div>
                 <div>
@@ -428,12 +456,20 @@ export default function PropertyCustomizerModal({
                   <span className="text-slate-500 text-[11px]">Hora máxima de salida al aprobar el extra y nueva hora de limpieza.</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="time"
+                  <select
                     value={draft.lateCheckoutUntil || '17:00'}
                     onChange={(e) => setDraft({ ...draft, lateCheckoutUntil: e.target.value })}
-                    className="border border-slate-300 bg-white rounded-xl px-3 py-1.5 font-bold text-xs"
-                  />
+                    className="border border-slate-300 bg-white rounded-xl px-3 py-1.5 font-bold text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-2xs"
+                  >
+                    {draft.lateCheckoutUntil && !LATE_CHECKOUT_HOURS.includes(draft.lateCheckoutUntil) && (
+                      <option value={draft.lateCheckoutUntil}>{draft.lateCheckoutUntil}</option>
+                    )}
+                    {LATE_CHECKOUT_HOURS.map((h) => (
+                      <option key={h} value={h}>
+                        {h} {h === '17:00' ? '(Por la tarde)' : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 

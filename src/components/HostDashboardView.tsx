@@ -54,6 +54,14 @@ import {
   Invoice,
 } from '../lib/invoice';
 
+const CHECKOUT_HOURS = [
+  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00'
+];
+
+const CHECKIN_HOURS = [
+  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '19:00', '20:00'
+];
+
 interface Props {
   hostAccount?: HostAccount | null;
   onChangePlan?: (plan: HostAccount['plan']) => void;
@@ -2534,13 +2542,20 @@ export default function HostDashboardView({
                   <label className="block font-semibold text-slate-700 mb-1">
                     Hora salida (Check-out)
                   </label>
-                  <input
-                    type="text"
-                    placeholder="11:00"
-                    value={newPropCheckOut}
+                  <select
+                    value={newPropCheckOut || '11:00'}
                     onChange={(e) => setNewPropCheckOut(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono text-center shadow-2xs"
-                  />
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-bold shadow-2xs"
+                  >
+                    {newPropCheckOut && !CHECKOUT_HOURS.includes(newPropCheckOut) && (
+                      <option value={newPropCheckOut}>{newPropCheckOut}</option>
+                    )}
+                    {CHECKOUT_HOURS.map((h) => (
+                      <option key={h} value={h}>
+                        {h} {h === '11:00' ? '(Estándar)' : ''}
+                      </option>
+                    ))}
+                  </select>
                   <span className="text-[10px] text-slate-400 block mt-0.5">Inicio de la limpieza</span>
                 </div>
 
@@ -2548,13 +2563,20 @@ export default function HostDashboardView({
                   <label className="block font-semibold text-slate-700 mb-1">
                     Hora entrada (Check-in)
                   </label>
-                  <input
-                    type="text"
-                    placeholder="15:00"
-                    value={newPropCheckIn}
+                  <select
+                    value={newPropCheckIn || '15:00'}
                     onChange={(e) => setNewPropCheckIn(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono text-center shadow-2xs"
-                  />
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-bold shadow-2xs"
+                  >
+                    {newPropCheckIn && !CHECKIN_HOURS.includes(newPropCheckIn) && (
+                      <option value={newPropCheckIn}>{newPropCheckIn}</option>
+                    )}
+                    {CHECKIN_HOURS.map((h) => (
+                      <option key={h} value={h}>
+                        {h} {h === '15:00' ? '(Estándar)' : ''}
+                      </option>
+                    ))}
+                  </select>
                   <span className="text-[10px] text-slate-400 block mt-0.5">Llegada nuevo huésped</span>
                 </div>
 

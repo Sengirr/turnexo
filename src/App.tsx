@@ -36,6 +36,7 @@ import {
   isSupabaseConfigured,
   loadWorkspaceFromSupabase,
   subscribeToWorkspaceChanges,
+  supabase,
   syncCleanerToSupabase,
   syncCleaningTaskToSupabase,
   syncHostToSupabase,
@@ -131,7 +132,39 @@ export default function App() {
 
   // Sincronización inicial y tiempo real con Supabase si está configurado en .env
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured || !supabase) return;
+
+    // Detectar si venimos de un login con OAuth (Google)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user && !hostAccount) {
+        const meta = session.user.user_metadata || {};
+        const account: HostAccount = {
+          id: session.user.id,
+          email: session.user.email || 'usuario@gmail.com',
+          fullName: meta.full_name || meta.name || session.user.email?.split('@')[0] || 'Anfitrión',
+          companyName: meta.company_name || 'Mis Alojamientos',
+          plan: meta.subscription_plan || 'plan_starter',
+          trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+        };
+        handleAuthSuccess(account);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user && !hostAccount) {
+        const meta = session.user.user_metadata || {};
+        const account: HostAccount = {
+          id: session.user.id,
+          email: session.user.email || 'usuario@gmail.com',
+          fullName: meta.full_name || meta.name || session.user.email?.split('@')[0] || 'Anfitrión',
+          companyName: meta.company_name || 'Mis Alojamientos',
+          plan: meta.subscription_plan || 'plan_starter',
+          trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+        };
+        handleAuthSuccess(account);
+      }
+    });
+
     const fetchCloud = () => {
       loadWorkspaceFromSupabase().then((cloud) => {
         if (cloud.properties && cloud.properties.length > 0) setProperties(cloud.properties);
@@ -147,6 +180,7 @@ export default function App() {
     });
 
     return () => {
+      subscription.unsubscribe();
       unsubscribe();
     };
   }, []);

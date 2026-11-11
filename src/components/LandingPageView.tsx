@@ -675,13 +675,56 @@ export default function LandingPageView({
           </p>
         </div>
 
-        <div className="sm:hidden flex items-center justify-end gap-1.5 text-[11px] font-mono text-[#57554F] mb-2 px-1">
-          <span>Desliza para ver la comparativa</span>
-          <ArrowRight size={12} className="text-[#C85A32]" />
+        {/* VISTA MÓVIL: TARJETAS COMPARATIVAS VERTICALES (SIN SCROLL HORIZONTAL) */}
+        <div className="md:hidden space-y-4">
+          {t.comparison.rows.map((row, idx) => (
+            <div
+              key={idx}
+              className="bg-[#FAF9F5] border border-[#D5CFC0] p-4.5 space-y-3 shadow-2xs"
+            >
+              <h3 className="font-extrabold text-sm text-[#141413] border-b border-[#E2DDD2] pb-2">
+                {row.task}
+              </h3>
+
+              {/* Opción Ganadora: Con Turnexo */}
+              <div className="bg-[#141413] text-[#F6F4EE] p-3.5 space-y-1.5 border-l-4 border-[#C85A32]">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase font-bold text-[#C85A32]">
+                    {t.comparison.thTurnexo}
+                  </span>
+                  <Check size={14} className="text-[#C85A32]" />
+                </div>
+                <p className="text-xs leading-relaxed text-white font-medium">
+                  {row.turnexo}
+                </p>
+              </div>
+
+              {/* Opciones Tradicionales */}
+              <div className="space-y-2 text-xs pt-0.5">
+                <div className="bg-white p-2.5 border border-[#E2DDD2] space-y-0.5">
+                  <span className="font-mono text-[10px] text-[#57554F] font-bold block uppercase">
+                    {t.comparison.thManual}:
+                  </span>
+                  <p className="text-[#57554F] leading-snug">
+                    {row.manual}
+                  </p>
+                </div>
+                <div className="bg-white p-2.5 border border-[#E2DDD2] space-y-0.5">
+                  <span className="font-mono text-[10px] text-[#57554F] font-bold block uppercase">
+                    {t.comparison.thPms}:
+                  </span>
+                  <p className="text-[#57554F] leading-snug">
+                    {row.pms}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="bg-[#FAF9F5] border border-[#D5CFC0] overflow-x-auto shadow-xs">
-          <table className="w-full min-w-[620px] text-left border-collapse text-xs">
+        {/* VISTA ORDENADOR: TABLA CLÁSICA DE 4 COLUMNAS */}
+        <div className="hidden md:block bg-[#FAF9F5] border border-[#D5CFC0] overflow-hidden shadow-xs">
+          <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-[#D5CFC0] bg-[#E8E4D9]/60 font-mono text-[11px] uppercase tracking-wider text-[#57554F]">
                 <th className="py-4 px-5">{t.comparison.thTask}</th>

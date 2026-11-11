@@ -636,7 +636,7 @@ export default function GuestGuidePortalView({
   const { t } = useGuestTranslation(language);
 
   const [activeTab, setActiveTab] = useState<
-    'guide' | 'arrival' | 'extras' | 'house' | 'departure' | 'support'
+    'guide' | 'arrival' | 'extras' | 'house' | 'departure'
   >('guide');
 
   const [copiedField, setCopiedField] = useState<'wifi' | 'pass' | null>(null);
@@ -1626,56 +1626,27 @@ export default function GuestGuidePortalView({
           </div>
         )}
 
-        {/* TAB 6: AYUDA Y SOPORTE (support) */}
-        {activeTab === 'support' && (
-          <div className="space-y-8 animate-in fade-in duration-300">
-            <Card className="bg-white border-2 border-gray-100">
-              <SectionTitle
-                icon={Headset}
-                title={t('support.title')}
-                iconClass="bg-primary-ivi-light text-primary-ivi"
-              />
-              <div className="grid grid-cols-1 gap-3 mt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIncidentSent(false);
-                    setIsIncidentModalOpen(true);
-                  }}
-                  className="flex items-center p-6 bg-red-50 rounded-[2rem] text-red-500 gap-4 border border-red-100 hover:bg-red-100 transition-colors"
-                >
-                  <div className="w-12 h-12 bg-red-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-100 shrink-0">
-                    <AlertCircle size={24} />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-black uppercase tracking-widest italic">
-                      {t('support.incident')}
-                    </p>
-                    <p className="text-[10px] font-bold opacity-70">{t('support.incident_desc')}</p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => window.open(`https://wa.me/${cleanWhatsappPhone}`, '_blank')}
-                  className="flex items-center p-6 bg-emerald-50 rounded-[2rem] text-emerald-700 gap-4 border border-emerald-100 hover:bg-emerald-100 transition-colors"
-                >
-                  <div className="w-12 h-12 bg-[#25D366] text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-100 shrink-0">
-                    <Phone size={24} />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-black uppercase tracking-widest italic">
-                      {t('support.whatsapp_direct')}
-                    </p>
-                    <p className="text-[10px] font-bold opacity-70">{t('support.whatsapp_desc')}</p>
-                  </div>
-                </button>
-              </div>
-            </Card>
+        <footer className="pt-8 pb-14 text-center space-y-3">
+          <div>
+            <button
+              type="button"
+              onClick={() => {
+                setIncidentSent(false);
+                setIsIncidentModalOpen(true);
+              }}
+              className="text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-gray-100"
+            >
+              <AlertCircle size={13} className="text-gray-400" />
+              <span>
+                {language === 'en'
+                  ? 'Report an incident or issue'
+                  : language === 'fr'
+                  ? 'Signaler un problème'
+                  : '¿Algún problema? Reportar incidencia'}
+              </span>
+            </button>
           </div>
-        )}
 
-        <footer className="pt-12 pb-14 text-center space-y-3">
           <div className="w-12 h-1 bg-gray-200 mx-auto rounded-full" />
           {!isWhiteLabel && (
             <div>
@@ -1707,7 +1678,6 @@ export default function GuestGuidePortalView({
               { id: 'extras', icon: PlusCircle, label: t('tabs.extras') },
               { id: 'house', icon: Video, label: t('tabs.guide') },
               { id: 'departure', icon: LogOut, label: t('tabs.departure') },
-              { id: 'support', icon: Headset, label: t('tabs.support') },
             ] as const
           ).map((tab) => {
             const isActive = activeTab === tab.id;

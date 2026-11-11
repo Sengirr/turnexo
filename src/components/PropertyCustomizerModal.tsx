@@ -50,7 +50,40 @@ export default function PropertyCustomizerModal({
   onClose,
 }: Props) {
   const isEn = language === 'en';
-  const [draft, setDraft] = useState<Property>(() => JSON.parse(JSON.stringify(property)));
+  const [draft, setDraft] = useState<Property>(() => {
+    const p: Property = JSON.parse(JSON.stringify(property));
+    const extras: PropertyExtra[] = p.extras || [];
+    const lateExtIdx = extras.findIndex(
+      (e) => e.onlyWhenFreeNextDay || e.id === 'ext-late' || /late/i.test(e.title)
+    );
+    if (lateExtIdx >= 0) {
+      extras[lateExtIdx] = {
+        ...extras[lateExtIdx],
+        onlyWhenFreeNextDay: true,
+        price: p.lateCheckoutPrice || extras[lateExtIdx].price || 35,
+        title: `Late Check-out hasta las ${p.lateCheckoutUntil || '17:00'}h`,
+      };
+      // Eliminar duplicados si hubiera más de un extra de late checkout
+      p.extras = extras.filter(
+        (e, idx) => idx === lateExtIdx || (!e.onlyWhenFreeNextDay && !/late\s*check/i.test(e.title))
+      );
+    } else {
+      p.extras = [
+        {
+          id: 'ext-late',
+          title: `Late Check-out hasta las ${p.lateCheckoutUntil || '17:00'}h`,
+          description: 'Salida por la tarde sujeta a disponibilidad según el calendario iCal.',
+          price: p.lateCheckoutPrice || 35,
+          priceUnit: 'reserva',
+          icon: 'clock',
+          onlyWhenFreeNextDay: true,
+          active: true,
+        },
+        ...extras,
+      ];
+    }
+    return p;
+  });
   const [tab, setTab] = useState<EditorTab>('general');
 
   // Campos temporales para añadir vídeos, extras, normas, recomendaciones y checklist
@@ -588,123 +621,173 @@ export default function PropertyCustomizerModal({
             </div>
           )}
 
-          {/* PESTAÑA 3: EXTRAS, LATE CHECK-OUT Y CHECKLIST LIMPIEZA */}
+          {/* PESTAÑA 3: TODOS LOS EXTRAS (LATE CHECK-OUT + UPSELL) Y CHECKLIST LIMPIEZA */}
           {tab === 'services' && (
             <div className="space-y-4">
-              {/* Late Check-out Configuración */}
-              <div className="bg-orange-50/70 border border-orange-200/80 rounded-2xl p-4 space-y-2.5">
+              {/* Catálogo Unificado de Extras y Servicios de Pago */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-slate-900 block text-xs">
-                      {isEn ? 'Late Check-out Upsell' : 'Venta de Late Check-out (Salida por la tarde)'}
+                    <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
+                      {isEn ? 'Extras & Paid Upsell for Guests' : 'Extras y Servicios para Huéspedes (Upsell)'}
                     </span>
                     <span className="text-[11px] text-slate-500">
-                      {isEn ? 'Offered in digital guide only when no guest is checking in the same day.' : 'Se ofrece en la guía solo si el día de salida no entra otra reserva en el iCal.'}
+                      {isEn ? 'All items guests can order through their digital guide.' : 'Todo lo que el huésped puede contratar desde su Guía Digital.'}
                     </span>
                   </div>
+                  <span className="text-xs font-bold text-orange-600 bg-orange-100/60 px-2 py-0.5 rounded-full">
+                    {draft.extras?.filter((e) => e.active).length || 0} {isEn ? 'active' : 'activos'}
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      {isEn ? 'Latest Allowed Check-out' : 'Hora máxima permitida'}
-                    </label>
-                    <select
-                      value={draft.lateCheckoutUntil || '17:00'}
-                      onChange={(e) => setDraft({ ...draft, lateCheckoutUntil: e.target.value })}
-                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800"
-                    >
-                      {LATE_CHECKOUT_HOURS.map((h) => (
-                        <option key={h} value={h}>{h}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      {isEn ? 'Price (€)' : 'Precio que pagará el huésped (€)'}
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={draft.lateCheckoutPrice || 35}
-                      onChange={(e) => setDraft({ ...draft, lateCheckoutPrice: Number(e.target.value) })}
-                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800"
-                    />
-                  </div>
-                </div>
-              </div>
+                <div className="space-y-2.5">
+                  {(draft.extras || []).map((ext) => {
+                    const isLateCheckout = Boolean(
+                      ext.onlyWhenFreeNextDay || ext.id === 'ext-late' || /late/i.test(ext.title)
+                    );
 
-              {/* Otros Extras / Servicios */}
-              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
-                <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
-                  {isEn ? 'Other Extras & Paid Services' : 'Otros Extras y Servicios de Pago'}
-                </span>
+                    return (
+                      <div
+                        key={ext.id}
+                        className={`rounded-2xl p-3 border transition ${
+                          isLateCheckout
+                            ? 'bg-amber-50/50 border-amber-200/80 shadow-2xs'
+                            : 'bg-white border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                            <input
+                              type="checkbox"
+                              checked={ext.active}
+                              onChange={(e) => {
+                                const newActive = e.target.checked;
+                                setDraft({
+                                  ...draft,
+                                  extras: draft.extras.map((item) =>
+                                    item.id === ext.id ? { ...item, active: newActive } : item
+                                  ),
+                                });
+                              }}
+                              className="mt-1 h-4 w-4 rounded text-orange-600 focus:ring-orange-500"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold text-slate-900 text-xs">{ext.title}</span>
+                                {isLateCheckout && (
+                                  <span className="text-[10px] font-extrabold uppercase bg-amber-100 text-amber-900 border border-amber-200/60 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                                    <span>⚡ {isEn ? 'Smart Late Check-out' : 'Salida Tarde Inteligente'}</span>
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                                {isLateCheckout
+                                  ? (isEn
+                                      ? 'Offered only when no other guest is checking in the same day via iCal.'
+                                      : 'Se ofrece al huésped solo si no entra otra reserva el mismo día en el iCal.')
+                                  : ext.description}
+                              </p>
 
-                <div className="space-y-2">
-                  {(draft.extras || []).map((ext) => (
-                    <div
-                      key={ext.id}
-                      className="flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl p-3"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <input
-                          type="checkbox"
-                          checked={ext.active}
-                          onChange={(e) =>
-                            setDraft({
-                              ...draft,
-                              extras: draft.extras.map((item) =>
-                                item.id === ext.id ? { ...item, active: e.target.checked } : item
-                              ),
-                            })
-                          }
-                          className="h-4 w-4 rounded text-orange-600"
-                        />
-                        <div>
-                          <p className="font-bold text-slate-900 text-xs">
-                            {ext.title} — <span className="text-emerald-700 font-extrabold">{ext.price} €</span>
-                          </p>
-                          <p className="text-[11px] text-slate-500">{ext.description}</p>
+                              {/* Parámetros específicos para Late Check-out */}
+                              {isLateCheckout && (
+                                <div className="mt-2.5 flex items-center gap-3 flex-wrap text-xs pt-2 border-t border-amber-200/60">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-slate-600 font-medium">{isEn ? 'Max checkout hour:' : 'Salida hasta las:'}</span>
+                                    <select
+                                      value={draft.lateCheckoutUntil || '17:00'}
+                                      onChange={(e) => {
+                                        const newHour = e.target.value;
+                                        setDraft({
+                                          ...draft,
+                                          lateCheckoutUntil: newHour,
+                                          extras: draft.extras.map((item) =>
+                                            item.id === ext.id
+                                              ? { ...item, title: `Late Check-out hasta las ${newHour}h` }
+                                              : item
+                                          ),
+                                        });
+                                      }}
+                                      className="border border-amber-300 bg-white rounded-lg px-2 py-1 font-bold text-slate-800 text-xs"
+                                    >
+                                      {LATE_CHECKOUT_HOURS.map((h) => (
+                                        <option key={h} value={h}>{h}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            {/* Editor de precio en línea */}
+                            <div className="flex items-center bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-2xs">
+                              <input
+                                type="number"
+                                min="0"
+                                value={ext.price}
+                                onChange={(e) => {
+                                  const newPrice = Number(e.target.value);
+                                  setDraft({
+                                    ...draft,
+                                    ...(isLateCheckout ? { lateCheckoutPrice: newPrice } : {}),
+                                    extras: draft.extras.map((item) =>
+                                      item.id === ext.id ? { ...item, price: newPrice } : item
+                                    ),
+                                  });
+                                }}
+                                className="w-12 font-extrabold text-slate-900 text-right focus:outline-none"
+                              />
+                              <span className="text-slate-500 font-bold ml-1 text-xs">€</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setDraft({
+                                  ...draft,
+                                  extras: draft.extras.filter((item) => item.id !== ext.id),
+                                })
+                              }
+                              className="text-slate-400 hover:text-rose-600 p-1 rounded-lg transition"
+                              title={isEn ? 'Remove extra' : 'Eliminar extra'}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setDraft({
-                            ...draft,
-                            extras: draft.extras.filter((item) => item.id !== ext.id),
-                          })
-                        }
-                        className="text-rose-500 hover:text-rose-700 p-1"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
-                  <p className="font-bold text-slate-800 text-xs">{isEn ? 'Add extra (Parking, Baby cot...)' : 'Añadir extra (Parking, Cuna, Traslado...)'}</p>
+                {/* Formulario rápido para añadir cualquier extra */}
+                <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 mt-2">
+                  <p className="font-bold text-slate-800 text-xs">
+                    {isEn ? 'Add new extra / upsell' : 'Añadir nuevo extra al alojamiento'}
+                  </p>
                   <div className="flex gap-2">
                     <input
-                      placeholder={isEn ? 'Name (e.g. Covered Parking Space)' : 'Nombre (ej. Plaza de Parking)'}
+                      placeholder={isEn ? 'Name (e.g. Private Parking, Baby Cot, Airport Shuttle...)' : 'Nombre (ej. Plaza de Parking, Cuna de Bebé, Traslado...)'}
                       value={newExtraTitle}
                       onChange={(e) => setNewExtraTitle(e.target.value)}
                       className="flex-1 border border-slate-200 rounded-xl px-3 py-1.5 text-xs"
                     />
-                    <input
-                      type="number"
-                      placeholder="€"
-                      value={newExtraPrice}
-                      onChange={(e) => setNewExtraPrice(Number(e.target.value))}
-                      className="w-20 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold"
-                    />
+                    <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2 py-1">
+                      <input
+                        type="number"
+                        placeholder="25"
+                        value={newExtraPrice}
+                        onChange={(e) => setNewExtraPrice(Number(e.target.value))}
+                        className="w-14 bg-transparent font-bold text-xs text-right focus:outline-none"
+                      />
+                      <span className="text-slate-500 font-bold ml-1 text-xs">€</span>
+                    </div>
                     <button
                       type="button"
                       onClick={addExtra}
-                      className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-xl text-xs shrink-0"
+                      className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1 transition shrink-0 shadow-2xs"
                     >
-                      + {isEn ? 'Add' : 'Añadir'}
+                      <Plus size={13} /> {isEn ? 'Add Extra' : 'Añadir Extra'}
                     </button>
                   </div>
                 </div>

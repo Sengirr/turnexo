@@ -30,6 +30,7 @@ import {
   Send,
   FileSpreadsheet,
   Camera,
+  LogOut,
 } from 'lucide-react';
 import { Cleaner, CleaningTask, Property, Reservation } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
@@ -378,13 +379,25 @@ export default function HostDashboardView({
               : 'Plan'}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-bold px-3 py-1.5 flex items-center gap-1.5 border border-white/20"
-        >
-          {mobileMenuOpen ? 'Cerrar ✕' : 'Menú ☰'}
-        </button>
+        <div className="flex items-center gap-2">
+          {onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              className="bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 hover:text-white p-1.5 border border-rose-800/50"
+              title="Cerrar sesión"
+            >
+              <LogOut size={13} />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-bold px-3 py-1.5 flex items-center gap-1.5 border border-white/20"
+          >
+            {mobileMenuOpen ? 'Cerrar ✕' : 'Menú ☰'}
+          </button>
+        </div>
       </div>
 
       {/* BARRA LATERAL IZQUIERDA ESTILO SOFTWARE PROFESIONAL */}

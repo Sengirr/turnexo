@@ -577,9 +577,18 @@ export default function App() {
             setHostAccount({ ...hostAccount, subscriptionStatus: 'active' });
             showToast('Suscripción Stripe activada correctamente.');
           }}
-          onLogout={() => {
+          onLogout={async () => {
+            try {
+              if (isSupabaseConfigured && supabase) {
+                await supabase.auth.signOut();
+              }
+            } catch (err) {
+              console.error('Error signing out from Supabase:', err);
+            }
+            localStorage.removeItem(STORAGE_KEYS.host);
             setHostAccount(null);
-            showToast('Sesión cerrada.');
+            navigate('/', { kind: 'landing' });
+            showToast('Sesión cerrada correctamente.');
           }}
           properties={properties}
           cleaners={cleaners}

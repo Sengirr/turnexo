@@ -159,30 +159,32 @@ export default function LandingPageView({
 
           {/* Columna 3: Idioma + Acceso Clientes + CTA Principal */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0 whitespace-nowrap">
-            {/* SELECTOR DE IDIOMA (ES / EN) */}
-            <div className="flex items-center border border-[#D5CFC0] bg-white rounded-lg p-0.5 text-xs font-mono shadow-2xs">
+            {/* SELECTOR DE IDIOMA ULTRA-VISIBLE (ES / EN) */}
+            <div className="flex items-center gap-1 border-2 border-[#141413] bg-white rounded-lg px-2 py-1 text-xs font-mono shadow-xs">
+              <Globe size={14} className="text-[#C85A32] shrink-0" />
               <button
                 type="button"
                 onClick={() => changeLanguage('es')}
-                className={`px-2 py-1 rounded transition-all ${
+                className={`px-2 py-0.5 rounded transition-all font-bold ${
                   lang === 'es'
-                    ? 'bg-[#141413] text-white font-bold shadow-xs'
+                    ? 'bg-[#141413] text-white shadow-xs'
                     : 'text-[#57554F] hover:text-[#141413]'
                 }`}
-                title="Español"
+                title="Cambiar a Español"
                 aria-label="Español"
               >
                 ES
               </button>
+              <span className="text-[#D5CFC0] font-sans">|</span>
               <button
                 type="button"
                 onClick={() => changeLanguage('en')}
-                className={`px-2 py-1 rounded transition-all ${
+                className={`px-2 py-0.5 rounded transition-all font-bold ${
                   lang === 'en'
-                    ? 'bg-[#141413] text-white font-bold shadow-xs'
+                    ? 'bg-[#141413] text-white shadow-xs'
                     : 'text-[#57554F] hover:text-[#141413]'
                 }`}
-                title="English"
+                title="Switch to English"
                 aria-label="English"
               >
                 EN
@@ -1079,7 +1081,33 @@ export default function LandingPageView({
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-white/40">
+        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-white/50 border-t border-white/10 mt-2">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-white/70">
+              <Globe size={13} className="text-[#C85A32]" />
+              Idioma / Language:
+            </span>
+            <div className="inline-flex items-center bg-white/10 rounded-md p-0.5 border border-white/15">
+              <button
+                type="button"
+                onClick={() => changeLanguage('es')}
+                className={`px-2 py-0.5 rounded transition ${
+                  lang === 'es' ? 'bg-[#C85A32] text-white font-bold' : 'text-white/70 hover:text-white'
+                }`}
+              >
+                Español
+              </button>
+              <button
+                type="button"
+                onClick={() => changeLanguage('en')}
+                className={`px-2 py-0.5 rounded transition ${
+                  lang === 'en' ? 'bg-[#C85A32] text-white font-bold' : 'text-white/70 hover:text-white'
+                }`}
+              >
+                English
+              </button>
+            </div>
+          </div>
           <p>© {new Date().getFullYear()} {t.footer.copyright}</p>
           <p>{t.footer.icalCompat}</p>
         </div>

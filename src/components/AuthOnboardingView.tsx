@@ -106,10 +106,6 @@ export default function AuthOnboardingView({
           provider: 'google',
           options: {
             redirectTo: `${window.location.origin}/app`,
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'consent',
-            },
           },
         });
         if (error) throw error;

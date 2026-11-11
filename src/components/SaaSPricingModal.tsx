@@ -35,7 +35,7 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
       periodYearly: '/mes (180 € al año)',
       subtitle: 'Hasta 5 Alojamientos (~3€/alojamiento)',
       badge: '⭐ El más elegido · IVA 10%',
-      savings: 'Ahorras 48 € al año (2,5 meses gratis)',
+      savings: 'Ahorras 48 € al año (2 meses gratis)',
       icon: FileText,
       features: [
         'Hasta 5 alojamientos turísticos',
@@ -57,7 +57,7 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
       periodYearly: '/mes (372 € al año)',
       subtitle: 'Hasta 10 Alojamientos (~3,10€/alojamiento)',
       badge: 'Microgestores',
-      savings: 'Ahorras 96 € al año (2,5 meses gratis)',
+      savings: 'Ahorras 96 € al año (2 meses gratis)',
       icon: Users,
       features: [
         'Hasta 10 alojamientos turísticos incluidos',

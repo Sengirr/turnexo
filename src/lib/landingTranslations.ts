@@ -409,7 +409,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
           priceYearly: '15 €',
           note: '/ mes (tarifa plana)',
           noteYearly: '/ mes (180 € al año)',
-          savingsText: 'Ahorras 48 € al año (2,5 meses gratis)',
+          savingsText: 'Ahorras 48 € al año (2 meses gratis)',
           summary:
             'Todo el control operativo más facturación oficial al 10% de IVA y exportación trimestral en 1 clic para tu gestoría.',
           highlight: true,
@@ -431,7 +431,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
           priceYearly: '31 €',
           note: '/ mes (tarifa plana)',
           noteYearly: '/ mes (372 € al año)',
-          savingsText: 'Ahorras 96 € al año (2,5 meses gratis)',
+          savingsText: 'Ahorras 96 € al año (2 meses gratis)',
           summary:
             'Para gestores con varias limpiadoras y múltiples propietarios que necesitan coordinar todas las salidas sin líos.',
           highlight: false,
@@ -766,7 +766,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
           priceYearly: '€15',
           note: '/ month (flat rate)',
           noteYearly: '/ month (€180 / year)',
-          savingsText: 'Save €48/year (2.5 months free)',
+          savingsText: 'Save €48/year (2 months free)',
           summary:
             'Full operational control plus official invoicing with 10% VAT and 1-click quarterly Excel export for your accountant.',
           highlight: true,
@@ -788,7 +788,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
           priceYearly: '€31',
           note: '/ month (flat rate)',
           noteYearly: '/ month (€372 / year)',
-          savingsText: 'Save €96/year (2.5 months free)',
+          savingsText: 'Save €96/year (2 months free)',
           summary:
             'For property managers with multiple cleaners and owners needing smooth turnover coordination without headaches.',
           highlight: false,

@@ -308,7 +308,7 @@ export default function PropertyCustomizerModal({
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
-                    Tarifa Limpieza (€) <span className="font-normal text-xs text-slate-400">(Opcional)</span>
+                    Pago a la limpiadora (€) <span className="font-normal text-xs text-slate-400">(Opcional)</span>
                   </label>
                   <input
                     type="number"
@@ -318,7 +318,7 @@ export default function PropertyCustomizerModal({
                     onChange={(e) => setDraft({ ...draft, cleaningFee: e.target.value === '' ? 0 : Number(e.target.value) })}
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 font-bold"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">Por turno. Déjalo en 0 si es sueldo fijo o por horas.</span>
+                  <span className="text-[11px] text-slate-400 block mt-1">Lo que le pagas a tu personal por cada limpieza realizada (déjalo en 0 si cobra sueldo fijo o por horas). No es lo que cobras al huésped.</span>
                 </div>
               </div>
 

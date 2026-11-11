@@ -258,7 +258,7 @@ export default function HostDashboardView({
   const downloadCleanerSettlementCsv = (cleaner: Cleaner) => {
     const cleanerTasks = tasks.filter((t) => t.cleanerId === cleaner.id);
     const rows = [
-      ['Fecha', 'Alojamiento', 'Huesped', 'Canal', 'Hora Limpieza', 'Tarifa EUR', 'Estado', 'Fotos'],
+      ['Fecha', 'Alojamiento', 'Huesped', 'Canal', 'Hora Limpieza', 'Pago Limpiadora EUR', 'Estado', 'Fotos'],
       ...cleanerTasks.map((t) => {
         const p = properties.find((prop) => prop.id === t.propertyId);
         const res = reservations.find((r) => r.id === t.reservationId);
@@ -1149,7 +1149,7 @@ export default function HostDashboardView({
                                   Personal: <strong className="text-slate-900">{cleaner?.name}</strong>
                                 </span>
                                 <span className="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md text-xs font-medium">
-                                  Tarifa: <strong className="text-slate-900">{prop?.cleaningFee || 40} €</strong>
+                                  Pago limpiadora: <strong className="text-slate-900">{prop?.cleaningFee ?? 0} €</strong>
                                 </span>
                               </div>
 
@@ -2337,7 +2337,7 @@ export default function HostDashboardView({
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Tarifa (€) <span className="text-[10px] text-slate-400 font-normal">(Opcional)</span>
+                    Pago a la limpiadora (€) <span className="text-[10px] text-slate-400 font-normal">(Opcional)</span>
                   </label>
                   <input
                     type="number"
@@ -2348,7 +2348,7 @@ export default function HostDashboardView({
                     onChange={(e) => setNewPropCleaningFee(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono text-center shadow-2xs"
                   />
-                  <span className="text-[10px] text-slate-400 block mt-0.5">0 € si sueldo fijo / horas</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Lo que le pagas por servicio (0 si sueldo fijo)</span>
                 </div>
               </div>
 

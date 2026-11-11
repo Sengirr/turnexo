@@ -29,6 +29,22 @@ export const STRIPE_PAYMENT_LINKS = {
   module_guide: import.meta.env.VITE_STRIPE_LINK_GUIDE || '',
 };
 
+export const getStripePaymentLink = (plan: string): string => {
+  try {
+    const adminConfig = localStorage.getItem('turnexo_stripe_links_v1');
+    if (adminConfig) {
+      const parsed = JSON.parse(adminConfig);
+      if (parsed[plan] && typeof parsed[plan] === 'string' && parsed[plan].startsWith('http')) {
+        return parsed[plan];
+      }
+    }
+  } catch {}
+
+  const envLink = (STRIPE_PAYMENT_LINKS as Record<string, string>)[plan] || '';
+  if (envLink && envLink.startsWith('http')) return envLink;
+  return '';
+};
+
 /**
  * Carga propiedades, limpiadoras, reservas y tareas desde Supabase cuando está configurado.
  */

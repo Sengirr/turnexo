@@ -114,6 +114,36 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
   const [newPlan, setNewPlan] = useState<'plan_starter' | 'plan_pro' | 'plan_manager'>('plan_pro');
   const [newPropsCount, setNewPropsCount] = useState(2);
 
+  // Configuración de Enlaces de Pago de Stripe (Fundador)
+  const [stripeProLink, setStripeProLink] = useState(() => {
+    try {
+      const stored = localStorage.getItem('turnexo_stripe_links_v1');
+      if (stored) return JSON.parse(stored).plan_pro || '';
+    } catch {}
+    return import.meta.env.VITE_STRIPE_LINK_PRO || '';
+  });
+
+  const [stripeManagerLink, setStripeManagerLink] = useState(() => {
+    try {
+      const stored = localStorage.getItem('turnexo_stripe_links_v1');
+      if (stored) return JSON.parse(stored).plan_manager || '';
+    } catch {}
+    return import.meta.env.VITE_STRIPE_LINK_MANAGER || '';
+  });
+
+  const [stripeSavedMsg, setStripeSavedMsg] = useState(false);
+
+  const handleSaveStripeLinks = (e: React.FormEvent) => {
+    e.preventDefault();
+    const config = {
+      plan_pro: stripeProLink.trim(),
+      plan_manager: stripeManagerLink.trim(),
+    };
+    localStorage.setItem('turnexo_stripe_links_v1', JSON.stringify(config));
+    setStripeSavedMsg(true);
+    setTimeout(() => setStripeSavedMsg(false), 2500);
+  };
+
   const metrics = computeSaasMetrics(users);
 
   const saveUsers = (updated: SaasUser[]) => {
@@ -627,6 +657,81 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* CONFIGURACIÓN DE PASARELA STRIPE CHECKOUT (FUNDADOR) */}
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-4 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold">
+                💳
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm">
+                  Enlaces de Pago de Stripe (Payment Links)
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Configura aquí las URLs a las que se redirige a los anfitriones al contratar un plan.
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://dashboard.stripe.com/payment-links"
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-semibold text-orange-600 hover:text-orange-700 inline-flex items-center gap-1"
+            >
+              Abrir Stripe Dashboard ↗
+            </a>
+          </div>
+
+          <form onSubmit={handleSaveStripeLinks} className="space-y-4 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block font-semibold text-slate-700">
+                  Enlace Plan Pro Fiscal (19€/mes)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://buy.stripe.com/..."
+                  value={stripeProLink}
+                  onChange={(e) => setStripeProLink(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block font-semibold text-slate-700">
+                  Enlace Plan Microgestora (39€/mes)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://buy.stripe.com/..."
+                  value={stripeManagerLink}
+                  onChange={(e) => setStripeManagerLink(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              {stripeSavedMsg ? (
+                <span className="text-xs text-emerald-600 font-bold">
+                  ✓ Enlaces de Stripe guardados correctamente.
+                </span>
+              ) : (
+                <span className="text-[11px] text-slate-400">
+                  * Si dejas un enlace vacío, el panel de clientes mostrará un botón de contacto directo con soporte.
+                </span>
+              )}
+              <button
+                type="submit"
+                className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm"
+              >
+                Guardar Enlaces
+              </button>
+            </div>
+          </form>
         </div>
 
         {/* CENTRO DE CONEXIÓN NUBE & SUPABASE */}

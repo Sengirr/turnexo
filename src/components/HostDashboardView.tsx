@@ -31,10 +31,11 @@ import {
   FileSpreadsheet,
   Camera,
   LogOut,
+  Mail,
 } from 'lucide-react';
 import { Cleaner, CleaningTask, Property, Reservation } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
-import { HostAccount, isSupabaseConfigured, STRIPE_PAYMENT_LINKS } from '../lib/supabase';
+import { HostAccount, isSupabaseConfigured, STRIPE_PAYMENT_LINKS, getStripePaymentLink } from '../lib/supabase';
 import PrintableQrPosterModal from './PrintableQrPosterModal';
 import PropertyCustomizerModal from './PropertyCustomizerModal';
 import InvoicePrintModal from './InvoicePrintModal';
@@ -2051,7 +2052,7 @@ export default function HostDashboardView({
                       type="button"
                       onClick={() => {
                         const planKey = hostAccount?.plan || 'plan_pro';
-                        const stripeUrl = (STRIPE_PAYMENT_LINKS as Record<string, string>)[planKey] || STRIPE_PAYMENT_LINKS.plan_pro;
+                        const stripeUrl = getStripePaymentLink(planKey) || getStripePaymentLink('plan_pro');
                         if (stripeUrl && stripeUrl.startsWith('http')) {
                           window.open(stripeUrl, '_blank');
                         } else {
@@ -2444,18 +2445,20 @@ export default function HostDashboardView({
         </div>
       )}
 
-      {/* Modal Aviso Enlace Stripe No Configurado */}
+      {/* Modal Atención al Cliente: Activación de Plan */}
       {showStripeNoticeModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 flex items-center justify-center font-bold text-lg">
-                  💳
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 border border-orange-200/60 flex items-center justify-center font-bold text-lg">
+                  ✨
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Enlace de Stripe pendiente</h3>
-                  <p className="text-xs text-slate-500">Configuración de cobro para suscripciones reales</p>
+                  <h3 className="text-lg font-bold text-slate-900">
+                    Suscripción {hostAccount?.plan === 'plan_manager' ? 'Microgestora' : 'Pro Fiscal'}
+                  </h3>
+                  <p className="text-xs text-slate-500">Periodo de prueba gratuito activo (14 días)</p>
                 </div>
               </div>
               <button
@@ -2467,25 +2470,36 @@ export default function HostDashboardView({
               </button>
             </div>
 
-            <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
+            <div className="space-y-3.5 text-xs text-slate-600 leading-relaxed">
               <p>
-                Aún no has vinculado tu <strong>Enlace de Pago de Stripe (Payment Link)</strong> para el plan {hostAccount?.plan === 'plan_manager' ? 'Microgestora' : 'Pro Fiscal'}.
+                Actualmente dispones de acceso completo a todas las herramientas durante tus <strong>14 días de prueba</strong>.
               </p>
-              <div className="bg-slate-50 rounded-2xl border border-slate-200/80 p-4 space-y-2.5 text-slate-700">
-                <span className="font-bold text-slate-900 block text-xs">¿Cómo configurarlo en 2 minutos?</span>
-                <ol className="list-decimal list-inside space-y-2 text-xs text-slate-600">
-                  <li>Inicia sesión en tu cuenta de <a href="https://dashboard.stripe.com/payment-links" target="_blank" rel="noreferrer" className="text-orange-600 font-semibold underline">Stripe Dashboard ↗</a>.</li>
-                  <li>Ve a <strong>Enlaces de Pago</strong> y crea uno recurrente para <em>Pro Fiscal (19€/mes)</em> o <em>Microgestora (39€/mes)</em>.</li>
-                  <li>Copia la URL (ej: <code>https://buy.stripe.com/...</code>) y añádela a tu archivo <code>.env</code>:
-                    <pre className="mt-1.5 p-2.5 bg-slate-900 text-slate-100 rounded-xl text-[11px] overflow-x-auto font-mono">
-{`VITE_STRIPE_LINK_PRO=https://buy.stripe.com/...
-VITE_STRIPE_LINK_MANAGER=https://buy.stripe.com/...`}
-                    </pre>
-                  </li>
-                </ol>
+              <div className="bg-slate-50 rounded-2xl border border-slate-200/80 p-4 space-y-2 text-slate-700">
+                <span className="font-bold text-slate-900 block text-xs">¿Deseas activar tu suscripción ahora?</span>
+                <p className="text-xs text-slate-600">
+                  Para formalizar tu cuenta de forma anticipada o domiciliar el pago con tu gestora, nuestro equipo te lo habilitará de inmediato:
+                </p>
+                <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                  <a
+                    href={`https://wa.me/34600000000?text=${encodeURIComponent(`Hola, soy ${hostAccount?.fullName || 'anfitrión'} (${hostAccount?.email}). Quiero activar mi suscripción al Plan ${hostAccount?.plan === 'plan_manager' ? 'Microgestora' : 'Pro Fiscal'} en Turnexo.`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 transition shadow-sm"
+                  >
+                    <Send size={13} />
+                    <span>Solicitar por WhatsApp</span>
+                  </a>
+                  <a
+                    href={`mailto:info@turnexo.app?subject=${encodeURIComponent(`Activación Plan ${hostAccount?.plan === 'plan_manager' ? 'Microgestora' : 'Pro Fiscal'} - ${hostAccount?.fullName || 'Turnexo'}`)}&body=${encodeURIComponent(`Hola, quiero activar mi suscripción en Turnexo con el email: ${hostAccount?.email}`)}`}
+                    className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 transition shadow-sm"
+                  >
+                    <Mail size={13} />
+                    <span>Email a info@turnexo.app</span>
+                  </a>
+                </div>
               </div>
               <p className="text-[11px] text-slate-400">
-                Mientras lo configuras, puedes seguir probando todas las funciones en tu periodo de prueba activo de 14 días.
+                Recuerda que no se realizará ningún cargo automático hasta que decidas activar formalmente tu suscripción.
               </p>
             </div>
 
@@ -2493,9 +2507,9 @@ VITE_STRIPE_LINK_MANAGER=https://buy.stripe.com/...`}
               <button
                 type="button"
                 onClick={() => setShowStripeNoticeModal(false)}
-                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-sm"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-5 py-2.5 rounded-xl transition"
               >
-                Entendido
+                Seguir disfrutando de la prueba
               </button>
             </div>
           </div>

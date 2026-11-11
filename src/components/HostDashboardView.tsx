@@ -186,6 +186,13 @@ export default function HostDashboardView({
   const maxAllowedProperties = isManager ? 10 : isPro ? 5 : 1;
   const maxAllowedCleaners = isManager ? 99 : isPro ? 2 : 1;
 
+  const isSubscriptionActive = hostAccount?.subscriptionStatus === 'active';
+  const trialDaysRemaining = useMemo(() => {
+    if (!hostAccount?.trialEndsAt) return 14;
+    const diff = new Date(hostAccount.trialEndsAt).getTime() - Date.now();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }, [hostAccount?.trialEndsAt]);
+
   const handleOpenNewPropModal = () => {
     if (properties.length >= maxAllowedProperties) {
       setPlanLimitReason({
@@ -534,9 +541,23 @@ export default function HostDashboardView({
                     {hostAccount.email || (hostAccount.companyName && hostAccount.companyName !== 'Mis Alojamientos' ? hostAccount.companyName : '')}
                   </span>
                 </div>
-                <span className="text-[10px] uppercase px-2 py-0.5 bg-emerald-500/20 text-emerald-300 font-bold shrink-0 rounded-full border border-emerald-500/30">
-                  14d Trial
-                </span>
+                {isSubscriptionActive ? (
+                  <span className="text-[10px] uppercase px-2 py-0.5 bg-emerald-500/20 text-emerald-300 font-bold shrink-0 rounded-full border border-emerald-500/30">
+                    Suscripción Activa
+                  </span>
+                ) : isStarter ? (
+                  <span className="text-[10px] uppercase px-2 py-0.5 bg-slate-700/80 text-slate-300 font-bold shrink-0 rounded-full border border-slate-600">
+                    Plan Gratuito
+                  </span>
+                ) : trialDaysRemaining > 0 ? (
+                  <span className="text-[10px] uppercase px-2 py-0.5 bg-emerald-500/20 text-emerald-300 font-bold shrink-0 rounded-full border border-emerald-500/30">
+                    Prueba ({trialDaysRemaining}d)
+                  </span>
+                ) : (
+                  <span className="text-[10px] uppercase px-2 py-0.5 bg-rose-500/20 text-rose-300 font-bold shrink-0 rounded-full border border-rose-500/30">
+                    Prueba Caducada
+                  </span>
+                )}
               </div>
 
               <div className="pt-2.5 border-t border-slate-700/70 flex items-center justify-between text-xs">
@@ -2129,9 +2150,13 @@ export default function HostDashboardView({
                     </h3>
                     <p className="text-xs text-slate-400 mt-1">
                       Estado:{' '}
-                      {hostAccount?.subscriptionStatus === 'active'
+                      {isSubscriptionActive
                         ? 'Suscripción Activa (Stripe Billing)'
-                        : `Periodo de prueba gratuito activo hasta el ${hostAccount?.trialEndsAt || 'próximo mes'}`}
+                        : isStarter
+                        ? 'Plan Starter 100% gratuito (1 alojamiento sin límite de tiempo)'
+                        : trialDaysRemaining > 0
+                        ? `Periodo de prueba gratuito (${trialDaysRemaining} días restantes hasta el ${hostAccount?.trialEndsAt || 'final del ciclo'})`
+                        : `Periodo de prueba finalizado el ${hostAccount?.trialEndsAt}. Suscríbete para continuar con este plan.`}
                     </p>
                   </div>
                   <div className="text-right">

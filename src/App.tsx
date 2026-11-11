@@ -72,8 +72,19 @@ function loadStored<T>(key: string, fallback: T): T {
 
 function parseCurrentLocation(): RouteState {
   const path = window.location.pathname;
+  const hash = window.location.hash;
   const params = new URLSearchParams(window.location.search);
   const isDemo = params.get('demo') === '1';
+
+  // Si volvemos de OAuth de Google o enlace de confirmación de email con tokens en el hash o query
+  if (
+    hash.includes('access_token=') ||
+    hash.includes('type=') ||
+    params.get('code') !== null ||
+    params.get('token') !== null
+  ) {
+    return { kind: 'app' };
+  }
 
   if (path.startsWith('/admin') || params.get('admin') !== null) {
     return { kind: 'admin' };
@@ -490,6 +501,7 @@ export default function App() {
   const handleAuthSuccess = (account: HostAccount) => {
     setHostAccount(account);
     applyPlanToProperties(account.plan);
+    navigate('/app', { kind: 'app' });
     showToast(`Bienvenido a Turnexo, ${account.fullName}.`);
   };
 
@@ -530,6 +542,7 @@ export default function App() {
 
       {route.kind === 'landing' && (
         <LandingPageView
+          hostAccount={hostAccount}
           onNavigateToApp={(mode = 'register', plan = 'plan_starter') => {
             setAuthInitialMode(mode);
             setAuthInitialPlan(plan);

@@ -16,8 +16,10 @@ import {
   Mail,
 } from 'lucide-react';
 import HeroPhoneMockup from './HeroPhoneMockup';
+import { HostAccount } from '../lib/supabase';
 
 interface Props {
+  hostAccount?: HostAccount | null;
   onNavigateToApp: (
     mode?: 'login' | 'register',
     plan?: 'plan_starter' | 'plan_pro' | 'plan_manager'
@@ -28,6 +30,7 @@ interface Props {
 }
 
 export default function LandingPageView({
+  hostAccount,
   onNavigateToApp,
   onOpenGuestDemo,
   onOpenCleanerDemo,
@@ -127,22 +130,35 @@ export default function LandingPageView({
 
           {/* Columna 3: Acceso Clientes + CTA Principal */}
           <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
-            <button
-              type="button"
-              onClick={() => onNavigateToApp('login')}
-              className="hidden sm:inline-flex items-center text-sm font-semibold text-[#141413] hover:text-[#C85A32] px-3 py-2 transition whitespace-nowrap"
-            >
-              Iniciar sesión
-            </button>
+            {hostAccount ? (
+              <button
+                type="button"
+                onClick={() => onNavigateToApp()}
+                className="bg-[#141413] hover:bg-[#C85A32] text-white text-xs font-bold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-xs whitespace-nowrap"
+              >
+                <span>Mi Panel ({hostAccount.fullName.split(' ')[0] || 'Anfitrión'})</span>
+                <ArrowUpRight size={15} className="shrink-0" />
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToApp('login')}
+                  className="hidden sm:inline-flex items-center text-sm font-semibold text-[#141413] hover:text-[#C85A32] px-3 py-2 transition whitespace-nowrap"
+                >
+                  Iniciar sesión
+                </button>
 
-            <button
-              type="button"
-              onClick={() => onNavigateToApp('register')}
-              className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-bold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-xs whitespace-nowrap"
-            >
-              <span>Probar 1 Alojamiento Gratis</span>
-              <ArrowUpRight size={15} className="shrink-0" />
-            </button>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToApp('register')}
+                  className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-bold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-xs whitespace-nowrap"
+                >
+                  <span>Probar 1 Alojamiento Gratis</span>
+                  <ArrowUpRight size={15} className="shrink-0" />
+                </button>
+              </>
+            )}
 
             {/* Botón Menú Móvil */}
             <button
@@ -208,7 +224,7 @@ export default function LandingPageView({
               }}
               className="w-full bg-[#141413] text-white font-sans text-xs font-bold uppercase py-3.5"
             >
-              Iniciar sesión / Crear cuenta gratis →
+              {hostAccount ? `Mi Panel de Anfitrión (${hostAccount.fullName.split(' ')[0] || 'Anfitrión'}) →` : 'Iniciar sesión / Crear cuenta gratis →'}
             </button>
           </div>
         )}

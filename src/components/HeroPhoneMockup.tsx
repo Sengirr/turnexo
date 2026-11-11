@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Check,
   Camera,
@@ -13,10 +13,12 @@ import {
   Sparkles,
   CheckCircle2,
 } from 'lucide-react';
+import { LandingLanguage, LANDING_TRANSLATIONS } from '../lib/landingTranslations';
 
 interface HeroPhoneMockupProps {
   onOpenCleanerDemo?: () => void;
   onOpenGuestDemo?: () => void;
+  lang?: LandingLanguage;
 }
 
 interface ChecklistItem {
@@ -28,18 +30,28 @@ interface ChecklistItem {
 export default function HeroPhoneMockup({
   onOpenCleanerDemo,
   onOpenGuestDemo,
+  lang = 'es',
 }: HeroPhoneMockupProps) {
+  const t = LANDING_TRANSLATIONS[lang].phoneMockup;
   const [activeRole, setActiveRole] = useState<'cleaner' | 'guest'>('cleaner');
 
   // Estado interactivo Vista Limpiadora
-  const [tasks, setTasks] = useState<ChecklistItem[]>([
-    { id: 'sabanas', label: 'Sábanas cambiadas', checked: true },
-    { id: 'bano', label: 'Baño desinfectado', checked: true },
-    { id: 'amenities', label: 'Reposición amenities', checked: false },
-    { id: 'llaves', label: 'Llaves en cajetín', checked: true },
-  ]);
+  const [tasks, setTasks] = useState<ChecklistItem[]>(() => t.tasks);
   const [photosCount, setPhotosCount] = useState(3);
   const [photoFeedback, setPhotoFeedback] = useState(false);
+
+  // Cuando cambia el idioma, sincronizamos las etiquetas pero manteniendo el estado checked
+  useEffect(() => {
+    setTasks((prev) =>
+      t.tasks.map((defTask) => {
+        const found = prev.find((p) => p.id === defTask.id);
+        return {
+          ...defTask,
+          checked: found ? found.checked : defTask.checked,
+        };
+      })
+    );
+  }, [lang, t.tasks]);
 
   // Estado interactivo Vista Huésped
   const [wifiCopied, setWifiCopied] = useState(false);
@@ -82,7 +94,7 @@ export default function HeroPhoneMockup({
     }
   };
 
-  const completedTasksCount = tasks.filter((t) => t.checked).length;
+  const completedTasksCount = tasks.filter((tItem) => tItem.checked).length;
 
   return (
     <div className="w-full max-w-[370px] mx-auto flex flex-col items-center space-y-4 select-none">
@@ -103,7 +115,7 @@ export default function HeroPhoneMockup({
               : 'text-[#57554F] hover:text-[#141413]'
           }`}
         >
-          <span>📱 Vista Limpiadora</span>
+          <span>{t.cleanerViewTab}</span>
         </button>
 
         <button
@@ -117,7 +129,7 @@ export default function HeroPhoneMockup({
               : 'text-[#57554F] hover:text-[#141413]'
           }`}
         >
-          <span>✨ Vista Huésped</span>
+          <span>{t.guestViewTab}</span>
         </button>
       </div>
 
@@ -150,14 +162,14 @@ export default function HeroPhoneMockup({
               <div className="flex items-center justify-between gap-2 border-b border-[#E2DDD2] pb-2.5">
                 <div>
                   <span className="text-[10px] font-mono uppercase tracking-wider text-[#1F4E3D] font-bold block">
-                    Parte de hoy · Sin contraseñas
+                    {t.cleanerSubheader}
                   </span>
                   <h3 className="text-sm font-extrabold text-[#141413]">
-                    Limpiezas de María Carmen
+                    {t.cleanerTitle}
                   </h3>
                 </div>
                 <span className="text-[10px] font-mono font-bold bg-[#1F4E3D] text-white px-2.5 py-1 rounded-full whitespace-nowrap">
-                  2 de 3 completadas
+                  {t.cleanerProgress}
                 </span>
               </div>
 
@@ -166,14 +178,14 @@ export default function HeroPhoneMockup({
                 <div className="flex items-center justify-between gap-2">
                   <div>
                     <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-[#C85A32]">
-                      <Flame size={12} /> Rotación urgente
+                      <Flame size={12} /> {t.urgentBadge}
                     </span>
                     <h4 className="font-extrabold text-sm text-[#141413]">
-                      Loft Centro Catedral
+                      {t.propertyTitle}
                     </h4>
                   </div>
                   <span className="font-mono text-[11px] font-bold bg-[#141413] text-white px-2.5 py-1 rounded-lg whitespace-nowrap">
-                    11:00 → 15:00
+                    {t.turnaroundTime}
                   </span>
                 </div>
 
@@ -181,7 +193,7 @@ export default function HeroPhoneMockup({
                 <div className="space-y-1.5 pt-1 border-t border-[#F0EDE6]">
                   <div className="flex items-center justify-between text-[11px] text-[#57554F] pb-0.5">
                     <span className="font-semibold text-[#141413]">
-                      Checklist obligatorio (haz clic):
+                      {t.checklistHeader}
                     </span>
                     <span className="font-mono font-bold text-[#1F4E3D]">
                       {completedTasksCount}/{tasks.length}
@@ -215,7 +227,7 @@ export default function HeroPhoneMockup({
                       </div>
                       {task.checked && (
                         <span className="text-[10px] font-mono text-[#1F4E3D] font-bold">
-                          Hecho
+                          {t.doneLabel}
                         </span>
                       )}
                     </button>
@@ -230,9 +242,7 @@ export default function HeroPhoneMockup({
                 >
                   <Camera size={14} className="text-[#C85A32]" />
                   <span>
-                    {photoFeedback
-                      ? '✓ Foto añadida a la revisión'
-                      : `📸 Subir fotos de comprobación (${photosCount} subidas)`}
+                    {photoFeedback ? t.photoBtnAdded : t.photoBtnDefault(photosCount)}
                   </span>
                 </button>
               </div>
@@ -242,7 +252,7 @@ export default function HeroPhoneMockup({
             <div className="space-y-2">
               <div className="p-2.5 rounded-xl bg-[#1F4E3D]/10 border border-[#1F4E3D]/25 text-[#1F4E3D] text-[11px] font-semibold flex items-center justify-center gap-1.5 text-center">
                 <CheckCircle2 size={13} className="shrink-0" />
-                <span>0 audios de WhatsApp · Todo sincronizado por iCal</span>
+                <span>{t.cleanerFooterBadge}</span>
               </div>
               <div className="w-28 h-1 bg-slate-300 rounded-full mx-auto" />
             </div>
@@ -255,14 +265,14 @@ export default function HeroPhoneMockup({
               <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
                 <div>
                   <span className="text-[10px] font-mono uppercase tracking-wider text-[#C85A32] font-bold block">
-                    Guía Digital del Huésped
+                    {t.guestSubheader}
                   </span>
                   <h3 className="text-sm font-extrabold text-white">
-                    Guía de Bienvenida · Loft Centro
+                    {t.guestTitle}
                   </h3>
                 </div>
                 <span className="text-[10px] font-mono bg-white/10 text-white/80 px-2 py-0.5 rounded-full">
-                  ES · EN · FR
+                  {t.languagesBadge}
                 </span>
               </div>
 
@@ -282,45 +292,26 @@ export default function HeroPhoneMockup({
                   </div>
                   <div>
                     <p className="text-xs font-bold">
-                      {wifiCopied ? '✓ Clave WiFi copiada al portapapeles' : '🔑 Copiar clave WiFi'}
+                      {wifiCopied ? t.wifiButtonCopied : t.wifiButtonDefault}
                     </p>
                     <p className="text-[10px] text-white/60 font-mono">
-                      Red: LoftCentro_5G · Toque rápido
+                      {t.wifiSubDefault}
                     </p>
                   </div>
                 </div>
                 <span className="text-[10px] font-mono font-bold px-2 py-1 rounded-lg bg-white/10">
-                  {wifiCopied ? 'Copiado' : 'Copiar'}
+                  {wifiCopied ? t.wifiActionCopied : t.wifiActionDefault}
                 </span>
               </button>
 
               {/* Botones de acceso rápido */}
               <div className="space-y-1.5">
                 <p className="text-[10px] font-mono uppercase tracking-wider text-white/50">
-                  Accesos directos en vídeo (1 toque):
+                  {t.shortcutsHeader}
                 </p>
 
-                {[
-                  {
-                    id: 'checkin',
-                    title: 'Vídeo Check-in en portal',
-                    sub: 'Código entrada 4829# y cajetín paso a paso (0:45s)',
-                    icon: Play,
-                  },
-                  {
-                    id: 'vitro',
-                    title: 'Cómo usar la vitrocerámica',
-                    sub: 'Desbloqueo táctil y encendido rápido (0:20s)',
-                    icon: Play,
-                  },
-                  {
-                    id: 'normas',
-                    title: 'Normas de la casa',
-                    sub: 'Silencio 23:00h, reciclaje y recogida de llaves',
-                    icon: BookOpen,
-                  },
-                ].map((item) => {
-                  const Icon = item.icon;
+                {t.shortcuts.map((item, idx) => {
+                  const Icon = idx === 2 ? BookOpen : Play;
                   const isSelected = selectedGuideItem === item.id;
                   return (
                     <button
@@ -349,7 +340,7 @@ export default function HeroPhoneMockup({
                         </div>
                       </div>
                       <span className="text-[10px] font-mono text-[#C85A32] font-bold shrink-0">
-                        {isSelected ? 'Viendo' : 'Ver →'}
+                        {isSelected ? t.viewingLabel : t.viewLabel}
                       </span>
                     </button>
                   );
@@ -360,14 +351,14 @@ export default function HeroPhoneMockup({
               <div className="bg-[#FAF9F5] text-[#141413] p-3 rounded-2xl space-y-2 shadow-md">
                 <div className="flex items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase font-bold text-[#1F4E3D]">
-                    <Clock size={11} /> Extras disponibles (0% comisión)
+                    <Clock size={11} /> {t.extrasHeader}
                   </span>
                   <span className="font-mono text-[11px] font-extrabold text-[#C85A32]">
-                    100% para ti
+                    {t.extrasKeepAll}
                   </span>
                 </div>
                 <p className="text-xs font-bold leading-snug">
-                  Early Check-in · Late Check-out · Cuna bebé · Parking
+                  {t.extrasList}
                 </p>
                 <button
                   type="button"
@@ -380,9 +371,7 @@ export default function HeroPhoneMockup({
                 >
                   <Sparkles size={13} />
                   <span>
-                    {lateCheckoutBooked
-                      ? '✓ Extra solicitado al anfitrión'
-                      : 'Solicitar extra para mi estancia'}
+                    {lateCheckoutBooked ? t.extraBtnRequested : t.extraBtnDefault}
                   </span>
                 </button>
               </div>
@@ -401,9 +390,7 @@ export default function HeroPhoneMockup({
           className="font-sans text-xs sm:text-sm font-bold text-[#141413] hover:text-[#C85A32] transition inline-flex items-center gap-1.5 group"
         >
           <span>
-            {activeRole === 'cleaner'
-              ? 'Abrir enlace real de la Limpiadora'
-              : 'Abrir Guía Digital real del Huésped'}
+            {activeRole === 'cleaner' ? t.externalCtaCleaner : t.externalCtaGuest}
           </span>
           <ArrowUpRight
             size={15}
@@ -411,9 +398,7 @@ export default function HeroPhoneMockup({
           />
         </button>
         <p className="text-[11px] text-[#57554F]">
-          {activeRole === 'cleaner'
-            ? 'Así lo ve tu limpiadora en su móvil sin instalar nada'
-            : 'Así recibe tu huésped el enlace del alojamiento antes de llegar'}
+          {activeRole === 'cleaner' ? t.externalDescCleaner : t.externalDescGuest}
         </p>
       </div>
     </div>

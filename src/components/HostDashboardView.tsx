@@ -1845,7 +1845,7 @@ export default function HostDashboardView({
           </div>
         )}
 
-        {/* VISTA 5: FACTURACIÓN SELF-SERVICE & ESTADO DE INFRAESTRUCTURA 0€ */}
+        {/* VISTA 5: FACTURACIÓN SELF-SERVICE & PLAN */}
         {section === 'billing' && (
           <div className="space-y-8">
             <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
@@ -1854,7 +1854,7 @@ export default function HostDashboardView({
                   Planes transparentes sin permanencia
                 </span>
                 <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1">
-                  Facturación, Plan de Suscripción y Nube
+                  Facturación y Plan de Suscripción
                 </h2>
               </div>
 
@@ -2059,39 +2059,38 @@ export default function HostDashboardView({
                 </div>
               </div>
 
-              {/* Estado de Optimización Coste 0€ */}
+              {/* Seguridad, Garantía y Soporte */}
               <div className="bg-white rounded-3xl border border-slate-200/80 p-6 space-y-4 shadow-sm">
                 <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
-                  <ShieldCheck size={14} /> Arquitectura coste 0€ activa
+                  <ShieldCheck size={14} /> Garantía y Seguridad Turnexo
                 </span>
                 <h3 className="text-xl font-bold tracking-tight text-slate-900">
-                  Consumo de Servidor Optimizado
+                  Facturación 100% Segura
                 </h3>
                 <ul className="space-y-3 text-xs text-slate-600">
                   <li className="bg-slate-50 rounded-xl border border-slate-200/60 p-3.5">
                     <strong className="text-slate-900 block text-xs font-semibold mb-0.5">
-                      ✓ Vídeos en YouTube / Drive (0 GB)
+                      ✓ Pasarela Oficial Stripe
                     </strong>
-                    Los vídeos de llegada y Home Tour se reproducen por embed sin consumir almacenamiento ni ancho de banda.
+                    Tus pagos y suscripciones se gestionan con cifrado bancario SSL de 256 bits. Turnexo nunca almacena los datos de tu tarjeta.
                   </li>
                   <li className="bg-slate-50 rounded-xl border border-slate-200/60 p-3.5">
                     <strong className="text-slate-900 block text-xs font-semibold mb-0.5">
-                      ✓ Fotos WebP comprimidas (~50 KB)
+                      ✓ Sin permanencia ni penalizaciones
                     </strong>
-                    Las fotos subidas por las limpiadoras se comprimen en su móvil antes de enviarse (+16.000 fotos en 1 GB gratis).
+                    Cancela o cambia de plan con 1 solo clic en cualquier momento sin necesidad de llamar ni tramitar bajas.
                   </li>
                   <li className="bg-slate-50 rounded-xl border border-slate-200/60 p-3.5">
                     <strong className="text-slate-900 block text-xs font-semibold mb-0.5">
-                      ✓ iCal bajo demanda (Caché 30 min)
+                      ✓ Facturas oficiales con IVA desglosado
                     </strong>
-                    Sin Cron nocturno: solo sincroniza cuando alguien abre la app y han pasado +30 min.
+                    Recibe automáticamente la factura correspondiente a tu suscripción lista para desgravar en tu contabilidad.
                   </li>
                   <li className="bg-slate-50 rounded-xl border border-slate-200/60 p-3.5">
                     <strong className="text-slate-900 block text-xs font-semibold mb-0.5">
-                      Estado Base de Datos:{' '}
-                      {isSupabaseConfigured ? 'Conectada a Supabase' : 'Modo local + Esquema SQL listo'}
+                      ✓ Soporte al anfitrión
                     </strong>
-                    El esquema completo está en <code>supabase/schema.sql</code>.
+                    ¿Dudas con tu plan o configuración? Escríbenos directamente a <a href="mailto:info@turnexo.app" className="text-orange-600 font-semibold underline">info@turnexo.app</a>.
                   </li>
                 </ul>
               </div>

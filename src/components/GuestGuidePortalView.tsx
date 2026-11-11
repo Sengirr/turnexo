@@ -1360,12 +1360,14 @@ export default function GuestGuidePortalView({
                   (isLateCheckout && reservation.lateCheckoutApproved) ||
                   reservation.approvedExtras?.includes(extra.id);
 
+                const guestTag = isSpecificGuest ? ` (${reservation.guestName.split(' ')[0]})` : '';
+
                 const whatsappLink = isLateCheckout
                   ? `https://wa.me/${cleanWhatsappPhone}?text=${encodeURIComponent(
-                      `Hola, estoy en ${property.name} (${reservation.guestName}) y me gustaría solicitar el Late Check-out (salida hasta las ${property.lateCheckoutUntil || '17:00'}h por ${extra.price}€). ¿Sería posible confirmarlo? Muchas gracias.`
+                      `Hola, estoy en ${property.name}${guestTag} y me gustaría solicitar el Late Check-out (salida hasta las ${property.lateCheckoutUntil || '17:00'}h por ${extra.price}€). ¿Sería posible confirmarlo? Muchas gracias.`
                     )}`
                   : `https://wa.me/${cleanWhatsappPhone}?text=${encodeURIComponent(
-                      `Hola, estoy en ${property.name} (${reservation.guestName}) y he solicitado desde la guía el extra: "${extra.title}" (${extra.price}€ / ${extra.priceUnit}).`
+                      `Hola, estoy en ${property.name}${guestTag} y he solicitado desde la guía el extra: "${extra.title}" (${extra.price}€ / ${extra.priceUnit}).`
                     )}`;
 
                 return (

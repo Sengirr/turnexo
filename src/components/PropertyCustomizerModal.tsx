@@ -127,9 +127,9 @@ export default function PropertyCustomizerModal({
           {(
             [
               { id: 'general', label: 'Horarios, Acceso y WiFi', icon: Clock },
-              { id: 'videos', label: `Vídeos y Home Tour (${draft.videos?.length || 0})`, icon: Video },
+              { id: 'videos', label: `Vídeos y Llegada (${draft.videos?.length || 0})`, icon: Video },
+              { id: 'rules', label: 'Normas, Guía y Salida', icon: BookOpen },
               { id: 'extras', label: `Extras y Upsell (${draft.extras?.length || 0})`, icon: Sparkles },
-              { id: 'rules', label: 'Normas y Guía Casa', icon: BookOpen },
               { id: 'checklist', label: 'Checklist Limpieza', icon: CheckSquare },
             ] as const
           ).map((item) => {
@@ -317,59 +317,59 @@ export default function PropertyCustomizerModal({
                   />
                 </div>
               </div>
+            </div>
+          )}
 
-              <div>
-                <label className="flex items-center gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-200 cursor-pointer">
+          {tab === 'videos' && (
+            <div className="space-y-5">
+              <p className="text-slate-500 text-xs">
+                Gestiona los vídeos explicativos de la Guía Digital y la experiencia de llegada paso a paso del huésped.
+              </p>
+
+              {/* Experiencia de Llegada: Instrucciones y Seguridad de Códigos */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3.5">
+                <span className="font-bold text-slate-900 text-xs uppercase tracking-wider block">
+                  Experiencia de Llegada (Pestaña Check-in del Huésped)
+                </span>
+
+                <div>
+                  <label className="block font-bold text-slate-700 text-xs mb-1">
+                    Instrucciones escritas de Entrada
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="Ej. Introduce el código en el cajetín junto a la puerta principal..."
+                    value={draft.checkInInstructions}
+                    onChange={(e) => setDraft({ ...draft, checkInInstructions: e.target.value })}
+                    className="w-full border border-slate-200 bg-white rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <span className="text-[11px] text-slate-400 block mt-0.5">
+                    Se muestran junto al vídeo de entrada en la pestaña «Llegada» de la guía del viajero.
+                  </span>
+                </div>
+
+                <label className="flex items-center gap-2.5 bg-white p-3 rounded-xl border border-slate-200 cursor-pointer hover:border-slate-300 transition">
                   <input
                     type="checkbox"
                     checked={draft.requireVideoToUnlockCodes !== false}
                     onChange={(e) =>
                       setDraft({ ...draft, requireVideoToUnlockCodes: e.target.checked })
                     }
-                    className="h-4 w-4 rounded text-emerald-600"
+                    className="h-4 w-4 rounded text-orange-600 focus:ring-orange-500"
                   />
                   <div>
-                    <p className="font-black text-slate-900">Desbloquear códigos tras ver vídeo</p>
-                    <p className="text-[11px] text-slate-500">Difumina el código de buzón/portero hasta reproducir el vídeo</p>
+                    <p className="font-bold text-slate-900 text-xs">Desbloquear códigos tras ver el vídeo</p>
+                    <p className="text-[11px] text-slate-500">
+                      Difumina los códigos del cajetín/cerradura en el móvil del huésped hasta que reproduzca el vídeo de entrada.
+                    </p>
                   </div>
                 </label>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    Instrucciones de Entrada (Pestaña Llegada)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={draft.checkInInstructions}
-                    onChange={(e) => setDraft({ ...draft, checkInInstructions: e.target.value })}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    Instrucciones de Salida (Pestaña Salida)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={draft.checkOutInstructions || ''}
-                    placeholder="Ej. Dejar llaves en la mesa, apagar AC y luces..."
-                    onChange={(e) => setDraft({ ...draft, checkOutInstructions: e.target.value })}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {tab === 'videos' && (
-            <div className="space-y-4">
-              <p className="text-slate-500">
-                Añade vídeos de YouTube, Shorts, Google Drive o enlaces directos para explicar el Check-in paso a paso, enseñar el Home Tour del alojamiento o cómo funcionan los electrodomésticos.
-              </p>
-
               <div className="space-y-2">
+                <span className="font-bold text-slate-900 text-xs uppercase tracking-wider block">
+                  Vídeos en la Guía ({draft.videos?.length || 0})
+                </span>
                 {(draft.videos || []).map((v) => (
                   <div
                     key={v.id}
@@ -680,10 +680,31 @@ export default function PropertyCustomizerModal({
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <label className="block font-bold text-slate-700">
-                  Checklist de Salida del Huésped (Pestaña Salida · Antes de marcharte...)
-                </label>
+              <div className="space-y-3 pt-3 border-t border-slate-200/80">
+                <span className="font-bold text-slate-900 text-xs uppercase tracking-wider block">
+                  Experiencia de Salida (Pestaña Salida del Huésped)
+                </span>
+
+                <div>
+                  <label className="block font-bold text-slate-700 text-xs mb-1">
+                    Instrucciones escritas de Salida
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={draft.checkOutInstructions || ''}
+                    placeholder="Ej. Dejar las llaves en la mesa del salón, apagar la climatización y luces..."
+                    onChange={(e) => setDraft({ ...draft, checkOutInstructions: e.target.value })}
+                    className="w-full border border-slate-200 bg-white rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <span className="text-[11px] text-slate-400 block mt-0.5">
+                    Se muestran en la pestaña «Salida» de la guía del viajero el día de su partida.
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block font-bold text-slate-700 text-xs">
+                    Puntos de control para el huésped antes de salir
+                  </label>
                 {(draft.departureChecklist || [
                   'Apagar las luces',
                   'Apagar AC',
@@ -742,7 +763,8 @@ export default function PropertyCustomizerModal({
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
           {tab === 'checklist' && (
             <div className="space-y-3">

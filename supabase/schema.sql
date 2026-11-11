@@ -122,3 +122,40 @@ create policy "Public access reservations" on public.reservations for all using 
 
 drop policy if exists "Public access cleaning_tasks" on public.cleaning_tasks;
 create policy "Public access cleaning_tasks" on public.cleaning_tasks for all using (true) with check (true);
+
+-- 7. TRIGGER AUTOMÁTICO: AL CREARSE UN USUARIO EN AUTH (GOOGLE O EMAIL), INSERTAR EN PUBLIC.HOSTS
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.hosts (id, email, full_name, company_name, subscription_plan, subscription_status)
+  values (
+    new.id,
+    coalesce(new.email, ''),
+    coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1), 'Anfitrión'),
+    'Mis Alojamientos',
+    coalesce(new.raw_user_meta_data->>'subscription_plan', 'plan_starter'),
+    'trialing'
+  )
+  on conflict (id) do update set
+    email = excluded.email,
+    full_name = coalesce(excluded.full_name, public.hosts.full_name);
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+-- Sincronizar usuarios que ya existan previamente en auth.users
+insert into public.hosts (id, email, full_name, company_name, subscription_plan, subscription_status)
+select 
+  id, 
+  coalesce(email, ''), 
+  coalesce(raw_user_meta_data->>'full_name', raw_user_meta_data->>'name', split_part(email, '@', 1), 'Anfitrión'),
+  'Mis Alojamientos',
+  coalesce(raw_user_meta_data->>'subscription_plan', 'plan_starter'),
+  'trialing'
+from auth.users
+on conflict (id) do nothing;

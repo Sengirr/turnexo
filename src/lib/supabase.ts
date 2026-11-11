@@ -199,7 +199,7 @@ export async function syncPropertyToSupabase(hostId: string, prop: Property): Pr
 export async function syncHostToSupabase(account: HostAccount): Promise<void> {
   if (!supabase || !isSupabaseConfigured) return;
   try {
-    await supabase.from('hosts').upsert({
+    const { error } = await supabase.from('hosts').upsert({
       id: account.id,
       email: account.email,
       full_name: account.fullName,
@@ -207,6 +207,9 @@ export async function syncHostToSupabase(account: HostAccount): Promise<void> {
       subscription_plan: account.plan,
       subscription_status: account.subscriptionStatus || 'trialing',
     });
+    if (error) {
+      console.error('[Turnexo Supabase Sync] Error guardando host:', error);
+    }
   } catch (err) {
     console.warn('[Turnexo Supabase Sync] Error guardando host:', err);
   }

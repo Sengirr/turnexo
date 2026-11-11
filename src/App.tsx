@@ -147,7 +147,7 @@ export default function App() {
 
     // Detectar si venimos de un login con OAuth (Google)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user && !hostAccount) {
+      if (session?.user) {
         const meta = session.user.user_metadata || {};
         const account: HostAccount = {
           id: session.user.id,
@@ -157,12 +157,15 @@ export default function App() {
           plan: meta.subscription_plan || 'plan_starter',
           trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
         };
-        handleAuthSuccess(account);
+        syncHostToSupabase(account);
+        if (!hostAccount) {
+          handleAuthSuccess(account);
+        }
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user && !hostAccount) {
+      if (session?.user) {
         const meta = session.user.user_metadata || {};
         const account: HostAccount = {
           id: session.user.id,
@@ -172,7 +175,10 @@ export default function App() {
           plan: meta.subscription_plan || 'plan_starter',
           trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
         };
-        handleAuthSuccess(account);
+        syncHostToSupabase(account);
+        if (!hostAccount) {
+          handleAuthSuccess(account);
+        }
       }
     });
 

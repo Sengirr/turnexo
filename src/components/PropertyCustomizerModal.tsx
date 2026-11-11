@@ -15,6 +15,7 @@ import { Cleaner, Property, PropertyExtra, PropertyVideo } from '../lib/icalPars
 interface Props {
   property: Property;
   cleaners?: Cleaner[];
+  language?: 'es' | 'en';
   onSave: (updated: Property) => void;
   onDelete?: (id: string) => void;
   onClose: () => void;
@@ -37,10 +38,12 @@ const LATE_CHECKOUT_HOURS = [
 export default function PropertyCustomizerModal({
   property,
   cleaners = [],
+  language = 'es',
   onSave,
   onDelete,
   onClose,
 }: Props) {
+  const isEn = language === 'en';
   const [draft, setDraft] = useState<Property>(() => JSON.parse(JSON.stringify(property)));
   const [tab, setTab] = useState<EditorTab>('general');
 
@@ -136,7 +139,7 @@ export default function PropertyCustomizerModal({
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4 shrink-0">
           <div>
             <span className="text-[11px] font-black uppercase tracking-wider text-indigo-600">
-              Editor Personalizable del Alojamiento
+              {isEn ? 'Property Customizer Editor' : 'Editor Personalizable del Alojamiento'}
             </span>
             <h2 className="text-xl font-black text-slate-900 mt-0.5">{draft.name}</h2>
           </div>
@@ -153,11 +156,11 @@ export default function PropertyCustomizerModal({
         <div className="flex flex-wrap gap-1.5 bg-slate-100 p-1.5 rounded-2xl shrink-0">
           {(
             [
-              { id: 'general', label: 'Horarios, Acceso y WiFi', icon: Clock },
-              { id: 'videos', label: `Vídeos de Llegada (${arrivalVideos.length})`, icon: Video },
-              { id: 'rules', label: `Normas, Guía y Salida (${applianceVideos.length ? `${applianceVideos.length} vídeos` : 'Casa'})`, icon: BookOpen },
-              { id: 'extras', label: `Extras y Upsell (${draft.extras?.length || 0})`, icon: Sparkles },
-              { id: 'checklist', label: 'Checklist Limpieza', icon: CheckSquare },
+              { id: 'general', label: isEn ? 'Schedule, Access & WiFi' : 'Horarios, Acceso y WiFi', icon: Clock },
+              { id: 'videos', label: isEn ? `Arrival Videos (${arrivalVideos.length})` : `Vídeos de Llegada (${arrivalVideos.length})`, icon: Video },
+              { id: 'rules', label: isEn ? `Rules, Guide & Departure (${applianceVideos.length ? `${applianceVideos.length} videos` : 'House'})` : `Normas, Guía y Salida (${applianceVideos.length ? `${applianceVideos.length} vídeos` : 'Casa'})`, icon: BookOpen },
+              { id: 'extras', label: isEn ? `Extras & Upsell (${draft.extras?.length || 0})` : `Extras y Upsell (${draft.extras?.length || 0})`, icon: Sparkles },
+              { id: 'checklist', label: isEn ? 'Cleaning Checklist' : 'Checklist Limpieza', icon: CheckSquare },
             ] as const
           ).map((item) => {
             const Icon = item.icon;
@@ -938,7 +941,7 @@ export default function PropertyCustomizerModal({
                 className="px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-1.5"
               >
                 <Trash2 size={14} />
-                <span>Eliminar</span>
+                <span>{isEn ? 'Delete' : 'Eliminar'}</span>
               </button>
             )}
             <a
@@ -948,7 +951,7 @@ export default function PropertyCustomizerModal({
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition"
             >
               <ExternalLink size={13} />
-              <span>Ver Guía Huésped en Vivo</span>
+              <span>{isEn ? 'Live Guest Guide' : 'Ver Guía Huésped en Vivo'}</span>
             </a>
           </div>
 
@@ -958,7 +961,7 @@ export default function PropertyCustomizerModal({
               onClick={onClose}
               className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
             >
-              Cancelar
+              {isEn ? 'Cancel' : 'Cancelar'}
             </button>
             <button
               type="button"
@@ -966,7 +969,7 @@ export default function PropertyCustomizerModal({
               className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black px-6 py-2.5 rounded-xl flex items-center gap-1.5 shadow-md"
             >
               <Save size={15} />
-              Guardar Cambios del Alojamiento
+              {isEn ? 'Save Property Changes' : 'Guardar Cambios del Alojamiento'}
             </button>
           </div>
         </div>

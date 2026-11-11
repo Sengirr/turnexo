@@ -53,6 +53,7 @@ import {
   INITIAL_INVOICES,
   Invoice,
 } from '../lib/invoice';
+import { DASHBOARD_TRANSLATIONS, DashboardLanguage } from '../lib/dashboardTranslations';
 
 const CHECKOUT_HOURS = [
   '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00'
@@ -169,6 +170,16 @@ export default function HostDashboardView({
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
+
+  // Idioma del Panel de Control (por defecto en inglés a petición del anfitrión, conmutador ES / EN)
+  const [lang, setLang] = useState<DashboardLanguage>(() => {
+    try {
+      const saved = localStorage.getItem('turnexo_dashboard_lang');
+      if (saved === 'es' || saved === 'en') return saved;
+    } catch {}
+    return 'en';
+  });
+  const t = DASHBOARD_TRANSLATIONS[lang] || DASHBOARD_TRANSLATIONS.en;
 
   // Filtros y modos de visualización avanzados
   const [scheduleView, setScheduleView] = useState<'table' | 'timeline'>('table');
@@ -445,23 +456,50 @@ export default function HostDashboardView({
           <span className="text-slate-600 text-xs">·</span>
           <span className="text-xs text-slate-300 font-medium truncate max-w-[140px]">
             {section === 'overview'
-              ? 'Alojamientos'
+              ? t.nav.overview
               : section === 'schedule' || section === 'team'
-              ? 'Limpiezas & Equipo'
+              ? t.nav.schedule
               : section === 'guests'
-              ? 'Guía del Huésped'
+              ? t.nav.guests
               : section === 'invoices'
-              ? 'Facturas & Fiscal'
-              : 'Suscripción'}
+              ? t.nav.invoices
+              : t.nav.billing}
           </span>
         </div>
         <div className="flex items-center gap-2">
+          {/* Selector de idioma ES / EN móvil */}
+          <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-0.5 text-[11px] font-bold">
+            <button
+              type="button"
+              onClick={() => {
+                setLang('es');
+                try { localStorage.setItem('turnexo_dashboard_lang', 'es'); } catch {}
+              }}
+              className={`px-2 py-0.5 rounded transition ${
+                lang === 'es' ? 'bg-orange-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              ES
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLang('en');
+                try { localStorage.setItem('turnexo_dashboard_lang', 'en'); } catch {}
+              }}
+              className={`px-2 py-0.5 rounded transition ${
+                lang === 'en' ? 'bg-orange-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              EN
+            </button>
+          </div>
           {onLogout && (
             <button
               type="button"
               onClick={onLogout}
               className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white p-2 rounded-lg border border-rose-800/40 transition"
-              title="Cerrar sesión"
+              title={t.nav.logout}
             >
               <LogOut size={13} />
             </button>
@@ -471,7 +509,7 @@ export default function HostDashboardView({
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700 transition"
           >
-            {mobileMenuOpen ? 'Cerrar ✕' : 'Menú ☰'}
+            {mobileMenuOpen ? t.nav.close : t.nav.menu}
           </button>
         </div>
       </div>
@@ -493,24 +531,54 @@ export default function HostDashboardView({
                   Turnexo
                 </span>
                 <span className="text-xs text-orange-400 font-medium tracking-wide">
-                  Panel de Control
+                  {t.nav.controlPanel}
                 </span>
               </div>
+            </div>
+
+            {/* Selector de idioma ES / EN Desktop */}
+            <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-0.5 text-[11px] font-bold">
+              <button
+                type="button"
+                onClick={() => {
+                  setLang('es');
+                  try { localStorage.setItem('turnexo_dashboard_lang', 'es'); } catch {}
+                }}
+                className={`px-2 py-0.5 rounded transition ${
+                  lang === 'es' ? 'bg-orange-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                }`}
+                title="Cambiar a Español"
+              >
+                ES
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLang('en');
+                  try { localStorage.setItem('turnexo_dashboard_lang', 'en'); } catch {}
+                }}
+                className={`px-2 py-0.5 rounded transition ${
+                  lang === 'en' ? 'bg-orange-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                }`}
+                title="Switch to English"
+              >
+                EN
+              </button>
             </div>
           </div>
 
           <nav className="space-y-1.5">
             {[
-              { id: 'overview' as const, label: 'Mis Alojamientos', icon: Home },
-              { id: 'schedule' as const, label: 'Limpiezas & Equipo', icon: Calendar },
-              { id: 'guests' as const, label: 'Guía del Huésped', icon: UserCheck },
+              { id: 'overview' as const, label: t.nav.overview, icon: Home },
+              { id: 'schedule' as const, label: t.nav.schedule, icon: Calendar },
+              { id: 'guests' as const, label: t.nav.guests, icon: UserCheck },
               {
                 id: 'invoices' as const,
-                label: 'Facturas & Fiscal',
+                label: t.nav.invoices,
                 icon: FileText,
                 badge: isCommunityVip && isStarter ? 'COMUNIDAD' : isStarter ? 'PRO' : undefined,
               },
-              { id: 'billing' as const, label: 'Suscripción', icon: CreditCard },
+              { id: 'billing' as const, label: t.nav.billing, icon: CreditCard },
             ].map((item) => {
               const Icon = item.icon;
               const active = section === item.id || (item.id === 'schedule' && section === 'team');
@@ -563,25 +631,25 @@ export default function HostDashboardView({
                 </div>
                 {isSubscriptionActive ? (
                   <span className="text-[10px] uppercase px-2 py-0.5 bg-emerald-500/20 text-emerald-300 font-bold shrink-0 rounded-full border border-emerald-500/30">
-                    Suscripción Activa
+                    {t.nav.activeSubscription}
                   </span>
                 ) : isStarter ? (
                   <span className="text-[10px] uppercase px-2 py-0.5 bg-slate-700/80 text-slate-300 font-bold shrink-0 rounded-full border border-slate-600">
-                    Plan Gratuito
+                    {t.nav.freePlan}
                   </span>
                 ) : trialDaysRemaining > 0 ? (
                   <span className="text-[10px] uppercase px-2 py-0.5 bg-emerald-500/20 text-emerald-300 font-bold shrink-0 rounded-full border border-emerald-500/30">
-                    Prueba ({trialDaysRemaining}d)
+                    {lang === 'en' ? `Trial (${trialDaysRemaining}d)` : `Prueba (${trialDaysRemaining}d)`}
                   </span>
                 ) : (
                   <span className="text-[10px] uppercase px-2 py-0.5 bg-rose-500/20 text-rose-300 font-bold shrink-0 rounded-full border border-rose-500/30">
-                    Prueba Caducada
+                    {lang === 'en' ? 'Trial Expired' : 'Prueba Caducada'}
                   </span>
                 )}
               </div>
 
               <div className="pt-2.5 border-t border-slate-700/70 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Plan activo:</span>
+                <span className="text-slate-400 font-medium">{lang === 'en' ? 'Active plan:' : 'Plan activo:'}</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -589,7 +657,7 @@ export default function HostDashboardView({
                     setMobileMenuOpen(false);
                   }}
                   className="font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition"
-                  title="Gestionar plan y suscripción"
+                  title={lang === 'en' ? 'Manage plan and subscription' : 'Gestionar plan y suscripción'}
                 >
                   <span>
                     {hostAccount.plan === 'plan_manager'
@@ -612,7 +680,7 @@ export default function HostDashboardView({
                 className="w-full text-left px-3.5 py-2.5 text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/30 border border-rose-800/40 hover:bg-rose-900/50 rounded-xl flex items-center gap-2.5 transition"
               >
                 <LogOut size={14} className="text-rose-400" />
-                <span>Cerrar sesión</span>
+                <span>{t.nav.logout}</span>
               </button>
             )}
           </div>
@@ -625,7 +693,7 @@ export default function HostDashboardView({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-2 hover:border-slate-300 transition">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-              Alojamientos Activos (iCal)
+              {lang === 'en' ? 'Active Properties (iCal)' : 'Alojamientos Activos (iCal)'}
             </span>
             <div className="flex items-baseline justify-between mt-1">
               <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -633,35 +701,35 @@ export default function HostDashboardView({
                 <span className="text-base font-normal text-slate-400"> / {maxAllowedProperties}</span>
               </span>
               <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
-                ● Sincronizados
+                ● {lang === 'en' ? 'Synced' : 'Sincronizados'}
               </span>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-2 hover:border-slate-300 transition">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-              Limpiezas Hoy
+              {lang === 'en' ? "Today's Cleanings" : 'Limpiezas Hoy'}
             </span>
             <div className="flex items-baseline justify-between mt-1">
               <span className="text-3xl font-extrabold text-orange-600 tracking-tight">
                 0{urgentCount}
               </span>
               <span className="text-xs font-medium text-slate-500 bg-slate-100 rounded-full px-2.5 py-0.5">
-                Prioridad 11:00 → 15:00
+                {lang === 'en' ? 'Priority 11:00 → 15:00' : 'Prioridad 11:00 → 15:00'}
               </span>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-2 hover:border-slate-300 transition">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-              Ingresos Extras & Upsell
+              {lang === 'en' ? 'Upsell & Extra Revenue' : 'Ingresos Extras & Upsell'}
             </span>
             <div className="flex items-baseline justify-between mt-1">
               <span className="text-3xl font-extrabold text-emerald-700 tracking-tight">
                 +{upsellRevenue} €
               </span>
               <span className="text-xs font-medium text-slate-500">
-                0% comisión (100% tuyo)
+                {lang === 'en' ? '0% fee (100% yours)' : '0% comisión (100% tuyo)'}
               </span>
             </div>
           </div>
@@ -673,11 +741,14 @@ export default function HostDashboardView({
             <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
-                  Gestión por Alojamiento
+                  {t.overview.badge}
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mt-1">
-                  Alojamientos, Guías Digitales y Enlaces iCal
+                  {t.overview.title}
                 </h1>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {t.overview.subtitle}
+                </p>
               </div>
               <div className="flex items-center gap-2.5">
                 <button
@@ -686,7 +757,7 @@ export default function HostDashboardView({
                   className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm"
                 >
                   <RefreshCw size={14} className="text-orange-600" />
-                  <span>Sincronizar iCal</span>
+                  <span>{lang === 'en' ? 'Sync iCal' : 'Sincronizar iCal'}</span>
                 </button>
                 <button
                   type="button"
@@ -694,7 +765,7 @@ export default function HostDashboardView({
                   className="bg-orange-600 hover:bg-orange-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm"
                 >
                   <Plus size={15} />
-                  <span>Nuevo Alojamiento</span>
+                  <span>{t.overview.newPropertyBtn}</span>
                 </button>
               </div>
             </div>
@@ -770,7 +841,7 @@ export default function HostDashboardView({
 
                         <div className="text-right text-xs">
                           <span className="text-[11px] text-slate-400 uppercase font-semibold block">
-                            Horario base
+                            {t.overview.baseSchedule}
                           </span>
                           <span className="font-semibold text-slate-800 bg-slate-100 rounded-md px-2 py-0.5 inline-block mt-1">
                             IN {prop.checkInTime} · OUT {prop.checkOutTime}
@@ -782,18 +853,18 @@ export default function HostDashboardView({
                       <div className="grid grid-cols-2 gap-3 text-xs">
                         <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
                           <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">
-                            Limpieza & Personal
+                            {t.overview.cleaningStaff}
                           </span>
                           <span className="font-semibold text-slate-900 mt-1 block truncate">
-                            {cleaner?.name || 'Sin asignar'}
+                            {cleaner?.name || t.overview.noCleaner}
                           </span>
                         </div>
                         <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
                           <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">
-                            Guía del Huésped
+                            {t.overview.guestGuide}
                           </span>
                           <span className="font-semibold text-slate-900 mt-1 block truncate">
-                            {prop.videos?.length || 0} vídeos · {prop.extras?.filter((e) => e.active).length || 0} extras
+                            {prop.videos?.length || 0} {t.overview.videosCount} · {prop.extras?.filter((e) => e.active).length || 0} {t.overview.extrasCount}
                           </span>
                         </div>
                       </div>
@@ -802,7 +873,7 @@ export default function HostDashboardView({
                       <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2.5 text-xs">
                         <div className="truncate min-w-0 flex-1">
                           <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">
-                            URL de la Guía (QR y Bienvenida)
+                            {t.overview.guideUrlLabel}
                           </span>
                           <span className="font-mono text-xs text-slate-700 truncate block mt-0.5">
                             {publicGuideUrl}
@@ -814,7 +885,7 @@ export default function HostDashboardView({
                             onClick={() => copyLink(publicGuideUrl, `guide-${prop.id}`)}
                             className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
                           >
-                            {copiedId === `guide-${prop.id}` ? '✓ Copiado' : 'Copiar URL'}
+                            {copiedId === `guide-${prop.id}` ? `✓ ${t.overview.copied}` : t.overview.copyUrl}
                           </button>
                           <button
                             type="button"
@@ -825,8 +896,8 @@ export default function HostDashboardView({
                             className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
                           >
                             {copiedId === `tpl-${prop.id}`
-                              ? '✓ Plantilla Copiada'
-                              : 'Plantilla WhatsApp'}
+                              ? `✓ ${t.overview.copied}`
+                              : t.overview.whatsappTemplate}
                           </button>
                         </div>
                       </div>
@@ -876,7 +947,7 @@ export default function HostDashboardView({
                           className="bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition"
                         >
                           <Settings size={13} className="text-orange-400" />
-                          <span>Personalizar</span>
+                          <span>{t.overview.customizeBtn}</span>
                         </button>
 
                         <button
@@ -887,7 +958,7 @@ export default function HostDashboardView({
                           className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition"
                         >
                           <ExternalLink size={13} />
-                          <span>Ver Guía</span>
+                          <span>{t.overview.viewGuideBtn}</span>
                         </button>
 
                         <button
@@ -896,7 +967,7 @@ export default function HostDashboardView({
                           className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition font-semibold"
                         >
                           <Printer size={13} />
-                          <span>Cartel QR</span>
+                          <span>{t.overview.qrPosterBtn}</span>
                         </button>
                       </div>
                     )}
@@ -913,12 +984,12 @@ export default function HostDashboardView({
             <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
-                  Operativa de Salidas y Limpiezas
+                  {t.schedule.badge}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mt-1">
                   {cleaningsSubTab === 'schedule'
-                    ? 'Cuadrante de Salidas, Limpiezas y Late Check-out'
-                    : 'Personal de Limpieza, Enlaces Móviles y Tarifas'}
+                    ? (lang === 'en' ? 'Check-outs, Cleaning Turns & Late Check-out' : 'Cuadrante de Salidas, Limpiezas y Late Check-out')
+                    : (lang === 'en' ? 'Cleaning Staff, Magic Mobile Links & Rates' : 'Personal de Limpieza, Enlaces Móviles y Tarifas')}
                 </h2>
               </div>
 
@@ -934,7 +1005,7 @@ export default function HostDashboardView({
                   }`}
                 >
                   <Calendar size={14} className="text-orange-600" />
-                  <span>Cuadrante ({filteredTasks.length})</span>
+                  <span>{t.schedule.tabSchedule} ({filteredTasks.length})</span>
                 </button>
                 <button
                   type="button"
@@ -946,7 +1017,7 @@ export default function HostDashboardView({
                   }`}
                 >
                   <Users size={14} className="text-emerald-600" />
-                  <span>Equipo ({cleaners.length})</span>
+                  <span>{t.schedule.tabTeam} ({cleaners.length})</span>
                 </button>
               </div>
             </div>
@@ -2747,6 +2818,7 @@ export default function HostDashboardView({
         <PropertyCustomizerModal
           property={customizingProperty}
           cleaners={cleaners}
+          language={lang}
           onClose={() => setCustomizingProperty(null)}
           onDelete={
             onDeleteProperty

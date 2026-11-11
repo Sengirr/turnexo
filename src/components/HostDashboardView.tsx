@@ -186,10 +186,11 @@ export default function HostDashboardView({
     targetPlan: 'plan_pro' | 'plan_manager';
   } | null>(null);
 
-  const currentPlan = hostAccount?.plan || 'plan_starter';
-  const isStarter = currentPlan === 'plan_starter';
-  const isPro = currentPlan === 'plan_pro';
-  const isManager = currentPlan === 'plan_manager';
+  const rawPlan = hostAccount?.plan || 'plan_starter';
+  const isManager = rawPlan === 'plan_manager';
+  const isPro = rawPlan === 'plan_pro';
+  const isStarter = !isPro && !isManager;
+  const currentPlan = isManager ? 'plan_manager' : isPro ? 'plan_pro' : 'plan_starter';
 
   const maxAllowedProperties = isManager ? 10 : isPro ? 5 : 1;
   const maxAllowedCleaners = isManager ? 99 : isPro ? 2 : 1;
@@ -497,7 +498,12 @@ export default function HostDashboardView({
               { id: 'overview' as const, label: 'Mis Alojamientos', icon: Home },
               { id: 'schedule' as const, label: 'Limpiezas & Equipo', icon: Calendar },
               { id: 'guests' as const, label: 'Guía del Huésped', icon: UserCheck },
-              { id: 'invoices' as const, label: 'Facturas & IVA 10%', icon: FileText, badge: isStarter ? 'PRO' : 'IVA 10%' },
+              {
+                id: 'invoices' as const,
+                label: 'Facturas & Fiscal',
+                icon: FileText,
+                ...(isStarter ? { badge: 'PRO' } : {}),
+              },
               { id: 'billing' as const, label: 'Plan & Suscripción', icon: CreditCard },
             ].map((item) => {
               const Icon = item.icon;
@@ -520,7 +526,7 @@ export default function HostDashboardView({
                     <Icon size={16} />
                     <span>{item.label}</span>
                   </div>
-                  {'badge' in item && (
+                  {'badge' in item && item.badge && (
                     <span
                       className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full font-mono ${
                         item.id === 'invoices' && isStarter

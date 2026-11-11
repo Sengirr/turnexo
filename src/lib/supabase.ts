@@ -25,7 +25,7 @@ export const STRIPE_PAYMENT_LINKS = {
   plan_pro: import.meta.env.VITE_STRIPE_LINK_PRO || 'https://buy.stripe.com/3cIdR93BBbWd2mb9yt5c400',
   plan_pro_yearly: import.meta.env.VITE_STRIPE_LINK_PRO_YEARLY || 'https://buy.stripe.com/fZubJ16NNd0hgd1bGB5c402',
   plan_manager: import.meta.env.VITE_STRIPE_LINK_MANAGER || 'https://buy.stripe.com/6oU8wP8VV8K10e38up5c401',
-  plan_manager_yearly: import.meta.env.VITE_STRIPE_LINK_MANAGER_YEARLY || '',
+  plan_manager_yearly: import.meta.env.VITE_STRIPE_LINK_MANAGER_YEARLY || 'https://buy.stripe.com/00w14nc875xP0e311X5c403',
   pack_complete: import.meta.env.VITE_STRIPE_LINK_PACK || 'https://buy.stripe.com/3cIdR93BBbWd2mb9yt5c400',
   module_cleanings: import.meta.env.VITE_STRIPE_LINK_CLEANINGS || '',
   module_guide: import.meta.env.VITE_STRIPE_LINK_GUIDE || '',

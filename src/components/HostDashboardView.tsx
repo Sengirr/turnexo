@@ -2052,7 +2052,7 @@ export default function HostDashboardView({
                       type="button"
                       onClick={() => {
                         const planKey = hostAccount?.plan || 'plan_pro';
-                        const stripeUrl = getStripePaymentLink(planKey) || getStripePaymentLink('plan_pro');
+                        const stripeUrl = getStripePaymentLink(planKey, isAnnualBilling) || getStripePaymentLink('plan_pro', isAnnualBilling);
                         if (stripeUrl && stripeUrl.startsWith('http')) {
                           window.open(stripeUrl, '_blank');
                         } else {
@@ -2063,7 +2063,7 @@ export default function HostDashboardView({
                     >
                       {hostAccount?.subscriptionStatus === 'active'
                         ? '✓ Suscripción Stripe Activa'
-                        : `Activar ${hostAccount?.plan === 'plan_manager' ? 'Microgestora' : 'Pro Fiscal'} en Stripe Checkout →`}
+                        : `Activar ${hostAccount?.plan === 'plan_manager' ? 'Microgestora' : 'Pro Fiscal'} (${isAnnualBilling ? 'Pago Anual -20%' : 'Mensual'}) en Stripe Checkout →`}
                     </button>
                   )}
                 </div>

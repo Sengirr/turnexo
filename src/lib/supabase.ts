@@ -23,24 +23,31 @@ export interface HostAccount {
 export const STRIPE_PAYMENT_LINKS = {
   plan_starter: '',
   plan_pro: import.meta.env.VITE_STRIPE_LINK_PRO || 'https://buy.stripe.com/3cIdR93BBbWd2mb9yt5c400',
+  plan_pro_yearly: import.meta.env.VITE_STRIPE_LINK_PRO_YEARLY || '',
   plan_manager: import.meta.env.VITE_STRIPE_LINK_MANAGER || 'https://buy.stripe.com/6oU8wP8VV8K10e38up5c401',
+  plan_manager_yearly: import.meta.env.VITE_STRIPE_LINK_MANAGER_YEARLY || '',
   pack_complete: import.meta.env.VITE_STRIPE_LINK_PACK || 'https://buy.stripe.com/3cIdR93BBbWd2mb9yt5c400',
   module_cleanings: import.meta.env.VITE_STRIPE_LINK_CLEANINGS || '',
   module_guide: import.meta.env.VITE_STRIPE_LINK_GUIDE || '',
 };
 
-export const getStripePaymentLink = (plan: string): string => {
+export const getStripePaymentLink = (plan: string, isAnnual: boolean = false): string => {
+  const targetKey = isAnnual ? `${plan}_yearly` : plan;
+
   try {
     const adminConfig = localStorage.getItem('turnexo_stripe_links_v1');
     if (adminConfig) {
       const parsed = JSON.parse(adminConfig);
-      if (parsed[plan] && typeof parsed[plan] === 'string' && parsed[plan].startsWith('http')) {
+      if (parsed[targetKey] && typeof parsed[targetKey] === 'string' && parsed[targetKey].startsWith('http')) {
+        return parsed[targetKey];
+      }
+      if (!isAnnual && parsed[plan] && typeof parsed[plan] === 'string' && parsed[plan].startsWith('http')) {
         return parsed[plan];
       }
     }
   } catch {}
 
-  const envLink = (STRIPE_PAYMENT_LINKS as Record<string, string>)[plan] || '';
+  const envLink = (STRIPE_PAYMENT_LINKS as Record<string, string>)[targetKey] || (STRIPE_PAYMENT_LINKS as Record<string, string>)[plan] || '';
   if (envLink && envLink.startsWith('http')) return envLink;
   return '';
 };

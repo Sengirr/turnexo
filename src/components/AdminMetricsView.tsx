@@ -131,6 +131,22 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
     return import.meta.env.VITE_STRIPE_LINK_MANAGER || 'https://buy.stripe.com/6oU8wP8VV8K10e38up5c401';
   });
 
+  const [stripeProYearlyLink, setStripeProYearlyLink] = useState(() => {
+    try {
+      const stored = localStorage.getItem('turnexo_stripe_links_v1');
+      if (stored) return JSON.parse(stored).plan_pro_yearly || '';
+    } catch {}
+    return import.meta.env.VITE_STRIPE_LINK_PRO_YEARLY || '';
+  });
+
+  const [stripeManagerYearlyLink, setStripeManagerYearlyLink] = useState(() => {
+    try {
+      const stored = localStorage.getItem('turnexo_stripe_links_v1');
+      if (stored) return JSON.parse(stored).plan_manager_yearly || '';
+    } catch {}
+    return import.meta.env.VITE_STRIPE_LINK_MANAGER_YEARLY || '';
+  });
+
   const [stripeSavedMsg, setStripeSavedMsg] = useState(false);
 
   const handleSaveStripeLinks = (e: React.FormEvent) => {
@@ -138,6 +154,8 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
     const config = {
       plan_pro: stripeProLink.trim(),
       plan_manager: stripeManagerLink.trim(),
+      plan_pro_yearly: stripeProYearlyLink.trim(),
+      plan_manager_yearly: stripeManagerYearlyLink.trim(),
     };
     localStorage.setItem('turnexo_stripe_links_v1', JSON.stringify(config));
     setStripeSavedMsg(true);
@@ -689,7 +707,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block font-semibold text-slate-700">
-                  Enlace Plan Pro Fiscal (19€/mes)
+                  Enlace Pro Fiscal · Mensual (19€/mes)
                 </label>
                 <input
                   type="url"
@@ -702,13 +720,39 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
 
               <div className="space-y-1.5">
                 <label className="block font-semibold text-slate-700">
-                  Enlace Plan Microgestora (39€/mes)
+                  Enlace Pro Fiscal · Anual -20% (180€/año)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://buy.stripe.com/..."
+                  value={stripeProYearlyLink}
+                  onChange={(e) => setStripeProYearlyLink(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block font-semibold text-slate-700">
+                  Enlace Microgestora · Mensual (39€/mes)
                 </label>
                 <input
                   type="url"
                   placeholder="https://buy.stripe.com/..."
                   value={stripeManagerLink}
                   onChange={(e) => setStripeManagerLink(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block font-semibold text-slate-700">
+                  Enlace Microgestora · Anual -20% (372€/año)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://buy.stripe.com/..."
+                  value={stripeManagerYearlyLink}
+                  onChange={(e) => setStripeManagerYearlyLink(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>

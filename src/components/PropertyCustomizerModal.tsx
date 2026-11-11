@@ -74,27 +74,16 @@ export default function PropertyCustomizerModal({
       extras[lateExtIdx] = {
         ...extras[lateExtIdx],
         onlyWhenFreeNextDay: true,
-        price: p.lateCheckoutPrice || extras[lateExtIdx].price || 35,
-        title: `Late Check-out hasta las ${p.lateCheckoutUntil || '17:00'}h`,
+        price: extras[lateExtIdx].price || p.lateCheckoutPrice || 35,
+        title: extras[lateExtIdx].title || `Late Check-out hasta las ${p.lateCheckoutUntil || '17:00'}h`,
       };
       // Eliminar duplicados si hubiera más de un extra de late checkout
       p.extras = extras.filter(
         (e, idx) => idx === lateExtIdx || (!e.onlyWhenFreeNextDay && !/late\s*check/i.test(e.title))
       );
     } else {
-      p.extras = [
-        {
-          id: 'ext-late',
-          title: `Late Check-out hasta las ${p.lateCheckoutUntil || '17:00'}h`,
-          description: 'Salida por la tarde sujeta a disponibilidad según el calendario iCal.',
-          price: p.lateCheckoutPrice || 35,
-          priceUnit: 'reserva',
-          icon: 'clock',
-          onlyWhenFreeNextDay: true,
-          active: true,
-        },
-        ...extras,
-      ];
+      // Si el anfitrión lo ha eliminado, respetamos su decisión y no lo forzamos a reaparecer
+      p.extras = extras;
     }
     p.customChecklist = normalizeCleaningChecklist(p.customChecklist);
     return p;
@@ -178,20 +167,27 @@ export default function PropertyCustomizerModal({
 
   const addExtra = () => {
     if (!newExtraTitle.trim()) return;
+    const isLate = /late|salida\s*tarde/i.test(newExtraTitle);
+    const newExt: PropertyExtra = {
+      id: `ext-${Date.now()}`,
+      title: newExtraTitle.trim(),
+      description:
+        newExtraDesc.trim() ||
+        (isLate
+          ? (isEn
+              ? 'Offered only when no other guest is checking in the same day via iCal.'
+              : 'Se ofrece al huésped solo si no entra otra reserva el mismo día en el iCal.')
+          : (isEn ? 'Requested via digital guide' : 'Solicitado desde la guía')),
+      price: newExtraPrice,
+      priceUnit: newExtraUnit,
+      icon: isLate ? 'clock' : 'sparkles',
+      onlyWhenFreeNextDay: isLate,
+      active: true,
+    };
     setDraft({
       ...draft,
-      extras: [
-        ...(draft.extras || []),
-        {
-          id: `ext-${Date.now()}`,
-          title: newExtraTitle.trim(),
-          description: newExtraDesc.trim() || (isEn ? 'Requested via digital guide' : 'Solicitado desde la guía'),
-          price: newExtraPrice,
-          priceUnit: newExtraUnit,
-          icon: 'sparkles',
-          active: true,
-        },
-      ],
+      ...(isLate ? { lateCheckoutPrice: newExtraPrice } : {}),
+      extras: [...(draft.extras || []), newExt],
     });
     setNewExtraTitle('');
     setNewExtraDesc('');
@@ -840,6 +836,7 @@ export default function PropertyCustomizerModal({
                               onClick={() =>
                                 setDraft({
                                   ...draft,
+                                  ...(isLateCheckout ? { lateCheckoutPrice: 0 } : {}),
                                   extras: draft.extras.filter((item) => item.id !== ext.id),
                                 })
                               }

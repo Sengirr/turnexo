@@ -109,7 +109,8 @@ export default function HostDashboardView({
   onBackToLanding,
   onResetDemo,
 }: Props) {
-  const [section, setSection] = useState<BackofficeSection>('schedule');
+  const [section, setSection] = useState<BackofficeSection>('overview');
+  const [cleaningsSubTab, setCleaningsSubTab] = useState<'schedule' | 'team'>('schedule');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCleanerName, setNewCleanerName] = useState('');
   const [newCleanerPhone, setNewCleanerPhone] = useState('+34 ');
@@ -374,17 +375,15 @@ export default function HostDashboardView({
           <span className="font-bold text-sm tracking-tight">Turnexo</span>
           <span className="text-white/40 text-xs">·</span>
           <span className="text-xs text-white/80 font-medium truncate max-w-[140px]">
-            {section === 'schedule'
-              ? 'Limpiezas'
-              : section === 'guests'
-              ? 'Guías'
-              : section === 'invoices'
-              ? 'Facturas'
-              : section === 'overview'
+            {section === 'overview'
               ? 'Alojamientos'
-              : section === 'team'
-              ? 'Equipo'
-              : 'Plan'}
+              : section === 'schedule' || section === 'team'
+              ? 'Limpiezas & Equipo'
+              : section === 'guests'
+              ? 'Guía del Huésped'
+              : section === 'invoices'
+              ? 'Facturación'
+              : 'Plan & Ajustes'}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -424,8 +423,8 @@ export default function HostDashboardView({
                 <span className="font-bold text-base tracking-tight block leading-none">
                   Turnexo
                 </span>
-                <span className="font-mono text-[10px] text-white/45 uppercase tracking-wider">
-                  HOST WORKSPACE
+                <span className="font-mono text-[10px] text-[#C85A32] uppercase tracking-wider font-semibold">
+                  Panel de Control
                 </span>
               </div>
             </div>
@@ -434,16 +433,15 @@ export default function HostDashboardView({
           <nav className="space-y-1">
             {(
               [
-                { id: 'schedule', label: 'Limpiezas & Salidas', icon: Calendar },
+                { id: 'overview', label: 'Mis Alojamientos', icon: Home },
+                { id: 'schedule', label: 'Limpiezas & Equipo', icon: Calendar },
                 { id: 'guests', label: 'Guía del Huésped', icon: UserCheck },
                 { id: 'invoices', label: 'Facturas & IVA 10%', icon: FileText, badge: 'IVA 10%' },
-                { id: 'overview', label: 'Mis Alojamientos', icon: Home },
-                { id: 'team', label: 'Equipo de Limpieza', icon: Users },
                 { id: 'billing', label: 'Plan & Suscripción', icon: CreditCard },
               ] as const
             ).map((item) => {
               const Icon = item.icon;
-              const active = section === item.id;
+              const active = section === item.id || (item.id === 'schedule' && section === 'team');
               return (
                 <button
                   key={item.id}
@@ -471,73 +469,50 @@ export default function HostDashboardView({
               );
             })}
           </nav>
-
-          <div className="border-t border-white/10 pt-6 space-y-2">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-white/40">
-              ACCIONES RÁPIDAS
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setPreselectedResIdForInvoice(undefined);
-                setShowCreateInvoiceModal(true);
-              }}
-              className="w-full text-left px-3 py-2 text-xs font-mono text-emerald-300 hover:text-white bg-emerald-950/40 border border-emerald-800/40 hover:bg-emerald-900/60 flex items-center gap-2 transition"
-            >
-              <FileText size={13} className="text-emerald-400" />
-              <span>+ Emitir Factura 10%</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowIcalModal(true)}
-              className="w-full text-left px-3 py-2 text-xs font-mono text-white/80 hover:text-white bg-white/5 hover:bg-white/10 flex items-center gap-2 transition"
-            >
-              <RefreshCw size={13} className="text-[#C85A32]" />
-              <span>Sincronizar URL .ics</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowNewPropModal(true)}
-              className="w-full text-left px-3 py-2 text-xs font-mono text-white/80 hover:text-white bg-white/5 hover:bg-white/10 flex items-center gap-2 transition"
-            >
-              <Plus size={13} className="text-[#C85A32]" />
-              <span>Añadir Propiedad</span>
-            </button>
-          </div>
         </div>
 
         <div className="p-6 border-t border-white/10 space-y-4 text-xs">
           {hostAccount && (
-            <div className="bg-white/5 border border-white/10 p-3 space-y-2">
+            <div className="bg-white/5 border border-white/10 p-3.5 space-y-2.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-bold text-white truncate">{hostAccount.fullName}</span>
-                <span className="font-mono text-[9px] uppercase px-1.5 py-0.5 bg-[#1F4E3D] text-white">
+                <div className="truncate min-w-0">
+                  <span className="font-bold text-white text-xs block truncate">
+                    {hostAccount.fullName || 'Anfitrión'}
+                  </span>
+                  <span className="font-mono text-[10px] text-white/50 block truncate">
+                    {hostAccount.companyName || hostAccount.email}
+                  </span>
+                </div>
+                <span className="font-mono text-[9px] uppercase px-1.5 py-0.5 bg-[#1F4E3D] text-emerald-200 font-bold shrink-0 border border-emerald-500/30">
                   14d Trial
                 </span>
               </div>
-              <p className="font-mono text-[10px] text-white/50 truncate">
-                {hostAccount.companyName}
-              </p>
-              {onChangePlan && (
-                <div>
-                  <label className="block font-mono text-[9px] uppercase tracking-wider text-white/40 mb-1">
-                    MÓDULO CONTRATADO:
-                  </label>
-                  <select
-                    value={hostAccount.plan}
-                    onChange={(e) => onChangePlan(e.target.value as HostAccount['plan'])}
-                    className="w-full bg-[#141413] border border-white/20 text-white font-mono text-[10px] px-2 py-1.5 focus:outline-none focus:border-[#C85A32]"
-                  >
-                    <option value="plan_starter">Starter (1 Alojamiento · 0€)</option>
-                    <option value="plan_pro">Pro Fiscal (Hasta 5 Alojamientos · 19€/mes)</option>
-                    <option value="plan_manager">Microgestora (Hasta 10 Alojamientos · 39€/mes)</option>
-                  </select>
-                </div>
-              )}
+
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono">
+                <span className="text-white/50">Plan activo:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSection('billing');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="font-bold text-[#C85A32] hover:text-[#e06b3f] flex items-center gap-1 transition"
+                  title="Gestionar plan y suscripción"
+                >
+                  <span>
+                    {hostAccount.plan === 'plan_manager'
+                      ? 'Microgestora (10)'
+                      : hostAccount.plan === 'plan_pro'
+                      ? 'Pro Fiscal (5)'
+                      : 'Starter (1)'}
+                  </span>
+                  <span className="text-[10px]">⚙</span>
+                </button>
+              </div>
             </div>
           )}
 
-          <div className="pt-2">
+          <div className="pt-1">
             {onLogout && (
               <button
                 type="button"
@@ -612,14 +587,24 @@ export default function HostDashboardView({
                   Alojamientos, Guías Digitales y Enlaces iCal
                 </h1>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowNewPropModal(true)}
-                className="bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex items-center gap-2"
-              >
-                <Plus size={14} />
-                Nuevo Alojamiento
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowIcalModal(true)}
+                  className="bg-white hover:bg-slate-100 text-[#141413] border border-[#D5CFC0] font-mono text-xs font-bold uppercase tracking-wider px-3.5 py-2.5 flex items-center gap-2 transition"
+                >
+                  <RefreshCw size={13} className="text-[#C85A32]" />
+                  <span>Sincronizar iCal</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowNewPropModal(true)}
+                  className="bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex items-center gap-2 transition"
+                >
+                  <Plus size={14} />
+                  <span>Nuevo Alojamiento</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -764,47 +749,81 @@ export default function HostDashboardView({
           </div>
         )}
 
-        {/* VISTA 2: CUADRANTE DE SALIDAS Y APROBACIÓN DE LATE CHECK-OUT */}
-        {(section === 'overview' || section === 'schedule') && (
-          <div className="space-y-4 pt-4">
+        {/* VISTA 2: OPERATIVA DE SALIDAS, LIMPIEZAS Y EQUIPO */}
+        {(section === 'schedule' || section === 'team') && (
+          <div className="space-y-6 pt-2">
             <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E2DDD2] pb-3">
               <div>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
-                  SINCRONIZACIÓN EN TIEMPO REAL · ICAL AIRBNB & BOOKING
+                  OPERATIVA DE SALIDAS Y LIMPIEZAS
                 </span>
                 <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413]">
-                  Cuadrante de Salidas, Limpiezas y Late Check-out
+                  {cleaningsSubTab === 'schedule'
+                    ? 'Cuadrante de Salidas, Limpiezas y Late Check-out'
+                    : 'Personal de Limpieza, Enlaces Móviles y Tarifas'}
                 </h2>
               </div>
 
-              {/* Botones de Cambio de Vista: Tabla vs Timeline Semanal */}
+              {/* Sub-pestañas: Cuadrante vs Equipo */}
               <div className="flex items-center gap-1 bg-[#E8E4D9] p-1 border border-[#D5CFC0]">
                 <button
                   type="button"
-                  onClick={() => setScheduleView('table')}
+                  onClick={() => setCleaningsSubTab('schedule')}
                   className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
-                    scheduleView === 'table'
+                    cleaningsSubTab === 'schedule'
                       ? 'bg-[#141413] text-white shadow-sm'
                       : 'text-[#57554F] hover:text-[#141413]'
                   }`}
                 >
-                  <List size={13} />
-                  <span>Vista Tabla</span>
+                  <Calendar size={13} />
+                  <span>Cuadrante ({filteredTasks.length})</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setScheduleView('timeline')}
+                  onClick={() => setCleaningsSubTab('team')}
                   className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
-                    scheduleView === 'timeline'
+                    cleaningsSubTab === 'team'
                       ? 'bg-[#141413] text-white shadow-sm'
                       : 'text-[#57554F] hover:text-[#141413]'
                   }`}
                 >
-                  <LayoutGrid size={13} />
-                  <span>Timeline Semanal (Gantt)</span>
+                  <Users size={13} />
+                  <span>Equipo ({cleaners.length})</span>
                 </button>
               </div>
             </div>
+
+            {cleaningsSubTab === 'schedule' ? (
+              <div className="space-y-4">
+                {/* Botones de Cambio de Vista: Tabla vs Timeline Semanal */}
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-1 bg-[#E8E4D9] p-1 border border-[#D5CFC0]">
+                    <button
+                      type="button"
+                      onClick={() => setScheduleView('table')}
+                      className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
+                        scheduleView === 'table'
+                          ? 'bg-[#141413] text-white shadow-sm'
+                          : 'text-[#57554F] hover:text-[#141413]'
+                      }`}
+                    >
+                      <List size={13} />
+                      <span>Vista Tabla</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setScheduleView('timeline')}
+                      className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
+                        scheduleView === 'timeline'
+                          ? 'bg-[#141413] text-white shadow-sm'
+                          : 'text-[#57554F] hover:text-[#141413]'
+                      }`}
+                    >
+                      <LayoutGrid size={13} />
+                      <span>Timeline Semanal (Gantt)</span>
+                    </button>
+                  </div>
+                </div>
 
             {/* Barra de Filtros y Búsqueda */}
             <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -1148,31 +1167,24 @@ export default function HostDashboardView({
               </div>
             )}
           </div>
-        )}
-
-        {/* VISTA 3: ENLACES Y LIQUIDACIONES DE LIMPIADORAS */}
-        {(section === 'overview' || section === 'team') && (
-          <div className="space-y-6 pt-4">
-            <div className="border-b border-[#E2DDD2] pb-3 flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F] font-bold">
-                  GESTIÓN DEL EQUIPO & LIQUIDACIÓN DE PAGOS
-                </span>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413]">
-                  Personal de Limpieza, Enlaces Móviles y Tarifas Devengadas
-                </h2>
-              </div>
-              <div className="font-mono text-xs text-[#57554F] bg-[#FAF9F5] border border-[#D5CFC0] px-3 py-1.5">
-                Total devengado equipo:{' '}
-                <strong className="text-[#141413]">
-                  {tasks.reduce((sum, t) => {
-                    const p = properties.find((prop) => prop.id === t.propertyId);
-                    return sum + (p?.cleaningFee || 40);
-                  }, 0)}{' '}
-                  €
-                </strong>
-              </div>
-            </div>
+        ) : (
+          /* Sub-pestaña: Equipo de Limpiadoras y Liquidaciones */
+          <div className="space-y-6">
+                <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
+                  <span className="text-[#57554F]">
+                    Total devengado equipo:{' '}
+                    <strong className="text-[#141413] text-sm">
+                      {tasks.reduce((sum, t) => {
+                        const p = properties.find((prop) => prop.id === t.propertyId);
+                        return sum + (p?.cleaningFee || 40);
+                      }, 0)}{' '}
+                      €
+                    </strong>
+                  </span>
+                  <span className="text-[#1F4E3D] font-bold">
+                    ✓ Enlaces móviles directos para móvil sin contraseñas ni descargas
+                  </span>
+                </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {cleaners.map((c) => {
@@ -1319,6 +1331,8 @@ export default function HostDashboardView({
             )}
           </div>
         )}
+      </div>
+    )}
 
         {/* VISTA 4: HUÉSPEDES, HORARIOS PREVISTOS & EXTRAS SOLICITADOS */}
         {section === 'guests' && (

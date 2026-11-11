@@ -104,9 +104,9 @@ export default function LandingPageView({
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] overflow-x-hidden">
-      {/* NAVBAR SAAS DIRECTA Y LIMPIA */}
-      <header className="sticky top-0 z-50 bg-[#F6F4EE]/95 backdrop-blur-md border-b border-[#E2DDD2]">
+    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] pt-20 overflow-x-clip">
+      {/* NAVBAR SAAS DIRECTA Y LIMPIA FIJA SIEMPRE VISIBLE */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#F6F4EE]/95 backdrop-blur-md border-b border-[#E2DDD2]">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
           {/* Columna 1: Identidad de Marca */}
           <a href="/" className="flex items-center gap-2.5 shrink-0 whitespace-nowrap group">
@@ -406,7 +406,7 @@ export default function LandingPageView({
       </section>
 
       {/* SECCIÓN 2: LOS 3 MOTORES */}
-      <section id="modulos" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
+      <section id="modulos" className="scroll-mt-20 max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
         <div className="max-w-3xl space-y-3 mb-14">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
             {t.modules.badge}
@@ -662,7 +662,7 @@ export default function LandingPageView({
       </section>
 
       {/* SECCIÓN 3: COMPARATIVA DIRECTA */}
-      <section id="comparativa" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
+      <section id="comparativa" className="scroll-mt-20 max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
         <div className="max-w-3xl mx-auto text-center space-y-3 mb-14">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
             {t.comparison.badge}
@@ -707,7 +707,7 @@ export default function LandingPageView({
       </section>
 
       {/* SECCIÓN 4: PRECIOS CLAROS */}
-      <section id="precios" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
+      <section id="precios" className="scroll-mt-20 max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
         <div className="text-center space-y-3 max-w-2xl mx-auto mb-8">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
             {t.pricing.badge}
@@ -858,7 +858,7 @@ export default function LandingPageView({
       </section>
 
       {/* SECCIÓN 5: FAQ */}
-      <section id="faq" className="max-w-7xl mx-auto px-6 py-20">
+      <section id="faq" className="scroll-mt-20 max-w-7xl mx-auto px-6 py-20">
         <div className="max-w-3xl mx-auto space-y-12">
           <div className="text-center space-y-3">
             <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">

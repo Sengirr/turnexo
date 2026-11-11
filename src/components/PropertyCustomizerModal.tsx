@@ -30,6 +30,13 @@ import {
   normalizeCleaningChecklist,
 } from '../lib/icalParser';
 
+const DEFAULT_DEPARTURE_CHECKLIST = [
+  'Apagar luces y climatización',
+  'Tirar la basura en los contenedores',
+  'Dejar las llaves en el cajetín o sobre la mesa',
+  'Cerrar bien las ventanas y la puerta principal',
+];
+
 interface Props {
   property: Property;
   cleaners?: Cleaner[];
@@ -99,6 +106,10 @@ export default function PropertyCustomizerModal({
       p.extras = extras;
     }
     p.customChecklist = normalizeCleaningChecklist(p.customChecklist);
+    p.departureChecklist =
+      p.departureChecklist && p.departureChecklist.length > 0
+        ? p.departureChecklist
+        : [...DEFAULT_DEPARTURE_CHECKLIST];
     return p;
   });
   const [tab, setTab] = useState<EditorTab>('general');
@@ -108,6 +119,7 @@ export default function PropertyCustomizerModal({
   const [newVideoCategory, setNewVideoCategory] = useState<PropertyVideo['category']>('checkin');
   const [newVideoUrl, setNewVideoUrl] = useState('');
 
+  const [newDepartureItem, setNewDepartureItem] = useState('');
   const [newExtraTitle, setNewExtraTitle] = useState('');
   const [newExtraDesc, setNewExtraDesc] = useState('');
   const [newExtraPrice, setNewExtraPrice] = useState(25);
@@ -204,6 +216,29 @@ export default function PropertyCustomizerModal({
     });
     setNewExtraTitle('');
     setNewExtraDesc('');
+  };
+
+  const addDepartureItem = () => {
+    if (!newDepartureItem.trim()) return;
+    setDraft({
+      ...draft,
+      departureChecklist: [...(draft.departureChecklist || []), newDepartureItem.trim()],
+    });
+    setNewDepartureItem('');
+  };
+
+  const removeDepartureItem = (index: number) => {
+    setDraft({
+      ...draft,
+      departureChecklist: (draft.departureChecklist || []).filter((_, idx) => idx !== index),
+    });
+  };
+
+  const resetDepartureChecklist = () => {
+    setDraft({
+      ...draft,
+      departureChecklist: [...DEFAULT_DEPARTURE_CHECKLIST],
+    });
   };
 
   return (
@@ -485,6 +520,91 @@ export default function PropertyCustomizerModal({
                     </p>
                   </div>
                 </label>
+              </div>
+
+              {/* CHECKLIST DE SALIDA DEL HUÉSPED («Antes de marcharte...») */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                    <CheckSquare size={14} className="text-orange-600" />
+                    {isEn ? 'Guest Departure Checklist ("Before you leave...")' : 'Checklist de Salida del Huésped («Antes de marcharte...»)'}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-extrabold bg-orange-100 text-orange-900 px-2 py-0.5 rounded-full">
+                      {draft.departureChecklist?.length || 0} {isEn ? 'tasks' : 'tareas'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={resetDepartureChecklist}
+                      className="text-[10px] font-bold text-slate-500 hover:text-slate-800 bg-white border border-slate-200 hover:bg-slate-100 px-2 py-0.5 rounded-lg flex items-center gap-1 transition shadow-2xs"
+                      title={isEn ? 'Reset standard departure checklist' : 'Restablecer tareas estándar'}
+                    >
+                      <RotateCcw size={10} />
+                      {isEn ? 'Reset' : 'Restablecer'}
+                    </button>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-slate-500">
+                  {isEn
+                    ? 'Checklist items shown to guests in the "Departure" tab of their digital guide before leaving.'
+                    : 'Tareas que el huésped ve y marca en la pestaña «Salida» de la guía digital antes de abandonar el alojamiento.'}
+                </p>
+
+                <div className="space-y-1.5">
+                  {(draft.departureChecklist || []).map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between bg-white border border-slate-200/90 hover:border-slate-300 px-3 py-2 rounded-xl transition shadow-2xs"
+                    >
+                      <div className="flex items-center gap-2 flex-1 min-w-0 pr-2">
+                        <CheckSquare size={13} className="text-orange-500 shrink-0" />
+                        <span className="text-xs font-semibold text-slate-800 break-words">{item}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeDepartureItem(idx)}
+                        className="text-slate-400 hover:text-rose-600 p-1 rounded-lg transition shrink-0"
+                        title={isEn ? 'Remove task' : 'Eliminar tarea'}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))}
+                  {(!draft.departureChecklist || draft.departureChecklist.length === 0) && (
+                    <p className="text-slate-400 text-xs italic py-1">
+                      {isEn
+                        ? 'No departure tasks configured. Add one below or click Reset.'
+                        : 'No hay tareas de salida configuradas. Añade una abajo o pulsa Restablecer:'}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <input
+                    placeholder={
+                      isEn
+                        ? 'New departure task (e.g. Leave keys in lockbox, take out trash...)'
+                        : 'Nueva tarea de salida (ej. Dejar llaves en cajetín, apagar aire...)'
+                    }
+                    value={newDepartureItem}
+                    onChange={(e) => setNewDepartureItem(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addDepartureItem();
+                      }
+                    }}
+                    className="flex-1 border border-slate-200 bg-white rounded-xl px-3 py-1.5 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={addDepartureItem}
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-1.5 rounded-xl text-xs shrink-0 transition"
+                  >
+                    + {isEn ? 'Add' : 'Añadir'}
+                  </button>
+                </div>
               </div>
 
               {/* Vídeos Explicativos (Entrada, Electrodomésticos y Bienvenida) */}

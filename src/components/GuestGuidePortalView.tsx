@@ -670,7 +670,24 @@ export default function GuestGuidePortalView({
 
   const [copiedField, setCopiedField] = useState<'wifi' | 'pass' | null>(null);
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
-  const [isVideoWatched, setIsVideoWatched] = useState(false);
+  const [isVideoWatched, setIsVideoWatched] = useState(() => {
+    try {
+      return typeof window !== 'undefined' && sessionStorage.getItem(`turnexo_video_unlocked_${property.id}`) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const markVideoAsWatched = () => {
+    setIsVideoWatched(true);
+    try {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(`turnexo_video_unlocked_${property.id}`, 'true');
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   // Modal interactivo de Incidencias (igual que IVI ERP)
   const [isIncidentModalOpen, setIsIncidentModalOpen] = useState(false);
@@ -996,7 +1013,7 @@ export default function GuestGuidePortalView({
                   title={t('video.tour')}
                   subtitle={t('video.subtitle')}
                   language={language}
-                  onPlay={() => setIsVideoWatched(true)}
+                  onPlay={markVideoAsWatched}
                 />
               </Card>
             )}
@@ -1111,7 +1128,7 @@ export default function GuestGuidePortalView({
                     variant="hero"
                     className="w-full h-full border-0 !rounded-[2.5rem]"
                     language={language}
-                    onPlay={() => setIsVideoWatched(true)}
+                    onPlay={markVideoAsWatched}
                   />
 
                   {/* Additional Check-in Videos Carousel if > 1 */}
@@ -1134,7 +1151,7 @@ export default function GuestGuidePortalView({
                               variant="hero"
                               className="w-full aspect-video border-0 !rounded-3xl"
                               language={language}
-                              onPlay={() => setIsVideoWatched(true)}
+                              onPlay={markVideoAsWatched}
                             />
                           </div>
                         ))}
@@ -1173,7 +1190,7 @@ export default function GuestGuidePortalView({
             {/* Intercom Code Card (Reveal after video, identical to IVI ERP) */}
             {property.intercomCode && (
               <Card
-                onClick={() => setIsVideoWatched(true)}
+                onClick={markVideoAsWatched}
                 className={`border-2 transition-all duration-500 cursor-pointer ${
                   codesUnlocked
                     ? 'bg-blue-50 border-blue-100'
@@ -1222,7 +1239,7 @@ export default function GuestGuidePortalView({
             {/* Door / Lockbox Code Card (Reveal after video, identical to IVI ERP) */}
             {property.doorCode && (
               <Card
-                onClick={() => setIsVideoWatched(true)}
+                onClick={markVideoAsWatched}
                 className={`border-2 transition-all duration-500 cursor-pointer ${
                   codesUnlocked
                     ? 'bg-emerald-50 border-emerald-100'
@@ -1484,7 +1501,7 @@ export default function GuestGuidePortalView({
                     url={clip.url}
                     title={clip.title}
                     language={language}
-                    onPlay={() => setIsVideoWatched(true)}
+                    onPlay={markVideoAsWatched}
                   />
                 </Card>
               ))}

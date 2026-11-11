@@ -700,9 +700,17 @@ export default function HostDashboardView({
                 0{properties.length}
                 <span className="text-base font-normal text-slate-400"> / {maxAllowedProperties}</span>
               </span>
-              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
-                ● {lang === 'en' ? 'Synced' : 'Sincronizados'}
-              </span>
+              {properties.filter((p) => Boolean(p.airbnbIcalUrl?.trim() || p.bookingIcalUrl?.trim())).length > 0 ? (
+                <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
+                  ● {properties.filter((p) => Boolean(p.airbnbIcalUrl?.trim() || p.bookingIcalUrl?.trim())).length === properties.length
+                    ? (lang === 'en' ? 'Synced' : 'Sincronizados')
+                    : `${properties.filter((p) => Boolean(p.airbnbIcalUrl?.trim() || p.bookingIcalUrl?.trim())).length} iCal`}
+                </span>
+              ) : (
+                <span className="text-xs font-semibold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
+                  ○ {lang === 'en' ? 'Manual mode' : 'Modo manual'}
+                </span>
+              )}
             </div>
           </div>
 
@@ -807,6 +815,10 @@ export default function HostDashboardView({
                 const cleaner = cleaners.find((c) => c.id === prop.defaultCleanerId);
                 const propReservations = reservations.filter((r) => r.propertyId === prop.id);
                 const publicGuideUrl = `${window.location.origin}/g/${prop.slug}`;
+                const hasIcalConnected = Boolean(
+                  (prop.airbnbIcalUrl && prop.airbnbIcalUrl.trim().length > 0) ||
+                  (prop.bookingIcalUrl && prop.bookingIcalUrl.trim().length > 0)
+                );
 
                 return (
                   <div
@@ -823,15 +835,25 @@ export default function HostDashboardView({
                           <div className="flex items-center gap-2">
                             {isPaused ? (
                               <span className="text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
-                                <Lock size={12} /> Pausado por límite de plan
+                                <Lock size={12} /> {lang === 'en' ? 'Paused by plan limit' : 'Pausado por límite de plan'}
+                              </span>
+                            ) : hasIcalConnected ? (
+                              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
+                                ● {lang === 'en' ? 'iCal Connected' : 'iCal Conectado'}
                               </span>
                             ) : (
-                              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
-                                ● iCal Conectado
+                              <span className="text-xs font-semibold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
+                                ○ {lang === 'en' ? 'No iCal' : 'Sin iCal'}
                               </span>
                             )}
                             <span className="text-slate-400 text-xs">·</span>
-                            <span className="text-xs text-slate-500">{isPaused ? 'Requiere Pro Fiscal' : prop.lastSyncedAt}</span>
+                            <span className="text-xs text-slate-500">
+                              {isPaused
+                                ? (lang === 'en' ? 'Requires Pro Fiscal' : 'Requiere Pro Fiscal')
+                                : hasIcalConnected
+                                ? (prop.lastSyncedAt || (lang === 'en' ? 'Synced' : 'Sincronizado'))
+                                : (lang === 'en' ? 'Manual mode' : 'Sin sincronizar')}
+                            </span>
                           </div>
                           <h2 className="text-xl font-bold tracking-tight text-slate-900 mt-2">
                             {prop.name}
@@ -2829,7 +2851,14 @@ export default function HostDashboardView({
               : undefined
           }
           onSave={(updated) => {
-            onUpdateProperty(updated);
+            const hasIcal = Boolean(updated.airbnbIcalUrl?.trim() || updated.bookingIcalUrl?.trim());
+            const finalUpdated: Property = {
+              ...updated,
+              airbnbIcalUrl: updated.airbnbIcalUrl?.trim() || '',
+              bookingIcalUrl: updated.bookingIcalUrl?.trim() || '',
+              lastSyncedAt: hasIcal ? (updated.lastSyncedAt || 'Sincronizado') : 'Sin sincronizar',
+            };
+            onUpdateProperty(finalUpdated);
             setCustomizingProperty(null);
           }}
         />

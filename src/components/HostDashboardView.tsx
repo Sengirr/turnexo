@@ -690,7 +690,7 @@ export default function HostDashboardView({
             </span>
             <div className="flex items-baseline justify-between mt-1">
               <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                0{properties.length}
+                {properties.length}
                 <span className="text-base font-normal text-slate-400"> / {maxAllowedProperties}</span>
               </span>
               {properties.filter((p) => Boolean(p.airbnbIcalUrl?.trim() || p.bookingIcalUrl?.trim())).length > 0 ? (
@@ -713,10 +713,7 @@ export default function HostDashboardView({
             </span>
             <div className="flex items-baseline justify-between mt-1">
               <span className="text-3xl font-extrabold text-orange-600 tracking-tight">
-                0{urgentCount}
-              </span>
-              <span className="text-xs font-medium text-slate-500 bg-slate-100 rounded-full px-2.5 py-0.5">
-                {lang === 'en' ? 'Priority 11:00 → 15:00' : 'Prioridad 11:00 → 15:00'}
+                {urgentCount}
               </span>
             </div>
           </div>
@@ -727,10 +724,7 @@ export default function HostDashboardView({
             </span>
             <div className="flex items-baseline justify-between mt-1">
               <span className="text-3xl font-extrabold text-emerald-700 tracking-tight">
-                +{upsellRevenue} €
-              </span>
-              <span className="text-xs font-medium text-slate-500">
-                {lang === 'en' ? '0% fee (100% yours)' : '0% comisión (100% tuyo)'}
+                {upsellRevenue} €
               </span>
             </div>
           </div>

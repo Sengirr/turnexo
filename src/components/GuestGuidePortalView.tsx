@@ -1240,66 +1240,6 @@ export default function GuestGuidePortalView({
                 </div>
               </Card>
             )}
-
-            {/* "¡He llegado!" Confirmation Card */}
-            <Card
-              className={
-                reservation.guestArrivedAt
-                  ? 'bg-emerald-50 border-emerald-200'
-                  : 'border-primary-ivi-light bg-primary-ivi/5'
-              }
-            >
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-12 h-12 ${
-                    reservation.guestArrivedAt
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-white text-primary-ivi'
-                  } rounded-2xl flex items-center justify-center shadow-sm shrink-0`}
-                >
-                  <CheckCircle size={24} />
-                </div>
-                <div className="flex-1">
-                  <p
-                    className={`text-[10px] font-bold uppercase tracking-widest ${
-                      reservation.guestArrivedAt ? 'text-emerald-600' : 'text-gray-400'
-                    }`}
-                  >
-                    {reservation.guestArrivedAt
-                      ? t('arrival.confirmed_at', { time: reservation.guestArrivedAt })
-                      : t('arrival.arrival_confirm_desc')}
-                  </p>
-                </div>
-                <Button
-                  variant={reservation.guestArrivedAt ? 'outline' : 'primary'}
-                  size="sm"
-                  onClick={() => {
-                    const nowStr = new Date().toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    });
-                    onUpdateReservation?.(
-                      {
-                        ...reservation,
-                        guestArrivedAt: reservation.guestArrivedAt ? undefined : nowStr,
-                      },
-                      reservation.guestArrivedAt
-                        ? undefined
-                        : '¡Aviso de llegada enviado al anfitrión!'
-                    );
-                  }}
-                  className={
-                    reservation.guestArrivedAt
-                      ? 'border-emerald-100 text-emerald-600 bg-white'
-                      : ''
-                  }
-                >
-                  {reservation.guestArrivedAt
-                    ? t('arrival.arrival_confirm_success')
-                    : t('arrival.arrival_confirm_btn')}
-                </Button>
-              </div>
-            </Card>
           </div>
         )}
 

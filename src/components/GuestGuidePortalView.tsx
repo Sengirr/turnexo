@@ -45,7 +45,7 @@ const GUEST_TRANSLATIONS: Record<Language, Record<string, any>> = {
     tabs: {
       home: 'Inicio',
       arrival: 'Llegada',
-      guide: 'Guía',
+      guide: 'Casa',
       departure: 'Salida',
       extras: 'Extras',
       support: 'Ayuda',
@@ -96,8 +96,8 @@ const GUEST_TRANSLATIONS: Record<Language, Record<string, any>> = {
       checklist_title: 'Antes de marcharte...',
     },
     guide: {
-      title: 'Guía de la Casa',
-      subtitle: 'Clips rápidos para ayudarte con los electrodomésticos.',
+      title: 'Manual de la Casa',
+      subtitle: 'Clips rápidos de funcionamiento de electrodomésticos y equipos.',
       no_clips: 'No hay clips disponibles todavía',
       appliances_title: 'Funcionamiento de Electrodomésticos',
       rules_title: 'Normas de la Casa',
@@ -138,7 +138,7 @@ const GUEST_TRANSLATIONS: Record<Language, Record<string, any>> = {
     tabs: {
       home: 'Home',
       arrival: 'Arrival',
-      guide: 'Guide',
+      guide: 'House',
       departure: 'Departure',
       extras: 'Extras',
       support: 'Support',
@@ -189,8 +189,8 @@ const GUEST_TRANSLATIONS: Record<Language, Record<string, any>> = {
       checklist_title: 'Before you leave...',
     },
     guide: {
-      title: 'House Guide',
-      subtitle: 'Quick video clips to help you with the appliances.',
+      title: 'House & Appliances',
+      subtitle: 'Quick video clips to help with house appliances and devices.',
       no_clips: 'No video clips available yet',
       appliances_title: 'Appliances & Equipment Guide',
       rules_title: 'House Rules',
@@ -231,7 +231,7 @@ const GUEST_TRANSLATIONS: Record<Language, Record<string, any>> = {
     tabs: {
       home: 'Accueil',
       arrival: 'Arrivée',
-      guide: 'Guide',
+      guide: 'Logement',
       departure: 'Départ',
       extras: 'Extras',
       support: 'Aide',
@@ -282,8 +282,8 @@ const GUEST_TRANSLATIONS: Record<Language, Record<string, any>> = {
       checklist_title: 'Avant de partir...',
     },
     guide: {
-      title: 'Guide de la Maison',
-      subtitle: 'Courtes vidéos pour utiliser les équipements.',
+      title: 'Guide du Logement',
+      subtitle: 'Clips vidéo rapides pour les appareils et équipements.',
       no_clips: 'Aucune vidéo disponible',
       appliances_title: 'Équipements et Appareils',
       rules_title: 'Règlement Intérieur',
@@ -706,6 +706,13 @@ export default function GuestGuidePortalView({
   const houseClips = (property.videos || []).filter(
     (v) => v.category === 'appliance' || v.category === 'other'
   );
+  const hasHouseGuide = houseClips.length > 0 || Boolean(property.appliancesGuide?.trim());
+
+  useEffect(() => {
+    if (!hasHouseGuide && activeTab === 'house') {
+      setActiveTab('guide');
+    }
+  }, [hasHouseGuide, activeTab]);
 
   // ¿Entra otro huésped el mismo día de salida en este alojamiento?
   const hasSameDayCheckIn = reservations.some(
@@ -1519,12 +1526,14 @@ export default function GuestGuidePortalView({
         <nav className="max-w-md mx-auto h-[5.5rem] bg-white/95 backdrop-blur-3xl rounded-[2.5rem] border-2 border-white shadow-[0_20px_50px_rgba(0,0,0,0.15),0_0_10px_rgba(0,0,0,0.05)] flex items-center justify-around px-3 pointer-events-auto overflow-hidden">
           {(
             [
-              { id: 'guide', icon: Home, label: t('tabs.home') },
-              { id: 'arrival', icon: MapPin, label: t('tabs.arrival') },
-              { id: 'extras', icon: PlusCircle, label: t('tabs.extras') },
-              { id: 'house', icon: Video, label: t('tabs.guide') },
-              { id: 'departure', icon: LogOut, label: t('tabs.departure') },
-            ] as const
+              { id: 'guide' as const, icon: Home, label: t('tabs.home') },
+              { id: 'arrival' as const, icon: MapPin, label: t('tabs.arrival') },
+              { id: 'extras' as const, icon: PlusCircle, label: t('tabs.extras') },
+              ...(hasHouseGuide
+                ? [{ id: 'house' as const, icon: Video, label: t('tabs.guide') }]
+                : []),
+              { id: 'departure' as const, icon: LogOut, label: t('tabs.departure') },
+            ]
           ).map((tab) => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;

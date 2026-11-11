@@ -1035,33 +1035,6 @@ export default function GuestGuidePortalView({
                 </div>
               </Card>
             )}
-
-            {/* Recomendaciones Destacadas de la Zona */}
-            {property.localRecommendations && property.localRecommendations.length > 0 && (
-              <Card>
-                <div className="flex items-center justify-between mb-3">
-                  <SectionTitle
-                    icon={Compass}
-                    title={t('guide.neighborhood_title')}
-                    iconClass="bg-blue-50 text-blue-500"
-                  />
-                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200/60 px-2 py-0.5 rounded-full">
-                    {property.localRecommendations.length} {property.localRecommendations.length === 1 ? 'sitio' : 'sitios'}
-                  </span>
-                </div>
-                <div className="space-y-2.5">
-                  {property.localRecommendations.map((rec, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start gap-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100"
-                    >
-                      <MapPin size={16} className="text-blue-500 shrink-0 mt-0.5" />
-                      <span className="text-xs font-bold text-gray-700 leading-snug">{rec}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
           </div>
         )}
 
@@ -1496,7 +1469,7 @@ export default function GuestGuidePortalView({
               )}
             </div>
 
-            {/* Guía escrita de electrodomésticos */}
+            {/* Guía escrita de electrodomésticos (si existe) */}
             {property.appliancesGuide && (
               <Card>
                 <SectionTitle
@@ -1507,52 +1480,6 @@ export default function GuestGuidePortalView({
                 <p className="text-xs font-bold text-gray-600 leading-relaxed whitespace-pre-line">
                   {property.appliancesGuide}
                 </p>
-              </Card>
-            )}
-
-            {/* Normas de la Casa */}
-            {property.houseRules && property.houseRules.length > 0 && (
-              <Card>
-                <SectionTitle
-                  icon={ShieldCheck}
-                  title={t('guide.rules_title')}
-                  iconClass="bg-primary-ivi-light text-primary-ivi"
-                />
-                <div className="space-y-2.5">
-                  {property.houseRules.map((rule, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start gap-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100"
-                    >
-                      <span className="w-6 h-6 rounded-lg bg-primary-ivi-light text-primary-ivi font-black text-[11px] flex items-center justify-center shrink-0">
-                        {idx + 1}
-                      </span>
-                      <span className="text-xs font-bold text-gray-700 leading-snug">{rule}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
-
-            {/* Recomendaciones Locales */}
-            {property.localRecommendations && property.localRecommendations.length > 0 && (
-              <Card>
-                <SectionTitle
-                  icon={Compass}
-                  title={t('guide.neighborhood_title')}
-                  iconClass="bg-blue-50 text-blue-500"
-                />
-                <div className="space-y-2.5">
-                  {property.localRecommendations.map((rec, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start gap-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100"
-                    >
-                      <MapPin size={16} className="text-blue-500 shrink-0 mt-0.5" />
-                      <span className="text-xs font-bold text-gray-700 leading-snug">{rec}</span>
-                    </div>
-                  ))}
-                </div>
               </Card>
             )}
           </div>

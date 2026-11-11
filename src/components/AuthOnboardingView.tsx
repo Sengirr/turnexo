@@ -57,7 +57,7 @@ export default function AuthOnboardingView({
             id: userId,
             email: email.trim(),
             fullName: fullName.trim() || 'Anfitrión',
-            companyName: 'Mis Alojamientos',
+            companyName: '',
             plan: selectedPlan,
             trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
           });
@@ -73,7 +73,7 @@ export default function AuthOnboardingView({
             id: data.user?.id || 'host-1',
             email: data.user?.email || email.trim(),
             fullName: meta.full_name || 'Anfitrión',
-            companyName: meta.company_name || 'Mis Alojamientos',
+            companyName: meta.company_name || '',
             plan: meta.subscription_plan || 'plan_starter',
             trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
           });
@@ -86,7 +86,7 @@ export default function AuthOnboardingView({
         id: `host-${Date.now()}`,
         email: email.trim() || 'info@turnexo.app',
         fullName: fullName.trim() || email.split('@')[0] || 'Anfitrión Turnexo',
-        companyName: 'Mis Alojamientos',
+        companyName: '',
         plan: selectedPlan,
         trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
       });
@@ -116,7 +116,7 @@ export default function AuthOnboardingView({
         id: `host-google-${Date.now()}`,
         email: 'usuario.google@gmail.com',
         fullName: 'Usuario Google',
-        companyName: 'Mis Alojamientos',
+        companyName: '',
         plan: selectedPlan,
         trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
       });

@@ -479,8 +479,8 @@ export default function HostDashboardView({
                   <span className="font-bold text-white text-xs block truncate">
                     {hostAccount.fullName || 'Anfitrión'}
                   </span>
-                  <span className="text-[11px] text-slate-400 block truncate">
-                    {hostAccount.companyName || hostAccount.email}
+                  <span className="text-[11px] text-slate-400 block truncate" title={hostAccount.email}>
+                    {hostAccount.email || (hostAccount.companyName && hostAccount.companyName !== 'Mis Alojamientos' ? hostAccount.companyName : '')}
                   </span>
                 </div>
                 <span className="text-[10px] uppercase px-2 py-0.5 bg-emerald-500/20 text-emerald-300 font-bold shrink-0 rounded-full border border-emerald-500/30">

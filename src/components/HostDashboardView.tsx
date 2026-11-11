@@ -163,6 +163,7 @@ export default function HostDashboardView({
   const [guestPropertyFilter, setGuestPropertyFilter] = useState('all');
   const [copiedSettlementCleanerId, setCopiedSettlementCleanerId] = useState<string | null>(null);
   const [isAnnualBilling, setIsAnnualBilling] = useState(true);
+  const [showStripeNoticeModal, setShowStripeNoticeModal] = useState(false);
 
   const maxAllowedProperties =
     hostAccount?.plan === 'plan_manager'
@@ -2039,23 +2040,31 @@ export default function HostDashboardView({
                   <p className="text-xs text-slate-400">
                     Sin permanencia. Cancela o cambia de plan en cualquier momento desde tu panel.
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const planKey = hostAccount?.plan || 'plan_pro';
-                      const stripeUrl = (STRIPE_PAYMENT_LINKS as Record<string, string>)[planKey] || STRIPE_PAYMENT_LINKS.plan_pro || STRIPE_PAYMENT_LINKS.pack_complete;
-                      if (stripeUrl) {
-                        window.open(stripeUrl, '_blank');
-                      } else {
-                        onActivateSubscription?.();
-                      }
-                    }}
-                    className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-md"
-                  >
-                    {hostAccount?.subscriptionStatus === 'active'
-                      ? '✓ Suscripción Stripe Activa'
-                      : 'Activar Suscripción en Stripe Checkout →'}
-                  </button>
+                  {hostAccount?.plan === 'plan_starter' ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 rounded-xl">
+                        ✓ Plan Starter 100% Gratuito Activo
+                      </span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const planKey = hostAccount?.plan || 'plan_pro';
+                        const stripeUrl = (STRIPE_PAYMENT_LINKS as Record<string, string>)[planKey] || STRIPE_PAYMENT_LINKS.plan_pro;
+                        if (stripeUrl && stripeUrl.startsWith('http')) {
+                          window.open(stripeUrl, '_blank');
+                        } else {
+                          setShowStripeNoticeModal(true);
+                        }
+                      }}
+                      className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-md flex items-center gap-2"
+                    >
+                      {hostAccount?.subscriptionStatus === 'active'
+                        ? '✓ Suscripción Stripe Activa'
+                        : `Activar ${hostAccount?.plan === 'plan_manager' ? 'Microgestora' : 'Pro Fiscal'} en Stripe Checkout →`}
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -2429,6 +2438,64 @@ export default function HostDashboardView({
                 className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-sm"
               >
                 Conforme y Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Aviso Enlace Stripe No Configurado */}
+      {showStripeNoticeModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 flex items-center justify-center font-bold text-lg">
+                  💳
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Enlace de Stripe pendiente</h3>
+                  <p className="text-xs text-slate-500">Configuración de cobro para suscripciones reales</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowStripeNoticeModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
+              <p>
+                Aún no has vinculado tu <strong>Enlace de Pago de Stripe (Payment Link)</strong> para el plan {hostAccount?.plan === 'plan_manager' ? 'Microgestora' : 'Pro Fiscal'}.
+              </p>
+              <div className="bg-slate-50 rounded-2xl border border-slate-200/80 p-4 space-y-2.5 text-slate-700">
+                <span className="font-bold text-slate-900 block text-xs">¿Cómo configurarlo en 2 minutos?</span>
+                <ol className="list-decimal list-inside space-y-2 text-xs text-slate-600">
+                  <li>Inicia sesión en tu cuenta de <a href="https://dashboard.stripe.com/payment-links" target="_blank" rel="noreferrer" className="text-orange-600 font-semibold underline">Stripe Dashboard ↗</a>.</li>
+                  <li>Ve a <strong>Enlaces de Pago</strong> y crea uno recurrente para <em>Pro Fiscal (19€/mes)</em> o <em>Microgestora (39€/mes)</em>.</li>
+                  <li>Copia la URL (ej: <code>https://buy.stripe.com/...</code>) y añádela a tu archivo <code>.env</code>:
+                    <pre className="mt-1.5 p-2.5 bg-slate-900 text-slate-100 rounded-xl text-[11px] overflow-x-auto font-mono">
+{`VITE_STRIPE_LINK_PRO=https://buy.stripe.com/...
+VITE_STRIPE_LINK_MANAGER=https://buy.stripe.com/...`}
+                    </pre>
+                  </li>
+                </ol>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Mientras lo configuras, puedes seguir probando todas las funciones en tu periodo de prueba activo de 14 días.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowStripeNoticeModal(false)}
+                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-sm"
+              >
+                Entendido
               </button>
             </div>
           </div>

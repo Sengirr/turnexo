@@ -741,30 +741,9 @@ export default function GuestGuidePortalView({
 
   const availableExtras = baseExtras.filter((ext) => ext.active);
 
-  // Opciones de hora de llegada (10:00 a 02:00) y salida (06:00 a hora máxima)
-  const arrivalTimeOptions: string[] = [];
-  for (let i = 10; i < 24; i++) {
-    const h = i.toString().padStart(2, '0');
-    arrivalTimeOptions.push(`${h}:00`, `${h}:30`);
-  }
-  arrivalTimeOptions.push('00:00', '00:30', '01:00', '01:30', '02:00');
-
-  const maxCheckoutHour = reservation.lateCheckoutApproved
-    ? parseInt(property.lateCheckoutUntil.split(':')[0] || '17', 10)
-    : parseInt(property.checkOutTime.split(':')[0] || '11', 10);
-
-  const departureTimeOptions: string[] = [];
-  for (let i = 6; i <= maxCheckoutHour; i++) {
-    const h = i.toString().padStart(2, '0');
-    departureTimeOptions.push(`${h}:00`);
-    if (i < maxCheckoutHour) departureTimeOptions.push(`${h}:30`);
-  }
-
-  const currentArrivalTime = reservation.estimatedArrivalTime || property.checkInTime || '15:00';
   const effectiveMaxCheckout = reservation.lateCheckoutApproved
     ? property.lateCheckoutUntil
     : property.checkOutTime;
-  const currentDepartureTime = reservation.estimatedDepartureTime || effectiveMaxCheckout || '11:00';
 
   const codesUnlocked =
     property.requireVideoToUnlockCodes === false ||
@@ -942,66 +921,43 @@ export default function GuestGuidePortalView({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-primary-ivi/10">
-                    <div className="flex items-center gap-2">
-                      <Clock size={14} className="text-primary-ivi shrink-0" />
+                  <div className="grid grid-cols-2 gap-4 pt-3 border-t border-primary-ivi/10">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-primary-ivi/10 text-primary-ivi flex items-center justify-center shrink-0">
+                        <Clock size={16} />
+                      </div>
                       <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                          {t('info.checkin', { time: property.checkInTime })}
+                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                          {language === 'en' ? 'Check-in' : language === 'fr' ? 'Arrivée' : 'Horario Entrada'}
                         </p>
-                        <p className="text-xs font-black text-gray-900">{reservation.checkIn}</p>
+                        <p className="text-xs font-black text-gray-900">
+                          {language === 'en'
+                            ? `From ${property.checkInTime || '15:00'}h`
+                            : language === 'fr'
+                            ? `Dès ${property.checkInTime || '15:00'}h`
+                            : `A partir de las ${property.checkInTime || '15:00'}h`}
+                        </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <LogOut size={14} className="text-primary-ivi shrink-0" />
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center shrink-0">
+                        <LogOut size={16} />
+                      </div>
                       <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                          {t('info.checkout', { time: effectiveMaxCheckout })}
+                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                          {language === 'en' ? 'Check-out' : language === 'fr' ? 'Départ' : 'Horario Salida'}
                         </p>
-                        <p className="text-xs font-black text-gray-900">{reservation.checkOut}</p>
+                        <p className="text-xs font-black text-gray-900">
+                          {language === 'en'
+                            ? `Before ${effectiveMaxCheckout || '11:00'}h`
+                            : language === 'fr'
+                            ? `Avant ${effectiveMaxCheckout || '11:00'}h`
+                            : `Antes de las ${effectiveMaxCheckout || '11:00'}h`}
+                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
-              </Card>
-
-              {/* Arrival Time Selector Card */}
-              <Card className="border-primary-ivi-light">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-sm font-black text-gray-900 italic mb-1">
-                      {t('arrival.time_label')}
-                    </h3>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">
-                      {t('arrival.time_confirm')}
-                    </p>
-                  </div>
-                  <select
-                    value={currentArrivalTime}
-                    onChange={(e) =>
-                      onUpdateReservation?.(
-                        { ...reservation, estimatedArrivalTime: e.target.value },
-                        `Hora de llegada actualizada a las ${e.target.value}h`
-                      )
-                    }
-                    className="w-28 h-10 bg-gray-50 rounded-xl px-3 font-black text-gray-900 border-2 border-gray-100 focus:border-primary-ivi outline-none transition-all text-xs cursor-pointer"
-                  >
-                    {arrivalTimeOptions.map((time) => (
-                      <option key={time} value={time}>
-                        {time}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {currentArrivalTime < property.checkInTime && currentArrivalTime >= '10:00' && (
-                  <div className="mt-3 p-3 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-2">
-                    <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
-                    <p className="text-[10px] font-bold text-amber-700 leading-tight">
-                      {t('arrival.early_warning', { time: property.checkInTime })}
-                    </p>
-                  </div>
-                )}
               </Card>
             </div>
 

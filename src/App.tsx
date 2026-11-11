@@ -681,6 +681,7 @@ export default function App() {
           properties={properties}
           reservations={reservations}
           selectedReservationId={selectedReservationId}
+          isWhiteLabel={hostAccount?.plan === 'plan_pro' || hostAccount?.plan === 'plan_manager'}
           onSelectReservation={(resId) => {
             const r = reservations.find((item) => item.id === resId);
             const p = properties.find((item) => item.id === r?.propertyId);

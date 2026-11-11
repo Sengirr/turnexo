@@ -32,6 +32,9 @@ import {
   Camera,
   LogOut,
   Mail,
+  Lock,
+  AlertTriangle,
+  Sparkles,
 } from 'lucide-react';
 import { Cleaner, CleaningTask, Property, Reservation } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
@@ -169,13 +172,33 @@ export default function HostDashboardView({
   const [copiedSettlementCleanerId, setCopiedSettlementCleanerId] = useState<string | null>(null);
   const [isAnnualBilling, setIsAnnualBilling] = useState(true);
   const [showStripeNoticeModal, setShowStripeNoticeModal] = useState(false);
+  const [planLimitReason, setPlanLimitReason] = useState<{
+    title: string;
+    desc: string;
+    targetPlan: 'plan_pro' | 'plan_manager';
+  } | null>(null);
 
-  const maxAllowedProperties =
-    hostAccount?.plan === 'plan_manager'
-      ? 10
-      : hostAccount?.plan === 'plan_pro'
-      ? 5
-      : 1;
+  const currentPlan = hostAccount?.plan || 'plan_starter';
+  const isStarter = currentPlan === 'plan_starter';
+  const isPro = currentPlan === 'plan_pro';
+  const isManager = currentPlan === 'plan_manager';
+
+  const maxAllowedProperties = isManager ? 10 : isPro ? 5 : 1;
+  const maxAllowedCleaners = isManager ? 99 : isPro ? 2 : 1;
+
+  const handleOpenNewPropModal = () => {
+    if (properties.length >= maxAllowedProperties) {
+      setPlanLimitReason({
+        title: 'Has alcanzado el límite de alojamientos',
+        desc: isStarter
+          ? `El Plan Starter incluye 1 alojamiento gratuito (actualmente tienes ${properties.length} alojamientos registrados). Para gestionar hasta 5 alojamientos con sincronización iCal y facturación fiscal, actualiza a Pro Fiscal.`
+          : `Tu plan permite hasta ${maxAllowedProperties} alojamientos. Para ampliar tu cartera hasta 10 alojamientos, actualiza al Plan Microgestora.`,
+        targetPlan: isStarter ? 'plan_pro' : 'plan_manager',
+      });
+      return;
+    }
+    setShowNewPropModal(true);
+  };
 
   const urgentCount = tasks.filter((t) => t.sameDayCheckIn).length;
   const upsellRevenue = reservations.reduce(
@@ -298,6 +321,10 @@ export default function HostDashboardView({
 
   const handleCreateProperty = (e: React.FormEvent) => {
     e.preventDefault();
+    if (properties.length >= maxAllowedProperties) {
+      handleOpenNewPropModal();
+      return;
+    }
     if (!newPropName.trim()) return;
     const id = `prop-${Date.now()}`;
     const slug = newPropName
@@ -451,15 +478,13 @@ export default function HostDashboardView({
           </div>
 
           <nav className="space-y-1.5">
-            {(
-              [
-                { id: 'overview', label: 'Mis Alojamientos', icon: Home },
-                { id: 'schedule', label: 'Limpiezas & Equipo', icon: Calendar },
-                { id: 'guests', label: 'Guía del Huésped', icon: UserCheck },
-                { id: 'invoices', label: 'Facturas & IVA 10%', icon: FileText, badge: 'IVA 10%' },
-                { id: 'billing', label: 'Plan & Suscripción', icon: CreditCard },
-              ] as const
-            ).map((item) => {
+            {[
+              { id: 'overview' as const, label: 'Mis Alojamientos', icon: Home },
+              { id: 'schedule' as const, label: 'Limpiezas & Equipo', icon: Calendar },
+              { id: 'guests' as const, label: 'Guía del Huésped', icon: UserCheck },
+              { id: 'invoices' as const, label: 'Facturas & IVA 10%', icon: FileText, badge: isStarter ? 'PRO' : 'IVA 10%' },
+              { id: 'billing' as const, label: 'Plan & Suscripción', icon: CreditCard },
+            ].map((item) => {
               const Icon = item.icon;
               const active = section === item.id || (item.id === 'schedule' && section === 'team');
               return (
@@ -481,7 +506,13 @@ export default function HostDashboardView({
                     <span>{item.label}</span>
                   </div>
                   {'badge' in item && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full font-mono ${
+                        item.id === 'invoices' && isStarter
+                          ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      }`}
+                    >
                       {item.badge}
                     </span>
                   )}
@@ -618,7 +649,7 @@ export default function HostDashboardView({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowNewPropModal(true)}
+                  onClick={handleOpenNewPropModal}
                   className="bg-orange-600 hover:bg-orange-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm"
                 >
                   <Plus size={15} />
@@ -627,8 +658,40 @@ export default function HostDashboardView({
               </div>
             </div>
 
+            {properties.length > maxAllowedProperties && (
+              <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-amber-500 text-white rounded-xl shrink-0 mt-0.5">
+                    <AlertTriangle size={18} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-amber-950 text-sm">
+                      Límite de alojamientos superado ({properties.length} / {maxAllowedProperties})
+                    </h4>
+                    <p className="text-xs text-amber-800 mt-0.5">
+                      Tu plan {isStarter ? 'Starter gratuito' : 'actual'} incluye {maxAllowedProperties} alojamiento{maxAllowedProperties > 1 ? 's' : ''}. Los alojamientos que superan el cupo se encuentran en pausa. Actualiza tu suscripción para desbloquearlos y sincronizar sus calendarios.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPlanLimitReason({
+                      title: 'Desbloquea todos tus alojamientos',
+                      desc: `Tienes ${properties.length} alojamientos registrados y tu plan actual solo permite ${maxAllowedProperties}. Actualiza a Pro Fiscal para gestionarlos todos sin interrupciones.`,
+                      targetPlan: isStarter ? 'plan_pro' : 'plan_manager',
+                    });
+                  }}
+                  className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm shrink-0 whitespace-nowrap"
+                >
+                  Actualizar a Pro Fiscal
+                </button>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {properties.map((prop) => {
+              {properties.map((prop, idx) => {
+                const isPaused = idx >= maxAllowedProperties;
                 const cleaner = cleaners.find((c) => c.id === prop.defaultCleanerId);
                 const propReservations = reservations.filter((r) => r.propertyId === prop.id);
                 const publicGuideUrl = `${window.location.origin}/g/${prop.slug}`;
@@ -636,17 +699,27 @@ export default function HostDashboardView({
                 return (
                   <div
                     key={prop.id}
-                    className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between hover:border-slate-300 transition"
+                    className={`border rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between transition ${
+                      isPaused
+                        ? 'border-amber-300 bg-amber-50/20'
+                        : 'bg-white border-slate-200/80 hover:border-slate-300'
+                    }`}
                   >
                     <div className="p-6 space-y-5">
                       <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
-                              ● iCal Conectado
-                            </span>
+                            {isPaused ? (
+                              <span className="text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
+                                <Lock size={12} /> Pausado por límite de plan
+                              </span>
+                            ) : (
+                              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
+                                ● iCal Conectado
+                              </span>
+                            )}
                             <span className="text-slate-400 text-xs">·</span>
-                            <span className="text-xs text-slate-500">{prop.lastSyncedAt}</span>
+                            <span className="text-xs text-slate-500">{isPaused ? 'Requiere Pro Fiscal' : prop.lastSyncedAt}</span>
                           </div>
                           <h2 className="text-xl font-bold tracking-tight text-slate-900 mt-2">
                             {prop.name}
@@ -725,45 +798,82 @@ export default function HostDashboardView({
                     </div>
 
                     {/* Acciones del alojamiento */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50/70 border-t border-slate-100 p-3 text-xs font-medium">
-                      <button
-                        type="button"
-                        onClick={() => setCustomizingProperty(prop)}
-                        className="bg-slate-900 hover:bg-slate-800 text-white py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
-                      >
-                        <Settings size={13} className="text-orange-400" />
-                        <span>Personalizar</span>
-                      </button>
+                    {isPaused ? (
+                      <div className="bg-amber-50 border-t border-amber-200 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center gap-2 text-amber-900 font-medium">
+                          <Lock size={14} className="text-amber-700 shrink-0" />
+                          <span>Alojamiento en pausa ({idx + 1} de {maxAllowedProperties} permitidos en {isStarter ? 'Starter' : 'tu plan'}).</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {onDeleteProperty && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm(`¿Eliminar ${prop.name} para mantenerte dentro de tu cupo?`)) {
+                                  onDeleteProperty(prop.id);
+                                }
+                              }}
+                              className="text-slate-500 hover:text-red-600 font-semibold px-2 py-1 transition"
+                            >
+                              Eliminar
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPlanLimitReason({
+                                title: 'Activa este alojamiento',
+                                desc: `El Plan Starter incluye 1 alojamiento gratuito. Para reactivar "${prop.name}" y sincronizar sus limpiezas con Airbnb o Booking, actualiza al Plan Pro Fiscal.`,
+                                targetPlan: 'plan_pro',
+                              });
+                            }}
+                            className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-3.5 py-1.5 rounded-xl transition shadow-xs"
+                          >
+                            Activar con Pro Fiscal
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50/70 border-t border-slate-100 p-3 text-xs font-medium">
+                        <button
+                          type="button"
+                          onClick={() => setCustomizingProperty(prop)}
+                          className="bg-slate-900 hover:bg-slate-800 text-white py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
+                        >
+                          <Settings size={13} className="text-orange-400" />
+                          <span>Personalizar</span>
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          propReservations[0] && onOpenGuestPreview(propReservations[0].id)
-                        }
-                        className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
-                      >
-                        <ExternalLink size={13} />
-                        <span>Ver Guía</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            propReservations[0] && onOpenGuestPreview(propReservations[0].id)
+                          }
+                          className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
+                        >
+                          <ExternalLink size={13} />
+                          <span>Ver Guía</span>
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => cleaner && onOpenCleanerPreview(cleaner.id)}
-                        className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
-                      >
-                        <Users size={13} />
-                        <span>App Limpieza</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => cleaner && onOpenCleanerPreview(cleaner.id)}
+                          className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
+                        >
+                          <Users size={13} />
+                          <span>App Limpieza</span>
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => setQrModalProperty(prop)}
-                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition font-semibold"
-                      >
-                        <Printer size={13} />
-                        <span>Cartel QR</span>
-                      </button>
-                    </div>
+                        <button
+                          type="button"
+                          onClick={() => setQrModalProperty(prop)}
+                          className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition font-semibold"
+                        >
+                          <Printer size={13} />
+                          <span>Cartel QR</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1313,44 +1423,70 @@ export default function HostDashboardView({
               })}
             </div>
             {onAddCleaner && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!newCleanerName.trim()) return;
-                  const slugToken = `${newCleanerName
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '')
-                    .slice(0, 8)}-${Math.random().toString(36).slice(2, 6)}`;
-                  onAddCleaner({
-                    id: `cl-${Date.now()}`,
-                    name: newCleanerName.trim(),
-                    phone: newCleanerPhone.trim() || '+34 600 00 00 00',
-                    magicToken: slugToken,
-                  });
-                  setNewCleanerName('');
-                  setNewCleanerPhone('+34 ');
-                }}
-                className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center"
-              >
-                <input
-                  placeholder="Nombre de la nueva limpiadora (ej. Rocío Díaz)"
-                  value={newCleanerName}
-                  onChange={(e) => setNewCleanerName(e.target.value)}
-                  className="flex-1 w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <input
-                  placeholder="Teléfono (+34...)"
-                  value={newCleanerPhone}
-                  onChange={(e) => setNewCleanerPhone(e.target.value)}
-                  className="w-full sm:w-48 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shrink-0 transition shadow-sm"
+              cleaners.length >= maxAllowedCleaners ? (
+                <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5 text-amber-900 font-medium">
+                    <Users size={18} className="text-amber-700 shrink-0" />
+                    <span>
+                      Has alcanzado el límite de personal ({cleaners.length}/{maxAllowedCleaners}) de tu plan {isStarter ? 'Starter' : 'Pro Fiscal'}.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPlanLimitReason({
+                        title: 'Equipo de limpieza múltiple',
+                        desc: isStarter
+                          ? 'El Plan Starter incluye 1 limpiador/a. Actualiza a Pro Fiscal (hasta 2) o Microgestora para coordinar un equipo sin límite.'
+                          : 'Para coordinar un equipo más amplio con liquidaciones individuales y control por persona, actualiza a Microgestora.',
+                        targetPlan: isStarter ? 'plan_pro' : 'plan_manager',
+                      });
+                    }}
+                    className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 py-2 rounded-xl transition shadow-xs whitespace-nowrap"
+                  >
+                    Actualizar Plan
+                  </button>
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!newCleanerName.trim()) return;
+                    const slugToken = `${newCleanerName
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, '')
+                      .slice(0, 8)}-${Math.random().toString(36).slice(2, 6)}`;
+                    onAddCleaner({
+                      id: `cl-${Date.now()}`,
+                      name: newCleanerName.trim(),
+                      phone: newCleanerPhone.trim() || '+34 600 00 00 00',
+                      magicToken: slugToken,
+                    });
+                    setNewCleanerName('');
+                    setNewCleanerPhone('+34 ');
+                  }}
+                  className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center"
                 >
-                  + Crear Enlace /c/
-                </button>
-              </form>
+                  <input
+                    placeholder="Nombre de la nueva limpiadora (ej. Rocío Díaz)"
+                    value={newCleanerName}
+                    onChange={(e) => setNewCleanerName(e.target.value)}
+                    className="flex-1 w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <input
+                    placeholder="Teléfono (+34...)"
+                    value={newCleanerPhone}
+                    onChange={(e) => setNewCleanerPhone(e.target.value)}
+                    className="w-full sm:w-48 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shrink-0 transition shadow-sm"
+                  >
+                    + Crear Enlace /c/
+                  </button>
+                </form>
+              )
             )}
           </div>
         )}
@@ -1546,7 +1682,75 @@ export default function HostDashboardView({
         )}
 
         {/* VISTA FISCAL: FACTURAS A HUÉSPEDES & IVA 10% (MODELO 303) */}
-        {section === 'invoices' && (
+        {section === 'invoices' && isStarter && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-3xl border border-slate-200/80 p-8 sm:p-12 shadow-sm text-center max-w-3xl mx-auto space-y-6">
+              <div className="w-16 h-16 rounded-3xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center mx-auto shadow-sm">
+                <FileSpreadsheet size={32} />
+              </div>
+              <div className="space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-orange-600 bg-orange-100/70 border border-orange-200 px-3 py-1 rounded-full">
+                  Exclusivo Plan Pro Fiscal & Microgestora
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                  Módulo Fiscal & Facturación Oficial (IVA 10%)
+                </h2>
+                <p className="text-slate-600 text-sm max-w-xl mx-auto leading-relaxed">
+                  Automatiza la emisión legal de Facturas Simplificadas a viajeros de Airbnb o Booking y descarga el <strong>Libro Registro en Excel</strong> para tu gestoría en 1 solo clic, listo para rellenar el Modelo 303.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left pt-2">
+                <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-4 space-y-1.5">
+                  <span className="font-bold text-slate-900 text-xs block">Facturas Simplificadas</span>
+                  <p className="text-slate-500 text-[11px] leading-relaxed">
+                    Numeración legal correlativa y desglose del 10% de IVA sin necesidad de pedir el DNI al viajero.
+                  </p>
+                </div>
+                <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-4 space-y-1.5">
+                  <span className="font-bold text-slate-900 text-xs block">Modelo 303 en 1 Clic</span>
+                  <p className="text-slate-500 text-[11px] leading-relaxed">
+                    Cálculo automático de bases imponibles y cuotas de IVA para enviárselo directamente a tu gestor.
+                  </p>
+                </div>
+                <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-4 space-y-1.5">
+                  <span className="font-bold text-slate-900 text-xs block">Multi-NIF & Sociedades</span>
+                  <p className="text-slate-500 text-[11px] leading-relaxed">
+                    Configura tus datos fiscales o los de varios propietarios según cada alojamiento.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const stripeUrl = getStripePaymentLink('plan_pro', isAnnualBilling);
+                    if (stripeUrl && stripeUrl.startsWith('http')) {
+                      window.open(stripeUrl, '_blank');
+                    } else {
+                      setSection('billing');
+                    }
+                  }}
+                  className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs px-6 py-3.5 rounded-xl transition shadow-md flex items-center justify-center gap-2"
+                >
+                  <Sparkles size={15} />
+                  <span>Activar Plan Pro Fiscal ({isAnnualBilling ? '15 €/mes' : '19 €/mes'})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSection('billing')}
+                  className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-5 py-3.5 rounded-xl transition"
+                >
+                  Ver comparativa de planes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* VISTA FISCAL: FACTURAS A HUÉSPEDES & IVA 10% (MODELO 303) */}
+        {section === 'invoices' && !isStarter && (
           <div className="space-y-8">
             <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
               <div>
@@ -2689,6 +2893,150 @@ export default function HostDashboardView({
                 className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-5 py-2.5 rounded-xl transition"
               >
                 Seguir disfrutando de la prueba
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PAYWALL DE CONTROL DE LÍMITES DE PLAN */}
+      {planLimitReason && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100 my-8">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                  <Lock size={20} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full inline-block">
+                    Plan {isStarter ? 'Starter' : 'Pro Fiscal'}
+                  </span>
+                  <h3 className="font-extrabold text-slate-900 text-lg leading-tight mt-1">
+                    {planLimitReason.title}
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPlanLimitReason(null)}
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1 rounded-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              {planLimitReason.desc}
+            </p>
+
+            {/* Tarjeta del plan recomendado */}
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-2xl space-y-4 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs text-orange-400 font-bold uppercase tracking-wider">Recomendado</span>
+                  <h4 className="text-lg font-black mt-0.5">
+                    {planLimitReason.targetPlan === 'plan_pro' ? 'Plan Pro Fiscal' : 'Plan Microgestora'}
+                  </h4>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-white">
+                    {planLimitReason.targetPlan === 'plan_pro'
+                      ? isAnnualBilling ? '15 €' : '19 €'
+                      : isAnnualBilling ? '31 €' : '39 €'}
+                  </span>
+                  <span className="text-[10px] text-slate-400 block">/ mes (tarifa plana)</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-xs text-slate-300 pt-2 border-t border-slate-700/60">
+                {planLimitReason.targetPlan === 'plan_pro' ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">✓</span>
+                      <span>Hasta 5 alojamientos con iCal automático</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">✓</span>
+                      <span>Facturación oficial IVA 10% y Modelo 303 en Excel</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">✓</span>
+                      <span>Guía Digital 100% marca blanca (sin sello Turnexo)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">✓</span>
+                      <span>Historial ilimitado de fotos de limpieza</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">✓</span>
+                      <span>Hasta 10 alojamientos</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">✓</span>
+                      <span>Múltiples limpiadoras con liquidaciones desglosadas</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">✓</span>
+                      <span>Todo lo incluido en Pro Fiscal</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">✓</span>
+                      <span>Soporte prioritario directo</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Selector de facturación mensual / anual */}
+            <div className="flex items-center justify-between text-xs bg-slate-50 border border-slate-200/80 p-3 rounded-xl">
+              <span className="font-semibold text-slate-700">Facturación anual (-20% de descuento)</span>
+              <button
+                type="button"
+                onClick={() => setIsAnnualBilling(!isAnnualBilling)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                  isAnnualBilling ? 'bg-orange-600' : 'bg-slate-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    isAnnualBilling ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Acciones */}
+            <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  const stripeUrl = getStripePaymentLink(planLimitReason.targetPlan, isAnnualBilling);
+                  if (stripeUrl && stripeUrl.startsWith('http')) {
+                    window.open(stripeUrl, '_blank');
+                  } else {
+                    setSection('billing');
+                    setPlanLimitReason(null);
+                  }
+                }}
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3 px-4 rounded-xl transition shadow-md flex items-center justify-center gap-2"
+              >
+                <Sparkles size={14} />
+                <span>Actualizar Plan con Stripe</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSection('billing');
+                  setPlanLimitReason(null);
+                }}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-3 px-4 rounded-xl transition"
+              >
+                Ver todos los planes
               </button>
             </div>
           </div>

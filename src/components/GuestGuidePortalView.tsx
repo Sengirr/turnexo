@@ -589,6 +589,7 @@ interface Props {
   properties: Property[];
   reservations: Reservation[];
   selectedReservationId: string;
+  isWhiteLabel?: boolean;
   onSelectReservation: (id: string) => void;
   onRequestExtra: (reservationId: string, extra: PropertyExtra) => void;
   onUpdateReservation?: (updated: Reservation, toast?: string) => void;
@@ -601,6 +602,7 @@ export default function GuestGuidePortalView({
   properties,
   reservations,
   selectedReservationId,
+  isWhiteLabel = false,
   onSelectReservation,
   onRequestExtra,
   onUpdateReservation,
@@ -1607,18 +1609,20 @@ export default function GuestGuidePortalView({
 
         <footer className="pt-12 pb-14 text-center space-y-3">
           <div className="w-12 h-1 bg-gray-200 mx-auto rounded-full" />
-          <div>
-            <a
-              href="https://turnexo.app"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/5 hover:bg-black/10 text-gray-500 hover:text-gray-900 text-[11px] font-bold transition shadow-sm"
-            >
-              <span>Guía creada con <strong>Turnexo</strong></span>
-              <span>·</span>
-              <span className="text-emerald-700">Crea la tuya 100% gratis</span>
-            </a>
-          </div>
+          {!isWhiteLabel && (
+            <div>
+              <a
+                href="https://turnexo.app"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/5 hover:bg-black/10 text-gray-500 hover:text-gray-900 text-[11px] font-bold transition shadow-sm"
+              >
+                <span>Guía creada con <strong>Turnexo</strong></span>
+                <span>·</span>
+                <span className="text-emerald-700">Crea la tuya 100% gratis</span>
+              </a>
+            </div>
+          )}
           <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">
             {property.name}
           </p>

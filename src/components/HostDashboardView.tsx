@@ -451,8 +451,8 @@ export default function HostDashboardView({
               : section === 'guests'
               ? 'Guía del Huésped'
               : section === 'invoices'
-              ? 'Facturación'
-              : 'Plan & Ajustes'}
+              ? 'Facturas & Fiscal'
+              : 'Suscripción'}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -510,7 +510,7 @@ export default function HostDashboardView({
                 icon: FileText,
                 badge: isCommunityVip && isStarter ? 'COMUNIDAD' : isStarter ? 'PRO' : undefined,
               },
-              { id: 'billing' as const, label: 'Plan & Suscripción', icon: CreditCard },
+              { id: 'billing' as const, label: 'Suscripción', icon: CreditCard },
             ].map((item) => {
               const Icon = item.icon;
               const active = section === item.id || (item.id === 'schedule' && section === 'team');
@@ -2126,7 +2126,7 @@ export default function HostDashboardView({
                   Planes transparentes sin permanencia
                 </span>
                 <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1">
-                  Facturación y Plan de Suscripción
+                  Tu Suscripción
                 </h2>
               </div>
 

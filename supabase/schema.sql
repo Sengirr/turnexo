@@ -108,8 +108,17 @@ alter table public.cleaners enable row level security;
 alter table public.reservations enable row level security;
 alter table public.cleaning_tasks enable row level security;
 
+drop policy if exists "Public access hosts" on public.hosts;
 create policy "Public access hosts" on public.hosts for all using (true) with check (true);
+
+drop policy if exists "Public access properties" on public.properties;
 create policy "Public access properties" on public.properties for all using (true) with check (true);
+
+drop policy if exists "Public access cleaners" on public.cleaners;
 create policy "Public access cleaners" on public.cleaners for all using (true) with check (true);
+
+drop policy if exists "Public access reservations" on public.reservations;
 create policy "Public access reservations" on public.reservations for all using (true) with check (true);
+
+drop policy if exists "Public access cleaning_tasks" on public.cleaning_tasks;
 create policy "Public access cleaning_tasks" on public.cleaning_tasks for all using (true) with check (true);

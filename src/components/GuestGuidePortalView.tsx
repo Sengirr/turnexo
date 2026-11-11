@@ -613,9 +613,38 @@ export default function GuestGuidePortalView({
     ? properties.find((p) => p.slug === activePropertySlug)
     : undefined;
 
-  const matchedReservation = slugMatchedProperty
-    ? reservations.find((r) => r.propertyId === slugMatchedProperty.id)
-    : reservations.find((r) => r.id === selectedReservationId) || reservations[0];
+  // 1. Detección inteligente de reserva:
+  // - Si viene ?r=... en el enlace (enviado por WhatsApp a un viajero concreto)
+  // - Si escanea el cartel QR físico: detecta la reserva activa HOY
+  // - Si entra antes de la fecha sin ?r=: detecta la próxima reserva que entrará
+  const urlParams =
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const targetResId =
+    urlParams?.get('r') || urlParams?.get('res') || selectedReservationId;
+
+  const propReservations = slugMatchedProperty
+    ? reservations.filter((r) => r.propertyId === slugMatchedProperty.id)
+    : reservations;
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const directMatch = targetResId
+    ? propReservations.find((r) => r.id === targetResId)
+    : undefined;
+
+  const currentActiveStay = propReservations.find(
+    (r) => r.checkIn <= todayStr && r.checkOut >= todayStr
+  );
+
+  const nextUpcomingStay = propReservations
+    .filter((r) => r.checkIn >= todayStr)
+    .sort((a, b) => a.checkIn.localeCompare(b.checkIn))[0];
+
+  const matchedReservation =
+    directMatch ||
+    currentActiveStay ||
+    nextUpcomingStay ||
+    propReservations[0];
 
   const property =
     slugMatchedProperty ||

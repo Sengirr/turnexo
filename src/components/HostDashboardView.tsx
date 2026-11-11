@@ -344,7 +344,7 @@ export default function HostDashboardView({
   const sendGuestGuideWhatsApp = (res: Reservation) => {
     const prop = properties.find((p) => p.id === res.propertyId);
     if (!prop) return;
-    const guideUrl = `${window.location.origin}/g/${prop.slug}`;
+    const guideUrl = `${window.location.origin}/g/${prop.slug}?r=${res.id}`;
     const msg = `¡Hola ${res.guestName.split(' ')[0]}! Te damos la bienvenida a ${prop.name}.\n` +
       `📱 Aquí tienes tu Guía Digital con los vídeos para entrar, clave del WiFi, instrucciones y solicitud de extras:\n` +
       `👉 ${guideUrl}\n\n` +

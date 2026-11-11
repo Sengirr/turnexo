@@ -365,16 +365,16 @@ export default function HostDashboardView({
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col lg:flex-row overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col lg:flex-row overflow-x-hidden font-sans">
       {/* BARRA SUPERIOR PARA MÓVIL */}
-      <div className="lg:hidden bg-[#141413] text-[#F6F4EE] px-4 py-3 border-b border-[#2C2C29] flex items-center justify-between sticky top-0 z-40">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-[#C85A32] text-white flex items-center justify-center font-mono font-bold text-xs">
+      <div className="lg:hidden bg-slate-900 text-slate-100 px-4 py-3 border-b border-slate-800 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-orange-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
             TX
           </div>
-          <span className="font-bold text-sm tracking-tight">Turnexo</span>
-          <span className="text-white/40 text-xs">·</span>
-          <span className="text-xs text-white/80 font-medium truncate max-w-[140px]">
+          <span className="font-bold text-base tracking-tight text-white">Turnexo</span>
+          <span className="text-slate-600 text-xs">·</span>
+          <span className="text-xs text-slate-300 font-medium truncate max-w-[140px]">
             {section === 'overview'
               ? 'Alojamientos'
               : section === 'schedule' || section === 'team'
@@ -391,7 +391,7 @@ export default function HostDashboardView({
             <button
               type="button"
               onClick={onLogout}
-              className="bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 hover:text-white p-1.5 border border-rose-800/50"
+              className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white p-2 rounded-lg border border-rose-800/40 transition"
               title="Cerrar sesión"
             >
               <LogOut size={13} />
@@ -400,37 +400,37 @@ export default function HostDashboardView({
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-bold px-3 py-1.5 flex items-center gap-1.5 border border-white/20"
+            className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700 transition"
           >
             {mobileMenuOpen ? 'Cerrar ✕' : 'Menú ☰'}
           </button>
         </div>
       </div>
 
-      {/* BARRA LATERAL IZQUIERDA ESTILO SOFTWARE PROFESIONAL */}
+      {/* BARRA LATERAL IZQUIERDA MODERNA */}
       <aside
         className={`${
           mobileMenuOpen ? 'flex' : 'hidden'
-        } lg:flex w-full lg:w-64 bg-[#141413] text-[#F6F4EE] shrink-0 flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#2C2C29]`}
+        } lg:flex w-full lg:w-64 bg-slate-900 text-slate-200 shrink-0 flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800`}
       >
-        <div className="p-6 space-y-8">
+        <div className="p-6 space-y-7">
           <div className="hidden lg:flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 bg-[#C85A32] text-white flex items-center justify-center font-mono font-bold text-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
                 TX
               </div>
               <div>
-                <span className="font-bold text-base tracking-tight block leading-none">
+                <span className="font-bold text-base tracking-tight block leading-none text-white">
                   Turnexo
                 </span>
-                <span className="font-mono text-[10px] text-[#C85A32] uppercase tracking-wider font-semibold">
+                <span className="text-xs text-orange-400 font-medium tracking-wide">
                   Panel de Control
                 </span>
               </div>
             </div>
           </div>
 
-          <nav className="space-y-1">
+          <nav className="space-y-1.5">
             {(
               [
                 { id: 'overview', label: 'Mis Alojamientos', icon: Home },
@@ -450,18 +450,18 @@ export default function HostDashboardView({
                     setSection(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold flex items-center justify-between transition ${
+                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold rounded-xl flex items-center justify-between transition ${
                     active
-                      ? 'bg-[#C85A32] text-white'
-                      : 'text-white/65 hover:text-white hover:bg-white/5'
+                      ? 'bg-orange-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon size={15} />
+                    <Icon size={16} />
                     <span>{item.label}</span>
                   </div>
                   {'badge' in item && (
-                    <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-slate-950 px-1.5 py-0.5 rounded font-mono">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">
                       {item.badge}
                     </span>
                   )}
@@ -471,32 +471,32 @@ export default function HostDashboardView({
           </nav>
         </div>
 
-        <div className="p-6 border-t border-white/10 space-y-4 text-xs">
+        <div className="p-6 border-t border-slate-800 space-y-4 text-xs">
           {hostAccount && (
-            <div className="bg-white/5 border border-white/10 p-3.5 space-y-2.5">
+            <div className="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-4 space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="truncate min-w-0">
                   <span className="font-bold text-white text-xs block truncate">
                     {hostAccount.fullName || 'Anfitrión'}
                   </span>
-                  <span className="font-mono text-[10px] text-white/50 block truncate">
+                  <span className="text-[11px] text-slate-400 block truncate">
                     {hostAccount.companyName || hostAccount.email}
                   </span>
                 </div>
-                <span className="font-mono text-[9px] uppercase px-1.5 py-0.5 bg-[#1F4E3D] text-emerald-200 font-bold shrink-0 border border-emerald-500/30">
+                <span className="text-[10px] uppercase px-2 py-0.5 bg-emerald-500/20 text-emerald-300 font-bold shrink-0 rounded-full border border-emerald-500/30">
                   14d Trial
                 </span>
               </div>
 
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono">
-                <span className="text-white/50">Plan activo:</span>
+              <div className="pt-2.5 border-t border-slate-700/70 flex items-center justify-between text-xs">
+                <span className="text-slate-400 font-medium">Plan activo:</span>
                 <button
                   type="button"
                   onClick={() => {
                     setSection('billing');
                     setMobileMenuOpen(false);
                   }}
-                  className="font-bold text-[#C85A32] hover:text-[#e06b3f] flex items-center gap-1 transition"
+                  className="font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition"
                   title="Gestionar plan y suscripción"
                 >
                   <span>
@@ -517,9 +517,9 @@ export default function HostDashboardView({
               <button
                 type="button"
                 onClick={onLogout}
-                className="w-full text-left px-3 py-2 text-xs font-mono text-rose-300 hover:text-white bg-rose-950/40 border border-rose-800/40 hover:bg-rose-900/60 flex items-center gap-2 transition"
+                className="w-full text-left px-3.5 py-2.5 text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/30 border border-rose-800/40 hover:bg-rose-900/50 rounded-xl flex items-center gap-2.5 transition"
               >
-                <LogOut size={13} className="text-rose-400" />
+                <LogOut size={14} className="text-rose-400" />
                 <span>Cerrar sesión</span>
               </button>
             )}
@@ -530,45 +530,45 @@ export default function HostDashboardView({
       {/* ÁREA DE TRABAJO PRINCIPAL */}
       <div className="flex-1 p-6 lg:p-10 space-y-8 overflow-y-auto">
         {/* Franja de Métricas Operativas */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-[#D5CFC0] border border-[#D5CFC0]">
-          <div className="bg-[#FAF9F5] p-5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F]">
-              ALOJAMIENTOS ACTIVOS (ICAL)
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-2 hover:border-slate-300 transition">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+              Alojamientos Activos (iCal)
             </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <span className="font-mono text-3xl font-bold text-[#141413]">
+            <div className="flex items-baseline justify-between mt-1">
+              <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
                 0{properties.length}
-                <span className="text-sm font-normal text-[#57554F]"> / {maxAllowedProperties}</span>
+                <span className="text-base font-normal text-slate-400"> / {maxAllowedProperties}</span>
               </span>
-              <span className="font-mono text-[11px] text-[#1F4E3D] font-semibold">
+              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
                 ● Sincronizados
               </span>
             </div>
           </div>
 
-          <div className="bg-[#FAF9F5] p-5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F]">
-              LIMPIEZAS HOY
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-2 hover:border-slate-300 transition">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+              Limpiezas Hoy
             </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <span className="font-mono text-3xl font-bold text-[#C85A32]">
+            <div className="flex items-baseline justify-between mt-1">
+              <span className="text-3xl font-extrabold text-orange-600 tracking-tight">
                 0{urgentCount}
               </span>
-              <span className="font-mono text-[11px] text-[#57554F]">
+              <span className="text-xs font-medium text-slate-500 bg-slate-100 rounded-full px-2.5 py-0.5">
                 Prioridad 11:00 → 15:00
               </span>
             </div>
           </div>
 
-          <div className="bg-[#FAF9F5] p-5">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F]">
-              INGRESOS EXTRAS & LATE CHECK-OUT
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-2 hover:border-slate-300 transition">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+              Ingresos Extras & Upsell
             </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <span className="font-mono text-3xl font-bold text-[#1F4E3D]">
+            <div className="flex items-baseline justify-between mt-1">
+              <span className="text-3xl font-extrabold text-emerald-700 tracking-tight">
                 +{upsellRevenue} €
               </span>
-              <span className="font-mono text-[11px] text-[#57554F]">
+              <span className="text-xs font-medium text-slate-500">
                 0% comisión (100% tuyo)
               </span>
             </div>
@@ -578,30 +578,30 @@ export default function HostDashboardView({
         {/* VISTA 1: ALOJAMIENTOS Y PERSONALIZACIÓN DE GUÍA */}
         {section === 'overview' && (
           <div className="space-y-6">
-            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E2DDD2] pb-4">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                  GESTIÓN POR ALOJAMIENTO
+                <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
+                  Gestión por Alojamiento
                 </span>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#141413] mt-0.5">
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mt-1">
                   Alojamientos, Guías Digitales y Enlaces iCal
                 </h1>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <button
                   type="button"
                   onClick={() => setShowIcalModal(true)}
-                  className="bg-white hover:bg-slate-100 text-[#141413] border border-[#D5CFC0] font-mono text-xs font-bold uppercase tracking-wider px-3.5 py-2.5 flex items-center gap-2 transition"
+                  className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm"
                 >
-                  <RefreshCw size={13} className="text-[#C85A32]" />
+                  <RefreshCw size={14} className="text-orange-600" />
                   <span>Sincronizar iCal</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowNewPropModal(true)}
-                  className="bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex items-center gap-2 transition"
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm"
                 >
-                  <Plus size={14} />
+                  <Plus size={15} />
                   <span>Nuevo Alojamiento</span>
                 </button>
               </div>
@@ -616,49 +616,51 @@ export default function HostDashboardView({
                 return (
                   <div
                     key={prop.id}
-                    className="bg-[#FAF9F5] border border-[#D5CFC0] flex flex-col justify-between"
+                    className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between hover:border-slate-300 transition"
                   >
                     <div className="p-6 space-y-5">
-                      <div className="flex items-start justify-between gap-3 border-b border-[#E2DDD2] pb-4">
+                      <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4">
                         <div>
-                          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider">
-                            <span className="text-[#1F4E3D] font-bold">● ICAL CONECTADO</span>
-                            <span className="text-[#57554F]">·</span>
-                            <span className="text-[#57554F]">{prop.lastSyncedAt}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1.5">
+                              ● iCal Conectado
+                            </span>
+                            <span className="text-slate-400 text-xs">·</span>
+                            <span className="text-xs text-slate-500">{prop.lastSyncedAt}</span>
                           </div>
-                          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413] mt-1">
+                          <h2 className="text-xl font-bold tracking-tight text-slate-900 mt-2">
                             {prop.name}
                           </h2>
-                          <p className="text-xs text-[#57554F]">{prop.address}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{prop.address}</p>
                         </div>
 
-                        <div className="text-right font-mono text-xs">
-                          <span className="text-[10px] text-[#57554F] uppercase block">
-                            HORARIO BASE
+                        <div className="text-right text-xs">
+                          <span className="text-[11px] text-slate-400 uppercase font-semibold block">
+                            Horario base
                           </span>
-                          <span className="font-bold text-[#141413]">
+                          <span className="font-semibold text-slate-800 bg-slate-100 rounded-md px-2 py-0.5 inline-block mt-1">
                             IN {prop.checkInTime} · OUT {prop.checkOutTime}
                           </span>
                         </div>
                       </div>
 
                       {/* Estado de los módulos en este alojamiento */}
-                      <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                        <div className="bg-white border border-[#E2DDD2] p-3">
-                          <span className="text-[10px] text-[#57554F] uppercase block">
-                            MÓDULO LIMPIEZAS
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
+                          <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">
+                            Módulo Limpiezas
                           </span>
-                          <span className="font-bold text-[#141413] mt-0.5 block">
+                          <span className="font-semibold text-slate-900 mt-1 block">
                             {prop.modulesEnabled.cleanings
                               ? `Activo · ${cleaner?.name}`
                               : 'Desactivado'}
                           </span>
                         </div>
-                        <div className="bg-white border border-[#E2DDD2] p-3">
-                          <span className="text-[10px] text-[#57554F] uppercase block">
-                            MÓDULO GUÍA HUÉSPED
+                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
+                          <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">
+                            Módulo Guía Huésped
                           </span>
-                          <span className="font-bold text-[#141413] mt-0.5 block">
+                          <span className="font-semibold text-slate-900 mt-1 block">
                             {prop.modulesEnabled.guestGuide
                               ? `${prop.videos?.length || 0} vídeos · ${
                                   prop.extras?.filter((e) => e.active).length || 0
@@ -669,22 +671,22 @@ export default function HostDashboardView({
                       </div>
 
                       {/* URL pública de la Guía del Huésped */}
-                      <div className="bg-white border border-[#E2DDD2] p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-                        <div className="truncate">
-                          <span className="font-mono text-[10px] uppercase text-[#57554F] block">
-                            URL PÚBLICA DE LA GUÍA (QR Y MENSAJE DE BIENVENIDA)
+                      <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                        <div className="truncate min-w-0 flex-1">
+                          <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">
+                            URL de la Guía (QR y Bienvenida)
                           </span>
-                          <span className="font-mono text-xs text-[#141413]">
+                          <span className="font-mono text-xs text-slate-700 truncate block mt-0.5">
                             {publicGuideUrl}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0">
                           <button
                             type="button"
                             onClick={() => copyLink(publicGuideUrl, `guide-${prop.id}`)}
-                            className="border border-[#D5CFC0] px-2.5 py-1.5 font-mono text-[11px] font-bold hover:bg-[#F6F4EE]"
+                            className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
                           >
-                            {copiedId === `guide-${prop.id}` ? 'COPIADO' : 'COPIAR URL'}
+                            {copiedId === `guide-${prop.id}` ? '✓ Copiado' : 'Copiar URL'}
                           </button>
                           <button
                             type="button"
@@ -692,24 +694,24 @@ export default function HostDashboardView({
                               const tpl = `🇪🇸 ¡Hola! Aquí tienes la guía interactiva de tu alojamiento (${prop.name}) con el vídeo paso a paso para entrar, los códigos de acceso y el WiFi:\n👉 ${publicGuideUrl}\n\n🇬🇧 Hi! Here is your interactive guest guide (${prop.name}) with the step-by-step check-in video, door codes and WiFi:\n👉 ${publicGuideUrl}`;
                               copyLink(tpl, `tpl-${prop.id}`);
                             }}
-                            className="bg-[#1F4E3D] text-white px-2.5 py-1.5 font-mono text-[11px] font-bold hover:bg-[#163A2D]"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
                           >
                             {copiedId === `tpl-${prop.id}`
-                              ? '✓ PLANTILLA COPIADA'
-                              : 'PLANTILLA AIRBNB/BOOKING'}
+                              ? '✓ Plantilla Copiada'
+                              : 'Plantilla WhatsApp'}
                           </button>
                         </div>
                       </div>
                     </div>
 
                     {/* Acciones del alojamiento */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[#D5CFC0] border-t border-[#D5CFC0] font-mono text-[11px] font-bold uppercase">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50/70 border-t border-slate-100 p-3 text-xs font-medium">
                       <button
                         type="button"
                         onClick={() => setCustomizingProperty(prop)}
-                        className="bg-[#141413] hover:bg-[#2C2C29] text-white py-3.5 px-3 flex items-center justify-center gap-1.5 transition"
+                        className="bg-slate-900 hover:bg-slate-800 text-white py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
                       >
-                        <Settings size={13} className="text-[#C85A32]" />
+                        <Settings size={13} className="text-orange-400" />
                         <span>Personalizar</span>
                       </button>
 
@@ -718,7 +720,7 @@ export default function HostDashboardView({
                         onClick={() =>
                           propReservations[0] && onOpenGuestPreview(propReservations[0].id)
                         }
-                        className="bg-[#FAF9F5] hover:bg-white text-[#141413] py-3.5 px-3 flex items-center justify-center gap-1.5 transition"
+                        className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
                       >
                         <ExternalLink size={13} />
                         <span>Ver Guía</span>
@@ -727,7 +729,7 @@ export default function HostDashboardView({
                       <button
                         type="button"
                         onClick={() => cleaner && onOpenCleanerPreview(cleaner.id)}
-                        className="bg-[#FAF9F5] hover:bg-white text-[#141413] py-3.5 px-3 flex items-center justify-center gap-1.5 transition"
+                        className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition"
                       >
                         <Users size={13} />
                         <span>App Limpieza</span>
@@ -736,7 +738,7 @@ export default function HostDashboardView({
                       <button
                         type="button"
                         onClick={() => setQrModalProperty(prop)}
-                        className="bg-[#FAF9F5] hover:bg-white text-[#1F4E3D] py-3.5 px-3 flex items-center justify-center gap-1.5 transition"
+                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition font-semibold"
                       >
                         <Printer size={13} />
                         <span>Cartel QR</span>
@@ -751,13 +753,13 @@ export default function HostDashboardView({
 
         {/* VISTA 2: OPERATIVA DE SALIDAS, LIMPIEZAS Y EQUIPO */}
         {(section === 'schedule' || section === 'team') && (
-          <div className="space-y-6 pt-2">
-            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E2DDD2] pb-3">
+          <div className="space-y-6 pt-1">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold">
-                  OPERATIVA DE SALIDAS Y LIMPIEZAS
+                <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
+                  Operativa de Salidas y Limpiezas
                 </span>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413]">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mt-1">
                   {cleaningsSubTab === 'schedule'
                     ? 'Cuadrante de Salidas, Limpiezas y Late Check-out'
                     : 'Personal de Limpieza, Enlaces Móviles y Tarifas'}
@@ -765,29 +767,29 @@ export default function HostDashboardView({
               </div>
 
               {/* Sub-pestañas: Cuadrante vs Equipo */}
-              <div className="flex items-center gap-1 bg-[#E8E4D9] p-1 border border-[#D5CFC0]">
+              <div className="flex items-center gap-1 bg-slate-200/70 p-1 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setCleaningsSubTab('schedule')}
-                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
+                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition ${
                     cleaningsSubTab === 'schedule'
-                      ? 'bg-[#141413] text-white shadow-sm'
-                      : 'text-[#57554F] hover:text-[#141413]'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  <Calendar size={13} />
+                  <Calendar size={14} className="text-orange-600" />
                   <span>Cuadrante ({filteredTasks.length})</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setCleaningsSubTab('team')}
-                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
+                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition ${
                     cleaningsSubTab === 'team'
-                      ? 'bg-[#141413] text-white shadow-sm'
-                      : 'text-[#57554F] hover:text-[#141413]'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  <Users size={13} />
+                  <Users size={14} className="text-emerald-600" />
                   <span>Equipo ({cleaners.length})</span>
                 </button>
               </div>
@@ -797,285 +799,286 @@ export default function HostDashboardView({
               <div className="space-y-4">
                 {/* Botones de Cambio de Vista: Tabla vs Timeline Semanal */}
                 <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex items-center gap-1 bg-[#E8E4D9] p-1 border border-[#D5CFC0]">
+                  <div className="flex items-center gap-1 bg-slate-200/70 p-1 rounded-xl">
                     <button
                       type="button"
                       onClick={() => setScheduleView('table')}
-                      className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition ${
                         scheduleView === 'table'
-                          ? 'bg-[#141413] text-white shadow-sm'
-                          : 'text-[#57554F] hover:text-[#141413]'
+                          ? 'bg-white text-slate-900 shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      <List size={13} />
+                      <List size={14} />
                       <span>Vista Tabla</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setScheduleView('timeline')}
-                      className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition ${
                         scheduleView === 'timeline'
-                          ? 'bg-[#141413] text-white shadow-sm'
-                          : 'text-[#57554F] hover:text-[#141413]'
+                          ? 'bg-white text-slate-900 shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      <LayoutGrid size={13} />
+                      <LayoutGrid size={14} />
                       <span>Timeline Semanal (Gantt)</span>
                     </button>
                   </div>
                 </div>
 
-            {/* Barra de Filtros y Búsqueda */}
-            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
-                {/* Buscador */}
-                <div className="relative flex-1 min-w-[180px]">
-                  <Search size={14} className="absolute left-2.5 top-2.5 text-[#57554F]" />
-                  <input
-                    type="text"
-                    value={scheduleSearch}
-                    onChange={(e) => setScheduleSearch(e.target.value)}
-                    placeholder="Buscar por huésped, alojamiento o personal de limpieza..."
-                    className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#D5CFC0] text-xs font-medium text-[#141413] focus:outline-none focus:border-[#141413]"
-                  />
-                  {scheduleSearch && (
-                    <button
-                      type="button"
-                      onClick={() => setScheduleSearch('')}
-                      className="absolute right-2 top-2 text-[#57554F] hover:text-[#141413] text-xs"
+                {/* Barra de Filtros y Búsqueda */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+                    {/* Buscador */}
+                    <div className="relative flex-1 min-w-[200px]">
+                      <Search size={15} className="absolute left-3 top-2.5 text-slate-400" />
+                      <input
+                        type="text"
+                        value={scheduleSearch}
+                        onChange={(e) => setScheduleSearch(e.target.value)}
+                        placeholder="Buscar por huésped, alojamiento o limpiadora..."
+                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition"
+                      />
+                      {scheduleSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setScheduleSearch('')}
+                          className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 text-xs"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Filtro Propiedad */}
+                    <select
+                      value={schedulePropertyFilter}
+                      onChange={(e) => setSchedulePropertyFilter(e.target.value)}
+                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
                     >
-                      ✕
-                    </button>
-                  )}
+                      <option value="all">Todos los alojamientos ({properties.length})</option>
+                      {properties.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Filtro Estado */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {(
+                      [
+                        { id: 'all', label: 'Todos' },
+                        { id: 'urgent', label: '🔥 Mismo Día' },
+                        { id: 'late', label: '⏱ Late Out' },
+                        { id: 'pending', label: '⏳ Pendientes' },
+                        { id: 'completed', label: '✓ Hechas' },
+                      ] as const
+                    ).map((st) => (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() => setScheduleStatusFilter(st.id)}
+                        className={`px-3 py-1.5 text-xs font-semibold rounded-full transition ${
+                          scheduleStatusFilter === st.id
+                            ? 'bg-orange-600 text-white shadow-xs'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                        }`}
+                      >
+                        {st.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Filtro Propiedad */}
-                <select
-                  value={schedulePropertyFilter}
-                  onChange={(e) => setSchedulePropertyFilter(e.target.value)}
-                  className="bg-white border border-[#D5CFC0] px-3 py-1.5 font-semibold text-[#141413] text-xs"
-                >
-                  <option value="all">Todos los alojamientos ({properties.length})</option>
-                  {properties.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                {/* Renderizado de Vista: Tabla o Timeline */}
+                {filteredTasks.length === 0 ? (
+                  <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center space-y-3 shadow-sm">
+                    <p className="font-bold text-sm text-slate-900">No hay tareas que coincidan con los filtros</p>
+                    <p className="text-xs text-slate-500">Prueba a limpiar la búsqueda o cambiar el filtro de estado.</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setScheduleSearch('');
+                        setSchedulePropertyFilter('all');
+                        setScheduleStatusFilter('all');
+                      }}
+                      className="text-xs font-bold text-orange-600 hover:text-orange-700 underline pt-2"
+                    >
+                      Restablecer filtros
+                    </button>
+                  </div>
+                ) : scheduleView === 'table' ? (
+                  <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="border-b border-slate-200 bg-slate-50/80 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                            <th className="py-3.5 px-4">Fecha Salida</th>
+                            <th className="py-3.5 px-4">Alojamiento</th>
+                            <th className="py-3.5 px-4">Huésped / Canal</th>
+                            <th className="py-3.5 px-4">Estado Rotación & Late Check-out</th>
+                            <th className="py-3.5 px-4">Hora Limpieza</th>
+                            <th className="py-3.5 px-4">Asignación</th>
+                            <th className="py-3.5 px-4">Comprobación</th>
+                            <th className="py-3.5 px-4 text-right">Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {filteredTasks.map((task) => {
+                            const prop = properties.find((p) => p.id === task.propertyId);
+                            const res = reservations.find((r) => r.id === task.reservationId);
+                            const cleaner = cleaners.find((c) => c.id === task.cleanerId);
 
-              {/* Filtro Estado */}
-              <div className="flex flex-wrap items-center gap-1">
-                {(
-                  [
-                    { id: 'all', label: 'Todos' },
-                    { id: 'urgent', label: '🔥 Mismo Día' },
-                    { id: 'late', label: '⏱ Late Out' },
-                    { id: 'pending', label: '⏳ Pendientes' },
-                    { id: 'completed', label: '✓ Hechas' },
-                  ] as const
-                ).map((st) => (
-                  <button
-                    key={st.id}
-                    type="button"
-                    onClick={() => setScheduleStatusFilter(st.id)}
-                    className={`px-2.5 py-1 text-[11px] font-mono font-bold transition ${
-                      scheduleStatusFilter === st.id
-                        ? 'bg-[#C85A32] text-white'
-                        : 'bg-white border border-[#D5CFC0] text-[#57554F] hover:text-[#141413]'
-                    }`}
-                  >
-                    {st.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Renderizado de Vista: Tabla o Timeline */}
-            {filteredTasks.length === 0 ? (
-              <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-10 text-center space-y-2">
-                <p className="font-bold text-sm text-[#141413]">No hay tareas que coincidan con los filtros</p>
-                <p className="text-xs text-[#57554F]">Prueba a limpiar la búsqueda o cambiar el filtro de estado.</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setScheduleSearch('');
-                    setSchedulePropertyFilter('all');
-                    setScheduleStatusFilter('all');
-                  }}
-                  className="font-mono text-xs uppercase font-bold text-[#C85A32] underline pt-2"
-                >
-                  Restablecer filtros
-                </button>
-              </div>
-            ) : scheduleView === 'table' ? (
-              <div className="bg-[#FAF9F5] border border-[#D5CFC0] overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-[#D5CFC0] bg-[#E8E4D9]/50 font-mono text-[10px] text-[#57554F] uppercase tracking-wider">
-                      <th className="py-3.5 px-4">Fecha Salida</th>
-                      <th className="py-3.5 px-4">Propiedad</th>
-                      <th className="py-3.5 px-4">Huésped / Canal</th>
-                      <th className="py-3.5 px-4">Estado Rotación & Late Check-out</th>
-                      <th className="py-3.5 px-4">Hora Limpieza</th>
-                      <th className="py-3.5 px-4">Asignación</th>
-                      <th className="py-3.5 px-4">Verificación</th>
-                      <th className="py-3.5 px-4 text-right">Despacho</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#E2DDD2]">
-                    {filteredTasks.map((task) => {
-                      const prop = properties.find((p) => p.id === task.propertyId);
-                      const res = reservations.find((r) => r.id === task.reservationId);
-                      const cleaner = cleaners.find((c) => c.id === task.cleanerId);
-
-                      return (
-                        <tr key={task.id} className="hover:bg-white transition">
-                          <td className="py-4 px-4 font-mono font-bold text-[#141413] whitespace-nowrap">
-                            {task.date}
-                          </td>
-                          <td className="py-4 px-4 font-bold text-[#141413]">{prop?.name}</td>
-                          <td className="py-4 px-4">
-                            <button
-                              type="button"
-                              onClick={() => res && onOpenGuestPreview(res.id)}
-                              className="font-semibold text-[#141413] hover:text-[#C85A32] underline underline-offset-2 flex items-center gap-1"
-                            >
-                              <span>{res?.guestName}</span>
-                              <span className="font-mono text-[10px] text-[#57554F]">
-                                [{res?.source}]
-                              </span>
-                            </button>
-                          </td>
-                          <td className="py-4 px-4 font-mono text-[11px]">
-                            {task.sameDayCheckIn ? (
-                              <span className="inline-flex items-center gap-1.5 bg-[#C85A32]/15 text-[#C85A32] font-bold px-2.5 py-1">
-                                <Flame size={12} />
-                                ENTRADA HOY ({task.nextCheckInTime}H)
-                              </span>
-                            ) : task.lateCheckoutActive ? (
-                              <span className="inline-flex items-center gap-1.5 bg-[#1F4E3D] text-white font-bold px-2.5 py-1">
-                                <CheckCircle2 size={12} />
-                                LATE CHECK-OUT HASTA {task.scheduledCleaningTime}H (+
-                                {prop?.lateCheckoutPrice}€)
-                              </span>
-                            ) : res?.lateCheckoutRequested ? (
-                              <div className="flex items-center gap-2">
-                                <span className="bg-amber-200 text-[#141413] font-bold px-2.5 py-1">
-                                  SOLICITADO POR HUÉSPED
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => res && onApproveLateCheckout(res.id)}
-                                  className="bg-[#141413] text-white font-bold px-3 py-1 hover:bg-[#2C2C29]"
-                                >
-                                  APROBAR ({prop?.lateCheckoutUntil}H)
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <span className="text-[#57554F]">Tarde libre</span>
-                                <button
-                                  type="button"
-                                  onClick={() => res && onApproveLateCheckout(res.id)}
-                                  className="text-[#C85A32] font-bold underline"
-                                >
-                                  Conceder Late Check-out
-                                </button>
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-4 px-4 font-mono font-bold">
-                            <span
-                              className={`px-2.5 py-1 ${
-                                task.lateCheckoutActive
-                                  ? 'bg-[#1F4E3D] text-white'
-                                  : 'bg-[#E8E4D9] text-[#141413]'
-                              }`}
-                            >
-                              {task.scheduledCleaningTime}h
-                            </span>
-                          </td>
-                          <td className="py-4 px-4">
-                            <select
-                              value={task.cleanerId}
-                              onChange={(e) => onAssignCleaner(task.id, e.target.value)}
-                              className="bg-white border border-[#D5CFC0] px-2.5 py-1.5 font-semibold text-[#141413]"
-                            >
-                              {cleaners.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                  {c.name}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td className="py-4 px-4 font-mono text-[11px]">
-                            {task.photosUploaded.length > 0 ? (
-                              <button
-                                type="button"
-                                onClick={() => setInspectingTaskPhotos(task)}
-                                className="inline-flex items-center gap-1.5 text-[#1F4E3D] hover:text-[#141413] font-bold underline underline-offset-2"
-                                title="Ver comprobación de fotos y checklist"
-                              >
-                                <Camera size={13} />
-                                <span>✓ FOTOS COMPROBADAS ({task.photosUploaded.length})</span>
-                              </button>
-                            ) : task.status === 'completed' ? (
-                              <span className="text-[#1F4E3D] font-bold">
-                                ✓ COMPLETADA (0 FOTOS)
-                              </span>
-                            ) : (
-                              <span className="text-[#57554F]">
-                                PENDIENTE ({task.photosUploaded.length} FOTOS)
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-4 px-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setPreselectedResIdForInvoice(task.reservationId);
-                                  setShowCreateInvoiceModal(true);
-                                }}
-                                title="Emitir Factura Simplificada con IVA 10%"
-                                className="inline-flex items-center gap-1 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-2 py-1 font-mono text-[10px] font-bold uppercase transition"
-                              >
-                                <FileText size={11} className="text-emerald-600" />
-                                <span>Factura 10%</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => sendTaskWhatsApp(task)}
-                                title="Enviar detalles de la limpieza por WhatsApp al personal"
-                                className="inline-flex items-center gap-1 bg-[#1F4E3D] hover:bg-[#163A2D] text-white px-2.5 py-1 font-mono text-[10px] font-bold uppercase transition"
-                              >
-                                <Send size={11} />
-                                <span>WhatsApp</span>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                            return (
+                              <tr key={task.id} className="hover:bg-slate-50/60 transition">
+                                <td className="py-4 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
+                                  {task.date}
+                                </td>
+                                <td className="py-4 px-4 font-bold text-slate-900">{prop?.name}</td>
+                                <td className="py-4 px-4">
+                                  <button
+                                    type="button"
+                                    onClick={() => res && onOpenGuestPreview(res.id)}
+                                    className="font-semibold text-slate-900 hover:text-orange-600 underline underline-offset-2 flex items-center gap-1"
+                                  >
+                                    <span>{res?.guestName}</span>
+                                    <span className="font-mono text-[11px] text-slate-400">
+                                      [{res?.source}]
+                                    </span>
+                                  </button>
+                                </td>
+                                <td className="py-4 px-4 text-xs">
+                                  {task.sameDayCheckIn ? (
+                                    <span className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 font-bold px-2.5 py-1 rounded-full">
+                                      <Flame size={13} />
+                                      ENTRADA HOY ({task.nextCheckInTime}H)
+                                    </span>
+                                  ) : task.lateCheckoutActive ? (
+                                    <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded-full">
+                                      <CheckCircle2 size={13} />
+                                      LATE CHECK-OUT HASTA {task.scheduledCleaningTime}H (+{prop?.lateCheckoutPrice}€)
+                                    </span>
+                                  ) : res?.lateCheckoutRequested ? (
+                                    <div className="flex items-center gap-2">
+                                      <span className="bg-amber-50 text-amber-900 border border-amber-200 font-bold px-2.5 py-1 rounded-full">
+                                        SOLICITADO POR HUÉSPED
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => res && onApproveLateCheckout(res.id)}
+                                        className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1 rounded-lg text-xs"
+                                      >
+                                        Aprobar ({prop?.lateCheckoutUntil}H)
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2 text-slate-500">
+                                      <span>Tarde libre</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => res && onApproveLateCheckout(res.id)}
+                                        className="text-orange-600 hover:text-orange-700 font-semibold underline"
+                                      >
+                                        Conceder Late Check-out
+                                      </button>
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="py-4 px-4 font-mono font-bold">
+                                  <span
+                                    className={`px-2.5 py-1 rounded-lg text-xs ${
+                                      task.lateCheckoutActive
+                                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                        : 'bg-slate-100 text-slate-800'
+                                    }`}
+                                  >
+                                    {task.scheduledCleaningTime}h
+                                  </span>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <select
+                                    value={task.cleanerId}
+                                    onChange={(e) => onAssignCleaner(task.id, e.target.value)}
+                                    className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-800 text-xs"
+                                  >
+                                    {cleaners.map((c) => (
+                                      <option key={c.id} value={c.id}>
+                                        {c.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td className="py-4 px-4 text-xs">
+                                  {task.photosUploaded.length > 0 ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => setInspectingTaskPhotos(task)}
+                                      className="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 px-2.5 py-1 rounded-lg font-semibold transition"
+                                      title="Ver comprobación de fotos y checklist"
+                                    >
+                                      <Camera size={13} />
+                                      <span>✓ {task.photosUploaded.length} FOTOS</span>
+                                    </button>
+                                  ) : task.status === 'completed' ? (
+                                    <span className="text-emerald-700 font-semibold">
+                                      ✓ COMPLETADA
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-400 font-medium">
+                                      PENDIENTE
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-4 px-4 text-right">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setPreselectedResIdForInvoice(task.reservationId);
+                                        setShowCreateInvoiceModal(true);
+                                      }}
+                                      title="Emitir Factura Simplificada con IVA 10%"
+                                      className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-medium transition shadow-xs"
+                                    >
+                                      <FileText size={12} className="text-emerald-600" />
+                                      <span>Factura 10%</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => sendTaskWhatsApp(task)}
+                                      title="Enviar detalles de la limpieza por WhatsApp al personal"
+                                      className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
+                                    >
+                                      <Send size={12} />
+                                      <span>WhatsApp</span>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
             ) : (
               /* Vista Timeline Semanal / Gantt */
               <div className="space-y-4">
                 {Array.from(new Set(filteredTasks.map((t) => t.date))).sort().map((dateStr) => {
                   const dayTasks = filteredTasks.filter((t) => t.date === dateStr);
                   return (
-                    <div key={dateStr} className="bg-[#FAF9F5] border border-[#D5CFC0]">
-                      <div className="bg-[#E8E4D9] px-4 py-2 border-b border-[#D5CFC0] flex items-center justify-between">
+                    <div key={dateStr} className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                      <div className="bg-slate-50/80 px-5 py-3 border-b border-slate-200/80 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Calendar size={14} className="text-[#C85A32]" />
-                          <span className="font-mono text-xs font-bold text-[#141413] uppercase">
+                          <Calendar size={15} className="text-orange-600" />
+                          <span className="text-xs font-bold text-slate-900">
                             Fecha de Salida: {dateStr}
                           </span>
                         </div>
-                        <span className="font-mono text-[10px] uppercase bg-white border border-[#D5CFC0] px-2 py-0.5 font-bold text-[#57554F]">
+                        <span className="text-xs font-semibold bg-white border border-slate-200 text-slate-600 px-2.5 py-0.5 rounded-full">
                           {dayTasks.length} {dayTasks.length === 1 ? 'Limpieza' : 'Limpiezas'}
                         </span>
                       </div>
@@ -1089,71 +1092,71 @@ export default function HostDashboardView({
                           return (
                             <div
                               key={task.id}
-                              className={`p-4 border bg-white space-y-3 ${
+                              className={`p-4 border bg-white rounded-xl space-y-3 transition hover:shadow-sm ${
                                 task.sameDayCheckIn
-                                  ? 'border-l-4 border-l-[#C85A32] border-[#D5CFC0]'
+                                  ? 'border-l-4 border-l-orange-500 border-slate-200'
                                   : task.lateCheckoutActive
-                                  ? 'border-l-4 border-l-[#1F4E3D] border-[#D5CFC0]'
-                                  : 'border-[#D5CFC0]'
+                                  ? 'border-l-4 border-l-emerald-600 border-slate-200'
+                                  : 'border-slate-200/80'
                               }`}
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div>
-                                  <span className="font-bold text-sm text-[#141413] block">
+                                  <span className="font-bold text-sm text-slate-900 block">
                                     {prop?.name}
                                   </span>
-                                  <span className="text-xs text-[#57554F]">
-                                    Huésped saliente: <strong>{res?.guestName}</strong> [{res?.source}]
+                                  <span className="text-xs text-slate-500">
+                                    Huésped saliente: <strong className="text-slate-800">{res?.guestName}</strong> [{res?.source}]
                                   </span>
                                 </div>
-                                <span className="font-mono text-xs font-bold bg-[#141413] text-white px-2 py-1">
+                                <span className="text-xs font-bold bg-slate-900 text-white px-2.5 py-1 rounded-lg">
                                   {task.scheduledCleaningTime}h
                                 </span>
                               </div>
 
-                              <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+                              <div className="flex flex-wrap items-center gap-2 text-xs">
                                 {task.sameDayCheckIn && (
-                                  <span className="bg-[#C85A32]/15 text-[#C85A32] font-bold px-2 py-0.5 flex items-center gap-1">
-                                    <Flame size={11} /> ENTRADA HOY {task.nextCheckInTime}h
+                                  <span className="bg-orange-50 text-orange-700 border border-orange-200/70 font-semibold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                    <Flame size={12} /> ENTRADA HOY {task.nextCheckInTime}h
                                   </span>
                                 )}
                                 {task.lateCheckoutActive && (
-                                  <span className="bg-[#1F4E3D] text-white font-bold px-2 py-0.5">
-                                    ✓ LATE CHECK-OUT ACTIVO
+                                  <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded-md">
+                                    ✓ Late Check-out activo
                                   </span>
                                 )}
-                                <span className="bg-[#FAF9F5] border border-[#E2DDD2] text-[#57554F] px-2 py-0.5">
-                                  Personal: <strong>{cleaner?.name}</strong>
+                                <span className="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md text-xs font-medium">
+                                  Personal: <strong className="text-slate-900">{cleaner?.name}</strong>
                                 </span>
-                                <span className="bg-[#FAF9F5] border border-[#E2DDD2] text-[#57554F] px-2 py-0.5">
-                                  Tarifa: <strong>{prop?.cleaningFee || 40} €</strong>
+                                <span className="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md text-xs font-medium">
+                                  Tarifa: <strong className="text-slate-900">{prop?.cleaningFee || 40} €</strong>
                                 </span>
                               </div>
 
-                              <div className="flex items-center justify-between pt-2 border-t border-[#E2DDD2]">
-                                <span className="font-mono text-[10px] text-[#57554F]">
+                              <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                                <span>
                                   {task.photosUploaded.length > 0 ? (
                                     <button
                                       type="button"
                                       onClick={() => setInspectingTaskPhotos(task)}
-                                      className="inline-flex items-center gap-1 text-[#1F4E3D] font-bold hover:underline"
+                                      className="inline-flex items-center gap-1 text-emerald-700 font-semibold hover:underline"
                                       title="Ver fotos y checklist"
                                     >
-                                      <Camera size={11} />
+                                      <Camera size={13} />
                                       <span>✓ Verificada ({task.photosUploaded.length} fotos)</span>
                                     </button>
                                   ) : task.status === 'completed' ? (
-                                    <strong className="text-[#1F4E3D]">✓ Completada (0 fotos)</strong>
+                                    <strong className="text-emerald-700 font-semibold">✓ Completada (0 fotos)</strong>
                                   ) : (
-                                    '⏳ Pendiente de realización'
+                                    <span className="text-slate-400">⏳ Pendiente de realización</span>
                                   )}
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => sendTaskWhatsApp(task)}
-                                  className="bg-[#1F4E3D] hover:bg-[#163A2D] text-white font-mono text-[10px] uppercase font-bold px-2.5 py-1 flex items-center gap-1"
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow-sm"
                                 >
-                                  <Send size={10} />
+                                  <Send size={11} />
                                   <span>Despacho WhatsApp</span>
                                 </button>
                               </div>
@@ -1170,21 +1173,21 @@ export default function HostDashboardView({
         ) : (
           /* Sub-pestaña: Equipo de Limpiadoras y Liquidaciones */
           <div className="space-y-6">
-                <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
-                  <span className="text-[#57554F]">
-                    Total devengado equipo:{' '}
-                    <strong className="text-[#141413] text-sm">
-                      {tasks.reduce((sum, t) => {
-                        const p = properties.find((prop) => prop.id === t.propertyId);
-                        return sum + (p?.cleaningFee || 40);
-                      }, 0)}{' '}
-                      €
-                    </strong>
-                  </span>
-                  <span className="text-[#1F4E3D] font-bold">
-                    ✓ Enlaces móviles directos para móvil sin contraseñas ni descargas
-                  </span>
-                </div>
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
+              <span className="text-slate-600">
+                Total devengado equipo:{' '}
+                <strong className="text-slate-900 text-base font-bold ml-1">
+                  {tasks.reduce((sum, t) => {
+                    const p = properties.find((prop) => prop.id === t.propertyId);
+                    return sum + (p?.cleaningFee || 40);
+                  }, 0)}{' '}
+                  €
+                </strong>
+              </span>
+              <span className="text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-3 py-1 rounded-full font-semibold">
+                ✓ Enlaces móviles directos sin contraseñas ni descargas
+              </span>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {cleaners.map((c) => {
@@ -1199,20 +1202,20 @@ export default function HostDashboardView({
                 return (
                   <div
                     key={c.id}
-                    className="bg-[#FAF9F5] border border-[#D5CFC0] p-5 flex flex-col justify-between gap-4 shadow-sm"
+                    className="bg-white rounded-2xl border border-slate-200/80 p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-base text-[#141413]">{c.name}</span>
+                        <span className="font-bold text-base text-slate-900">{c.name}</span>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-mono text-[10px] uppercase bg-[#E8E4D9] px-2 py-0.5 font-bold">
-                            ACTIVA
+                          <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-2 py-0.5 rounded-full">
+                            Activa
                           </span>
                           {onDeleteCleaner && cleaners.length > 1 && (
                             <button
                               type="button"
                               onClick={() => onDeleteCleaner(c.id)}
-                              className="text-rose-500 hover:text-rose-700 text-xs px-1"
+                              className="text-slate-400 hover:text-rose-600 text-xs px-1 transition"
                               title="Eliminar limpiadora"
                             >
                               ✕
@@ -1220,43 +1223,43 @@ export default function HostDashboardView({
                           )}
                         </div>
                       </div>
-                      <p className="text-xs text-[#57554F]">{c.phone}</p>
+                      <p className="text-xs text-slate-500">{c.phone}</p>
 
                       {/* Tarjeta de métricas devengadas */}
-                      <div className="bg-white border border-[#E2DDD2] p-3 space-y-1.5 font-mono text-xs">
-                        <div className="flex justify-between text-[#57554F] text-[11px]">
+                      <div className="bg-slate-50 rounded-xl border border-slate-100 p-3.5 space-y-2 text-xs">
+                        <div className="flex justify-between text-slate-600">
                           <span>Servicios asignados:</span>
-                          <strong className="text-[#141413]">{cleanerTasks.length} ({completedCount} hechos)</strong>
+                          <strong className="text-slate-900">{cleanerTasks.length} ({completedCount} hechos)</strong>
                         </div>
-                        <div className="flex justify-between text-[#57554F] text-[11px] border-t border-[#E2DDD2] pt-1">
+                        <div className="flex justify-between text-slate-600 border-t border-slate-200/60 pt-1.5">
                           <span>Total devengado:</span>
-                          <strong className="text-[#1F4E3D] text-sm font-bold">{totalAccrued} €</strong>
+                          <strong className="text-emerald-700 text-sm font-bold">{totalAccrued} €</strong>
                         </div>
                       </div>
 
-                      <p className="font-mono text-[11px] text-[#141413] bg-white border border-[#E2DDD2] px-2.5 py-1.5 truncate">
+                      <p className="text-xs text-slate-600 font-mono bg-slate-50 border border-slate-200/70 px-3 py-2 rounded-lg truncate">
                         {cleanerUrl}
                       </p>
                     </div>
 
-                    <div className="space-y-2 font-mono text-xs font-bold uppercase">
+                    <div className="space-y-2 text-xs font-semibold">
                       <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={() => copyCleanerSettlement(c)}
-                          className="flex-1 bg-white border border-[#141413] py-2 flex items-center justify-center gap-1.5 hover:bg-[#141413] hover:text-white transition text-[11px]"
+                          className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-xs shadow-sm"
                           title="Copiar desglose completo para pago vía Bizum o transferencia"
                         >
-                          {copiedSettlementCleanerId === c.id ? <CheckCheck size={13} className="text-[#1F4E3D]" /> : <Copy size={13} />}
+                          {copiedSettlementCleanerId === c.id ? <CheckCheck size={14} className="text-emerald-600" /> : <Copy size={14} />}
                           <span>{copiedSettlementCleanerId === c.id ? '¡Copiado!' : 'Liquidación'}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => downloadCleanerSettlementCsv(c)}
-                          className="bg-white border border-[#141413] px-3 py-2 flex items-center justify-center hover:bg-[#141413] hover:text-white transition"
+                          className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-xl flex items-center justify-center transition shadow-sm"
                           title="Descargar liquidación en CSV"
                         >
-                          <Download size={13} />
+                          <Download size={14} />
                         </button>
                       </div>
 
@@ -1271,7 +1274,7 @@ export default function HostDashboardView({
                               '_blank'
                             );
                           }}
-                          className="flex-1 bg-[#1F4E3D] hover:bg-[#163A2D] text-white py-2 flex items-center justify-center gap-1.5 transition text-[11px]"
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-xs shadow-sm"
                         >
                           <Send size={12} />
                           <span>WhatsApp</span>
@@ -1279,7 +1282,7 @@ export default function HostDashboardView({
                         <button
                           type="button"
                           onClick={() => onOpenCleanerPreview(c.id)}
-                          className="bg-[#141413] hover:bg-[#2C2C29] text-white px-4 py-2 text-[11px]"
+                          className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs transition shadow-sm"
                         >
                           Abrir
                         </button>
@@ -1307,23 +1310,23 @@ export default function HostDashboardView({
                   setNewCleanerName('');
                   setNewCleanerPhone('+34 ');
                 }}
-                className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 flex flex-col sm:flex-row gap-2 items-center"
+                className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center"
               >
                 <input
                   placeholder="Nombre de la nueva limpiadora (ej. Rocío Díaz)"
                   value={newCleanerName}
                   onChange={(e) => setNewCleanerName(e.target.value)}
-                  className="flex-1 w-full bg-white border border-[#D5CFC0] px-3 py-2 text-xs"
+                  className="flex-1 w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
                 <input
                   placeholder="Teléfono (+34...)"
                   value={newCleanerPhone}
                   onChange={(e) => setNewCleanerPhone(e.target.value)}
-                  className="w-full sm:w-48 bg-white border border-[#D5CFC0] px-3 py-2 text-xs font-mono"
+                  className="w-full sm:w-48 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
                 <button
                   type="submit"
-                  className="w-full sm:w-auto bg-[#141413] text-white font-mono text-xs font-bold uppercase px-4 py-2 shrink-0"
+                  className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shrink-0 transition shadow-sm"
                 >
                   + Crear Enlace /c/
                 </button>
@@ -1337,34 +1340,34 @@ export default function HostDashboardView({
         {/* VISTA 4: HUÉSPEDES, HORARIOS PREVISTOS & EXTRAS SOLICITADOS */}
         {section === 'guests' && (
           <div className="space-y-6">
-            <div className="border-b border-[#E2DDD2] pb-3 flex flex-wrap items-end justify-between gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
               <div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                  DATOS EN VIVO DESDE LA GUÍA DEL HUÉSPED (/g/:slug)
+                <span className="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200/60 px-2.5 py-0.5 rounded-full inline-block">
+                  Datos en vivo desde la Guía del Huésped (/g/:slug)
                 </span>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413]">
-                  Horarios de Llegada/Salida, Confirmaciones y Extras Solicitados
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1">
+                  Horarios de Llegada/Salida, Confirmaciones y Extras
                 </h2>
               </div>
             </div>
 
             {/* Barra de Filtros Huéspedes */}
-            <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="relative flex-1 min-w-[200px]">
-                <Search size={14} className="absolute left-2.5 top-2.5 text-[#57554F]" />
+                <Search size={14} className="absolute left-3 top-3 text-slate-400" />
                 <input
                   type="text"
                   value={guestSearch}
                   onChange={(e) => setGuestSearch(e.target.value)}
                   placeholder="Buscar huésped por nombre..."
-                  className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#D5CFC0] text-xs font-medium text-[#141413] focus:outline-none focus:border-[#141413]"
+                  className="w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
               <select
                 value={guestPropertyFilter}
                 onChange={(e) => setGuestPropertyFilter(e.target.value)}
-                className="bg-white border border-[#D5CFC0] px-3 py-1.5 font-semibold text-[#141413] text-xs"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-medium text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="all">Todos los alojamientos ({properties.length})</option>
                 {properties.map((p) => (
@@ -1375,19 +1378,19 @@ export default function HostDashboardView({
               </select>
             </div>
 
-            <div className="bg-[#FAF9F5] border border-[#D5CFC0] overflow-x-auto">
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-[#D5CFC0] bg-[#F6F4EE] font-mono text-[10px] uppercase tracking-wider text-[#57554F]">
-                    <th className="py-3.5 px-4">Huésped / Canal</th>
+                  <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <th className="py-3.5 px-5">Huésped / Canal</th>
                     <th className="py-3.5 px-4">Alojamiento</th>
                     <th className="py-3.5 px-4">Hora Llegada / Salida</th>
                     <th className="py-3.5 px-4">Extras Solicitados</th>
                     <th className="py-3.5 px-4">Estado Guía</th>
-                    <th className="py-3.5 px-4 text-center">Acciones</th>
+                    <th className="py-3.5 px-5 text-center">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E2DDD2]">
+                <tbody className="divide-y divide-slate-100">
                   {reservations
                     .filter((r) => {
                       if (guestPropertyFilter !== 'all' && r.propertyId !== guestPropertyFilter) return false;
@@ -1403,21 +1406,21 @@ export default function HostDashboardView({
                     const reqCount = (res.requestedExtras || []).length;
 
                     return (
-                      <tr key={res.id} className="hover:bg-white transition">
-                        <td className="py-4 px-4">
-                          <span className="font-bold text-[#141413] block">{res.guestName}</span>
-                          <span className="font-mono text-[10px] uppercase text-[#57554F]">
+                      <tr key={res.id} className="hover:bg-slate-50/60 transition">
+                        <td className="py-4 px-5">
+                          <span className="font-bold text-slate-900 block">{res.guestName}</span>
+                          <span className="text-xs text-slate-500">
                             {res.source} · {res.checkIn} → {res.checkOut}
                           </span>
                         </td>
-                        <td className="py-4 px-4 font-semibold text-[#141413]">
+                        <td className="py-4 px-4 font-semibold text-slate-800">
                           {prop?.name}
                         </td>
-                        <td className="py-4 px-4 font-mono">
-                          <span className="block text-[#141413]">
+                        <td className="py-4 px-4 text-xs">
+                          <span className="block text-slate-800">
                             In: <strong>{res.estimatedArrivalTime || prop?.checkInTime || '15:00'}h</strong>
                           </span>
-                          <span className="block text-[#57554F]">
+                          <span className="block text-slate-500">
                             Out:{' '}
                             <strong>
                               {res.lateCheckoutApproved
@@ -1426,21 +1429,21 @@ export default function HostDashboardView({
                             </strong>
                           </span>
                         </td>
-                        <td className="py-4 px-4 font-mono text-[11px]">
-                          <div className="space-y-1">
+                        <td className="py-4 px-4 text-xs">
+                          <div className="space-y-1.5">
                             {res.lateCheckoutApproved ? (
-                              <span className="inline-block px-2 py-0.5 font-bold uppercase bg-[#1F4E3D] text-white">
-                                ✓ LATE CHECK-OUT ACTIVO
+                              <span className="inline-block px-2.5 py-0.5 font-semibold text-xs rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                ✓ Late Check-out activo
                               </span>
                             ) : res.lateCheckoutRequested ? (
                               <div className="flex items-center gap-1.5">
-                                <span className="px-2 py-0.5 font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300">
-                                  LATE CHECK-OUT PEDIDO
+                                <span className="px-2 py-0.5 font-semibold text-xs rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
+                                  Late Check-out pedido
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => onApproveLateCheckout(res.id)}
-                                  className="bg-[#141413] text-white font-bold px-2 py-0.5 text-[10px] hover:bg-[#2C2C29]"
+                                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-2.5 py-0.5 text-xs rounded-md shadow-sm transition"
                                 >
                                   Aprobar
                                 </button>
@@ -1454,10 +1457,10 @@ export default function HostDashboardView({
                               return (
                                 <div key={extraId} className="flex items-center gap-1.5 pt-0.5">
                                   <span
-                                    className={`px-2 py-0.5 font-bold uppercase ${
+                                    className={`px-2 py-0.5 font-semibold text-xs rounded-md ${
                                       isApproved
-                                        ? 'bg-[#1F4E3D] text-white'
-                                        : 'bg-indigo-100 text-indigo-900 border border-indigo-200'
+                                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                        : 'bg-indigo-50 text-indigo-800 border border-indigo-200'
                                     }`}
                                   >
                                     {ext.title} ({ext.price}€) {isApproved ? '✓' : ''}
@@ -1466,7 +1469,7 @@ export default function HostDashboardView({
                                     <button
                                       type="button"
                                       onClick={() => onApproveExtra(res.id, extraId)}
-                                      className="bg-[#141413] text-white font-bold px-2 py-0.5 text-[10px] hover:bg-[#2C2C29]"
+                                      className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-2 py-0.5 text-xs rounded-md shadow-sm transition"
                                     >
                                       Aprobar
                                     </button>
@@ -1478,35 +1481,35 @@ export default function HostDashboardView({
                             {!res.lateCheckoutApproved &&
                               !res.lateCheckoutRequested &&
                               reqCount === 0 && (
-                                <span className="text-[#57554F]">Ninguno aún</span>
+                                <span className="text-slate-400">Ninguno aún</span>
                               )}
                           </div>
                         </td>
-                        <td className="py-4 px-4 font-mono text-[11px] space-y-1">
+                        <td className="py-4 px-4 text-xs space-y-1">
                           {res.guestArrivedAt ? (
-                            <span className="block text-[#1F4E3D] font-bold">
+                            <span className="block text-emerald-700 font-semibold">
                               ✓ Llegó a las {res.guestArrivedAt}
                             </span>
                           ) : res.arrivalInstructionsConfirmed ? (
-                            <span className="block text-[#141413] font-semibold">
+                            <span className="block text-slate-800 font-medium">
                               ✓ Instrucciones leídas
                             </span>
                           ) : (
-                            <span className="block text-[#57554F]">Pendiente de lectura</span>
+                            <span className="block text-slate-400">Pendiente de lectura</span>
                           )}
                         </td>
-                        <td className="py-4 px-4 space-y-1.5 min-w-[140px]">
+                        <td className="py-4 px-5 space-y-1.5 min-w-[140px]">
                           <button
                             type="button"
                             onClick={() => onOpenGuestPreview(res.id)}
-                            className="w-full bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-[10px] font-bold uppercase px-3 py-1.5 transition text-center"
+                            className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition text-center shadow-sm"
                           >
                             Abrir Guía
                           </button>
                           <button
                             type="button"
                             onClick={() => sendGuestGuideWhatsApp(res)}
-                            className="w-full bg-[#1F4E3D] hover:bg-[#163A2D] text-white font-mono text-[10px] font-bold uppercase px-3 py-1.5 flex items-center justify-center gap-1 transition"
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 transition shadow-sm"
                             title="Enviar enlace directo de la guía por WhatsApp al huésped"
                           >
                             <Send size={11} />
@@ -1525,20 +1528,20 @@ export default function HostDashboardView({
         {/* VISTA FISCAL: FACTURAS A HUÉSPEDES & IVA 10% (MODELO 303) */}
         {section === 'invoices' && (
           <div className="space-y-8">
-            <div className="border-b border-[#E2DDD2] pb-4 flex flex-wrap items-end justify-between gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-emerald-800 bg-emerald-100 font-bold px-2 py-0.5 rounded">
-                    RÉGIMEN FISCAL ALOJAMIENTOS TURÍSTICOS
+                  <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
+                    Régimen Fiscal Alojamientos Turísticos
                   </span>
-                  <span className="text-xs text-[#57554F] font-semibold">
-                    IVA 10% Obligatorio &lt; 30 días
+                  <span className="text-xs text-slate-500 font-medium">
+                    IVA 10% obligatorio &lt; 30 días
                   </span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413] mt-1">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1">
                   Facturas a Huéspedes & Libro de IVA
                 </h2>
-                <p className="text-xs text-[#57554F] mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Emisión legal de Facturas Simplificadas (&lt; 3.000 € sin DNI obligatorio) y resumen para el Modelo 303 de Hacienda.
                 </p>
               </div>
@@ -1547,9 +1550,9 @@ export default function HostDashboardView({
                 <button
                   type="button"
                   onClick={() => setShowFiscalProfileModal(true)}
-                  className="bg-white hover:bg-[#FAF9F5] border border-[#D5CFC0] text-[#141413] px-3.5 py-2 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition"
+                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 px-3.5 py-2 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-sm"
                 >
-                  <Building2 size={14} className="text-[#57554F]" />
+                  <Building2 size={15} className="text-slate-500" />
                   <span>Mis Datos Fiscales</span>
                 </button>
                 <button
@@ -1558,27 +1561,27 @@ export default function HostDashboardView({
                     setPreselectedResIdForInvoice(undefined);
                     setShowCreateInvoiceModal(true);
                   }}
-                  className="bg-[#141413] hover:bg-[#2C2C29] text-white px-4 py-2 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition shadow-sm"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-sm"
                 >
-                  <Plus size={14} className="text-emerald-400" />
+                  <Plus size={15} />
                   <span>+ Emitir Factura</span>
                 </button>
               </div>
             </div>
 
             {/* AVISO LEGAL Y TRANQUILIDAD CONTABLE */}
-            <div className="bg-emerald-50 border border-emerald-200/90 p-5 rounded-2xl flex flex-col sm:flex-row items-start gap-4">
-              <div className="p-2.5 bg-emerald-600 text-white rounded-xl shrink-0 mt-0.5">
+            <div className="bg-emerald-50/70 border border-emerald-200/80 p-5 rounded-2xl flex flex-col sm:flex-row items-start gap-4 shadow-sm">
+              <div className="p-2.5 bg-emerald-600 text-white rounded-xl shrink-0 mt-0.5 shadow-sm">
                 <ShieldCheck size={20} />
               </div>
-              <div className="space-y-1 text-xs">
+              <div className="space-y-1.5 text-xs">
                 <h3 className="font-bold text-emerald-950 text-sm">
                   ¿Por qué puedes emitir Factura Simplificada sin pedir DNI al viajero?
                 </h3>
                 <p className="text-emerald-900 leading-relaxed">
                   Conforme al <strong>Artículo 4.2.f del Real Decreto 1619/2012</strong>, en los servicios de hospedaje y alojamiento turístico se permite emitir <strong>Factura Simplificada hasta 3.000 €</strong> (IVA incluido). No estás obligado a solicitar el NIF ni el domicilio del huésped salvo que se trate de una empresa o autónomo que lo solicite para deducirse el gasto.
                 </p>
-                <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] font-mono text-emerald-800">
+                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-medium text-emerald-800">
                   <span>✓ 100% Válido ante la AEAT</span>
                   <span>✓ Serie correlativa {currentFiscalProfile.simplifiedSeriesPrefix}-XXX</span>
                   <span>✓ Cálculo automático del 10% de IVA</span>
@@ -1587,13 +1590,13 @@ export default function HostDashboardView({
             </div>
 
             {/* RESUMEN TRIMESTRAL PARA EL MODELO 303 DE HACIENDA */}
-            <div className="bg-white border border-[#E2DDD2] p-6 space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2DDD2] pb-4">
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <div>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#57554F] font-bold">
-                    LIQUIDACIÓN TRIBUTARIA
+                  <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">
+                    Liquidación Tributaria
                   </span>
-                  <h3 className="text-base font-bold text-[#141413]">
+                  <h3 className="text-base font-bold text-slate-900">
                     Resumen Trimestral para Hacienda (Modelo 303)
                   </h3>
                 </div>
@@ -1604,10 +1607,10 @@ export default function HostDashboardView({
                       key={q}
                       type="button"
                       onClick={() => setSelectedQuarter(q)}
-                      className={`px-3 py-1.5 font-mono text-xs font-bold transition ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                         selectedQuarter === q
-                          ? 'bg-[#141413] text-white shadow-sm'
-                          : 'bg-[#FAF9F5] text-[#57554F] border border-[#D5CFC0] hover:bg-white'
+                          ? 'bg-slate-900 text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'
                       }`}
                     >
                       {q}
@@ -1624,7 +1627,7 @@ export default function HostDashboardView({
                       );
                       exportInvoicesToCsv(qInvoices, `libro_iva_turnexo_${selectedQuarter}.csv`);
                     }}
-                    className="ml-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1F4E3D] hover:bg-[#163A2D] text-white text-xs font-mono font-bold uppercase transition"
+                    className="ml-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition shadow-sm"
                     title="Descargar libro de facturas para tu gestoría"
                   >
                     <Download size={13} />
@@ -1639,44 +1642,44 @@ export default function HostDashboardView({
                 const currentSummary = summaries.find((s) => s.quarter === selectedQuarter) || summaries[0];
                 return (
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-4 bg-[#FAF9F5] border border-[#E2DDD2]">
-                      <span className="font-mono text-[10px] uppercase text-[#57554F] font-semibold block">
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                      <span className="text-xs uppercase text-slate-500 font-semibold block">
                         Facturas Emitidas ({selectedQuarter})
                       </span>
-                      <span className="text-2xl font-extrabold text-[#141413] font-mono mt-1 block">
+                      <span className="text-2xl font-bold text-slate-900 mt-1 block">
                         {currentSummary.totalInvoices}
                       </span>
-                      <span className="text-[10px] text-[#57554F]">Operaciones registradas</span>
+                      <span className="text-xs text-slate-500">Operaciones registradas</span>
                     </div>
 
-                    <div className="p-4 bg-[#FAF9F5] border border-[#E2DDD2]">
-                      <span className="font-mono text-[10px] uppercase text-[#57554F] font-semibold block">
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                      <span className="text-xs uppercase text-slate-500 font-semibold block">
                         Base Imponible Total
                       </span>
-                      <span className="text-2xl font-extrabold text-[#141413] font-mono mt-1 block">
+                      <span className="text-2xl font-bold text-slate-900 mt-1 block">
                         {currentSummary.totalBase.toFixed(2)} €
                       </span>
-                      <span className="text-[10px] text-[#57554F]">Casilla [01] Modelo 303</span>
+                      <span className="text-xs text-slate-500">Casilla [01] Modelo 303</span>
                     </div>
 
-                    <div className="p-4 bg-emerald-50 border border-emerald-200">
-                      <span className="font-mono text-[10px] uppercase text-emerald-800 font-bold block">
+                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200/80">
+                      <span className="text-xs uppercase text-emerald-800 font-bold block">
                         Cuota IVA Devengado (10%)
                       </span>
-                      <span className="text-2xl font-extrabold text-emerald-900 font-mono mt-1 block">
+                      <span className="text-2xl font-bold text-emerald-900 mt-1 block">
                         {currentSummary.totalVat.toFixed(2)} €
                       </span>
-                      <span className="text-[10px] text-emerald-700">Casilla [03] a ingresar</span>
+                      <span className="text-xs text-emerald-700">Casilla [03] a ingresar</span>
                     </div>
 
-                    <div className="p-4 bg-[#141413] text-white">
-                      <span className="font-mono text-[10px] uppercase text-white/50 font-semibold block">
+                    <div className="p-4 bg-slate-900 rounded-xl text-white shadow-sm">
+                      <span className="text-xs uppercase text-slate-300 font-semibold block">
                         Total Facturado ({selectedQuarter})
                       </span>
-                      <span className="text-2xl font-extrabold text-emerald-400 font-mono mt-1 block">
+                      <span className="text-2xl font-bold text-emerald-400 mt-1 block">
                         {currentSummary.totalAmount.toFixed(2)} €
                       </span>
-                      <span className="text-[10px] text-white/60">IVA incluido</span>
+                      <span className="text-xs text-slate-400">IVA incluido</span>
                     </div>
                   </div>
                 );
@@ -1688,20 +1691,20 @@ export default function HostDashboardView({
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative">
-                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#57554F]" />
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                       type="text"
                       placeholder="Buscar por factura o huésped..."
                       value={invoiceSearch}
                       onChange={(e) => setInvoiceSearch(e.target.value)}
-                      className="pl-8 pr-3 py-1.5 text-xs bg-white border border-[#D5CFC0] w-60 focus:outline-none"
+                      className="pl-8 pr-3.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl w-60 focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
 
                   <select
                     value={invoicePropertyFilter}
                     onChange={(e) => setInvoicePropertyFilter(e.target.value)}
-                    className="py-1.5 px-3 text-xs bg-white border border-[#D5CFC0]"
+                    className="py-1.5 px-3 text-xs bg-white border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="all">Todos los alojamientos ({properties.length})</option>
                     {properties.map((p) => (
@@ -1712,38 +1715,38 @@ export default function HostDashboardView({
                   </select>
                 </div>
 
-                <span className="font-mono text-xs text-[#57554F]">
+                <span className="text-xs text-slate-500 font-medium">
                   Mostrando {allInvoices.length} facturas registradas
                 </span>
               </div>
 
               {allInvoices.length === 0 ? (
-                <div className="bg-white border border-[#E2DDD2] p-12 text-center space-y-4">
-                  <div className="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center mx-auto">
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center space-y-4 shadow-sm">
+                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto border border-emerald-100">
                     <FileText size={24} />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-[#141413]">
+                    <h3 className="text-base font-bold text-slate-900">
                       No tienes facturas emitidas todavía
                     </h3>
-                    <p className="text-xs text-[#57554F] max-w-md mx-auto mt-1">
+                    <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
                       Conecta tus salidas del calendario iCal o emite tu primera factura simplificada con IVA del 10% para cumplir con la normativa.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowCreateInvoiceModal(true)}
-                    className="bg-[#141413] hover:bg-[#2C2C29] text-white px-5 py-2.5 text-xs font-mono font-bold uppercase transition"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 text-xs font-bold rounded-xl transition shadow-sm"
                   >
                     + Emitir Mi Primera Factura
                   </button>
                 </div>
               ) : (
-                <div className="bg-white border border-[#E2DDD2] overflow-x-auto">
+                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-[#FAF9F5] border-b border-[#E2DDD2] font-mono text-[10px] text-[#57554F] uppercase">
-                        <th className="py-3 px-4">Nº Factura</th>
+                      <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] text-slate-500 uppercase tracking-wider font-semibold">
+                        <th className="py-3 px-5">Nº Factura</th>
                         <th className="py-3 px-4">Fecha Emisión</th>
                         <th className="py-3 px-4">Alojamiento</th>
                         <th className="py-3 px-4">Huésped / Cliente</th>
@@ -1751,10 +1754,10 @@ export default function HostDashboardView({
                         <th className="py-3 px-4 text-right">Base Imponible</th>
                         <th className="py-3 px-4 text-right">IVA (10%)</th>
                         <th className="py-3 px-4 text-right">Total Factura</th>
-                        <th className="py-3 px-4 text-right">Acción</th>
+                        <th className="py-3 px-5 text-right">Acción</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E2DDD2]">
+                    <tbody className="divide-y divide-slate-100">
                       {allInvoices
                         .filter((inv) => {
                           if (
@@ -1771,9 +1774,9 @@ export default function HostDashboardView({
                           return true;
                         })
                         .map((inv) => (
-                          <tr key={inv.id} className="hover:bg-[#FAF9F5] transition">
-                            <td className="py-3.5 px-4 font-mono font-bold text-[#141413]">
-                              <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">
+                          <tr key={inv.id} className="hover:bg-slate-50/60 transition">
+                            <td className="py-3.5 px-5 font-mono font-bold text-slate-900">
+                              <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md border border-slate-200">
                                 {inv.invoiceNumber}
                               </span>
                             </td>
@@ -1781,52 +1784,52 @@ export default function HostDashboardView({
                               {inv.issueDate}
                             </td>
                             <td className="py-3.5 px-4">
-                              <span className="font-semibold text-[#141413] block">
+                              <span className="font-semibold text-slate-900 block">
                                 {inv.propertyName}
                               </span>
-                              <span className="text-[10px] text-slate-500 font-mono">
+                              <span className="text-[11px] text-slate-500">
                                 {inv.stayStartDate} al {inv.stayEndDate} ({inv.nights} noches)
                               </span>
                             </td>
                             <td className="py-3.5 px-4">
-                              <span className="font-bold text-[#141413] block">
+                              <span className="font-bold text-slate-900 block">
                                 {inv.guestName}
                               </span>
                               {inv.guestFiscalId ? (
-                                <span className="text-[10px] font-mono text-slate-500">
+                                <span className="text-[11px] font-mono text-slate-500">
                                   NIF: {inv.guestFiscalId}
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-slate-400 italic">
+                                <span className="text-[11px] text-slate-400 italic">
                                   Simplificada (RD 1619/2012)
                                 </span>
                               )}
                             </td>
-                            <td className="py-3.5 px-4 font-mono text-[10px]">
+                            <td className="py-3.5 px-4 text-[11px]">
                               {inv.isSimplified ? (
-                                <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
+                                <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
                                   Simplificada
                                 </span>
                               ) : (
-                                <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">
+                                <span className="bg-indigo-50 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full font-semibold">
                                   Completa
                                 </span>
                               )}
                             </td>
-                            <td className="py-3.5 px-4 text-right font-mono font-medium text-slate-700">
+                            <td className="py-3.5 px-4 text-right font-medium text-slate-700">
                               {inv.baseAmount.toFixed(2)} €
                             </td>
-                            <td className="py-3.5 px-4 text-right font-mono font-semibold text-emerald-700">
+                            <td className="py-3.5 px-4 text-right font-semibold text-emerald-700">
                               +{inv.vatAmount.toFixed(2)} €
                             </td>
-                            <td className="py-3.5 px-4 text-right font-mono font-bold text-[#141413]">
+                            <td className="py-3.5 px-4 text-right font-bold text-slate-900">
                               {inv.totalAmount.toFixed(2)} €
                             </td>
-                            <td className="py-3.5 px-4 text-right">
+                            <td className="py-3.5 px-5 text-right">
                               <button
                                 type="button"
                                 onClick={() => setSelectedInvoiceForPrint(inv)}
-                                className="inline-flex items-center gap-1 bg-[#141413] hover:bg-[#2C2C29] text-white px-2.5 py-1 text-[11px] font-mono font-bold uppercase transition"
+                                className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
                               >
                                 <Printer size={12} />
                                 <span>Ver / PDF</span>
@@ -1845,25 +1848,25 @@ export default function HostDashboardView({
         {/* VISTA 5: FACTURACIÓN SELF-SERVICE & ESTADO DE INFRAESTRUCTURA 0€ */}
         {section === 'billing' && (
           <div className="space-y-8">
-            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E2DDD2] pb-4">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
               <div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                  PLANES TRANSPARENTES SIN PERMANENCIA
+                <span className="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200/60 px-2.5 py-0.5 rounded-full inline-block">
+                  Planes transparentes sin permanencia
                 </span>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413] mt-0.5">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1">
                   Facturación, Plan de Suscripción y Nube
                 </h2>
               </div>
 
               {/* Selector Mensual / Anual con descuento */}
-              <div className="flex items-center gap-2 bg-[#E8E4D9] p-1 border border-[#D5CFC0]">
+              <div className="flex items-center gap-1.5 bg-slate-200/70 p-1 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setIsAnnualBilling(false)}
-                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition ${
+                  className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition ${
                     !isAnnualBilling
-                      ? 'bg-[#141413] text-white shadow-sm'
-                      : 'text-[#57554F] hover:text-[#141413]'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   Pago Mensual
@@ -1871,14 +1874,14 @@ export default function HostDashboardView({
                 <button
                   type="button"
                   onClick={() => setIsAnnualBilling(true)}
-                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition ${
+                  className={`px-3.5 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 transition ${
                     isAnnualBilling
-                      ? 'bg-[#C85A32] text-white shadow-sm'
-                      : 'text-[#57554F] hover:text-[#141413]'
+                      ? 'bg-orange-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <span>Pago Anual</span>
-                  <span className="bg-emerald-500 text-slate-950 text-[9px] px-1 py-0.2 rounded font-black font-mono">
+                  <span className="bg-emerald-500 text-slate-950 text-[10px] px-1.5 py-0.2 rounded-md font-extrabold">
                     -20%
                   </span>
                 </button>
@@ -1887,28 +1890,28 @@ export default function HostDashboardView({
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Resumen de Suscripción Actual */}
-              <div className="lg:col-span-2 bg-[#141413] text-[#F6F4EE] p-7 space-y-6">
-                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/15 pb-5">
+              <div className="lg:col-span-2 bg-slate-900 text-slate-100 rounded-3xl p-7 space-y-6 shadow-xl border border-slate-800">
+                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 pb-5">
                   <div>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] block">
-                      PLAN ACTIVO EN TU CUENTA
+                    <span className="text-xs font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full inline-block">
+                      Plan activo en tu cuenta
                     </span>
-                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight mt-1">
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1.5">
                       {hostAccount?.plan === 'plan_starter'
                         ? 'Starter · 1 Alojamiento (0€ Gratis)'
                         : hostAccount?.plan === 'plan_manager'
                         ? `Microgestora · Hasta 10 Alojamientos (${isAnnualBilling ? '31€/mes · 372€/año' : '39€/mes'})`
                         : `Pro Fiscal · Hasta 5 Alojamientos (${isAnnualBilling ? '15€/mes · 180€/año' : '19€/mes'})`}
                     </h3>
-                    <p className="text-xs text-white/65 mt-1">
+                    <p className="text-xs text-slate-400 mt-1">
                       Estado:{' '}
                       {hostAccount?.subscriptionStatus === 'active'
                         ? 'Suscripción Activa (Stripe Billing)'
                         : `Periodo de prueba gratuito activo hasta el ${hostAccount?.trialEndsAt || 'próximo mes'}`}
                     </p>
                   </div>
-                  <div className="text-right font-mono">
-                    <span className="text-3xl font-bold text-white">
+                  <div className="text-right">
+                    <span className="text-3xl font-extrabold text-white">
                       {hostAccount?.plan === 'plan_starter'
                         ? '0'
                         : hostAccount?.plan === 'plan_manager'
@@ -1916,24 +1919,24 @@ export default function HostDashboardView({
                         : (isAnnualBilling ? '15' : '19')}{' '}
                       €
                     </span>
-                    <span className="block text-[10px] text-white/50">
+                    <span className="block text-xs text-slate-400 mt-0.5">
                       / mes ({isAnnualBilling ? 'pago anual · 2 meses gratis' : 'facturación mensual'})
                     </span>
                   </div>
                 </div>
 
                 {/* Quota de Alojamientos del Plan */}
-                <div className="bg-white/5 border border-white/10 p-4 space-y-2">
-                  <div className="flex items-center justify-between font-mono text-xs">
-                    <span className="text-white/60">Alojamientos utilizados en tu cuenta:</span>
+                <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-300 font-medium">Alojamientos utilizados en tu cuenta:</span>
                     <span className="font-bold text-white">
                       {properties.length} / {maxAllowedProperties} alojamientos
                     </span>
                   </div>
-                  <div className="w-full bg-white/10 h-2 overflow-hidden">
+                  <div className="w-full bg-slate-700/50 h-2 rounded-full overflow-hidden">
                     <div
-                      className={`h-full transition-all duration-300 ${
-                        properties.length >= maxAllowedProperties ? 'bg-[#C85A32]' : 'bg-emerald-500'
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        properties.length >= maxAllowedProperties ? 'bg-orange-500' : 'bg-emerald-500'
                       }`}
                       style={{
                         width: `${Math.min(100, (properties.length / Math.max(1, maxAllowedProperties)) * 100)}%`,
@@ -1941,14 +1944,14 @@ export default function HostDashboardView({
                     />
                   </div>
                   {properties.length >= maxAllowedProperties && hostAccount?.plan !== 'plan_manager' && (
-                    <p className="text-[11px] text-amber-300 pt-1">
+                    <p className="text-xs text-amber-300 pt-1">
                       ⚠️ Has alcanzado el límite de tu plan ({properties.length}/{maxAllowedProperties} alojamientos). Selecciona un plan superior para sincronizar más propiedades.
                     </p>
                   )}
                 </div>
 
                 {/* Comparador interactivo de los 3 planes oficiales */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
                   {(
                     [
                       {
@@ -1986,42 +1989,42 @@ export default function HostDashboardView({
                         key={p.id}
                         type="button"
                         onClick={() => onChangePlan?.(p.id)}
-                        className={`p-4 text-left border transition flex flex-col justify-between ${
+                        className={`p-4 rounded-2xl text-left border transition flex flex-col justify-between ${
                           isCurrent
-                            ? 'border-[#C85A32] bg-[#1E1E1C] ring-1 ring-[#C85A32]'
-                            : 'border-white/15 hover:border-white/40 bg-white/[0.02]'
+                            ? 'border-orange-500 bg-white/[0.06] ring-2 ring-orange-500 shadow-md'
+                            : 'border-slate-800 hover:border-slate-700 bg-slate-800/40'
                         }`}
                       >
                         <div>
-                          <div className="flex items-center justify-between gap-1 mb-1">
-                            <span className="text-[10px] uppercase font-bold text-emerald-400">
+                          <div className="flex items-center justify-between gap-1 mb-1.5">
+                            <span className="text-[11px] font-bold text-emerald-400">
                               {p.saving}
                             </span>
                             {isCurrent && (
-                              <span className="text-[9px] uppercase px-1.5 py-0.5 bg-[#C85A32] text-white font-bold">
-                                ACTIVO
+                              <span className="text-[10px] px-2 py-0.5 bg-orange-600 text-white font-bold rounded-full">
+                                Activo
                               </span>
                             )}
                           </div>
                           <span className="font-extrabold text-white text-sm block">{p.title}</span>
-                          <span className="text-[11px] text-[#C85A32] font-bold block mt-0.5">
+                          <span className="text-xs text-orange-400 font-semibold block mt-0.5">
                             {p.limit}
                           </span>
-                          <div className="mt-2">
+                          <div className="mt-2.5">
                             <span className="text-xl font-black text-white">{p.price}</span>
-                            <span className="text-[10px] text-white/50 block">{p.period}</span>
+                            <span className="text-[11px] text-slate-400 block">{p.period}</span>
                           </div>
-                          <span className="text-[11px] text-white/60 font-sans block mt-2 leading-relaxed">
+                          <span className="text-xs text-slate-300 block mt-2.5 leading-relaxed">
                             {p.desc}
                           </span>
                         </div>
 
-                        <div className="mt-4 pt-3 border-t border-white/10 text-center">
+                        <div className="mt-4 pt-3 border-t border-slate-700/60 text-center">
                           <span
-                            className={`block py-1.5 text-[10px] font-bold uppercase tracking-wider ${
+                            className={`block py-2 text-xs font-bold rounded-xl transition ${
                               isCurrent
-                                ? 'bg-white/10 text-white'
-                                : 'bg-[#C85A32] hover:bg-[#B04A25] text-white'
+                                ? 'bg-slate-700/60 text-white'
+                                : 'bg-orange-600 hover:bg-orange-700 text-white shadow-sm'
                             }`}
                           >
                             {isCurrent ? '✓ Plan Actual' : 'Seleccionar'}
@@ -2033,7 +2036,7 @@ export default function HostDashboardView({
                 </div>
 
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs text-white/60">
+                  <p className="text-xs text-slate-400">
                     Sin permanencia. Cancela o cambia de plan en cualquier momento desde tu panel.
                   </p>
                   <button
@@ -2047,7 +2050,7 @@ export default function HostDashboardView({
                         onActivateSubscription?.();
                       }
                     }}
-                    className="bg-[#C85A32] hover:bg-[#B04A25] text-white font-mono text-xs font-bold uppercase tracking-wider px-5 py-3 transition shadow-md"
+                    className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-md"
                   >
                     {hostAccount?.subscriptionStatus === 'active'
                       ? '✓ Suscripción Stripe Activa'
@@ -2057,36 +2060,36 @@ export default function HostDashboardView({
               </div>
 
               {/* Estado de Optimización Coste 0€ */}
-              <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-6 space-y-4">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#1F4E3D] font-bold flex items-center gap-1.5">
-                  <ShieldCheck size={14} /> ARQUITECTURA COSTE 0€ ACTIVA
+              <div className="bg-white rounded-3xl border border-slate-200/80 p-6 space-y-4 shadow-sm">
+                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+                  <ShieldCheck size={14} /> Arquitectura coste 0€ activa
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413]">
+                <h3 className="text-xl font-bold tracking-tight text-slate-900">
                   Consumo de Servidor Optimizado
                 </h3>
-                <ul className="space-y-3 text-xs text-[#57554F]">
-                  <li className="bg-white border border-[#E2DDD2] p-3">
-                    <strong className="text-[#141413] block font-mono text-[11px]">
-                      ✓ VÍDEOS EN YOUTUBE / DRIVE (0 GB)
+                <ul className="space-y-3 text-xs text-slate-600">
+                  <li className="bg-slate-50 rounded-xl border border-slate-200/60 p-3.5">
+                    <strong className="text-slate-900 block text-xs font-semibold mb-0.5">
+                      ✓ Vídeos en YouTube / Drive (0 GB)
                     </strong>
                     Los vídeos de llegada y Home Tour se reproducen por embed sin consumir almacenamiento ni ancho de banda.
                   </li>
-                  <li className="bg-white border border-[#E2DDD2] p-3">
-                    <strong className="text-[#141413] block font-mono text-[11px]">
-                      ✓ FOTOS WEBP COMPRIMIDAS (~50 KB)
+                  <li className="bg-slate-50 rounded-xl border border-slate-200/60 p-3.5">
+                    <strong className="text-slate-900 block text-xs font-semibold mb-0.5">
+                      ✓ Fotos WebP comprimidas (~50 KB)
                     </strong>
                     Las fotos subidas por las limpiadoras se comprimen en su móvil antes de enviarse (+16.000 fotos en 1 GB gratis).
                   </li>
-                  <li className="bg-white border border-[#E2DDD2] p-3">
-                    <strong className="text-[#141413] block font-mono text-[11px]">
-                      ✓ ICAL BAJO DEMANDA (CACHÉ 30 MIN)
+                  <li className="bg-slate-50 rounded-xl border border-slate-200/60 p-3.5">
+                    <strong className="text-slate-900 block text-xs font-semibold mb-0.5">
+                      ✓ iCal bajo demanda (Caché 30 min)
                     </strong>
                     Sin Cron nocturno: solo sincroniza cuando alguien abre la app y han pasado +30 min.
                   </li>
-                  <li className="bg-white border border-[#E2DDD2] p-3">
-                    <strong className="text-[#141413] block font-mono text-[11px]">
-                      ESTADO BASE DE DATOS:{' '}
-                      {isSupabaseConfigured ? 'CONECTADA A SUPABASE' : 'MODO LOCAL + ESQUEMA SQL LISTO'}
+                  <li className="bg-slate-50 rounded-xl border border-slate-200/60 p-3.5">
+                    <strong className="text-slate-900 block text-xs font-semibold mb-0.5">
+                      Estado Base de Datos:{' '}
+                      {isSupabaseConfigured ? 'Conectada a Supabase' : 'Modo local + Esquema SQL listo'}
                     </strong>
                     El esquema completo está en <code>supabase/schema.sql</code>.
                   </li>
@@ -2099,29 +2102,29 @@ export default function HostDashboardView({
 
       {/* Modal para Sincronizar URL iCal real */}
       {showIcalModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#FAF9F5] border border-[#141413] max-w-lg w-full p-6 space-y-4 shadow-2xl my-8">
-            <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-3">
-              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413]">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-xl font-bold tracking-tight text-slate-900">
                 Sincronizar Calendario iCal (.ics)
               </h3>
               <button
                 type="button"
                 onClick={() => setShowIcalModal(false)}
-                className="font-mono text-xs font-bold text-[#57554F]"
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1"
               >
                 ✕
               </button>
             </div>
 
             <div>
-              <label className="block font-mono text-[10px] uppercase font-bold text-[#57554F] mb-1">
-                Propiedad destino
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Alojamiento de destino
               </label>
               <select
                 value={targetPropertyId}
                 onChange={(e) => setTargetPropertyId(e.target.value)}
-                className="w-full bg-white border border-[#D5CFC0] px-3 py-2 text-xs font-bold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 {properties.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -2131,9 +2134,9 @@ export default function HostDashboardView({
               </select>
             </div>
 
-            <div className="bg-white border border-[#D5CFC0] p-4 space-y-2">
-              <label className="block font-mono text-[10px] uppercase font-bold text-[#C85A32]">
-                Opción A · Pegar URL .ics real de Airbnb o Booking
+            <div className="bg-orange-50/50 border border-orange-200/60 rounded-2xl p-4 space-y-2.5">
+              <label className="block text-xs font-bold text-orange-800">
+                Opción A · Pegar URL .ics directa de Airbnb o Booking
               </label>
               <div className="flex gap-2">
                 <input
@@ -2141,7 +2144,7 @@ export default function HostDashboardView({
                   value={liveIcalUrl}
                   onChange={(e) => setLiveIcalUrl(e.target.value)}
                   placeholder="https://www.airbnb.es/calendar/ical/....ics"
-                  className="flex-1 text-xs border border-[#D5CFC0] px-3 py-2 font-mono"
+                  className="flex-1 text-xs bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
                 <button
                   type="button"
@@ -2152,7 +2155,7 @@ export default function HostDashboardView({
                     setSyncingUrl(false);
                     setShowIcalModal(false);
                   }}
-                  className="bg-[#C85A32] text-white font-mono text-xs font-bold uppercase px-4 py-2 shrink-0"
+                  className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-xl shrink-0 transition shadow-sm"
                 >
                   {syncingUrl ? '...' : 'Sincronizar'}
                 </button>
@@ -2160,25 +2163,32 @@ export default function HostDashboardView({
             </div>
 
             <div className="space-y-1.5">
-              <label className="block font-mono text-[10px] uppercase font-bold text-[#57554F]">
+              <label className="block text-xs font-semibold text-slate-700">
                 Opción B · Contenido .ics de prueba
               </label>
               <textarea
-                rows={6}
+                rows={5}
                 value={icsInput}
                 onChange={(e) => setIcsInput(e.target.value)}
-                className="w-full font-mono text-[11px] bg-[#141413] text-[#F6F4EE] p-3"
+                className="w-full font-mono text-xs bg-slate-900 text-slate-100 rounded-xl p-3 focus:outline-none"
               />
             </div>
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowIcalModal(false)}
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+              >
+                Cancelar
+              </button>
               <button
                 type="button"
                 onClick={() => {
                   onImportIcalText(targetPropertyId, icsInput);
                   setShowIcalModal(false);
                 }}
-                className="bg-[#141413] text-white font-mono text-xs font-bold uppercase px-5 py-2.5"
+                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-sm"
               >
                 Importar Reservas iCal
               </button>
@@ -2189,17 +2199,17 @@ export default function HostDashboardView({
 
       {/* Modal Nueva Propiedad */}
       {showNewPropModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <form
             onSubmit={handleCreateProperty}
-            className="bg-[#FAF9F5] border border-[#141413] max-w-md w-full p-6 space-y-3.5 shadow-2xl"
+            className="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 sm:p-8 space-y-4 shadow-2xl"
           >
-            <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-3">
-              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[#141413]">Nueva Propiedad</h3>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-xl font-bold tracking-tight text-slate-900">Nuevo Alojamiento</h3>
               <button
                 type="button"
                 onClick={() => setShowNewPropModal(false)}
-                className="font-mono text-xs font-bold"
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1"
               >
                 ✕
               </button>
@@ -2207,53 +2217,53 @@ export default function HostDashboardView({
 
             <input
               required
-              placeholder="Nombre del alojamiento"
+              placeholder="Nombre del alojamiento (ej. Ático Malasaña)"
               value={newPropName}
               onChange={(e) => setNewPropName(e.target.value)}
-              className="w-full text-xs bg-white border border-[#D5CFC0] px-3 py-2.5"
+              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <input
               placeholder="Dirección completa"
               value={newPropAddress}
               onChange={(e) => setNewPropAddress(e.target.value)}
-              className="w-full text-xs bg-white border border-[#D5CFC0] px-3 py-2.5"
+              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <input
               placeholder="WhatsApp del anfitrión (+34...)"
               value={newPropWhatsapp}
               onChange={(e) => setNewPropWhatsapp(e.target.value)}
-              className="w-full text-xs bg-white border border-[#D5CFC0] px-3 py-2.5"
+              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <input
-              placeholder="URL iCal de Airbnb (.ics)"
+              placeholder="URL iCal de Airbnb o Booking (.ics)"
               value={newPropIcal}
               onChange={(e) => setNewPropIcal(e.target.value)}
-              className="w-full text-xs bg-white border border-[#D5CFC0] px-3 py-2.5 font-mono"
+              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-mono text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <input
                 placeholder="Red WiFi"
                 value={newPropWifiSsid}
                 onChange={(e) => setNewPropWifiSsid(e.target.value)}
-                className="text-xs bg-white border border-[#D5CFC0] px-3 py-2.5"
+                className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               <input
                 placeholder="Clave WiFi"
                 value={newPropWifiPass}
                 onChange={(e) => setNewPropWifiPass(e.target.value)}
-                className="text-xs bg-white border border-[#D5CFC0] px-3 py-2.5"
+                className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
             <input
-              placeholder="Código Puerta / Cajetín"
+              placeholder="Código Puerta / Cajetín de Llaves"
               value={newPropDoorCode}
               onChange={(e) => setNewPropDoorCode(e.target.value)}
-              className="w-full text-xs bg-white border border-[#D5CFC0] px-3 py-2.5"
+              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
 
             <button
               type="submit"
-              className="w-full bg-[#141413] text-white font-mono text-xs font-bold uppercase py-3.5"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold py-3.5 rounded-xl transition shadow-sm mt-2"
             >
               Crear Alojamiento
             </button>
@@ -2327,35 +2337,35 @@ export default function HostDashboardView({
 
       {/* MODAL COMPROBACIÓN DE FOTOS Y CHECKLIST DE LIMPIEZA */}
       {inspectingTaskPhotos && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#FAF9F5] border-2 border-[#141413] max-w-2xl w-full p-6 space-y-5 shadow-[8px_8px_0px_#141413] my-8 animate-in fade-in">
-            <div className="flex items-start justify-between border-b border-[#E2DDD2] pb-3">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl border border-slate-200 max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-8 animate-in fade-in">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
               <div>
-                <span className="font-mono text-[10px] uppercase font-bold text-[#1F4E3D] bg-[#1F4E3D]/10 px-2 py-0.5">
-                  COMPROBACIÓN DE FOTOS Y CHECKLIST EN TIEMPO REAL
+                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full inline-block">
+                  Comprobación en tiempo real
                 </span>
-                <h3 className="text-xl font-black text-[#141413] mt-1">
+                <h3 className="text-xl font-bold text-slate-900 mt-1.5">
                   {properties.find((p) => p.id === inspectingTaskPhotos.propertyId)?.name || 'Alojamiento'}
                 </h3>
-                <p className="font-mono text-xs text-[#57554F] mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Fecha salida: {inspectingTaskPhotos.date} · Limpiadora:{' '}
-                  <strong>{cleaners.find((c) => c.id === inspectingTaskPhotos.cleanerId)?.name || 'Sin asignar'}</strong>
+                  <strong className="text-slate-800">{cleaners.find((c) => c.id === inspectingTaskPhotos.cleanerId)?.name || 'Sin asignar'}</strong>
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setInspectingTaskPhotos(null)}
-                className="text-xs font-mono font-bold text-[#57554F] hover:text-[#141413] p-1.5"
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1"
               >
-                ✕ CERRAR
+                ✕
               </button>
             </div>
 
             {/* Estado del Checklist */}
-            <div className="bg-white border border-[#E2DDD2] p-4 space-y-2">
-              <div className="flex items-center justify-between font-mono text-xs font-bold text-[#1F4E3D]">
+            <div className="bg-slate-50 rounded-2xl border border-slate-200/60 p-4 space-y-3">
+              <div className="flex items-center justify-between text-xs font-bold text-emerald-700">
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle2 size={14} /> Checklist Comprobado por la Limpiadora
+                  <CheckCircle2 size={16} /> Checklist verificado por la limpiadora
                 </span>
                 <span>
                   {inspectingTaskPhotos.checklist.filter((c) => c.completed).length} /{' '}
@@ -2364,8 +2374,8 @@ export default function HostDashboardView({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
                 {inspectingTaskPhotos.checklist.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2 text-[#141413] bg-[#FAF9F5] p-2 border border-[#E2DDD2]">
-                    <span className="text-[#1F4E3D] font-bold">✓</span>
+                  <div key={item.id} className="flex items-center gap-2 text-slate-800 bg-white p-2.5 rounded-xl border border-slate-200/70 shadow-2xs">
+                    <span className="text-emerald-600 font-bold">✓</span>
                     <span>{item.label}</span>
                   </div>
                 ))}
@@ -2373,13 +2383,13 @@ export default function HostDashboardView({
             </div>
 
             {/* Galería de fotos subidas por la limpiadora */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between font-mono text-xs font-bold text-[#141413]">
-                <span>Fotos Tomadas con la Cámara ({inspectingTaskPhotos.photosUploaded.length})</span>
-                <span className="text-[#57554F] font-normal text-[11px]">Comprobación antes de la llegada del huésped</span>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-900">
+                <span>Fotos tomadas con la cámara ({inspectingTaskPhotos.photosUploaded.length})</span>
+                <span className="text-slate-500 font-normal text-xs">Comprobación antes de la llegada del huésped</span>
               </div>
               {inspectingTaskPhotos.photosUploaded.length === 0 ? (
-                <p className="text-xs text-[#57554F] italic p-4 bg-white border border-[#E2DDD2] text-center">
+                <p className="text-xs text-slate-400 italic p-6 bg-slate-50 rounded-2xl border border-slate-200/60 text-center">
                   Aún no se han subido fotos para esta limpieza.
                 </p>
               ) : (
@@ -2390,17 +2400,17 @@ export default function HostDashboardView({
                       href={url}
                       target="_blank"
                       rel="noreferrer"
-                      className="group relative block aspect-video sm:aspect-square bg-slate-900 overflow-hidden border border-[#D5CFC0] shadow-sm"
+                      className="group relative block aspect-video sm:aspect-square bg-slate-900 rounded-xl overflow-hidden border border-slate-200 shadow-sm"
                     >
                       <img
                         src={url}
                         alt={`Foto verificación ${idx + 1}`}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                       />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-mono text-[11px] font-bold">
+                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
                         Ampliar foto ↗
                       </div>
-                      <span className="absolute bottom-1.5 left-1.5 bg-black/80 text-white font-mono text-[9px] px-1.5 py-0.5">
+                      <span className="absolute bottom-2 left-2 bg-slate-900/80 text-white text-[10px] px-2 py-0.5 rounded-md font-semibold">
                         Habitación {idx + 1}
                       </span>
                     </a>
@@ -2409,15 +2419,15 @@ export default function HostDashboardView({
               )}
             </div>
 
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#E2DDD2]">
-              <span className="font-mono text-xs text-[#1F4E3D] font-bold flex items-center gap-1.5">
+            <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
+              <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
                 <CheckCircle2 size={16} />
                 <span>Todo comprobado: el alojamiento está impecable para el nuevo huésped</span>
               </span>
               <button
                 type="button"
                 onClick={() => setInspectingTaskPhotos(null)}
-                className="w-full sm:w-auto bg-[#141413] hover:bg-[#2C2C29] text-white font-mono text-xs uppercase font-bold px-6 py-2.5 transition"
+                className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-sm"
               >
                 Conforme y Cerrar
               </button>

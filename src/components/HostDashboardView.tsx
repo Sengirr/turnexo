@@ -150,7 +150,7 @@ export default function HostDashboardView({
   const [newPropIcal, setNewPropIcal] = useState('');
   const [newPropCheckIn, setNewPropCheckIn] = useState('15:00');
   const [newPropCheckOut, setNewPropCheckOut] = useState('11:00');
-  const [newPropCleaningFee, setNewPropCleaningFee] = useState(40);
+  const [newPropCleaningFee, setNewPropCleaningFee] = useState<number | ''>('');
   const [newPropCleanerId, setNewPropCleanerId] = useState('');
 
   const copyLink = (text: string, id: string) => {
@@ -315,7 +315,7 @@ export default function HostDashboardView({
       airbnbIcalUrl: newPropIcal.trim(),
       bookingIcalUrl: '',
       defaultCleanerId: newPropCleanerId || (cleaners[0]?.id || 'cl-1'),
-      cleaningFee: Number(newPropCleaningFee) || 40,
+      cleaningFee: newPropCleaningFee === '' ? 0 : Number(newPropCleaningFee),
       checkInTime: newPropCheckIn || '15:00',
       checkOutTime: newPropCheckOut || '11:00',
       lateCheckoutPrice: 35,
@@ -379,7 +379,7 @@ export default function HostDashboardView({
     setNewPropDoorCode('');
     setNewPropCheckIn('15:00');
     setNewPropCheckOut('11:00');
-    setNewPropCleaningFee(40);
+    setNewPropCleaningFee('');
     setNewPropCleanerId('');
     setShowNewPropModal(false);
   };
@@ -2337,18 +2337,18 @@ export default function HostDashboardView({
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Tarifa Limpieza (€)
+                    Tarifa (€) <span className="text-[10px] text-slate-400 font-normal">(Opcional)</span>
                   </label>
                   <input
                     type="number"
                     min="0"
                     step="1"
-                    placeholder="40"
+                    placeholder="0"
                     value={newPropCleaningFee}
-                    onChange={(e) => setNewPropCleaningFee(Number(e.target.value))}
+                    onChange={(e) => setNewPropCleaningFee(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono text-center shadow-2xs"
                   />
-                  <span className="text-[10px] text-slate-400 block mt-0.5">Pago por servicio</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">0 € si sueldo fijo / horas</span>
                 </div>
               </div>
 

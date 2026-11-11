@@ -29,6 +29,7 @@ import AuthOnboardingView from './components/AuthOnboardingView';
 import AdminMetricsView from './components/AdminMetricsView';
 import LegalModal from './components/LegalModal';
 import CookieBanner from './components/CookieBanner';
+import { getStoredPromoCode, isCommunityPromoCode } from './lib/promo';
 import {
   deleteCleanerFromSupabase,
   deletePropertyFromSupabase,
@@ -140,6 +141,24 @@ export default function App() {
   const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms' | 'legal' | null>(null);
   const [authInitialMode, setAuthInitialMode] = useState<'register' | 'login'>('register');
   const [authInitialPlan, setAuthInitialPlan] = useState<'plan_starter' | 'plan_pro' | 'plan_manager'>('plan_starter');
+  const [promoCode, setPromoCode] = useState<string | null>(() => getStoredPromoCode());
+
+  // Detectar y aplicar promociones activas
+  useEffect(() => {
+    const code = getStoredPromoCode();
+    if (code) {
+      setPromoCode(code);
+      if (hostAccount && isCommunityPromoCode(code) && hostAccount.specialAccess !== 'comunidad') {
+        const updated = {
+          ...hostAccount,
+          specialAccess: 'comunidad' as const,
+          promoCode: code,
+        };
+        setHostAccount(updated);
+        syncHostToSupabase(updated);
+      }
+    }
+  }, [hostAccount]);
 
   // Sincronización inicial y tiempo real con Supabase si está configurado en .env
   useEffect(() => {
@@ -552,6 +571,7 @@ export default function App() {
       {route.kind === 'landing' && (
         <LandingPageView
           hostAccount={hostAccount}
+          promoCode={promoCode}
           onNavigateToApp={(mode = 'register', plan = 'plan_starter') => {
             setAuthInitialMode(mode);
             setAuthInitialPlan(plan);
@@ -573,6 +593,7 @@ export default function App() {
         <AuthOnboardingView
           initialMode={authInitialMode}
           initialPlan={authInitialPlan}
+          initialPromoCode={promoCode}
           onSuccess={handleAuthSuccess}
           onBackToLanding={() => navigate('/', { kind: 'landing' })}
         />

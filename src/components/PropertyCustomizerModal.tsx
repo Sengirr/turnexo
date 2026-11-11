@@ -46,8 +46,10 @@ export default function PropertyCustomizerModal({
 
   // Campos temporales para añadir vídeos, extras, normas, recomendaciones y checklist
   const [newVideoTitle, setNewVideoTitle] = useState('');
-  const [newVideoCategory, setNewVideoCategory] = useState<PropertyVideo['category']>('hometour');
+  const [newVideoCategory, setNewVideoCategory] = useState<PropertyVideo['category']>('checkin');
   const [newVideoUrl, setNewVideoUrl] = useState('');
+  const [newApplianceTitle, setNewApplianceTitle] = useState('');
+  const [newApplianceUrl, setNewApplianceUrl] = useState('');
 
   const [newExtraTitle, setNewExtraTitle] = useState('');
   const [newExtraDesc, setNewExtraDesc] = useState('');
@@ -60,6 +62,13 @@ export default function PropertyCustomizerModal({
   const [newRec, setNewRec] = useState('');
   const [newCheckItem, setNewCheckItem] = useState('');
   const [newDepartureItem, setNewDepartureItem] = useState('');
+
+  const arrivalVideos = (draft.videos || []).filter(
+    (v) => v.category === 'checkin' || v.category === 'hometour'
+  );
+  const applianceVideos = (draft.videos || []).filter(
+    (v) => v.category === 'appliance' || v.category === 'other'
+  );
 
   const addVideo = () => {
     if (!newVideoTitle.trim() || !newVideoUrl.trim()) return;
@@ -77,6 +86,24 @@ export default function PropertyCustomizerModal({
     });
     setNewVideoTitle('');
     setNewVideoUrl('');
+  };
+
+  const addApplianceVideo = () => {
+    if (!newApplianceTitle.trim() || !newApplianceUrl.trim()) return;
+    setDraft({
+      ...draft,
+      videos: [
+        ...(draft.videos || []),
+        {
+          id: `vid-${Date.now()}`,
+          title: newApplianceTitle.trim(),
+          category: 'appliance',
+          url: newApplianceUrl.trim(),
+        },
+      ],
+    });
+    setNewApplianceTitle('');
+    setNewApplianceUrl('');
   };
 
   const addExtra = () => {
@@ -127,8 +154,8 @@ export default function PropertyCustomizerModal({
           {(
             [
               { id: 'general', label: 'Horarios, Acceso y WiFi', icon: Clock },
-              { id: 'videos', label: `Vídeos y Llegada (${draft.videos?.length || 0})`, icon: Video },
-              { id: 'rules', label: 'Normas, Guía y Salida', icon: BookOpen },
+              { id: 'videos', label: `Vídeos de Llegada (${arrivalVideos.length})`, icon: Video },
+              { id: 'rules', label: `Normas, Guía y Salida (${applianceVideos.length ? `${applianceVideos.length} vídeos` : 'Casa'})`, icon: BookOpen },
               { id: 'extras', label: `Extras y Upsell (${draft.extras?.length || 0})`, icon: Sparkles },
               { id: 'checklist', label: 'Checklist Limpieza', icon: CheckSquare },
             ] as const
@@ -368,9 +395,9 @@ export default function PropertyCustomizerModal({
 
               <div className="space-y-2">
                 <span className="font-bold text-slate-900 text-xs uppercase tracking-wider block">
-                  Vídeos en la Guía ({draft.videos?.length || 0})
+                  Vídeos de Llegada y Bienvenida ({arrivalVideos.length})
                 </span>
-                {(draft.videos || []).map((v) => (
+                {arrivalVideos.map((v) => (
                   <div
                     key={v.id}
                     className="flex items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-3"
@@ -378,10 +405,8 @@ export default function PropertyCustomizerModal({
                     <div>
                       <span className="text-[10px] font-extrabold uppercase text-indigo-600">
                         {v.category === 'checkin'
-                          ? 'LLEGADA / CHECK-IN'
-                          : v.category === 'hometour'
-                          ? 'HOME TOUR (INICIO)'
-                          : 'GUÍA DE LA CASA / ELECTRODOMÉSTICOS'}
+                          ? 'LLEGADA / ACCESO Y LLAVES'
+                          : 'HOME TOUR (INICIO)'}
                       </span>
                       <p className="font-bold text-slate-900">{v.title}</p>
                       <p className="text-[11px] font-mono text-slate-400 truncate max-w-md">{v.url}</p>
@@ -400,13 +425,16 @@ export default function PropertyCustomizerModal({
                     </button>
                   </div>
                 ))}
+                {arrivalVideos.length === 0 && (
+                  <p className="text-[11px] text-slate-400 italic">No hay vídeos de llegada configurados aún.</p>
+                )}
               </div>
 
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-                <p className="font-black text-slate-800">Añadir nuevo vídeo a la Guía</p>
+                <p className="font-black text-slate-800">Añadir vídeo de Llegada o Bienvenida</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <input
-                    placeholder="Título (ej. Acceso Vivienda / Vitrocerámica)"
+                    placeholder="Título (ej. Cómo abrir el portal y cajetín)"
                     value={newVideoTitle}
                     onChange={(e) => setNewVideoTitle(e.target.value)}
                     className="sm:col-span-2 border border-slate-200 bg-white rounded-xl px-3 py-2"
@@ -420,8 +448,6 @@ export default function PropertyCustomizerModal({
                   >
                     <option value="checkin">Entrada / Llaves (Llegada)</option>
                     <option value="hometour">Home Tour (Inicio)</option>
-                    <option value="appliance">Electrodomésticos (Guía)</option>
-                    <option value="other">Otro (Guía)</option>
                   </select>
                 </div>
                 <div className="flex gap-2">
@@ -438,6 +464,25 @@ export default function PropertyCustomizerModal({
                   >
                     <Plus size={14} /> Añadir
                   </button>
+                </div>
+              </div>
+
+              {/* Banner informativo sobre electrodomésticos */}
+              <div className="bg-indigo-50/70 border border-indigo-200/60 rounded-2xl p-3.5 flex items-start gap-3">
+                <span className="text-base leading-none">💡</span>
+                <div className="text-xs text-indigo-900 leading-relaxed">
+                  <span className="font-bold">¿Tienes vídeos de electrodomésticos?</span> (Vitrocerámica, aire acondicionado, lavadora, termo...)
+                  <p className="text-indigo-700 mt-0.5">
+                    Se configuran en la pestaña{' '}
+                    <button
+                      type="button"
+                      onClick={() => setTab('rules')}
+                      className="underline font-bold text-indigo-900 hover:text-indigo-950"
+                    >
+                      «Normas, Guía y Salida»
+                    </button>
+                    , donde se muestran en la sección Guía de la casa del huésped.
+                  </p>
                 </div>
               </div>
             </div>
@@ -581,16 +626,85 @@ export default function PropertyCustomizerModal({
 
           {tab === 'rules' && (
             <div className="space-y-4">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Guía rápida de Electrodomésticos (Aire, Vitro, Lavadora, Termo...)
-                </label>
-                <textarea
-                  rows={3}
-                  value={draft.appliancesGuide}
-                  onChange={(e) => setDraft({ ...draft, appliancesGuide: e.target.value })}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2"
-                />
+              {/* Guía de la Casa y Electrodomésticos */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3.5">
+                <span className="font-bold text-slate-900 text-xs uppercase tracking-wider block">
+                  Guía de la Casa y Electrodomésticos (Pestaña Guía del Huésped)
+                </span>
+
+                <div>
+                  <label className="block font-bold text-slate-700 text-xs mb-1">
+                    Instrucciones escritas (Aire, Vitro, Lavadora, Termo...)
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Ej. El aire acondicionado se enciende con el mando blanco; la vitrocerámica tiene bloqueo de seguridad..."
+                    value={draft.appliancesGuide}
+                    onChange={(e) => setDraft({ ...draft, appliancesGuide: e.target.value })}
+                    className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs"
+                  />
+                </div>
+
+                {/* Vídeos de Electrodomésticos */}
+                <div className="space-y-2 pt-2 border-t border-slate-200/80">
+                  <span className="font-bold text-slate-800 text-xs block">
+                    Vídeos de Electrodomésticos y Uso ({applianceVideos.length})
+                  </span>
+                  {applianceVideos.map((v) => (
+                    <div
+                      key={v.id}
+                      className="flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl p-3"
+                    >
+                      <div>
+                        <span className="text-[10px] font-extrabold uppercase text-purple-600">
+                          ELECTRODOMÉSTICO / CASA
+                        </span>
+                        <p className="font-bold text-slate-900">{v.title}</p>
+                        <p className="text-[11px] font-mono text-slate-400 truncate max-w-md">{v.url}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDraft({
+                            ...draft,
+                            videos: draft.videos.filter((item) => item.id !== v.id),
+                          })
+                        }
+                        className="text-rose-500 hover:bg-rose-50 p-2 rounded-xl"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  ))}
+                  {applianceVideos.length === 0 && (
+                    <p className="text-[11px] text-slate-400 italic">No hay vídeos de electrodomésticos aún.</p>
+                  )}
+
+                  <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 mt-2">
+                    <p className="font-bold text-slate-800 text-xs">Añadir vídeo explicativo de electrodoméstico</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        placeholder="Título (ej. Encendido Vitrocerámica o Mando Aire)"
+                        value={newApplianceTitle}
+                        onChange={(e) => setNewApplianceTitle(e.target.value)}
+                        className="border border-slate-200 rounded-xl px-3 py-2 text-xs"
+                      />
+                      <input
+                        placeholder="URL de YouTube, Shorts o Drive"
+                        value={newApplianceUrl}
+                        onChange={(e) => setNewApplianceUrl(e.target.value)}
+                        className="border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addApplianceVideo}
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition"
+                    >
+                      <Plus size={13} /> Añadir vídeo a la Guía
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">

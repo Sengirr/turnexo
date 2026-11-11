@@ -18,6 +18,8 @@ export interface HostAccount {
   plan: 'module_cleanings' | 'module_guide' | 'pack_complete' | 'plan_starter' | 'plan_pro' | 'plan_manager' | string;
   subscriptionStatus?: 'trialing' | 'active';
   trialEndsAt: string;
+  promoCode?: string;
+  specialAccess?: 'comunidad' | 'iva_beta' | string;
 }
 
 export const STRIPE_PAYMENT_LINKS = {

@@ -192,6 +192,12 @@ export default function HostDashboardView({
   const isStarter = !isPro && !isManager;
   const currentPlan = isManager ? 'plan_manager' : isPro ? 'plan_pro' : 'plan_starter';
 
+  const isCommunityVip = Boolean(
+    hostAccount?.specialAccess === 'comunidad' ||
+    (hostAccount?.promoCode && /comunidad|anfitriones|iva|whatsapp|beta/i.test(hostAccount.promoCode))
+  );
+  const hasFiscalAccess = isPro || isManager || isCommunityVip;
+
   const maxAllowedProperties = isManager ? 10 : isPro ? 5 : 1;
   const maxAllowedCleaners = isManager ? 99 : isPro ? 2 : 1;
 
@@ -502,7 +508,7 @@ export default function HostDashboardView({
                 id: 'invoices' as const,
                 label: 'Facturas & Fiscal',
                 icon: FileText,
-                ...(isStarter ? { badge: 'PRO' } : {}),
+                badge: isCommunityVip && isStarter ? 'COMUNIDAD' : isStarter ? 'PRO' : undefined,
               },
               { id: 'billing' as const, label: 'Plan & Suscripción', icon: CreditCard },
             ].map((item) => {
@@ -529,7 +535,7 @@ export default function HostDashboardView({
                   {'badge' in item && item.badge && (
                     <span
                       className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full font-mono ${
-                        item.id === 'invoices' && isStarter
+                        item.id === 'invoices' && isStarter && !isCommunityVip
                           ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
                           : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                       }`}
@@ -1702,7 +1708,7 @@ export default function HostDashboardView({
         )}
 
         {/* VISTA FISCAL: FACTURAS A HUÉSPEDES & IVA 10% (MODELO 303) */}
-        {section === 'invoices' && isStarter && (
+        {section === 'invoices' && !hasFiscalAccess && (
           <div className="space-y-6">
             <div className="bg-white rounded-3xl border border-slate-200/80 p-8 sm:p-12 shadow-sm text-center max-w-3xl mx-auto space-y-6">
               <div className="w-16 h-16 rounded-3xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center mx-auto shadow-sm">
@@ -1770,8 +1776,30 @@ export default function HostDashboardView({
         )}
 
         {/* VISTA FISCAL: FACTURAS A HUÉSPEDES & IVA 10% (MODELO 303) */}
-        {section === 'invoices' && !isStarter && (
+        {section === 'invoices' && hasFiscalAccess && (
           <div className="space-y-8">
+            {isCommunityVip && isStarter && (
+              <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-300 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-emerald-950 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                    VIP
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold uppercase tracking-wide text-emerald-900 text-xs">
+                        Pase Exclusivo Comunidad de Anfitriones
+                      </span>
+                      <span className="text-[10px] bg-emerald-200 text-emerald-900 font-bold px-2 py-0.5 rounded-full border border-emerald-300">
+                        Cortesía Activa
+                      </span>
+                    </div>
+                    <p className="text-emerald-800 text-[11px] mt-0.5">
+                      Tienes acceso completo al <strong>Módulo Fiscal Oficial (IVA 10%)</strong>: emisión de facturas simplificadas y descarga del Libro Registro para tu gestoría / Modelo 303 sin coste adicional.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200/80 pb-4">
               <div>
                 <div className="flex items-center gap-2">
@@ -2152,11 +2180,18 @@ export default function HostDashboardView({
                       {isSubscriptionActive
                         ? 'Suscripción Activa (Stripe Billing)'
                         : isStarter
-                        ? 'Plan Starter 100% gratuito (1 alojamiento sin límite de tiempo)'
+                        ? isCommunityVip
+                          ? 'Plan Starter con Pase Especial de Comunidad (Módulo Fiscal IVA 10% activo de cortesía)'
+                          : 'Plan Starter 100% gratuito (1 alojamiento sin límite de tiempo)'
                         : trialDaysRemaining > 0
                         ? `Periodo de prueba gratuito (${trialDaysRemaining} días restantes hasta el ${hostAccount?.trialEndsAt || 'final del ciclo'})`
                         : `Periodo de prueba finalizado el ${hostAccount?.trialEndsAt}. Suscríbete para continuar con este plan.`}
                     </p>
+                    {isCommunityVip && isStarter && (
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold">
+                        <span>Pase Comunidad Activo · Módulo Fiscal IVA 10% Incluido</span>
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <span className="text-3xl font-extrabold text-white">

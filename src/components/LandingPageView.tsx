@@ -19,9 +19,11 @@ import {
 import HeroPhoneMockup from './HeroPhoneMockup';
 import { LandingLanguage, LANDING_TRANSLATIONS } from '../lib/landingTranslations';
 import { HostAccount } from '../lib/supabase';
+import { isCommunityPromoCode } from '../lib/promo';
 
 interface Props {
   hostAccount?: HostAccount | null;
+  promoCode?: string | null;
   onNavigateToApp: (
     mode?: 'login' | 'register',
     plan?: 'plan_starter' | 'plan_pro' | 'plan_manager'
@@ -33,11 +35,13 @@ interface Props {
 
 export default function LandingPageView({
   hostAccount,
+  promoCode,
   onNavigateToApp,
   onOpenGuestDemo,
   onOpenCleanerDemo,
   onOpenLegal,
 }: Props) {
+  const hasCommunityPromo = isCommunityPromoCode(promoCode);
   // Estado de idioma (ES / EN) con persistencia en localStorage y detección automática
   const [lang, setLang] = useState<LandingLanguage>(() => {
     try {
@@ -104,9 +108,33 @@ export default function LandingPageView({
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] pt-20 overflow-x-clip">
+    <div className={`min-h-screen bg-[#F6F4EE] text-[#141413] ${hasCommunityPromo ? 'pt-28 sm:pt-32' : 'pt-20'} overflow-x-clip`}>
       {/* NAVBAR SAAS DIRECTA Y LIMPIA FIJA SIEMPRE VISIBLE */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#F6F4EE]/95 backdrop-blur-md border-b border-[#E2DDD2]">
+        {hasCommunityPromo && (
+          <div className="bg-[#141413] text-[#F6F4EE] px-4 py-2 border-b border-[#C85A32] text-xs shadow-sm">
+            <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="bg-[#C85A32] text-white text-[10px] font-mono uppercase font-bold px-2 py-0.5 tracking-wider">
+                  PASE COMUNIDAD ANFITRIONES
+                </span>
+                <span className="text-white/90 text-xs hidden sm:inline">
+                  Acceso exclusivo para el grupo: <strong>Módulo Fiscal de IVA 10% y Facturación Oficial activado gratis</strong>.
+                </span>
+                <span className="text-white/90 text-xs sm:hidden">
+                  <strong>Pase IVA 10% gratis</strong> para tu grupo.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => onNavigateToApp('register', 'plan_starter')}
+                className="bg-[#C85A32] hover:bg-[#b04b25] text-white font-bold px-3 py-1 text-xs transition whitespace-nowrap ml-auto"
+              >
+                Activar pase gratis →
+              </button>
+            </div>
+          </div>
+        )}
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
           {/* Columna 1: Identidad de Marca */}
           <a href="/" className="flex items-center gap-2.5 shrink-0 whitespace-nowrap group">

@@ -5,15 +5,19 @@ import {
   Lock,
   Mail,
   Phone,
+  Sparkles,
+  Tag,
   User,
 } from 'lucide-react';
 import { HostAccount, isSupabaseConfigured, supabase } from '../lib/supabase';
+import { getStoredPromoCode, isCommunityPromoCode } from '../lib/promo';
 
 interface Props {
   onSuccess: (account: HostAccount) => void;
   onBackToLanding: () => void;
   initialMode?: 'register' | 'login';
   initialPlan?: 'plan_starter' | 'plan_pro' | 'plan_manager';
+  initialPromoCode?: string | null;
 }
 
 export default function AuthOnboardingView({
@@ -21,9 +25,20 @@ export default function AuthOnboardingView({
   onBackToLanding,
   initialMode = 'register',
   initialPlan = 'plan_starter',
+  initialPromoCode,
 }: Props) {
   const [mode, setMode] = useState<'register' | 'login'>(initialMode);
   const [selectedPlan, setSelectedPlan] = useState<HostAccount['plan']>(initialPlan);
+
+  const [promoCode, setPromoCode] = useState<string>(() => {
+    return initialPromoCode || getStoredPromoCode() || '';
+  });
+  const [showPromoInput, setShowPromoInput] = useState<boolean>(() => {
+    const code = initialPromoCode || getStoredPromoCode() || '';
+    return Boolean(code);
+  });
+
+  const isCommunityApplied = isCommunityPromoCode(promoCode);
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -60,6 +75,8 @@ export default function AuthOnboardingView({
             companyName: '',
             plan: selectedPlan,
             trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+            promoCode: promoCode.trim() || undefined,
+            specialAccess: isCommunityApplied ? 'comunidad' : undefined,
           });
           return;
         } else {
@@ -76,6 +93,8 @@ export default function AuthOnboardingView({
             companyName: meta.company_name || '',
             plan: meta.subscription_plan || 'plan_starter',
             trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+            promoCode: promoCode.trim() || undefined,
+            specialAccess: isCommunityApplied ? 'comunidad' : undefined,
           });
           return;
         }
@@ -89,6 +108,8 @@ export default function AuthOnboardingView({
         companyName: '',
         plan: selectedPlan,
         trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+        promoCode: promoCode.trim() || undefined,
+        specialAccess: isCommunityApplied ? 'comunidad' : undefined,
       });
     } catch (err: any) {
       setErrorMsg(err?.message || 'Error al autenticar. Comprueba tus datos.');
@@ -119,6 +140,8 @@ export default function AuthOnboardingView({
         companyName: '',
         plan: selectedPlan,
         trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+        promoCode: promoCode.trim() || undefined,
+        specialAccess: isCommunityApplied ? 'comunidad' : undefined,
       });
     } catch (err: any) {
       setErrorMsg(err?.message || 'No se pudo iniciar sesión con Google.');
@@ -199,6 +222,23 @@ export default function AuthOnboardingView({
                 : 'Configura tu primer alojamiento en menos de 2 minutos. Sin permanencia.'}
             </p>
           </div>
+
+          {isCommunityApplied && (
+            <div className="p-3.5 bg-emerald-50 border border-emerald-300 text-xs text-emerald-950 flex items-start gap-2.5">
+              <Sparkles size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-emerald-900">Pase Especial Comunidad de Anfitriones</span>
+                  <span className="bg-emerald-200 text-emerald-900 text-[10px] font-mono uppercase font-extrabold px-1.5 py-0.5 rounded">
+                    Activo
+                  </span>
+                </div>
+                <p className="text-emerald-800 text-[11px] leading-relaxed">
+                  Tu cuenta tendrá acceso completo y gratuito al <strong>Módulo Fiscal de IVA 10% y Facturas Oficiales</strong>.
+                </p>
+              </div>
+            </div>
+          )}
 
           {errorMsg && (
             <div className="p-3 bg-rose-50 border border-rose-300 text-rose-800 text-xs font-medium">
@@ -372,6 +412,49 @@ export default function AuthOnboardingView({
                 />
               </div>
             </div>
+
+            {mode === 'register' && (
+              <div className="pt-1">
+                {!showPromoInput && !isCommunityApplied ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowPromoInput(true)}
+                    className="text-[11px] text-[#57554F] hover:text-[#C85A32] flex items-center gap-1.5 font-medium underline underline-offset-2"
+                  >
+                    <Tag size={12} />
+                    <span>¿Tienes un código de comunidad o grupo?</span>
+                  </button>
+                ) : (
+                  <div className="space-y-1">
+                    <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F]">
+                      CÓDIGO DE GRUPO / PROMO (OPCIONAL)
+                    </label>
+                    <div className="relative">
+                      <Tag size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#57554F]" />
+                      <input
+                        value={promoCode}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setPromoCode(val);
+                          try {
+                            if (val.trim()) localStorage.setItem('turnexo_promo_code', val.trim());
+                            else localStorage.removeItem('turnexo_promo_code');
+                          } catch {}
+                        }}
+                        placeholder="Ej. COMUNIDAD"
+                        className="w-full bg-white border border-[#D5CFC0] pl-8 pr-3 py-2 font-mono text-xs uppercase focus:outline-none focus:border-[#141413]"
+                      />
+                    </div>
+                    {isCommunityApplied && (
+                      <p className="text-[11px] text-emerald-700 font-medium flex items-center gap-1 mt-1">
+                        <Check size={12} className="text-emerald-600" />
+                        <span>Código reconocido: Pase de IVA 10% activo</span>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <button
               type="submit"

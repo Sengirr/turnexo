@@ -788,39 +788,29 @@ export default function GuestGuidePortalView({
 
   const cleanWhatsappPhone = property.hostWhatsapp.replace(/[^0-9]/g, '');
 
+  const isSpecificGuest =
+    Boolean(reservation.guestName) &&
+    reservation.guestName.trim().length > 0 &&
+    !/^(hu[eé]sped|guest|invitado)$/i.test(reservation.guestName.trim());
+
+  const guestFirstName = isSpecificGuest
+    ? reservation.guestName.trim().split(' ')[0]
+    : null;
+
+  const welcomeGreeting = guestFirstName
+    ? (language === 'en'
+        ? `Hello, ${guestFirstName}!`
+        : language === 'fr'
+        ? `Bonjour, ${guestFirstName} !`
+        : `¡Hola, ${guestFirstName}!`)
+    : (language === 'en'
+        ? 'Welcome!'
+        : language === 'fr'
+        ? 'Bienvenue !'
+        : '¡Te damos la bienvenida!');
+
   return (
     <div className="min-h-screen bg-gray-50/50 selection:bg-emerald-100 selection:text-emerald-900 font-sans text-gray-900">
-      {/* Barra superior discreta sólo cuando el anfitrión está previsualizando desde /app */}
-      {onBackToApp && (
-        <div className="bg-gray-900 text-white px-4 py-2 text-xs z-[60] relative">
-          <div className="max-w-md mx-auto flex items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={onBackToApp}
-              className="inline-flex items-center gap-1.5 font-black uppercase tracking-wider text-primary-ivi hover:underline"
-            >
-              <ArrowLeft size={14} />
-              Volver a Turnexo
-            </button>
-
-            <select
-              value={reservation.id}
-              onChange={(e) => onSelectReservation(e.target.value)}
-              className="bg-white/10 border border-white/20 rounded-lg text-white px-2.5 py-1 text-[11px] font-bold outline-none"
-            >
-              {reservations.map((r) => {
-                const p = properties.find((item) => item.id === r.propertyId);
-                return (
-                  <option key={r.id} value={r.id} className="text-gray-900">
-                    {r.guestName.split(' ')[0]} · {p?.name.split('·')[0]}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-        </div>
-      )}
-
       {/* Elegant Sticky Header (Identical to IVI ERP) */}
       <header className="p-4 py-3 sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100">
         <div className="max-w-md mx-auto flex items-center justify-between">
@@ -875,9 +865,7 @@ export default function GuestGuidePortalView({
             <div className="space-y-4">
               <div className="space-y-1">
                 <h1 className="text-3xl font-black text-gray-900 tracking-tighter italic">
-                  {t('welcome', {
-                    name: (reservation.guestName || 'Huésped').split(' ')[0],
-                  })}
+                  {welcomeGreeting}
                 </h1>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
                   {t('subtitle', { property: property.name })}

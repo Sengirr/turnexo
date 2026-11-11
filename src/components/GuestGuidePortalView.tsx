@@ -836,18 +836,13 @@ export default function GuestGuidePortalView({
       {/* Elegant Sticky Header (Identical to IVI ERP) */}
       <header className="p-4 py-3 sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-primary-ivi text-white flex items-center justify-center font-black text-sm shadow-sm shadow-primary-ivi/30">
-              {property.name.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-primary-ivi/10 text-primary-ivi flex items-center justify-center font-black text-sm">
+              <Sparkles size={16} />
             </div>
-            <div>
-              <span className="font-black text-xs tracking-tight text-gray-900 block leading-none">
-                {property.name.split('·')[0].trim()}
-              </span>
-              <span className="text-[9px] font-black uppercase tracking-widest text-primary-ivi">
-                GUEST PORTAL
-              </span>
-            </div>
+            <span className="font-black text-xs uppercase tracking-wider text-gray-800">
+              {language === 'en' ? 'Guest Guide' : language === 'fr' ? 'Guide du voyageur' : 'Guía del Huésped'}
+            </span>
           </div>
 
           <div className="flex bg-gray-100/80 p-1 rounded-xl gap-1">

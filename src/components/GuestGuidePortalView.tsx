@@ -672,7 +672,11 @@ export default function GuestGuidePortalView({
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
   const [isVideoWatched, setIsVideoWatched] = useState(() => {
     try {
-      return typeof window !== 'undefined' && sessionStorage.getItem(`turnexo_video_unlocked_${property.id}`) === 'true';
+      if (typeof window === 'undefined') return false;
+      return (
+        localStorage.getItem(`turnexo_video_unlocked_${property.id}`) === 'true' ||
+        sessionStorage.getItem(`turnexo_video_unlocked_${property.id}`) === 'true'
+      );
     } catch {
       return false;
     }
@@ -682,6 +686,7 @@ export default function GuestGuidePortalView({
     setIsVideoWatched(true);
     try {
       if (typeof window !== 'undefined') {
+        localStorage.setItem(`turnexo_video_unlocked_${property.id}`, 'true');
         sessionStorage.setItem(`turnexo_video_unlocked_${property.id}`, 'true');
       }
     } catch {

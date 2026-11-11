@@ -537,7 +537,7 @@ export default function HostDashboardView({
             </div>
           )}
 
-          <div className="space-y-3 pt-2">
+          <div className="pt-2">
             {onLogout && (
               <button
                 type="button"
@@ -548,26 +548,6 @@ export default function HostDashboardView({
                 <span>Cerrar sesión</span>
               </button>
             )}
-
-            <div className="flex items-center justify-between text-white/60 text-[11px] font-mono">
-              <button
-                type="button"
-                onClick={onBackToLanding}
-                className="hover:text-white flex items-center gap-1.5"
-              >
-                <ArrowLeft size={13} />
-                Web Pública (/)
-              </button>
-
-              <button
-                type="button"
-                onClick={onResetDemo}
-                title="Restaurar datos iniciales"
-                className="text-white/40 hover:text-white p-1"
-              >
-                <RotateCcw size={13} />
-              </button>
-            </div>
           </div>
         </div>
       </aside>
@@ -593,7 +573,7 @@ export default function HostDashboardView({
 
           <div className="bg-[#FAF9F5] p-5">
             <span className="font-mono text-[10px] uppercase tracking-widest text-[#57554F]">
-              ROTACIONES HOY (MISMO DÍA)
+              LIMPIEZAS HOY
             </span>
             <div className="flex items-baseline justify-between mt-2">
               <span className="font-mono text-3xl font-bold text-[#C85A32]">

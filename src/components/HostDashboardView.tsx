@@ -530,25 +530,28 @@ export default function HostDashboardView({
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={onBackToLanding}
-              className="text-white/60 hover:text-white flex items-center gap-1.5 font-mono text-[11px]"
-            >
-              <ArrowLeft size={13} />
-              Web Pública (/)
-            </button>
-            <div className="flex items-center gap-2">
-              {onLogout && (
-                <button
-                  type="button"
-                  onClick={onLogout}
-                  className="font-mono text-[10px] uppercase text-[#C85A32] hover:underline"
-                >
-                  Salir
-                </button>
-              )}
+          <div className="space-y-3 pt-2">
+            {onLogout && (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="w-full text-left px-3 py-2 text-xs font-mono text-rose-300 hover:text-white bg-rose-950/40 border border-rose-800/40 hover:bg-rose-900/60 flex items-center gap-2 transition"
+              >
+                <LogOut size={13} className="text-rose-400" />
+                <span>Cerrar sesión</span>
+              </button>
+            )}
+
+            <div className="flex items-center justify-between text-white/60 text-[11px] font-mono">
+              <button
+                type="button"
+                onClick={onBackToLanding}
+                className="hover:text-white flex items-center gap-1.5"
+              >
+                <ArrowLeft size={13} />
+                Web Pública (/)
+              </button>
+
               <button
                 type="button"
                 onClick={onResetDemo}

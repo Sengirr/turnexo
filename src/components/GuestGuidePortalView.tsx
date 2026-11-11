@@ -1560,82 +1560,85 @@ export default function GuestGuidePortalView({
 
         {/* TAB 5: SALIDA (departure) */}
         {activeTab === 'departure' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <SectionTitle
-              icon={LogOut}
-              title={t('departure.title')}
-              iconClass="bg-orange-50 text-orange-500"
-            />
-
-            <Card className="border-orange-100">
-              <h3 className="font-black text-gray-900 mb-2 italic">
-                {t('departure.subtitle', { time: effectiveMaxCheckout })}
-              </h3>
-              <div className="space-y-4">
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  {t('departure.time_label')}
-                </label>
-                <select
-                  value={currentDepartureTime}
-                  onChange={(e) =>
-                    onUpdateReservation?.(
-                      { ...reservation, estimatedDepartureTime: e.target.value },
-                      `Hora prevista de salida guardada: ${e.target.value}h`
-                    )
-                  }
-                  className="w-full h-14 bg-gray-50 rounded-2xl px-6 font-black text-gray-900 border-2 border-gray-100 focus:border-primary-ivi outline-none transition-all cursor-pointer"
-                >
-                  {departureTimeOptions.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </Card>
-
-            {property.checkOutInstructions && (
-              <Card>
-                <SectionTitle
-                  icon={LogOut}
-                  title={t('departure.instructions')}
-                  iconClass="bg-orange-50 text-orange-500"
-                />
-                <div className="pl-5 border-l-4 border-orange-200 mt-2">
-                  <div className="text-sm font-medium text-gray-700 leading-relaxed whitespace-pre-line italic">
-                    {property.checkOutInstructions}
-                  </div>
+          <div className="space-y-4 animate-in fade-in duration-300">
+            {/* Cabecera directa con hora de salida */}
+            <div className="bg-orange-50/80 border border-orange-200/80 rounded-[2rem] p-5 flex items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-orange-500 text-white rounded-2xl flex items-center justify-center shadow-md shadow-orange-200 shrink-0">
+                  <LogOut size={22} />
                 </div>
-              </Card>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-orange-800">
+                    {language === 'en' ? 'Check-out time' : language === 'fr' ? 'Heure de départ' : 'Hora límite de salida'}
+                  </p>
+                  <p className="text-xl font-black text-gray-900 tracking-tight mt-0.5">
+                    {effectiveMaxCheckout}h
+                  </p>
+                </div>
+              </div>
+              {reservation.lateCheckoutApproved && (
+                <span className="text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full shrink-0">
+                  ✓ {language === 'en' ? 'Late checkout active' : 'Late checkout'}
+                </span>
+              )}
+            </div>
+
+            {/* Instrucción breve de llaves/salida si el anfitrión la indicó */}
+            {property.checkOutInstructions && (
+              <div className="bg-white border border-orange-200/70 rounded-2xl p-4 flex items-start gap-3 shadow-2xs">
+                <div className="w-8 h-8 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                  <Key size={15} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-orange-700">
+                    {language === 'en' ? 'Key & Departure Note' : 'Instrucciones para las llaves'}
+                  </p>
+                  <p className="text-xs font-semibold text-gray-800 leading-snug mt-0.5 whitespace-pre-line">
+                    {property.checkOutInstructions}
+                  </p>
+                </div>
+              </div>
             )}
 
+            {/* Checklist directo: Antes de marcharte... */}
             <Card className="border-orange-100">
               <SectionTitle
                 icon={CheckCircle2}
                 title={t('departure.checklist_title')}
                 iconClass="bg-orange-50 text-orange-500"
               />
-              <div className="space-y-3">
+              <p className="text-xs font-bold text-gray-400 -mt-2 mb-4">
+                {language === 'en'
+                  ? 'Please check off these items before leaving the accommodation:'
+                  : language === 'fr'
+                  ? 'Veuillez cocher ces points avant de quitter le logement :'
+                  : 'Por favor, marca estas comprobaciones antes de abandonar el alojamiento:'}
+              </p>
+              <div className="space-y-2.5">
                 {departureChecklistItems.map((item) => {
                   const isChecked = checkedItems.includes(item);
                   return (
                     <div
                       key={item}
                       onClick={() => toggleChecklistItem(item)}
-                      className="flex items-center gap-3 p-4 rounded-2xl bg-gray-50 border border-gray-100 cursor-pointer active:scale-[0.98] transition-all"
+                      className={`flex items-center gap-3.5 p-4 rounded-2xl border cursor-pointer active:scale-[0.98] transition-all ${
+                        isChecked
+                          ? 'bg-orange-50/60 border-orange-200 text-orange-950'
+                          : 'bg-gray-50 border-gray-100 text-gray-800 hover:bg-gray-100/80'
+                      }`}
                     >
                       <div
                         className={`w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all shrink-0 ${
                           isChecked
-                            ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-200'
-                            : 'border-gray-200 bg-white'
+                            ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-200'
+                            : 'border-gray-300 bg-white'
                         }`}
                       >
                         {isChecked && <CheckCircle size={14} />}
                       </div>
                       <span
-                        className={`text-sm font-black italic transition-all ${
-                          isChecked ? 'text-gray-300 line-through' : 'text-gray-700'
+                        className={`text-sm font-bold transition-all ${
+                          isChecked ? 'text-gray-400 line-through' : 'text-gray-800'
                         }`}
                       >
                         {item}

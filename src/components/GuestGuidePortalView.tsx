@@ -656,17 +656,39 @@ export default function GuestGuidePortalView({
     (v) => v.category === 'appliance' || v.category === 'other'
   );
 
-  // ¿Entra otro huésped el mismo día de salida?
+  // ¿Entra otro huésped el mismo día de salida en este alojamiento?
   const hasSameDayCheckIn = reservations.some(
     (other) =>
       other.id !== reservation.id &&
-      other.propertyId === reservation.propertyId &&
+      other.propertyId === property.id &&
       other.checkIn === reservation.checkOut
   );
 
-  const availableExtras = (property.extras || []).filter(
-    (ext) => ext.active && (!ext.onlyWhenFreeNextDay || !hasSameDayCheckIn)
+  // Lista base de extras del alojamiento (garantizando Late Check-out si está configurado en el alojamiento)
+  const baseExtras: PropertyExtra[] = [...(property.extras || [])];
+  const hasLateInExtras = baseExtras.some(
+    (e) => e.onlyWhenFreeNextDay || e.id === 'ext-late' || /late/i.test(e.title)
   );
+
+  if (!hasLateInExtras && property.lateCheckoutPrice !== 0) {
+    baseExtras.unshift({
+      id: `ext-late-${property.id}`,
+      title: `Late Check-out hasta las ${property.lateCheckoutUntil || '17:00'}h`,
+      description:
+        language === 'en'
+          ? 'Afternoon departure at your own pace subject to calendar availability.'
+          : language === 'fr'
+          ? 'Départ dans l’après-midi sans stress selon disponibilité.'
+          : 'Salida por la tarde sin prisas sujeta a disponibilidad.',
+      price: property.lateCheckoutPrice || 35,
+      priceUnit: 'reserva',
+      icon: 'clock',
+      onlyWhenFreeNextDay: true,
+      active: true,
+    });
+  }
+
+  const availableExtras = baseExtras.filter((ext) => ext.active);
 
   // Opciones de hora de llegada (10:00 a 02:00) y salida (06:00 a hora máxima)
   const arrivalTimeOptions: string[] = [];
@@ -1388,6 +1410,17 @@ export default function GuestGuidePortalView({
                             >
                               {t('extras.whatsapp_confirm')}
                             </a>
+                          </div>
+                        ) : isLateCheckout && hasSameDayCheckIn ? (
+                          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 text-xs flex items-center justify-center gap-2 text-center">
+                            <Clock size={15} className="text-slate-400 shrink-0" />
+                            <span className="font-semibold text-[11px]">
+                              {language === 'en'
+                                ? 'Not available for your departure date (same-day guest arrival)'
+                                : language === 'fr'
+                                ? 'Non disponible pour votre date de départ (autre arrivée le même jour)'
+                                : 'No disponible para tu fecha de salida (otra reserva entra hoy)'}
+                            </span>
                           </div>
                         ) : (
                           <Button

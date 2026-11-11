@@ -81,8 +81,21 @@ export default function PropertyCustomizerModal({
       p.extras = extras.filter(
         (e, idx) => idx === lateExtIdx || (!e.onlyWhenFreeNextDay && !/late\s*check/i.test(e.title))
       );
+    } else if (p.lateCheckoutPrice !== 0) {
+      extras.unshift({
+        id: `ext-late-${p.id}`,
+        title: `Late Check-out hasta las ${p.lateCheckoutUntil || '17:00'}h`,
+        description: isEn
+          ? 'Offered only when no other guest is checking in the same day via iCal.'
+          : 'Se ofrece al huésped solo si no entra otra reserva el mismo día en el iCal.',
+        price: p.lateCheckoutPrice || 35,
+        priceUnit: 'reserva',
+        icon: 'clock',
+        onlyWhenFreeNextDay: true,
+        active: true,
+      });
+      p.extras = extras;
     } else {
-      // Si el anfitrión lo ha eliminado, respetamos su decisión y no lo forzamos a reaparecer
       p.extras = extras;
     }
     p.customChecklist = normalizeCleaningChecklist(p.customChecklist);

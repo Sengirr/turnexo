@@ -8,6 +8,7 @@ export interface LandingTranslations {
     faq: string;
     contact: string;
     login: string;
+    goToDashboard: string;
     freeTrialBtn: string;
     mobileLoginCta: string;
   };
@@ -229,6 +230,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
       faq: 'FAQ',
       contact: 'Contacto',
       login: 'Iniciar sesión',
+      goToDashboard: 'Ir a mi panel →',
       freeTrialBtn: 'Probar 1 Alojamiento Gratis',
       mobileLoginCta: 'Iniciar sesión / Crear cuenta gratis →',
     },
@@ -365,13 +367,20 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
       subtitle:
         'Con un solo extra vendido al mes (Early Check-in, Late Check-out o parking) la suscripción se paga sola.',
       mostChosenBadge: 'Más elegido',
+      billingMonthly: 'Pago Mensual',
+      billingYearly: 'Pago Anual',
+      yearlyDiscountBadge: '🎁 2 meses gratis (-20%)',
+      billedYearlyNote: 'facturado en un pago anual',
       plans: [
         {
           planKey: 'plan_starter',
           name: 'Starter',
           units: '1 alojamiento',
           price: '0 €',
+          priceYearly: '0 €',
           note: '/ mes',
+          noteYearly: '/ mes (0 €/año)',
+          savingsText: '100% gratis',
           summary:
             'Plan gratuito para probar Turnexo con 1 alojamiento real. Incluye la App de Limpiadora y la Guía Digital para tus viajeros.',
           highlight: false,
@@ -390,7 +399,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
           name: 'Pro Fiscal',
           units: 'Hasta 5 alojamientos',
           price: '19 €',
+          priceYearly: '15 €',
           note: '/ mes (tarifa plana)',
+          noteYearly: '/ mes (180 € al año)',
+          savingsText: 'Ahorras 48 € al año (2,5 meses gratis)',
           summary:
             'Todo el control operativo más facturación oficial al 10% de IVA y exportación trimestral en 1 clic para tu gestoría.',
           highlight: true,
@@ -409,7 +421,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
           name: 'Microgestora',
           units: 'Hasta 10 alojamientos',
           price: '39 €',
+          priceYearly: '31 €',
           note: '/ mes (tarifa plana)',
+          noteYearly: '/ mes (372 € al año)',
+          savingsText: 'Ahorras 96 € al año (2,5 meses gratis)',
           summary:
             'Para gestores con varias limpiadoras y múltiples propietarios que necesitan coordinar todas las salidas sin líos.',
           highlight: false,
@@ -573,6 +588,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
       faq: 'FAQ',
       contact: 'Contact',
       login: 'Log in',
+      goToDashboard: 'Go to Dashboard →',
       freeTrialBtn: 'Try 1 Property Free',
       mobileLoginCta: 'Log in / Create free account →',
     },
@@ -708,13 +724,20 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
       title: 'Start free. Only pay as you grow.',
       subtitle: 'With just one extra sold per month (Early Check-in, Late Check-out, or parking), the plan pays for itself.',
       mostChosenBadge: 'Most Popular',
+      billingMonthly: 'Monthly',
+      billingYearly: 'Yearly',
+      yearlyDiscountBadge: '🎁 2 months free (-20%)',
+      billedYearlyNote: 'billed annually',
       plans: [
         {
           planKey: 'plan_starter',
           name: 'Starter',
           units: '1 property',
           price: '€0',
+          priceYearly: '€0',
           note: '/ month',
+          noteYearly: '/ month (€0/yr)',
+          savingsText: '100% free',
           summary:
             'Free forever plan to test Turnexo on 1 live property. Includes the Cleaner App and the Digital Guest Guide.',
           highlight: false,
@@ -733,7 +756,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
           name: 'Pro Tax',
           units: 'Up to 5 properties',
           price: '€19',
+          priceYearly: '€15',
           note: '/ month (flat rate)',
+          noteYearly: '/ month (€180 / year)',
+          savingsText: 'Save €48/year (2.5 months free)',
           summary:
             'Full operational control plus official invoicing with 10% VAT and 1-click quarterly Excel export for your accountant.',
           highlight: true,
@@ -752,7 +778,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLanguage, LandingTranslations> 
           name: 'Manager',
           units: 'Up to 10 properties',
           price: '€39',
+          priceYearly: '€31',
           note: '/ month (flat rate)',
+          noteYearly: '/ month (€372 / year)',
+          savingsText: 'Save €96/year (2.5 months free)',
           summary:
             'For property managers with multiple cleaners and owners needing smooth turnover coordination without headaches.',
           highlight: false,

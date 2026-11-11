@@ -97,7 +97,7 @@ export default function HeroPhoneMockup({
   const completedTasksCount = tasks.filter((tItem) => tItem.checked).length;
 
   return (
-    <div className="w-full max-w-[370px] mx-auto flex flex-col items-center space-y-4 select-none">
+    <div className="w-full max-w-[320px] sm:max-w-[370px] mx-auto flex flex-col items-center space-y-4 select-none">
       {/* 1. SELECTOR SUPERIOR DE ROLES (2 PESTAÑAS) */}
       <div
         role="tablist"
@@ -109,7 +109,7 @@ export default function HeroPhoneMockup({
           role="tab"
           aria-selected={activeRole === 'cleaner'}
           onClick={() => setActiveRole('cleaner')}
-          className={`py-2.5 px-3 rounded-xl font-sans text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
+          className={`py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl font-sans text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
             activeRole === 'cleaner'
               ? 'bg-[#141413] text-white shadow-md scale-[1.01]'
               : 'text-[#57554F] hover:text-[#141413]'
@@ -123,7 +123,7 @@ export default function HeroPhoneMockup({
           role="tab"
           aria-selected={activeRole === 'guest'}
           onClick={() => setActiveRole('guest')}
-          className={`py-2.5 px-3 rounded-xl font-sans text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
+          className={`py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl font-sans text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
             activeRole === 'guest'
               ? 'bg-[#C85A32] text-white shadow-md scale-[1.01]'
               : 'text-[#57554F] hover:text-[#141413]'
@@ -134,10 +134,10 @@ export default function HeroPhoneMockup({
       </div>
 
       {/* 2. MARCO REALISTA DE SMARTPHONE (ESTILO IPHONE) */}
-      <div className="relative w-full rounded-[2.5rem] border-[8px] border-slate-800 bg-slate-900 shadow-2xl overflow-hidden ring-1 ring-black/15">
+      <div className="relative w-full rounded-[2rem] sm:rounded-[2.5rem] border-[6px] sm:border-[8px] border-slate-800 bg-slate-900 shadow-2xl overflow-hidden ring-1 ring-black/15">
         {/* Barra de estado superior + Dynamic Island / Notch sutil */}
         <div
-          className={`px-6 pt-2.5 pb-2 flex items-center justify-between text-[11px] font-sans font-semibold transition-colors ${
+          className={`px-4 sm:px-6 pt-2.5 pb-2 flex items-center justify-between text-[11px] font-sans font-semibold transition-colors ${
             activeRole === 'cleaner'
               ? 'bg-[#FAF9F5] text-slate-800'
               : 'bg-[#141413] text-white'

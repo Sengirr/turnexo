@@ -14,8 +14,10 @@ import {
   Layers,
   ArrowRight,
   Mail,
+  Globe,
 } from 'lucide-react';
 import HeroPhoneMockup from './HeroPhoneMockup';
+import { LandingLanguage, LANDING_TRANSLATIONS } from '../lib/landingTranslations';
 import { HostAccount } from '../lib/supabase';
 
 interface Props {
@@ -36,21 +38,47 @@ export default function LandingPageView({
   onOpenCleanerDemo,
   onOpenLegal,
 }: Props) {
+  // Estado de idioma (ES / EN) con persistencia en localStorage y detección automática
+  const [lang, setLang] = useState<LandingLanguage>(() => {
+    try {
+      const saved = localStorage.getItem('turnexo_lang_preference');
+      if (saved === 'es' || saved === 'en') return saved;
+      if (typeof navigator !== 'undefined' && navigator.language && navigator.language.startsWith('en')) {
+        return 'en';
+      }
+    } catch {
+      // ignore
+    }
+    return 'es';
+  });
+
+  const changeLanguage = (newLang: LandingLanguage) => {
+    setLang(newLang);
+    try {
+      localStorage.setItem('turnexo_lang_preference', newLang);
+    } catch {
+      // ignore
+    }
+  };
+
+  const t = LANDING_TRANSLATIONS[lang];
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
 
   // Estado del acordeón de FAQ
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
 
   // Estado del Modal de Contacto integrado
   const [contactModalOpen, setContactModalOpen] = useState(false);
-  const [contactUnits, setContactUnits] = useState('Más de 10 alojamientos');
+  const [contactUnits, setContactUnits] = useState(t.contactModal.unitsOptions[3] || 'Más de 10 alojamientos');
   const [contactName, setContactName] = useState('');
   const [contactChannel, setContactChannel] = useState('');
   const [contactMessage, setContactMessage] = useState('');
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  const openContactModal = (defaultUnits = '1 a 5 alojamientos') => {
-    setContactUnits(defaultUnits);
+  const openContactModal = (defaultUnits?: string) => {
+    setContactUnits(defaultUnits || t.contactModal.unitsOptions[1] || '2 a 5 alojamientos');
     setContactSubmitted(false);
     setContactModalOpen(true);
   };
@@ -65,6 +93,7 @@ export default function LandingPageView({
         contact: contactChannel.trim(),
         units: contactUnits,
         message: contactMessage.trim(),
+        lang,
         createdAt: new Date().toISOString(),
       });
       localStorage.setItem('turnexo_contact_leads_v1', JSON.stringify(existing));
@@ -75,10 +104,10 @@ export default function LandingPageView({
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
-      {/* NAVBAR SAAS DIRECTA Y LIMPIA (SIN DROPDOWNS QUE TAPEN EL HERO) */}
+    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] overflow-x-hidden">
+      {/* NAVBAR SAAS DIRECTA Y LIMPIA */}
       <header className="sticky top-0 z-50 bg-[#F6F4EE]/95 backdrop-blur-md border-b border-[#E2DDD2]">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
           {/* Columna 1: Identidad de Marca */}
           <a href="/" className="flex items-center gap-2.5 shrink-0 whitespace-nowrap group">
             <div className="w-8 h-8 bg-[#141413] text-[#F6F4EE] flex items-center justify-center font-mono font-extrabold text-xs tracking-tighter group-hover:bg-[#C85A32] transition-colors">
@@ -89,55 +118,85 @@ export default function LandingPageView({
             </span>
           </a>
 
-          {/* Columna 2: Navegación Directa a las 4 secciones de la página */}
+          {/* Columna 2: Navegación Directa */}
           <nav className="hidden lg:flex items-center gap-2 text-sm font-medium text-[#57554F] whitespace-nowrap">
             <a
               href="#modulos"
               className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
-              Qué incluye
+              {t.nav.includes}
             </a>
 
             <a
               href="#comparativa"
               className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
-              Comparativa
+              {t.nav.comparison}
             </a>
 
             <a
               href="#precios"
               className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
-              Precios
+              {t.nav.pricing}
             </a>
 
             <a
               href="#faq"
               className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
-              FAQ
+              {t.nav.faq}
             </a>
 
             <button
               type="button"
-              onClick={() => openContactModal('Cabecera')}
+              onClick={() => openContactModal(t.nav.contact)}
               className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
-              Contacto
+              {t.nav.contact}
             </button>
           </nav>
 
-          {/* Columna 3: Acceso Clientes + CTA Principal */}
-          <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
+          {/* Columna 3: Idioma + Acceso Clientes + CTA Principal */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 whitespace-nowrap">
+            {/* SELECTOR DE IDIOMA (ES / EN) */}
+            <div className="flex items-center border border-[#D5CFC0] bg-white rounded-lg p-0.5 text-xs font-mono shadow-2xs">
+              <button
+                type="button"
+                onClick={() => changeLanguage('es')}
+                className={`px-2 py-1 rounded transition-all ${
+                  lang === 'es'
+                    ? 'bg-[#141413] text-white font-bold shadow-xs'
+                    : 'text-[#57554F] hover:text-[#141413]'
+                }`}
+                title="Español"
+                aria-label="Español"
+              >
+                ES
+              </button>
+              <button
+                type="button"
+                onClick={() => changeLanguage('en')}
+                className={`px-2 py-1 rounded transition-all ${
+                  lang === 'en'
+                    ? 'bg-[#141413] text-white font-bold shadow-xs'
+                    : 'text-[#57554F] hover:text-[#141413]'
+                }`}
+                title="English"
+                aria-label="English"
+              >
+                EN
+              </button>
+            </div>
+
             {hostAccount ? (
               <button
                 type="button"
                 onClick={() => onNavigateToApp()}
-                className="bg-[#141413] hover:bg-[#C85A32] text-white text-xs font-bold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-xs whitespace-nowrap"
+                className="bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-bold uppercase tracking-wider px-3 sm:px-5 py-2 sm:py-3 transition flex items-center gap-1.5 sm:gap-2 shadow-xs whitespace-nowrap"
               >
-                <span>Mi Panel ({hostAccount.fullName.split(' ')[0] || 'Anfitrión'})</span>
-                <ArrowUpRight size={15} className="shrink-0" />
+                <span>{t.nav.goToDashboard}</span>
+                <ArrowUpRight size={14} className="shrink-0" />
               </button>
             ) : (
               <>
@@ -146,15 +205,15 @@ export default function LandingPageView({
                   onClick={() => onNavigateToApp('login')}
                   className="hidden sm:inline-flex items-center text-sm font-semibold text-[#141413] hover:text-[#C85A32] px-3 py-2 transition whitespace-nowrap"
                 >
-                  Iniciar sesión
+                  {t.nav.login}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => onNavigateToApp('register')}
-                  className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-bold uppercase tracking-wider px-5 py-3 transition flex items-center gap-2 shadow-xs whitespace-nowrap"
+                  className="hidden md:inline-flex bg-[#C85A32] hover:bg-[#B04A25] text-white text-xs font-bold uppercase tracking-wider px-4 sm:px-5 py-2.5 sm:py-3 transition items-center gap-2 shadow-xs whitespace-nowrap"
                 >
-                  <span>Probar 1 Alojamiento Gratis</span>
+                  <span>{t.nav.freeTrialBtn}</span>
                   <ArrowUpRight size={15} className="shrink-0" />
                 </button>
               </>
@@ -165,7 +224,7 @@ export default function LandingPageView({
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2.5 border border-[#141413] bg-white text-[#141413]"
-              aria-label="Abrir menú de navegación"
+              aria-label="Menu"
             >
               {mobileMenuOpen ? <X size={18} /> : <Layers size={18} />}
             </button>
@@ -175,44 +234,72 @@ export default function LandingPageView({
         {/* Drawer Móvil Desplegable */}
         {mobileMenuOpen && (
           <div className="lg:hidden bg-[#FAF9F5] border-t-2 border-[#141413] px-6 py-6 space-y-4 shadow-2xl">
+            {/* Selector de idioma en móvil */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#E2DDD2]">
+              <span className="text-xs font-mono uppercase text-[#57554F] flex items-center gap-1.5 font-bold">
+                <Globe size={14} className="text-[#C85A32]" />
+                Idioma / Language:
+              </span>
+              <div className="flex items-center border border-[#D5CFC0] bg-white rounded-lg p-0.5 text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={() => changeLanguage('es')}
+                  className={`px-3 py-1 rounded transition-all ${
+                    lang === 'es' ? 'bg-[#141413] text-white font-bold' : 'text-[#57554F]'
+                  }`}
+                >
+                  🇪🇸 Español
+                </button>
+                <button
+                  type="button"
+                  onClick={() => changeLanguage('en')}
+                  className={`px-3 py-1 rounded transition-all ${
+                    lang === 'en' ? 'bg-[#141413] text-white font-bold' : 'text-[#57554F]'
+                  }`}
+                >
+                  🇬🇧 English
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3 text-sm font-bold text-[#141413]">
               <a
                 href="#modulos"
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-3 bg-white border border-[#D5CFC0]"
               >
-                Qué incluye
+                {t.nav.includes}
               </a>
               <a
                 href="#comparativa"
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-3 bg-white border border-[#D5CFC0]"
               >
-                Comparativa
+                {t.nav.comparison}
               </a>
               <a
                 href="#precios"
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-3 bg-white border border-[#D5CFC0]"
               >
-                Precios (1 Gratis)
+                {t.nav.pricing}
               </a>
               <a
                 href="#faq"
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-3 bg-white border border-[#D5CFC0]"
               >
-                FAQ
+                {t.nav.faq}
               </a>
               <button
                 type="button"
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  openContactModal('Menú móvil');
+                  openContactModal(t.nav.contact);
                 }}
-                className="p-3 bg-[#E8E4D9] text-[#141413] border border-[#D5CFC0] text-left"
+                className="p-3 bg-[#E8E4D9] text-[#141413] border border-[#D5CFC0] text-left col-span-2"
               >
-                Contacto
+                {t.nav.contact}
               </button>
             </div>
 
@@ -224,7 +311,7 @@ export default function LandingPageView({
               }}
               className="w-full bg-[#141413] text-white font-sans text-xs font-bold uppercase py-3.5"
             >
-              {hostAccount ? `Mi Panel de Anfitrión (${hostAccount.fullName.split(' ')[0] || 'Anfitrión'}) →` : 'Iniciar sesión / Crear cuenta gratis →'}
+              {t.nav.mobileLoginCta}
             </button>
           </div>
         )}
@@ -236,18 +323,18 @@ export default function LandingPageView({
           <div className="lg:col-span-7 space-y-7 pt-2">
             <div className="inline-flex items-center gap-2.5 border border-emerald-300 bg-emerald-50 px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider text-emerald-900 font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-              <span>LISTO PARA EL NUEVO MARCO FISCAL: FACTURAS SIMPLIFICADAS Y MODELO 303</span>
+              <span>{t.hero.badge}</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.08] tracking-tight text-[#141413]">
-              El día a día de tus alojamientos.{' '}
+              {t.hero.titleStart}{' '}
               <span className="text-[#C85A32] block sm:inline">
-                Sin llamadas, sin WhatsApps y sin líos con el IVA.
+                {t.hero.titleHighlight}
               </span>
             </h1>
 
             <p className="text-base sm:text-lg text-[#57554F] leading-relaxed max-w-2xl font-normal">
-              Conecta el calendario de tus anuncios en 30 segundos. Turnexo se encarga de coordinar a tu equipo de limpieza, resolver las dudas de tus viajeros y preparar los libros contables para tu gestoría.
+              {t.hero.subtitle}
             </p>
 
             {/* 3 puntos con check (valor operativo) */}
@@ -255,19 +342,19 @@ export default function LandingPageView({
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
                 <span className="text-[#141413]">
-                  <strong>Cuadrante de limpieza sin grupos de WhatsApp:</strong> Tu limpiadora entra con un enlace móvil sin contraseñas, marca las tareas y sube fotos del alojamiento antes de cada check-in.
+                  <strong>{t.hero.check1Title}</strong> {t.hero.check1Desc}
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
                 <span className="text-[#141413]">
-                  <strong>Guía digital interactiva para el huésped:</strong> Clave WiFi en un toque, vídeos cortos de electrodomésticos para evitar llamadas a deshoras y venta de extras (early check-in, late check-out, cunas o parking).
+                  <strong>{t.hero.check2Title}</strong> {t.hero.check2Desc}
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-[#1F4E3D] shrink-0 mt-0.5" />
                 <span className="text-[#141413]">
-                  <strong>Facturación e IVA del 10% en un solo clic:</strong> Convierte tus reservas de Airbnb y Booking en facturas oficiales y exporta el libro trimestral en Excel listo para el Modelo 303.
+                  <strong>{t.hero.check3Title}</strong> {t.hero.check3Desc}
                 </span>
               </li>
             </ul>
@@ -279,75 +366,76 @@ export default function LandingPageView({
                   onClick={() => onNavigateToApp('register')}
                   className="bg-[#C85A32] hover:bg-[#B04A25] text-white text-sm sm:text-base font-bold px-7 py-4 transition flex items-center gap-2 shadow-md group"
                 >
-                  <span>Probar 1 Alojamiento Gratis →</span>
+                  <span>{t.hero.ctaBtn}</span>
                 </button>
               </div>
 
               <p className="text-xs font-mono text-[#57554F] flex items-center gap-1.5 pt-1">
                 <span className="text-[#1F4E3D] font-bold">✓</span>
-                <span>Plan Gratuito para 1 alojamiento · Sin tarjeta de crédito ni permanencia</span>
+                <span>{t.hero.noCardNote}</span>
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[#E2DDD2] max-w-xl">
-              <div>
-                <p className="font-mono text-2xl font-bold text-[#141413]">60 seg</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Sincronización automática iCal</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 pt-6 border-t border-[#E2DDD2] max-w-xl">
+              <div className="bg-white/60 sm:bg-transparent p-3 sm:p-0 border sm:border-0 border-[#E2DDD2]">
+                <p className="font-mono text-2xl font-bold text-[#141413]">{t.hero.metric1Val}</p>
+                <p className="text-xs text-[#57554F] mt-0.5">{t.hero.metric1Desc}</p>
               </div>
-              <div>
-                <p className="font-mono text-2xl font-bold text-emerald-700">1 clic</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Exportación oficial para tu gestoría</p>
+              <div className="bg-white/60 sm:bg-transparent p-3 sm:p-0 border sm:border-0 border-[#E2DDD2]">
+                <p className="font-mono text-2xl font-bold text-emerald-700">{t.hero.metric2Val}</p>
+                <p className="text-xs text-[#57554F] mt-0.5">{t.hero.metric2Desc}</p>
               </div>
-              <div>
-                <p className="font-mono text-2xl font-bold text-[#1F4E3D]">100 %</p>
-                <p className="text-xs text-[#57554F] mt-0.5">Guías interactivas para el viajero</p>
+              <div className="bg-white/60 sm:bg-transparent p-3 sm:p-0 border sm:border-0 border-[#E2DDD2]">
+                <p className="font-mono text-2xl font-bold text-[#1F4E3D]">{t.hero.metric3Val}</p>
+                <p className="text-xs text-[#57554F] mt-0.5">{t.hero.metric3Desc}</p>
               </div>
             </div>
           </div>
 
-          {/* Mockup Realista de Smartphone Interactivo (Vista Limpiadora / Vista Huésped) */}
+          {/* Mockup Realista de Smartphone Interactivo */}
           <div className="lg:col-span-5">
             <HeroPhoneMockup
               onOpenCleanerDemo={onOpenCleanerDemo}
               onOpenGuestDemo={onOpenGuestDemo}
+              lang={lang}
             />
           </div>
         </div>
       </section>
 
-      {/* SECCIÓN 2: LOS 3 MOTORES (PROBLEMA QUE RESUELVE + BENEFICIOS REALES EN UN SOLO LUGAR) */}
+      {/* SECCIÓN 2: LOS 3 MOTORES */}
       <section id="modulos" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
         <div className="max-w-3xl space-y-3 mb-14">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
-            QUÉ HACE TURNEXO POR TI
+            {t.modules.badge}
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] leading-tight tracking-tight">
-            Las 3 tareas que más tiempo te quitan cada semana, automatizadas en una sola plataforma.
+            {t.modules.title}
           </h2>
           <p className="text-sm text-[#57554F] leading-relaxed">
-            Sin curva de aprendizaje ni instalaciones para tus huéspedes o tu limpiadora. Todo funciona con enlaces web directos desde el primer minuto.
+            {t.modules.subtitle}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* MOTOR 1: EXPERIENCIA DEL HUÉSPED */}
-          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-8 sm:p-10 flex flex-col justify-between space-y-7">
+          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-5 sm:p-8 md:p-10 flex flex-col justify-between space-y-7">
             <div className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2DDD2] pb-4">
                 <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold whitespace-nowrap">
-                  01 · EXPERIENCIA DEL HUÉSPED
+                  {t.modules.mod1Num}
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2.5 py-0.5 whitespace-nowrap">
-                  Sin apps ni descargas
+                  {t.modules.mod1Badge}
                 </span>
               </div>
 
               <div className="space-y-2.5">
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                  Todo tu alojamiento explicado en vídeo antes de que el huésped llegue a la puerta<span className="-ml-[0.03em]">.</span>
+                  {t.modules.mod1Title}
                 </h3>
                 <p className="text-sm text-[#57554F] leading-relaxed">
-                  Le mandas un enlace por WhatsApp o por el chat de Airbnb en cuanto confirma la reserva. Desde su móvil resuelve el check-in, consulta cómo funcionan los aparatos de la casa y contrata extras sin llamarte.
+                  {t.modules.mod1Desc}
                 </p>
               </div>
 
@@ -355,40 +443,40 @@ export default function LandingPageView({
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Video size={14} className="text-[#C85A32]" />
-                    Vídeo Home Tour
+                    {t.modules.mod1Card1Title}
                   </p>
                   <p className="text-[#57554F]">
-                    Un recorrido visual por las estancias para que conozca el alojamiento por dentro antes de viajar.
+                    {t.modules.mod1Card1Desc}
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <CheckCircle2 size={14} className="text-[#1F4E3D]" />
-                    Llegada y llaves paso a paso
+                    {t.modules.mod1Card2Title}
                   </p>
                   <p className="text-[#57554F]">
-                    Vídeo desde la calle hasta el portal y código de apertura del cajetín o cerradura digital.
+                    {t.modules.mod1Card2Desc}
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Sparkles size={14} className="text-[#C85A32]" />
-                    Manual en vídeo de equipamiento
+                    {t.modules.mod1Card3Title}
                   </p>
                   <p className="text-[#57554F]">
-                    Clips de 15 segundos para aire acondicionado, placa, calefacción o cafetera que evitan llamadas nocturnas.
+                    {t.modules.mod1Card3Desc}
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Sparkles size={14} className="text-[#1F4E3D]" />
-                    Venta de Extras Personalizados
+                    {t.modules.mod1Card4Title}
                   </p>
                   <p className="text-[#57554F]">
-                    Ofrece Early Check-in, Late Check-out (si el iCal está libre), cuna de bebé, parking o mascotas. Cobras el 100% sin comisiones.
+                    {t.modules.mod1Card4Desc}
                   </p>
                 </div>
               </div>
@@ -400,7 +488,7 @@ export default function LandingPageView({
                 onClick={onOpenGuestDemo}
                 className="text-xs sm:text-sm font-sans font-bold text-[#C85A32] hover:text-[#B04A25] inline-flex items-center gap-1.5 group"
               >
-                <span>Ver ejemplo real de Guía del Huésped</span>
+                <span>{t.modules.mod1Cta}</span>
                 <ArrowUpRight
                   size={15}
                   className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
@@ -410,23 +498,23 @@ export default function LandingPageView({
           </div>
 
           {/* MOTOR 2: OPERATIVA DE LIMPIEZA */}
-          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-8 sm:p-10 flex flex-col justify-between space-y-7">
+          <div className="bg-[#FAF9F5] border border-[#D5CFC0] p-5 sm:p-8 md:p-10 flex flex-col justify-between space-y-7">
             <div className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2DDD2] pb-4">
                 <span className="font-mono text-xs uppercase tracking-widest text-[#1F4E3D] font-bold whitespace-nowrap">
-                  02 · OPERATIVA DE LIMPIEZA
+                  {t.modules.mod2Num}
                 </span>
                 <span className="font-mono text-xs font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2.5 py-0.5 whitespace-nowrap">
-                  Acceso móvil sin contraseñas
+                  {t.modules.mod2Badge}
                 </span>
               </div>
 
               <div className="space-y-2.5">
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                  Tu equipo recibe las limpiezas automáticamente y tú compruebas con fotos que todo está listo<span className="-ml-[0.03em]">.</span>
+                  {t.modules.mod2Title}
                 </h3>
                 <p className="text-sm text-[#57554F] leading-relaxed">
-                  Cada cambio en tu calendario de Airbnb o Booking actualiza al instante el enlace móvil de tu limpiadora. Ve qué alojamiento toca hoy, si hay entrada esa misma tarde y sube fotos al terminar.
+                  {t.modules.mod2Desc}
                 </p>
               </div>
 
@@ -434,40 +522,40 @@ export default function LandingPageView({
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Users size={14} className="text-[#1F4E3D]" />
-                    Agenda conectada por iCal
+                    {t.modules.mod2Card1Title}
                   </p>
                   <p className="text-[#57554F]">
-                    Las nuevas reservas, modificaciones o cancelaciones se reflejan en su teléfono al instante.
+                    {t.modules.mod2Card1Desc}
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <CheckCircle2 size={14} className="text-[#1F4E3D]" />
-                    Checklist por habitación
+                    {t.modules.mod2Card2Title}
                   </p>
                   <p className="text-[#57554F]">
-                    Puntos de control claros para dormitorio, baño, cocina y reposición de básicos en cada salida.
+                    {t.modules.mod2Card2Desc}
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <ShieldCheck size={14} className="text-[#1F4E3D]" />
-                    Fotos de comprobación
+                    {t.modules.mod2Card3Title}
                   </p>
                   <p className="text-[#57554F]">
-                    Recibe las fotos del alojamiento recién limpio en tu panel antes de que entre el siguiente huésped.
+                    {t.modules.mod2Card3Desc}
                   </p>
                 </div>
 
                 <div className="border border-[#E2DDD2] bg-white p-4 space-y-1">
                   <p className="font-bold text-[#141413] flex items-center gap-1.5">
                     <Flame size={14} className="text-[#C85A32]" />
-                    Aviso de rotación en el día
+                    {t.modules.mod2Card4Title}
                   </p>
                   <p className="text-[#57554F]">
-                    Marca como prioritarias las salidas de las 11:00h que tienen nueva entrada esa misma tarde.
+                    {t.modules.mod2Card4Desc}
                   </p>
                 </div>
               </div>
@@ -479,7 +567,7 @@ export default function LandingPageView({
                 onClick={onOpenCleanerDemo}
                 className="text-xs sm:text-sm font-sans font-bold text-[#1F4E3D] hover:text-[#16382B] inline-flex items-center gap-1.5 group"
               >
-                <span>Ver ejemplo real de la App de Limpiadora</span>
+                <span>{t.modules.mod2Cta}</span>
                 <ArrowUpRight
                   size={15}
                   className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
@@ -490,38 +578,38 @@ export default function LandingPageView({
         </div>
 
         {/* MOTOR 3: FACTURACIÓN Y GESTORÍA */}
-        <div className="mt-8 bg-[#FAF9F5] border border-[#D5CFC0] p-8 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="mt-8 bg-[#FAF9F5] border border-[#D5CFC0] p-5 sm:p-8 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2DDD2] pb-4">
               <span className="font-mono text-xs uppercase tracking-widest text-emerald-800 font-bold whitespace-nowrap">
-                03 · FACTURACIÓN Y GESTORÍA
+                {t.modules.mod3Num}
               </span>
               <span className="font-mono text-xs font-bold bg-emerald-100 text-emerald-900 px-2.5 py-0.5 whitespace-nowrap">
-                IVA 10% · Modelo 303
+                {t.modules.mod3Badge}
               </span>
             </div>
 
             <div className="space-y-2.5">
               <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141413] tracking-tight leading-tight">
-                De reservas de Airbnb y Booking a facturas oficiales listas para tu gestor en un clic<span className="-ml-[0.03em]">.</span>
+                {t.modules.mod3Title}
               </h3>
               <p className="text-sm text-[#57554F] leading-relaxed">
-                Olvídate de perder tardes enteras al final del trimestre haciendo facturas una por una en Word o Excel. Turnexo calcula la base imponible y el 10% de IVA de cada reserva automáticamente.
+                {t.modules.mod3Desc}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
-                <p className="font-bold text-[#141413]">Facturas simplificadas y con NIF</p>
-                <p className="text-[#57554F]">Numeración correlativa oficial con desglose de IVA al 10% y descarga en PDF.</p>
+                <p className="font-bold text-[#141413]">{t.modules.mod3Card1Title}</p>
+                <p className="text-[#57554F]">{t.modules.mod3Card1Desc}</p>
               </div>
               <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
-                <p className="font-bold text-[#141413]">Exportación trimestral en Excel</p>
-                <p className="text-[#57554F]">Libro Registro estructurado para que tu gestoría liquide el Modelo 303 en minutos.</p>
+                <p className="font-bold text-[#141413]">{t.modules.mod3Card2Title}</p>
+                <p className="text-[#57554F]">{t.modules.mod3Card2Desc}</p>
               </div>
               <div className="bg-white border border-[#E2DDD2] p-3.5 space-y-1">
-                <p className="font-bold text-[#141413]">Varios propietarios (Multi-NIF)</p>
-                <p className="text-[#57554F]">Configura distintos titulares y series si gestionas alojamientos de varios dueños.</p>
+                <p className="font-bold text-[#141413]">{t.modules.mod3Card3Title}</p>
+                <p className="text-[#57554F]">{t.modules.mod3Card3Desc}</p>
               </div>
             </div>
           </div>
@@ -529,24 +617,24 @@ export default function LandingPageView({
           <div className="lg:col-span-5 bg-[#141413] text-[#F6F4EE] p-6 border border-[#2C2C29] space-y-4">
             <div className="flex items-center justify-between border-b border-white/15 pb-3 font-mono">
               <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">
-                RESUMEN TRIMESTRAL · LIBRO IVA
+                {t.modules.mod3SummaryTitle}
               </span>
               <span className="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 text-[10px] font-bold">
-                MODELO 303 LISTO
+                {t.modules.mod3SummaryBadge}
               </span>
             </div>
 
             <div className="space-y-2 bg-white/5 p-3.5 border border-white/10 font-mono text-xs">
               <div className="flex justify-between text-white/70">
-                <span>Facturas emitidas (Airbnb + Booking):</span>
-                <span className="font-bold text-white">28 facturas</span>
+                <span>{t.modules.mod3SummaryInvoices}</span>
+                <span className="font-bold text-white">{t.modules.mod3SummaryInvoicesVal}</span>
               </div>
               <div className="flex justify-between text-white/70">
-                <span>Base imponible acumulada:</span>
+                <span>{t.modules.mod3SummaryBase}</span>
                 <span className="font-bold text-white">11.420,00 €</span>
               </div>
               <div className="flex justify-between text-emerald-400 font-bold border-t border-white/10 pt-2">
-                <span>IVA repercutido al 10% (Casilla 07):</span>
+                <span>{t.modules.mod3SummaryVat}</span>
                 <span>1.142,00 €</span>
               </div>
             </div>
@@ -555,15 +643,15 @@ export default function LandingPageView({
               <div className="bg-white/5 border border-white/10 px-3 py-2.5 flex items-center gap-2 text-white/90">
                 <FileSpreadsheet size={15} className="text-emerald-400 shrink-0" />
                 <div className="truncate">
-                  <p className="font-bold text-white truncate">Libro_IVA_3T.xlsx</p>
-                  <p className="text-[10px] text-white/55 truncate">Excel para gestoría</p>
+                  <p className="font-bold text-white truncate">{t.modules.mod3File1Name}</p>
+                  <p className="text-[10px] text-white/55 truncate">{t.modules.mod3File1Sub}</p>
                 </div>
               </div>
               <div className="bg-white/5 border border-white/10 px-3 py-2.5 flex items-center gap-2 text-white/90">
                 <CheckCircle2 size={15} className="text-emerald-400 shrink-0" />
                 <div className="truncate">
-                  <p className="font-bold text-white truncate">28 Facturas PDF</p>
-                  <p className="text-[10px] text-white/55 truncate">Serie F2026 correlativa</p>
+                  <p className="font-bold text-white truncate">{t.modules.mod3File2Name}</p>
+                  <p className="text-[10px] text-white/55 truncate">{t.modules.mod3File2Sub}</p>
                 </div>
               </div>
             </div>
@@ -571,249 +659,174 @@ export default function LandingPageView({
         </div>
       </section>
 
-      {/* SECCIÓN 3: COMPARATIVA DIRECTA (WHATSAPP/EXCEL VS SOFTWARE TRADICIONAL VS TURNEXO) */}
+      {/* SECCIÓN 3: COMPARATIVA DIRECTA */}
       <section id="comparativa" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
         <div className="max-w-3xl mx-auto text-center space-y-3 mb-14">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
-            COMPARATIVA DIRECTA
+            {t.comparison.badge}
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] leading-tight tracking-tight">
-            Por qué los anfitriones dejan atrás el caos de WhatsApp y los programas caros<span className="-ml-[0.03em]">.</span>
+            {t.comparison.title}
           </h2>
           <p className="text-sm text-[#57554F] leading-relaxed">
-            Ni perder horas cada semana coordinando todo a mano, ni pagar cuotas por alojamiento en herramientas pensadas para grandes hoteles.
+            {t.comparison.subtitle}
           </p>
         </div>
 
+        <div className="sm:hidden flex items-center justify-end gap-1.5 text-[11px] font-mono text-[#57554F] mb-2 px-1">
+          <span>Desliza para ver la comparativa</span>
+          <ArrowRight size={12} className="text-[#C85A32]" />
+        </div>
+
         <div className="bg-[#FAF9F5] border border-[#D5CFC0] overflow-x-auto shadow-xs">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full min-w-[620px] text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-[#D5CFC0] bg-[#E8E4D9]/60 font-mono text-[11px] uppercase tracking-wider text-[#57554F]">
-                <th className="py-4 px-5">Tarea del día a día</th>
-                <th className="py-4 px-5 text-[#57554F]">A mano (WhatsApp y Excel)</th>
-                <th className="py-4 px-5 text-[#57554F]">Software / PMS tradicional</th>
-                <th className="py-4 px-5 bg-[#141413] text-[#F6F4EE] font-bold">Con Turnexo</th>
+                <th className="py-4 px-5">{t.comparison.thTask}</th>
+                <th className="py-4 px-5 text-[#57554F]">{t.comparison.thManual}</th>
+                <th className="py-4 px-5 text-[#57554F]">{t.comparison.thPms}</th>
+                <th className="py-4 px-5 bg-[#141413] text-[#F6F4EE] font-bold">{t.comparison.thTurnexo}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2DDD2]">
-              <tr className="hover:bg-white transition">
-                <td className="py-4 px-5 font-bold text-[#141413]">
-                  Coordinación de limpiezas
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  Mensajes y capturas del calendario cada vez que entra o cambia una reserva
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  Obliga a tu equipo a instalar apps, recordar claves y usar menús complejos
-                </td>
-                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Limpiezas actualizadas al instante en un enlace móvil sin contraseñas
-                </td>
-              </tr>
-
-              <tr className="hover:bg-white transition">
-                <td className="py-4 px-5 font-bold text-[#141413]">
-                  Revisión del alojamiento
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  A ciegas: te enteras de un olvido cuando llega el siguiente huésped
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  Solo permite marcar «limpio», sin checklist visual por estancia
-                </td>
-                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Checklist por habitación y fotos de comprobación antes del check-in
-                </td>
-              </tr>
-
-              <tr className="hover:bg-white transition">
-                <td className="py-4 px-5 font-bold text-[#141413]">
-                  Llegada y dudas del huésped
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  PDFs que nadie lee y llamadas a deshoras por las llaves o la calefacción
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  Formularios pesados sin vídeos del acceso ni del equipamiento
-                </td>
-                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Guía Digital en vídeo enviada por enlace antes de que el viajero salga de casa
-                </td>
-              </tr>
-
-              <tr className="hover:bg-white transition">
-                <td className="py-4 px-5 font-bold text-[#141413]">
-                  Venta de extras (Early/Late, cunas, parking)
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  Se regalan por compromiso o se negocian uno por uno por WhatsApp
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  Comisiones por venta o sin avisar automáticamente a la limpiadora
-                </td>
-                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Catálogo propio (Early/Late según calendario, cunas, parking) 100% íntegro para ti
-                </td>
-              </tr>
-
-              <tr className="hover:bg-white transition">
-                <td className="py-4 px-5 font-bold text-[#141413]">
-                  Facturas al 10% de IVA y gestoría
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  Tardes enteras al final del trimestre pasando reservas a Word o Excel
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  Módulos de contabilidad aparte con sobrecoste mensual
-                </td>
-                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#1F4E3D]">
-                  ✓ Facturas oficiales en un clic y Libro Registro en Excel listo para el Modelo 303
-                </td>
-              </tr>
-
-              <tr className="hover:bg-white transition">
-                <td className="py-4 px-5 font-bold text-[#141413]">
-                  Precio mensual
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  0 €, a cambio de tu tiempo libre y estar pendiente del teléfono
-                </td>
-                <td className="py-4 px-5 text-[#57554F]">
-                  Cuota base más recargo o comisión por cada alojamiento añadido
-                </td>
-                <td className="py-4 px-5 bg-[#141413]/5 font-bold text-[#C85A32]">
-                  Plan gratuito (1 alojamiento) · Hasta 5 alojamientos por 19 €/mes (tarifa plana)
-                </td>
-              </tr>
+              {t.comparison.rows.map((row, idx) => (
+                <tr key={idx} className="hover:bg-white transition">
+                  <td className="py-4 px-5 font-bold text-[#141413]">{row.task}</td>
+                  <td className="py-4 px-5 text-[#57554F]">{row.manual}</td>
+                  <td className="py-4 px-5 text-[#57554F]">{row.pms}</td>
+                  <td className={`py-4 px-5 bg-[#141413]/5 font-bold ${idx === t.comparison.rows.length - 1 ? 'text-[#C85A32]' : 'text-[#1F4E3D]'}`}>
+                    {row.turnexo}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </section>
 
-      {/* SECCIÓN 4: PRECIOS CLAROS + GARANTÍAS DE RIESGO CERO INTEGRADAS */}
+      {/* SECCIÓN 4: PRECIOS CLAROS */}
       <section id="precios" className="max-w-7xl mx-auto px-6 py-24 border-b border-[#E2DDD2]">
-        <div className="text-center space-y-3 max-w-2xl mx-auto mb-12">
+        <div className="text-center space-y-3 max-w-2xl mx-auto mb-8">
           <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
-            PRECIOS · TARIFA PLANA, NO POR ALOJAMIENTO
+            {t.pricing.badge}
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
-            Empieza gratis. Paga solo cuando crezcas<span className="-ml-[0.03em]">.</span>
+            {t.pricing.title}
           </h2>
           <p className="text-sm text-[#57554F]">
-            Con un solo extra vendido al mes (Early Check-in, Late Check-out o parking) la suscripción se paga sola.
+            {t.pricing.subtitle}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          {[
-            {
-              planKey: 'plan_starter' as const,
-              name: 'Starter',
-              units: '1 alojamiento',
-              price: '0 €',
-              note: '/ mes',
-              summary:
-                'Plan gratuito para probar Turnexo con 1 alojamiento real. Incluye la App de Limpiadora y la Guía Digital para tus viajeros.',
-              highlight: false,
-              cta: 'Empezar gratis (Sin tarjeta)',
-              features: [
-                'App de Limpiadora con checklist por habitación y fotos',
-                'Guía Digital del Huésped con vídeos del alojamiento y check-in',
-                'Catálogo de extras a tu medida (Early/Late Check-out, cuna, parking...)',
-                'Sincronización iCal automática con Airbnb y Booking',
-                'Fotos de comprobación guardadas 7 días',
-                'Sello discreto "Creado con Turnexo" en la Guía',
-              ],
-            },
-            {
-              planKey: 'plan_pro' as const,
-              name: 'Pro Fiscal',
-              units: 'Hasta 5 alojamientos',
-              price: '19 €',
-              note: '/ mes (tarifa plana)',
-              summary:
-                'Todo el control operativo más facturación oficial al 10% de IVA y exportación trimestral en 1 clic para tu gestoría.',
-              highlight: true,
-              cta: 'Activar Plan Pro Fiscal',
-              features: [
-                'Todo lo incluido en Starter para hasta 5 alojamientos',
-                'Facturas simplificadas y con NIF al 10% de IVA en 1 clic',
-                'Libro Registro trimestral en Excel listo para el Modelo 303',
-                'Soporte para varios propietarios (Multi-NIF)',
-                'Historial fotográfico ilimitado ante reclamaciones',
-                'Guía Digital 100% marca blanca (sin sello de Turnexo)',
-              ],
-            },
-            {
-              planKey: 'plan_manager' as const,
-              name: 'Microgestora',
-              units: 'Hasta 10 alojamientos',
-              price: '39 €',
-              note: '/ mes (tarifa plana)',
-              summary:
-                'Para gestores con varias limpiadoras y múltiples propietarios que necesitan coordinar todas las salidas sin líos.',
-              highlight: false,
-              cta: 'Activar Plan Microgestora',
-              features: [
-                'Todo lo incluido en Pro Fiscal para hasta 10 alojamientos',
-                'Múltiples limpiadoras con asignación por alojamiento',
-                'Control y resumen mensual de limpiezas por persona',
-                'Soporte prioritario directo',
-              ],
-            },
-          ].map((plan) => (
-            <div
-              key={plan.name}
-              className={`p-8 flex flex-col justify-between space-y-6 ${
-                plan.highlight
-                  ? 'bg-[#141413] text-[#F6F4EE] border-2 border-[#141413] shadow-[8px_8px_0px_#C85A32]'
-                  : 'bg-[#FAF9F5] text-[#141413] border border-[#D5CFC0]'
+        {/* SELECTOR INTERACTIVO FACTURACIÓN MENSUAL / ANUAL */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
+          <div className="inline-flex items-center p-1 bg-[#E8E4D9] border border-[#D5CFC0] rounded-xl text-xs font-mono shadow-inner">
+            <button
+              type="button"
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                billingCycle === 'monthly'
+                  ? 'bg-[#141413] text-white shadow-xs'
+                  : 'text-[#57554F] hover:text-[#141413]'
               }`}
             >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-extrabold">{plan.name}</h3>
-                  {plan.highlight && (
-                    <span className="font-mono text-[10px] uppercase font-bold bg-[#C85A32] text-white px-2 py-0.5">
-                      Más elegido
-                    </span>
-                  )}
-                </div>
-                <p className={`text-xs font-mono uppercase ${plan.highlight ? 'text-white/60' : 'text-[#57554F]'}`}>
-                  {plan.units}
-                </p>
-                <div className="flex items-baseline gap-2 flex-wrap font-sans">
-                  <span className="text-5xl font-extrabold tracking-tight whitespace-nowrap">{plan.price}</span>
-                  <span className={`text-sm font-medium whitespace-nowrap ${plan.highlight ? 'text-white/70' : 'text-[#57554F]'}`}>
-                    {plan.note}
-                  </span>
-                </div>
-                <p className={`text-xs leading-relaxed ${plan.highlight ? 'text-white/75' : 'text-[#57554F]'}`}>
-                  {plan.summary}
-                </p>
-                <ul className="space-y-2.5 text-xs sm:text-sm pt-2 border-t border-current/10">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2">
-                      <Check size={16} className={`shrink-0 mt-0.5 ${plan.highlight ? 'text-[#C85A32]' : 'text-[#1F4E3D]'}`} />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <button
-                type="button"
-                onClick={() => onNavigateToApp('register', plan.planKey)}
-                className={`w-full font-sans font-semibold text-sm py-3.5 transition flex items-center justify-center gap-2 ${
+              {t.pricing.billingMonthly}
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                billingCycle === 'yearly'
+                  ? 'bg-[#C85A32] text-white shadow-xs'
+                  : 'text-[#57554F] hover:text-[#141413]'
+              }`}
+            >
+              <span>{t.pricing.billingYearly}</span>
+              <span className="bg-white/25 text-white text-[10px] px-1.5 py-0.5 rounded font-extrabold uppercase">
+                -20%
+              </span>
+            </button>
+          </div>
+          {billingCycle === 'yearly' && (
+            <span className="text-xs font-mono font-bold text-[#1F4E3D] bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full animate-fade-in flex items-center gap-1">
+              {t.pricing.yearlyDiscountBadge}
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+          {t.pricing.plans.map((plan) => {
+            const isYearly = billingCycle === 'yearly';
+            const currentPrice = isYearly ? plan.priceYearly : plan.price;
+            const currentNote = isYearly ? plan.noteYearly : plan.note;
+            const showCrossedOut = isYearly && plan.priceYearly !== plan.price;
+
+            return (
+              <div
+                key={plan.name}
+                className={`p-6 sm:p-8 flex flex-col justify-between space-y-6 ${
                   plan.highlight
-                    ? 'bg-[#C85A32] hover:bg-[#B04A25] text-white shadow-md'
-                    : 'bg-[#141413] hover:bg-[#2C2C29] text-white'
+                    ? 'bg-[#141413] text-[#F6F4EE] border-2 border-[#141413] shadow-[8px_8px_0px_#C85A32]'
+                    : 'bg-[#FAF9F5] text-[#141413] border border-[#D5CFC0]'
                 }`}
               >
-                <span>{plan.cta}</span>
-                <ArrowRight size={15} />
-              </button>
-            </div>
-          ))}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-extrabold">{plan.name}</h3>
+                    {plan.highlight && (
+                      <span className="font-mono text-[10px] uppercase font-bold bg-[#C85A32] text-white px-2 py-0.5">
+                        {t.pricing.mostChosenBadge}
+                      </span>
+                    )}
+                  </div>
+                  <p className={`text-xs font-mono uppercase ${plan.highlight ? 'text-white/60' : 'text-[#57554F]'}`}>
+                    {plan.units}
+                  </p>
+                  <div className="flex items-baseline gap-2 flex-wrap font-sans">
+                    {showCrossedOut && (
+                      <span className={`text-2xl font-bold line-through ${plan.highlight ? 'text-white/40' : 'text-[#57554F]/50'}`}>
+                        {plan.price}
+                      </span>
+                    )}
+                    <span className="text-4xl sm:text-5xl font-extrabold tracking-tight whitespace-nowrap">
+                      {currentPrice}
+                    </span>
+                    <span className={`text-xs sm:text-sm font-medium whitespace-nowrap ${plan.highlight ? 'text-white/70' : 'text-[#57554F]'}`}>
+                      {currentNote}
+                    </span>
+                  </div>
+                  {isYearly && plan.savingsText && (
+                    <p className={`text-[11px] font-mono font-bold ${plan.highlight ? 'text-emerald-300' : 'text-[#1F4E3D]'}`}>
+                      ✓ {plan.savingsText}
+                    </p>
+                  )}
+                  <p className={`text-xs leading-relaxed ${plan.highlight ? 'text-white/75' : 'text-[#57554F]'}`}>
+                    {plan.summary}
+                  </p>
+                  <ul className="space-y-2.5 text-xs sm:text-sm pt-2 border-t border-current/10">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2">
+                        <Check size={16} className={`shrink-0 mt-0.5 ${plan.highlight ? 'text-[#C85A32]' : 'text-[#1F4E3D]'}`} />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToApp('register', plan.planKey)}
+                  className={`w-full font-sans font-semibold text-sm py-3.5 transition flex items-center justify-center gap-2 ${
+                    plan.highlight
+                      ? 'bg-[#C85A32] hover:bg-[#B04A25] text-white shadow-md'
+                      : 'bg-[#141413] hover:bg-[#2C2C29] text-white'
+                  }`}
+                >
+                  <span>{plan.cta}</span>
+                  <ArrowRight size={15} />
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         {/* Bloque horizontal para Gestoras de +10 alojamientos */}
@@ -821,66 +834,41 @@ export default function LandingPageView({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-wider font-bold bg-[#1F4E3D]/10 text-[#1F4E3D] px-2 py-0.5">
-                CARTERAS DE +10 ALOJAMIENTOS
+                {t.pricing.customBannerBadge}
               </span>
               <h3 className="font-extrabold text-sm sm:text-base text-[#141413]">
-                ¿Gestionas más de 10 alojamientos?
+                {t.pricing.customBannerTitle}
               </h3>
             </div>
             <p className="text-xs sm:text-sm text-[#57554F]">
-              Contamos con planes de tarifa plana para gestoras de 15, 30 o más alojamientos e importación inicial asistida sin coste.
+              {t.pricing.customBannerDesc}
             </p>
           </div>
           <button
             type="button"
-            onClick={() => openContactModal('Más de 10 alojamientos')}
+            onClick={() => openContactModal(t.pricing.customBannerBadge)}
             className="shrink-0 font-sans text-xs sm:text-sm font-bold text-[#141413] hover:text-[#C85A32] border border-[#141413] hover:border-[#C85A32] bg-white px-5 py-3 transition inline-flex items-center gap-1.5 whitespace-nowrap"
           >
-            <span>Consultar tarifa a medida</span>
+            <span>{t.pricing.customBannerCta}</span>
             <ArrowUpRight size={15} />
           </button>
         </div>
       </section>
 
-      {/* SECCIÓN 5: FAQ + CIERRE FINAL */}
+      {/* SECCIÓN 5: FAQ */}
       <section id="faq" className="max-w-7xl mx-auto px-6 py-20">
         <div className="max-w-3xl mx-auto space-y-12">
           <div className="text-center space-y-3">
             <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-semibold">
-              PREGUNTAS FRECUENTES
+              {t.faq.badge}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141413] tracking-tight">
-              Todo lo que necesitas saber antes de empezar<span className="-ml-[0.03em]">.</span>
+              {t.faq.title}
             </h2>
           </div>
 
           <div className="space-y-3">
-            {[
-              {
-                q: '¿Cómo se conecta con mis anuncios de Airbnb y Booking?',
-                a: 'Sin dar las contraseñas de tus cuentas. Solo copias el enlace de calendario iCal (.ics) que te dan Airbnb, Booking o Vrbo y lo pegas en Turnexo. En 30 segundos todas tus reservas y cambios quedan sincronizados automáticamente.',
-              },
-              {
-                q: '¿Mis limpiadoras necesitan descargarse una app o crearse cuenta?',
-                a: 'No. Cada limpiadora recibe un enlace privado y directo por WhatsApp. Al abrirlo en el navegador de su móvil ve qué alojamientos tienen salida hoy, si entra otro huésped esa misma tarde, marca el checklist por habitación y sube fotos con su cámara al terminar para que compruebes que todo está listo.',
-              },
-              {
-                q: '¿Cómo recibe el huésped la Guía Digital del alojamiento? ¿Tiene que descargar algo?',
-                a: 'Funciona directamente en el navegador de su móvil sin instalar nada. Le envías el enlace por WhatsApp o por el chat de Airbnb cuando confirma la reserva: así ve el alojamiento en vídeo antes de viajar, sigue el check-in paso a paso al llegar a la puerta y consulta vídeos cortos de la placa, calefacción o cafetera sin llamarte a deshoras.',
-              },
-              {
-                q: '¿Cómo funciona la venta de extras (Early Check-in, Late Check-out, cuna o parking)?',
-                a: 'Tú configuras qué extras ofrecer en cada alojamiento y el precio de cada uno. Para las entradas antes de hora o salidas tarde, Turnexo revisa tu calendario iCal y solo las ofrece si ese día está libre. Cuando apruebas un extra, el horario de tu limpiadora se actualiza solo y tú cobras el 100% del importe sin comisiones.',
-              },
-              {
-                q: '¿Cómo funcionan las facturas con el 10% de IVA para mi gestoría?',
-                a: 'Desde cada reserva generas la factura simplificada o con NIF con el 10% de IVA desglosado en un clic. Si gestionas alojamientos de varios propietarios, puedes configurar distintos titulares y series (Multi-NIF). Al acabar el trimestre, descargas el Libro Registro en Excel listo para que tu gestoría presente el Modelo 303 en minutos.',
-              },
-              {
-                q: '¿Tengo permanencia o tengo que poner mi tarjeta de crédito para probar?',
-                a: 'Cero permanencia y sin tarjeta de crédito para empezar. El plan Starter para 1 alojamiento es gratuito, y puedes cambiar de plan o cancelar en cualquier momento con un clic desde tu panel.',
-              },
-            ].map((faqItem, idx) => {
+            {t.faq.items.map((faqItem, idx) => {
               const isOpen = activeFaq === idx;
               return (
                 <div
@@ -912,18 +900,19 @@ export default function LandingPageView({
         </div>
       </section>
 
-      {/* SECCIÓN FINAL DE CIERRE DE CONVERSIÓN (BOTTOM CTA BANNER) */}
+      {/* SECCIÓN FINAL DE CIERRE DE CONVERSIÓN */}
       <section className="max-w-7xl mx-auto px-6 pb-24">
         <div className="bg-[#141413] text-[#F6F4EE] border-2 border-[#141413] p-8 sm:p-14 shadow-[10px_10px_0px_#C85A32] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
           <div className="space-y-3 max-w-2xl">
             <span className="font-mono text-xs uppercase tracking-widest text-[#C85A32] font-bold">
-              EMPIEZA EN MENOS DE 5 MINUTOS · SIN TARJETA
+              {t.bottomCta.badge}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Pon tu primer alojamiento en piloto automático hoy mismo<span className="-ml-[0.03em]">.</span> Gratis<span className="-ml-[0.03em]">.</span>
+              {t.bottomCta.title}{' '}
+              <span className="text-[#C85A32]">{t.bottomCta.freeWord}</span>
             </h2>
             <p className="text-sm text-white/75 leading-relaxed">
-              Conecta tu calendario iCal de Airbnb o Booking, comparte el enlace móvil con tu limpiadora y envía la Guía Digital en vídeo a tu próximo huésped antes de que viaje.
+              {t.bottomCta.desc}
             </p>
           </div>
 
@@ -933,7 +922,7 @@ export default function LandingPageView({
               onClick={() => onNavigateToApp('register')}
               className="bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans text-sm sm:text-base font-bold px-7 py-4 transition flex items-center justify-center gap-2 shadow-md"
             >
-              <span>Probar 1 Alojamiento Gratis →</span>
+              <span>{t.bottomCta.ctaBtn}</span>
             </button>
           </div>
         </div>
@@ -953,16 +942,16 @@ export default function LandingPageView({
               </span>
             </div>
             <p className="text-xs text-white/65 leading-relaxed max-w-sm">
-              Coordinación de limpiezas por iCal, Guía Digital del Huésped en vídeo y facturación oficial al 10% de IVA lista para el Modelo 303 de tu gestoría.
+              {t.footer.brandDesc}
             </p>
             <div className="pt-1 flex flex-wrap items-center gap-3 text-xs font-mono">
               <button
                 type="button"
-                onClick={() => openContactModal('1 a 5 alojamientos')}
+                onClick={() => openContactModal(t.footer.supportBtn)}
                 className="bg-white/10 hover:bg-[#C85A32] text-white px-3.5 py-2 transition inline-flex items-center gap-1.5 font-bold"
               >
                 <Mail size={13} />
-                <span>Escribir a soporte / Contacto</span>
+                <span>{t.footer.supportBtn}</span>
               </button>
               <a
                 href="mailto:info@turnexo.app"
@@ -976,27 +965,27 @@ export default function LandingPageView({
           {/* Columna 2: Producto y Ejemplos */}
           <div className="md:col-span-4 space-y-3 text-xs">
             <p className="font-mono text-[11px] uppercase tracking-wider text-white/45 font-bold">
-              Producto y Ejemplos Reales
+              {t.footer.col2Title}
             </p>
             <ul className="space-y-2.5 text-white/75">
               <li>
                 <a href="#modulos" className="hover:text-white transition">
-                  Qué incluye Turnexo
+                  {t.footer.linkIncludes}
                 </a>
               </li>
               <li>
                 <a href="#comparativa" className="hover:text-white transition">
-                  Comparativa con WhatsApp y PMS
+                  {t.footer.linkComparison}
                 </a>
               </li>
               <li>
                 <a href="#precios" className="hover:text-white transition">
-                  Precios y Plan Gratuito (1 alojamiento)
+                  {t.footer.linkPricing}
                 </a>
               </li>
               <li>
                 <a href="#faq" className="hover:text-white transition">
-                  Preguntas frecuentes (FAQ)
+                  {t.footer.linkFaq}
                 </a>
               </li>
               <li>
@@ -1005,7 +994,7 @@ export default function LandingPageView({
                   onClick={onOpenGuestDemo}
                   className="text-[#C85A32] hover:underline inline-flex items-center gap-1 font-semibold"
                 >
-                  <span>Ver ejemplo de Guía del Huésped</span>
+                  <span>{t.footer.linkGuestDemo}</span>
                   <ArrowUpRight size={13} />
                 </button>
               </li>
@@ -1015,7 +1004,7 @@ export default function LandingPageView({
                   onClick={onOpenCleanerDemo}
                   className="text-emerald-400 hover:underline inline-flex items-center gap-1 font-semibold"
                 >
-                  <span>Ver ejemplo de App de Limpiadora</span>
+                  <span>{t.footer.linkCleanerDemo}</span>
                   <ArrowUpRight size={13} />
                 </button>
               </li>
@@ -1025,7 +1014,7 @@ export default function LandingPageView({
           {/* Columna 3: Acceso y Legal */}
           <div className="md:col-span-3 space-y-3 text-xs">
             <p className="font-mono text-[11px] uppercase tracking-wider text-white/45 font-bold">
-              Cuenta y Legal
+              {t.footer.col3Title}
             </p>
             <ul className="space-y-2.5 text-white/75">
               <li>
@@ -1034,7 +1023,7 @@ export default function LandingPageView({
                   onClick={() => onNavigateToApp('login')}
                   className="hover:text-white transition font-semibold"
                 >
-                  Iniciar sesión en mi cuenta
+                  {t.footer.linkLogin}
                 </button>
               </li>
               <li>
@@ -1043,16 +1032,16 @@ export default function LandingPageView({
                   onClick={() => onNavigateToApp('register')}
                   className="text-[#C85A32] hover:underline font-bold"
                 >
-                  Crear cuenta gratis (1 alojamiento) →
+                  {t.footer.linkRegister}
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => openContactModal('1 a 5 alojamientos')}
+                  onClick={() => openContactModal(t.footer.linkContact)}
                   className="hover:text-white transition"
                 >
-                  Contacto y atención a gestoras
+                  {t.footer.linkContact}
                 </button>
               </li>
               {onOpenLegal && (
@@ -1063,7 +1052,7 @@ export default function LandingPageView({
                       onClick={() => onOpenLegal('privacy')}
                       className="hover:text-white transition"
                     >
-                      Política de Privacidad
+                      {t.footer.linkPrivacy}
                     </button>
                   </li>
                   <li>
@@ -1072,7 +1061,7 @@ export default function LandingPageView({
                       onClick={() => onOpenLegal('terms')}
                       className="hover:text-white transition"
                     >
-                      Términos de Servicio
+                      {t.footer.linkTerms}
                     </button>
                   </li>
                   <li>
@@ -1081,7 +1070,7 @@ export default function LandingPageView({
                       onClick={() => onOpenLegal('legal')}
                       className="hover:text-white transition"
                     >
-                      Aviso Legal y Cookies
+                      {t.footer.linkLegal}
                     </button>
                   </li>
                 </>
@@ -1091,29 +1080,29 @@ export default function LandingPageView({
         </div>
 
         <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-white/40">
-          <p>© {new Date().getFullYear()} Turnexo. Todos los derechos reservados.</p>
-          <p>Compatible con calendarios iCal de Airbnb, Booking y Vrbo.</p>
+          <p>© {new Date().getFullYear()} {t.footer.copyright}</p>
+          <p>{t.footer.icalCompat}</p>
         </div>
       </footer>
 
-      {/* MODAL DE CONTACTO INTEGRADO (SIN DEPENDER DE CLIENTE DE CORREO EXTERNO) */}
+      {/* MODAL DE CONTACTO INTEGRADO */}
       {contactModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-[#FAF9F5] border-2 border-[#141413] max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-[10px_10px_0px_#C85A32]">
             <div className="flex items-start justify-between gap-4 border-b border-[#E2DDD2] pb-4">
               <div>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[#C85A32] font-bold">
-                  CONTACTO DIRECTO · TURNEXO
+                  {t.contactModal.badge}
                 </span>
                 <h3 className="text-xl font-extrabold text-[#141413] mt-0.5">
-                  ¿En qué podemos ayudarte?
+                  {t.contactModal.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setContactModalOpen(false)}
                 className="w-8 h-8 border border-[#D5CFC0] bg-white flex items-center justify-center text-[#141413] hover:bg-[#141413] hover:text-white transition"
-                aria-label="Cerrar contacto"
+                aria-label="Close"
               >
                 <X size={15} />
               </button>
@@ -1124,14 +1113,14 @@ export default function LandingPageView({
                 <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs space-y-1.5">
                   <p className="font-bold text-sm flex items-center gap-1.5">
                     <CheckCircle2 size={16} className="text-[#1F4E3D]" />
-                    <span>¡Mensaje recibido correctamente!</span>
+                    <span>{t.contactModal.successTitle}</span>
                   </p>
                   <p className="text-[#57554F] leading-relaxed">
-                    Hemos registrado tu consulta para <strong>{contactUnits}</strong> y te responderemos en menos de 24 horas a <strong>{contactChannel}</strong>.
+                    {t.contactModal.successDesc(contactUnits, contactChannel)}
                   </p>
                 </div>
                 <p className="text-xs text-[#57554F]">
-                  También puedes escribirnos directamente cuando quieras a{' '}
+                  {t.contactModal.supportAlternative}{' '}
                   <a href="mailto:info@turnexo.app" className="font-mono font-bold text-[#141413] underline">
                     info@turnexo.app
                   </a>
@@ -1142,20 +1131,20 @@ export default function LandingPageView({
                   onClick={() => setContactModalOpen(false)}
                   className="w-full bg-[#141413] text-white font-sans font-bold text-xs uppercase tracking-wider py-3.5"
                 >
-                  Cerrar ventana
+                  {t.contactModal.closeBtn}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleContactSubmit} className="space-y-4 text-xs">
                 <div>
                   <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
-                    TU NOMBRE
+                    {t.contactModal.nameLabel}
                   </label>
                   <input
                     required
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
-                    placeholder="Ej. Laura Gómez"
+                    placeholder={t.contactModal.namePlaceholder}
                     className="w-full bg-white border border-[#D5CFC0] px-3.5 py-2.5 text-[#141413] focus:outline-none focus:border-[#141413]"
                   />
                 </div>
@@ -1163,43 +1152,44 @@ export default function LandingPageView({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
-                      TU EMAIL O WHATSAPP
+                      {t.contactModal.channelLabel}
                     </label>
                     <input
                       required
                       value={contactChannel}
                       onChange={(e) => setContactChannel(e.target.value)}
-                      placeholder="tu@email.com o +34 600..."
+                      placeholder={t.contactModal.channelPlaceholder}
                       className="w-full bg-white border border-[#D5CFC0] px-3.5 py-2.5 text-[#141413] focus:outline-none focus:border-[#141413]"
                     />
                   </div>
                   <div>
                     <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
-                      ALOJAMIENTOS QUE GESTIONAS
+                      {t.contactModal.unitsLabel}
                     </label>
                     <select
                       value={contactUnits}
                       onChange={(e) => setContactUnits(e.target.value)}
                       className="w-full bg-white border border-[#D5CFC0] px-3 py-2.5 text-[#141413] focus:outline-none focus:border-[#141413]"
                     >
-                      <option value="1 alojamiento">1 alojamiento</option>
-                      <option value="2 a 5 alojamientos">2 a 5 alojamientos</option>
-                      <option value="6 a 10 alojamientos">6 a 10 alojamientos</option>
-                      <option value="Más de 10 alojamientos">Más de 10 alojamientos</option>
+                      {t.contactModal.unitsOptions.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="block font-mono text-[10px] uppercase tracking-wider text-[#57554F] mb-1">
-                    ¿QUÉ NECESITAS?
+                    {t.contactModal.messageLabel}
                   </label>
                   <textarea
                     required
                     rows={3}
                     value={contactMessage}
                     onChange={(e) => setContactMessage(e.target.value)}
-                    placeholder="Cuéntanos cuántos alojamientos tienes o cualquier duda sobre limpiezas, guías o facturación..."
+                    placeholder={t.contactModal.messagePlaceholder}
                     className="w-full bg-white border border-[#D5CFC0] p-3.5 text-[#141413] focus:outline-none focus:border-[#141413]"
                   />
                 </div>
@@ -1208,12 +1198,12 @@ export default function LandingPageView({
                   type="submit"
                   className="w-full bg-[#C85A32] hover:bg-[#B04A25] text-white font-sans font-bold text-sm py-3.5 transition flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <span>Enviar consulta</span>
+                  <span>{t.contactModal.submitBtn}</span>
                   <ArrowRight size={15} />
                 </button>
 
                 <p className="text-[11px] text-[#57554F] text-center">
-                  O escríbenos directamente a{' '}
+                  {t.contactModal.orDirectEmail}{' '}
                   <a href="mailto:info@turnexo.app" className="font-mono font-bold text-[#141413] underline">
                     info@turnexo.app
                   </a>

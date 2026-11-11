@@ -267,7 +267,7 @@ export default function PropertyCustomizerModal({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Hora Check-in</label>
                   <input
@@ -276,6 +276,7 @@ export default function PropertyCustomizerModal({
                     onChange={(e) => setDraft({ ...draft, checkInTime: e.target.value })}
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 font-bold"
                   />
+                  <span className="text-[11px] text-slate-400 block mt-1">Llegada nuevo huésped</span>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Hora Check-out</label>
@@ -285,26 +286,7 @@ export default function PropertyCustomizerModal({
                     onChange={(e) => setDraft({ ...draft, checkOutTime: e.target.value })}
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 font-bold"
                   />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Hora Late Check-out</label>
-                  <input
-                    type="time"
-                    value={draft.lateCheckoutUntil}
-                    onChange={(e) => setDraft({ ...draft, lateCheckoutUntil: e.target.value })}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Precio Late Out (€)</label>
-                  <input
-                    type="number"
-                    value={draft.lateCheckoutPrice}
-                    onChange={(e) =>
-                      setDraft({ ...draft, lateCheckoutPrice: Number(e.target.value) })
-                    }
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 font-bold"
-                  />
+                  <span className="text-[11px] text-slate-400 block mt-1">Salida / inicio limpieza</span>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
@@ -485,9 +467,25 @@ export default function PropertyCustomizerModal({
 
           {tab === 'extras' && (
             <div className="space-y-4">
-              <p className="text-slate-500">
-                Configura qué extras ofreces en este apartamento (Late Check-out, Parking, Cuna, Trona, Pack Bienvenida...). El huésped los solicita desde la pestaña Extras y tú los apruebas en 1 clic.
+              <p className="text-slate-500 text-xs">
+                Configura qué extras ofreces en este alojamiento (Late Check-out, Parking, Cuna, Trona, Pack Bienvenida...). El huésped los solicita desde su Guía Digital y tú los apruebas en 1 clic.
               </p>
+
+              {/* Ajuste unificado del horario de Late Check-out */}
+              <div className="bg-orange-50/60 border border-orange-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div>
+                  <span className="font-bold text-slate-900 block text-xs">Hora límite de Late Check-out</span>
+                  <span className="text-slate-500 text-[11px]">Hora máxima de salida al aprobar el extra y nueva hora de limpieza.</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="time"
+                    value={draft.lateCheckoutUntil || '17:00'}
+                    onChange={(e) => setDraft({ ...draft, lateCheckoutUntil: e.target.value })}
+                    className="border border-slate-300 bg-white rounded-xl px-3 py-1.5 font-bold text-xs"
+                  />
+                </div>
+              </div>
 
               <div className="space-y-2">
                 {(draft.extras || []).map((ext) => (

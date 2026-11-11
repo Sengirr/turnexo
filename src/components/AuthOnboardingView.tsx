@@ -86,12 +86,23 @@ export default function AuthOnboardingView({
           });
           if (error) throw error;
           const meta = data.user?.user_metadata || {};
+          let hostPlan = meta.subscription_plan;
+          if (!hostPlan && isSupabaseConfigured && supabase && data.user) {
+            try {
+              const { data: hostRow } = await supabase
+                .from('hosts')
+                .select('subscription_plan')
+                .eq('id', data.user.id)
+                .maybeSingle();
+              if (hostRow?.subscription_plan) hostPlan = hostRow.subscription_plan;
+            } catch {}
+          }
           onSuccess({
             id: data.user?.id || 'host-1',
             email: data.user?.email || email.trim(),
             fullName: meta.full_name || 'Anfitrión',
             companyName: meta.company_name || '',
-            plan: meta.subscription_plan || 'plan_starter',
+            plan: hostPlan || selectedPlan || 'plan_pro',
             trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
             promoCode: promoCode.trim() || undefined,
             specialAccess: isCommunityApplied ? 'comunidad' : undefined,

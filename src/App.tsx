@@ -164,40 +164,70 @@ export default function App() {
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
 
-    // Detectar si venimos de un login con OAuth (Google)
+    const restoreUserSession = async (user: any) => {
+      if (!user) return;
+      const meta = user.user_metadata || {};
+      const storedHost = loadStored<HostAccount | null>(STORAGE_KEYS.host, null);
+
+      let dbPlan: string | undefined;
+      let dbStatus: string | undefined;
+      let dbFullName: string | undefined;
+      let dbCompany: string | undefined;
+
+      try {
+        if (supabase) {
+          const { data: hostRow } = await supabase
+            .from('hosts')
+            .select('*')
+            .eq('id', user.id)
+            .maybeSingle();
+
+          if (hostRow) {
+            dbPlan = hostRow.subscription_plan;
+            dbStatus = hostRow.subscription_status;
+            dbFullName = hostRow.full_name;
+            dbCompany = hostRow.company_name;
+          }
+        }
+      } catch (err) {
+        console.warn('[Turnexo] Error leyendo host de Supabase:', err);
+      }
+
+      // El plan respeta siempre la elección guardada (localStorage o DB) antes que el fallback
+      const effectivePlan =
+        (storedHost?.plan && storedHost.plan !== 'plan_starter' ? storedHost.plan : null) ||
+        dbPlan ||
+        meta.subscription_plan ||
+        storedHost?.plan ||
+        'plan_pro';
+
+      const account: HostAccount = {
+        id: user.id,
+        email: user.email || storedHost?.email || 'usuario@gmail.com',
+        fullName: dbFullName || storedHost?.fullName || meta.full_name || meta.name || user.email?.split('@')[0] || 'Anfitrión',
+        companyName: dbCompany || storedHost?.companyName || meta.company_name || 'Mis Alojamientos',
+        plan: effectivePlan,
+        subscriptionStatus: (dbStatus === 'active' || dbStatus === 'trialing' ? dbStatus : storedHost?.subscriptionStatus || 'active') as HostAccount['subscriptionStatus'],
+        trialEndsAt: storedHost?.trialEndsAt || new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+        specialAccess: storedHost?.specialAccess,
+        promoCode: storedHost?.promoCode,
+      };
+
+      setHostAccount(account);
+      localStorage.setItem(STORAGE_KEYS.host, JSON.stringify(account));
+      syncHostToSupabase(account);
+    };
+
+    // Detectar si venimos de un login con OAuth (Google) o sesión activa
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        const meta = session.user.user_metadata || {};
-        const account: HostAccount = {
-          id: session.user.id,
-          email: session.user.email || 'usuario@gmail.com',
-          fullName: meta.full_name || meta.name || session.user.email?.split('@')[0] || 'Anfitrión',
-          companyName: meta.company_name || 'Mis Alojamientos',
-          plan: meta.subscription_plan || 'plan_starter',
-          trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
-        };
-        syncHostToSupabase(account);
-        if (!hostAccount) {
-          handleAuthSuccess(account);
-        }
+        restoreUserSession(session.user);
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        const meta = session.user.user_metadata || {};
-        const account: HostAccount = {
-          id: session.user.id,
-          email: session.user.email || 'usuario@gmail.com',
-          fullName: meta.full_name || meta.name || session.user.email?.split('@')[0] || 'Anfitrión',
-          companyName: meta.company_name || 'Mis Alojamientos',
-          plan: meta.subscription_plan || 'plan_starter',
-          trialEndsAt: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
-        };
-        syncHostToSupabase(account);
-        if (!hostAccount) {
-          handleAuthSuccess(account);
-        }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED' || event === 'INITIAL_SESSION')) {
+        restoreUserSession(session.user);
       }
     });
 
@@ -525,18 +555,31 @@ export default function App() {
 
   const handleAuthSuccess = (account: HostAccount) => {
     setHostAccount(account);
+    localStorage.setItem(STORAGE_KEYS.host, JSON.stringify(account));
     applyPlanToProperties(account.plan);
     syncHostToSupabase(account);
     navigate('/app', { kind: 'app' });
     showToast(`Bienvenido a Turnexo, ${account.fullName}.`);
   };
 
-  const handleChangePlan = (plan: HostAccount['plan']) => {
+  const handleChangePlan = async (plan: HostAccount['plan']) => {
     if (!hostAccount) return;
     const updated = { ...hostAccount, plan };
     setHostAccount(updated);
+    localStorage.setItem(STORAGE_KEYS.host, JSON.stringify(updated));
     applyPlanToProperties(plan);
     syncHostToSupabase(updated);
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.auth.updateUser({
+          data: { subscription_plan: plan },
+        });
+      } catch (err) {
+        console.warn('[Turnexo] Error actualizando plan en supabase auth metadata:', err);
+      }
+    }
+
     const label =
       plan === 'plan_starter'
         ? 'Starter (1 Alojamiento · 0 €/mes)'

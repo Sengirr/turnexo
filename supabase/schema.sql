@@ -11,12 +11,17 @@ create table if not exists public.hosts (
   full_name text,
   company_name text,
   whatsapp text,
-  subscription_plan text not null default 'plan_starter' check (subscription_plan in ('plan_starter', 'plan_pro', 'plan_manager', 'module_cleanings', 'module_guide', 'pack_complete')),
+  subscription_plan text not null default 'plan_starter',
   subscription_status text not null default 'trialing' check (subscription_status in ('trialing', 'active', 'past_due', 'canceled')),
   trial_ends_at timestamptz not null default (now() + interval '14 days'),
   stripe_customer_id text,
   created_at timestamptz not null default now()
 );
+
+-- Actualizar restricción de planes si la tabla ya existía previamente
+alter table public.hosts drop constraint if exists hosts_subscription_plan_check;
+alter table public.hosts add constraint hosts_subscription_plan_check 
+  check (subscription_plan in ('plan_starter', 'plan_pro', 'plan_manager', 'module_cleanings', 'module_guide', 'pack_complete'));
 
 -- 2. PROPIEDADES / ALOJAMIENTOS
 create table if not exists public.properties (

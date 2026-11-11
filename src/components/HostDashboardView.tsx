@@ -2541,7 +2541,7 @@ export default function HostDashboardView({
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Pago a la limpiadora (€) <span className="text-[10px] text-slate-400 font-normal">(Opcional)</span>
+                    Pago por limpieza (€) <span className="text-[10px] text-slate-400 font-normal">(Opcional)</span>
                   </label>
                   <input
                     type="number"
@@ -2552,7 +2552,7 @@ export default function HostDashboardView({
                     onChange={(e) => setNewPropCleaningFee(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono text-center shadow-2xs"
                   />
-                  <span className="text-[10px] text-slate-400 block mt-0.5">Lo que le pagas por servicio (0 si sueldo fijo)</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Coste al personal (0 si sueldo fijo)</span>
                 </div>
               </div>
 

@@ -143,11 +143,15 @@ export default function HostDashboardView({
 
   const [newPropName, setNewPropName] = useState('');
   const [newPropAddress, setNewPropAddress] = useState('');
-  const [newPropWhatsapp, setNewPropWhatsapp] = useState('+34 600 00 00 00');
+  const [newPropWhatsapp, setNewPropWhatsapp] = useState('');
   const [newPropWifiSsid, setNewPropWifiSsid] = useState('');
   const [newPropWifiPass, setNewPropWifiPass] = useState('');
   const [newPropDoorCode, setNewPropDoorCode] = useState('');
   const [newPropIcal, setNewPropIcal] = useState('');
+  const [newPropCheckIn, setNewPropCheckIn] = useState('15:00');
+  const [newPropCheckOut, setNewPropCheckOut] = useState('11:00');
+  const [newPropCleaningFee, setNewPropCleaningFee] = useState(40);
+  const [newPropCleanerId, setNewPropCleanerId] = useState('');
 
   const copyLink = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -305,25 +309,25 @@ export default function HostDashboardView({
       id,
       name: newPropName.trim(),
       slug: slug || id,
-      address: newPropAddress.trim() || 'Dirección del apartamento',
-      hostWhatsapp: newPropWhatsapp.trim() || '+34600000000',
+      address: newPropAddress.trim() || 'Dirección no indicada',
+      hostWhatsapp: newPropWhatsapp.trim() || '+34 600 00 00 00',
       googleMapsUrl: 'https://maps.google.com',
-      airbnbIcalUrl: newPropIcal.trim() || 'https://www.airbnb.es/calendar/ical/nuevo.ics',
+      airbnbIcalUrl: newPropIcal.trim(),
       bookingIcalUrl: '',
-      defaultCleanerId: cleaners[0].id,
-      cleaningFee: 40,
-      checkInTime: '15:00',
-      checkOutTime: '11:00',
+      defaultCleanerId: newPropCleanerId || (cleaners[0]?.id || 'cl-1'),
+      cleaningFee: Number(newPropCleaningFee) || 40,
+      checkInTime: newPropCheckIn || '15:00',
+      checkOutTime: newPropCheckOut || '11:00',
       lateCheckoutPrice: 35,
       lateCheckoutUntil: '17:00',
-      wifiSsid: newPropWifiSsid.trim() || 'WiFi_Apartamento',
-      wifiPassword: newPropWifiPass.trim() || 'Clave1234',
-      doorCode: newPropDoorCode.trim() || '1234#',
+      wifiSsid: newPropWifiSsid.trim(),
+      wifiPassword: newPropWifiPass.trim(),
+      doorCode: newPropDoorCode.trim(),
       checkInInstructions: 'Introduce el código en el cajetín junto a la puerta principal.',
       videos: [
         {
           id: `vid-${Date.now()}`,
-          title: 'Cómo entrar al apartamento y recoger las llaves',
+          title: 'Cómo entrar al alojamiento y recoger las llaves',
           category: 'checkin',
           url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
         },
@@ -332,7 +336,7 @@ export default function HostDashboardView({
         {
           id: `ext-${Date.now()}`,
           title: 'Late Check-out hasta las 17:00h',
-          description: 'Salida por la tarde sin prisas.',
+          description: 'Salida por la tarde sin prisas sujeta a disponibilidad.',
           price: 35,
           priceUnit: 'reserva',
           icon: 'clock',
@@ -340,29 +344,43 @@ export default function HostDashboardView({
           active: true,
         },
       ],
-      houseRules: ['No fumar', 'Respetar el descanso de los vecinos a partir de las 23:00h'],
+      houseRules: ['No fumar dentro del alojamiento', 'Respetar el descanso de los vecinos a partir de las 23:00h'],
       appliancesGuide:
         'Aire acondicionado con mando en el salón. Cafetera de cápsulas disponible.',
-      localRecommendations: ['Supermercado a 100 metros en la misma calle.'],
+      localRecommendations: ['Supermercado y farmacia a menos de 200 metros.'],
       customChecklist: [
-        'Ventilar todas las estancias',
-        'Cambiar sábanas y toallas',
-        'Desinfectar baño y cocina',
-        'Revisar que no quedan objetos olvidados',
+        'Ventilar todas las habitaciones',
+        'Cambiar sábanas y toallas limpias',
+        'Desinfectar baño y cocina a fondo',
+        'Reponer papel higiénico, bolsas y jabón',
+        'Revisar que no queden objetos personales',
+        'Comprobar luces y aire acondicionado apagados',
       ],
+      departureChecklist: [
+        'Apagar luces y climatización',
+        'Tirar la basura en los contenedores',
+        'Dejar las llaves en el cajetín o sobre la mesa',
+        'Cerrar bien las ventanas y la puerta principal',
+      ],
+      requireVideoToUnlockCodes: true,
+      lastSyncedAt: 'Sin sincronizar aún',
       modulesEnabled: {
         cleanings: true,
         guestGuide: true,
       },
-      lastSyncedAt: 'Justo ahora',
     });
 
     setNewPropName('');
     setNewPropAddress('');
+    setNewPropWhatsapp('');
+    setNewPropIcal('');
     setNewPropWifiSsid('');
     setNewPropWifiPass('');
     setNewPropDoorCode('');
-    setNewPropIcal('');
+    setNewPropCheckIn('15:00');
+    setNewPropCheckOut('11:00');
+    setNewPropCleaningFee(40);
+    setNewPropCleanerId('');
     setShowNewPropModal(false);
   };
 
@@ -2208,13 +2226,26 @@ export default function HostDashboardView({
 
       {/* Modal Nueva Propiedad */}
       {showNewPropModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <form
             onSubmit={handleCreateProperty}
-            className="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 sm:p-8 space-y-4 shadow-2xl"
+            className="bg-white rounded-3xl border border-slate-200 max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl my-8 max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-xl font-bold tracking-tight text-slate-900">Nuevo Alojamiento</h3>
+            {/* Cabecera */}
+            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 border border-orange-200/60 flex items-center justify-center font-bold text-lg">
+                  🏠
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight text-slate-900">
+                    Añadir Nuevo Alojamiento
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Ficha base para coordinar limpiezas y generar la Guía Digital del Huésped.
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowNewPropModal(false)}
@@ -2224,58 +2255,206 @@ export default function HostDashboardView({
               </button>
             </div>
 
-            <input
-              required
-              placeholder="Nombre del alojamiento (ej. Ático Malasaña)"
-              value={newPropName}
-              onChange={(e) => setNewPropName(e.target.value)}
-              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <input
-              placeholder="Dirección completa"
-              value={newPropAddress}
-              onChange={(e) => setNewPropAddress(e.target.value)}
-              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <input
-              placeholder="WhatsApp del anfitrión (+34...)"
-              value={newPropWhatsapp}
-              onChange={(e) => setNewPropWhatsapp(e.target.value)}
-              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <input
-              placeholder="URL iCal de Airbnb o Booking (.ics)"
-              value={newPropIcal}
-              onChange={(e) => setNewPropIcal(e.target.value)}
-              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-mono text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <div className="grid grid-cols-2 gap-2.5">
-              <input
-                placeholder="Red WiFi"
-                value={newPropWifiSsid}
-                onChange={(e) => setNewPropWifiSsid(e.target.value)}
-                className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-              <input
-                placeholder="Clave WiFi"
-                value={newPropWifiPass}
-                onChange={(e) => setNewPropWifiPass(e.target.value)}
-                className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
-            <input
-              placeholder="Código Puerta / Cajetín de Llaves"
-              value={newPropDoorCode}
-              onChange={(e) => setNewPropDoorCode(e.target.value)}
-              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
+            {/* Bloque 1: Datos Generales */}
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3.5">
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
+                1. Información del Alojamiento
+              </span>
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Nombre del Alojamiento <span className="text-orange-600">*</span>
+                  </label>
+                  <input
+                    required
+                    placeholder="ej. Ático Centro Histórico - Catedral"
+                    value={newPropName}
+                    onChange={(e) => setNewPropName(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs shadow-2xs"
+                  />
+                </div>
 
-            <button
-              type="submit"
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold py-3.5 rounded-xl transition shadow-sm mt-2"
-            >
-              Crear Alojamiento
-            </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Dirección completa
+                    </label>
+                    <input
+                      placeholder="ej. Calle Larios 12, 3ºB, Málaga"
+                      value={newPropAddress}
+                      onChange={(e) => setNewPropAddress(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      WhatsApp de contacto para el huésped
+                    </label>
+                    <input
+                      placeholder="ej. +34 612 345 678"
+                      value={newPropWhatsapp}
+                      onChange={(e) => setNewPropWhatsapp(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs shadow-2xs font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bloque 2: Operativa de Limpieza y Horarios */}
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3.5">
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
+                2. Horarios y Operativa de Limpiezas
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Hora salida (Check-out)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="11:00"
+                    value={newPropCheckOut}
+                    onChange={(e) => setNewPropCheckOut(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono text-center shadow-2xs"
+                  />
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Inicio de la limpieza</span>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Hora entrada (Check-in)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="15:00"
+                    value={newPropCheckIn}
+                    onChange={(e) => setNewPropCheckIn(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono text-center shadow-2xs"
+                  />
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Llegada nuevo huésped</span>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Tarifa Limpieza (€)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="40"
+                    value={newPropCleaningFee}
+                    onChange={(e) => setNewPropCleaningFee(Number(e.target.value))}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono text-center shadow-2xs"
+                  />
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Pago por servicio</span>
+                </div>
+              </div>
+
+              <div className="pt-1 text-xs">
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Limpiadora habitual asignada
+                </label>
+                <select
+                  value={newPropCleanerId}
+                  onChange={(e) => setNewPropCleanerId(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs shadow-2xs"
+                >
+                  {cleaners.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.phone})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Bloque 3: Acceso y WiFi */}
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3.5">
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
+                3. Acceso y WiFi (Para la Guía Digital del Huésped)
+              </span>
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Código de Puerta / Cajetín de Llaves
+                  </label>
+                  <input
+                    placeholder="ej. 1234# o C-5842"
+                    value={newPropDoorCode}
+                    onChange={(e) => setNewPropDoorCode(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono shadow-2xs"
+                  />
+                  <span className="text-[10px] text-slate-400 block mt-0.5">
+                    Se mostrará al huésped tras confirmar las instrucciones de llegada.
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Nombre de la Red WiFi
+                    </label>
+                    <input
+                      placeholder="ej. WiFi_Centro_5G"
+                      value={newPropWifiSsid}
+                      onChange={(e) => setNewPropWifiSsid(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      Contraseña WiFi
+                    </label>
+                    <input
+                      placeholder="ej. ClaveSegura2026"
+                      value={newPropWifiPass}
+                      onChange={(e) => setNewPropWifiPass(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs shadow-2xs font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bloque 4: Sincronización iCal */}
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <label className="block font-bold text-slate-900 uppercase tracking-wider">
+                  4. Enlace iCal de Airbnb o Booking (.ics)
+                </label>
+                <span className="text-[11px] text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded-full font-medium">
+                  Opcional
+                </span>
+              </div>
+              <input
+                placeholder="https://www.airbnb.es/calendar/ical/....ics"
+                value={newPropIcal}
+                onChange={(e) => setNewPropIcal(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono shadow-2xs"
+              />
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Si no tienes el enlace iCal a mano, puedes dejarlo en blanco y pegarlo en cualquier momento pulsando en <em>"Sincronizar iCal"</em>.
+              </p>
+            </div>
+
+            {/* Botones de acción */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowNewPropModal(false)}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition text-center"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-7 py-3 rounded-xl transition shadow-sm text-center"
+              >
+                Crear Alojamiento →
+              </button>
+            </div>
           </form>
         </div>
       )}

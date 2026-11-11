@@ -136,7 +136,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
       const stored = localStorage.getItem('turnexo_stripe_links_v1');
       if (stored) return JSON.parse(stored).plan_pro_yearly || '';
     } catch {}
-    return import.meta.env.VITE_STRIPE_LINK_PRO_YEARLY || '';
+    return import.meta.env.VITE_STRIPE_LINK_PRO_YEARLY || 'https://buy.stripe.com/fZubJ16NNd0hgd1bGB5c402';
   });
 
   const [stripeManagerYearlyLink, setStripeManagerYearlyLink] = useState(() => {

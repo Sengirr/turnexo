@@ -114,7 +114,7 @@ export default function PropertyCustomizerModal({
         <div className="flex flex-wrap gap-1.5 bg-slate-100 p-1.5 rounded-2xl shrink-0">
           {(
             [
-              { id: 'general', label: 'Horarios, WiFi y Módulos', icon: Clock },
+              { id: 'general', label: 'Horarios, Acceso y WiFi', icon: Clock },
               { id: 'videos', label: `Vídeos y Home Tour (${draft.videos?.length || 0})`, icon: Video },
               { id: 'extras', label: `Extras y Upsell (${draft.extras?.length || 0})`, icon: Sparkles },
               { id: 'rules', label: 'Normas y Guía Casa', icon: BookOpen },
@@ -144,56 +144,6 @@ export default function PropertyCustomizerModal({
         <div className="overflow-y-auto flex-1 pr-1 space-y-5 text-xs">
           {tab === 'general' && (
             <div className="space-y-4">
-              {/* Activación de los 2 módulos por separado */}
-              <div className="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-4 space-y-2.5">
-                <p className="font-black text-indigo-950 uppercase tracking-wider text-[11px]">
-                  Módulos activos en este alojamiento
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="flex items-center gap-2.5 bg-white p-3 rounded-xl border border-indigo-200 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={draft.modulesEnabled.cleanings}
-                      onChange={(e) =>
-                        setDraft({
-                          ...draft,
-                          modulesEnabled: {
-                            ...draft.modulesEnabled,
-                            cleanings: e.target.checked,
-                          },
-                        })
-                      }
-                      className="h-4 w-4 rounded text-indigo-600"
-                    />
-                    <div>
-                      <p className="font-black text-slate-900">Módulo 1: Limpiezas por iCal</p>
-                      <p className="text-[11px] text-slate-500">Limpiezas automáticas y fotos</p>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-2.5 bg-white p-3 rounded-xl border border-indigo-200 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={draft.modulesEnabled.guestGuide}
-                      onChange={(e) =>
-                        setDraft({
-                          ...draft,
-                          modulesEnabled: {
-                            ...draft.modulesEnabled,
-                            guestGuide: e.target.checked,
-                          },
-                        })
-                      }
-                      className="h-4 w-4 rounded text-indigo-600"
-                    />
-                    <div>
-                      <p className="font-black text-slate-900">Módulo 2: Guía del Huésped + Extras</p>
-                      <p className="text-[11px] text-slate-500">QR, vídeos, normas y Late Check-out</p>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Nombre del Alojamiento</label>

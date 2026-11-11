@@ -758,28 +758,22 @@ export default function HostDashboardView({
                         </div>
                       </div>
 
-                      {/* Estado de los módulos en este alojamiento */}
+                      {/* Resumen operativo de este alojamiento */}
                       <div className="grid grid-cols-2 gap-3 text-xs">
                         <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
                           <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">
-                            Módulo Limpiezas
+                            Limpieza & Personal
                           </span>
-                          <span className="font-semibold text-slate-900 mt-1 block">
-                            {prop.modulesEnabled.cleanings
-                              ? `Activo · ${cleaner?.name}`
-                              : 'Desactivado'}
+                          <span className="font-semibold text-slate-900 mt-1 block truncate">
+                            {cleaner?.name || 'Sin asignar'}
                           </span>
                         </div>
                         <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
                           <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">
-                            Módulo Guía Huésped
+                            Guía del Huésped
                           </span>
-                          <span className="font-semibold text-slate-900 mt-1 block">
-                            {prop.modulesEnabled.guestGuide
-                              ? `${prop.videos?.length || 0} vídeos · ${
-                                  prop.extras?.filter((e) => e.active).length || 0
-                                } extras`
-                              : 'Desactivado'}
+                          <span className="font-semibold text-slate-900 mt-1 block truncate">
+                            {prop.videos?.length || 0} vídeos · {prop.extras?.filter((e) => e.active).length || 0} extras
                           </span>
                         </div>
                       </div>

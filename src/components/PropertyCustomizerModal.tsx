@@ -331,6 +331,51 @@ export default function PropertyCustomizerModal({
                 </div>
               </div>
 
+              {/* ENLACE PRIVADO Y SEGURIDAD ANTI-COLISIÓN */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-emerald-600" />
+                    {isEn ? 'Private Guide URL & Anti-Collision Security' : 'Enlace Privado de la Guía y Seguridad Anti-Colisión'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const randSuffix = Math.random().toString(36).substring(2, 7);
+                      const baseName = (draft.name || 'alojamiento')
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/(^-|-$)/g, '');
+                      setDraft({ ...draft, slug: `${baseName}-${randSuffix}` });
+                    }}
+                    className="text-[10px] font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 px-2.5 py-1 rounded-lg flex items-center gap-1 transition shadow-2xs"
+                    title={isEn ? 'Generate new secure unique token' : 'Regenerar enlace único seguro'}
+                  >
+                    <RotateCcw size={11} />
+                    {isEn ? 'Regenerate secure link' : 'Regenerar enlace seguro'}
+                  </button>
+                </div>
+                <div className="flex items-center bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-2xs">
+                  <span className="text-slate-400 font-mono text-xs select-none">https://turnexo.app/g/</span>
+                  <input
+                    value={draft.slug}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        slug: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''),
+                      })
+                    }
+                    className="flex-1 font-mono font-bold text-slate-900 text-xs focus:outline-none px-1"
+                    placeholder="vistamarina-7k4e"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 leading-snug">
+                  {isEn
+                    ? 'Unique identifier so nobody on the internet can guess your apartment access codes or collide with properties of the same name.'
+                    : 'Identificador único seguro para evitar que nadie en internet pueda adivinar tus códigos de acceso ni colisionar con alojamientos que tengan el mismo nombre.'}
+                </p>
+              </div>
+
               {/* Horarios y Personal */}
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-3">
                 <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">

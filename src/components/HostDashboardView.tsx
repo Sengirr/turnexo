@@ -360,10 +360,12 @@ export default function HostDashboardView({
     }
     if (!newPropName.trim()) return;
     const id = `prop-${Date.now()}`;
-    const slug = newPropName
+    const uniqueSuffix = Math.random().toString(36).substring(2, 7);
+    const baseSlug = newPropName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
+    const slug = baseSlug ? `${baseSlug}-${uniqueSuffix}` : `prop-${uniqueSuffix}`;
 
     onAddProperty({
       id,

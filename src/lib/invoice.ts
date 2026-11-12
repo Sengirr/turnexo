@@ -208,16 +208,34 @@ const SPANISH_MONTHS: Record<string, string> = {
 };
 
 /**
- * Normaliza fechas en formato YYYY-MM-DD, DD/MM/YYYY o español ("2 de julio de 2026")
+ * Normaliza fechas en formato YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY (Airbnb) o español ("2 de julio de 2026")
  */
-export function normalizeDateString(dStr: string): string {
+export function normalizeDateString(dStr: string, isAirbnb = false): string {
   if (!dStr) return new Date().toISOString().split('T')[0];
   const trimmed = String(dStr).trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
-    const parts = trimmed.split('/');
-    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+
+  const slashMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (slashMatch) {
+    const p1 = parseInt(slashMatch[1], 10);
+    const p2 = parseInt(slashMatch[2], 10);
+    const year = slashMatch[3];
+
+    // Si p1 > 12 -> p1 es el día (DD/MM/YYYY)
+    if (p1 > 12) {
+      return `${year}-${String(p2).padStart(2, '0')}-${String(p1).padStart(2, '0')}`;
+    }
+    // Si p2 > 12 -> p2 es el día (MM/DD/YYYY)
+    if (p2 > 12) {
+      return `${year}-${String(p1).padStart(2, '0')}-${String(p2).padStart(2, '0')}`;
+    }
+    // Si ambos son <= 12: en Airbnb exports se usa MM/DD/YYYY, en Europa por defecto DD/MM/YYYY
+    if (isAirbnb) {
+      return `${year}-${String(p1).padStart(2, '0')}-${String(p2).padStart(2, '0')}`;
+    }
+    return `${year}-${String(p2).padStart(2, '0')}-${String(p1).padStart(2, '0')}`;
   }
+
   const match = trimmed.match(/^(\d{1,2})\s+de\s+([a-záéíóú]+)\s+de\s+(\d{4})$/i);
   if (match) {
     const day = match[1].padStart(2, '0');
@@ -318,10 +336,21 @@ export function parseCurrencyNumber(val: any): number {
 }
 
 /**
- * Parsea un array de objetos obtenido directamente de SheetJS (evita problemas de saltos de línea dentro de celdas de Excel)
+ * Parsea un array de objetos obtenido directamente de SheetJS (evita problemas de saltos de línea dentro de celdas de Excel y soporta Booking y Airbnb)
  */
 export function parseReservationsFromSheetRows(rawObjects: Record<string, any>[]): ImportedReservationRow[] {
   if (!Array.isArray(rawObjects) || rawObjects.length === 0) return [];
+
+  // Detectar si el archivo proviene de Airbnb (cabeceras características como Tipo, Código de confirmación, Ingresos brutos, Viajero)
+  const isAirbnb = rawObjects.some((row) => {
+    if (!row || typeof row !== 'object') return false;
+    const keys = Object.keys(row).map((k) => k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+    return (
+      keys.some((k) => k.includes('airbnb') || k.includes('viajero') || k.includes('ingresos brutos')) ||
+      row['Tipo'] !== undefined ||
+      row['Código de confirmación'] !== undefined
+    );
+  });
 
   const rows: ImportedReservationRow[] = [];
 
@@ -339,9 +368,41 @@ export function parseReservationsFromSheetRows(rawObjects: Record<string, any>[]
       return found ? found[1] : undefined;
     };
 
+    // Tipo de transacción (en Airbnb): omitir cobros de transferencia bancaria, comisiones de coanfitrión, resoluciones y ajustes
+    const tipoVal = String(findVal((k) => k === 'tipo' || k.includes('type')) || '').toLowerCase();
+    if (tipoVal) {
+      if (
+        tipoVal.includes('payout') ||
+        tipoVal.includes('transfer') ||
+        tipoVal.includes('coanfitrion') ||
+        tipoVal.includes('co-host') ||
+        tipoVal.includes('ajuste') ||
+        tipoVal.includes('adjustment') ||
+        tipoVal.includes('resolucion') ||
+        tipoVal.includes('resolution')
+      ) {
+        continue;
+      }
+    }
+
     // Si el estado es cancelado o anulado, ignorar
     const statusVal = String(findVal((k) => k.includes('estado') || k.includes('status')) || '').toLowerCase();
     if (statusVal.includes('cancel') || statusVal.includes('anula')) {
+      continue;
+    }
+
+    // Huésped / Viajero
+    let rawGuest = findVal((k) =>
+      k.includes('viajero') ||
+      k.includes('titular') ||
+      k.includes('huesped') ||
+      k.includes('guest') ||
+      (k.includes('cliente') && !k.includes('genius')) ||
+      (k.includes('nombre') && !k.includes('alojamiento') && !k.includes('propiedad') && !k.includes('habitacion'))
+    );
+
+    // Si no hay viajero / huésped o es una fila de transferencia bancaria, saltar
+    if (!rawGuest || String(rawGuest).toLowerCase().includes('transferido a')) {
       continue;
     }
 
@@ -353,16 +414,6 @@ export function parseReservationsFromSheetRows(rawObjects: Record<string, any>[]
       k.includes('apartamento') ||
       k.includes('habitacion') ||
       k.includes('room')
-    );
-
-    // Huésped (evitar "nombre del alojamiento" o "cliente genius")
-    let rawGuest = findVal((k) =>
-      k.includes('titular') ||
-      k.includes('huesped') ||
-      k.includes('viajero') ||
-      k.includes('guest') ||
-      (k.includes('cliente') && !k.includes('genius')) ||
-      (k.includes('nombre') && !k.includes('alojamiento') && !k.includes('propiedad') && !k.includes('habitacion'))
     );
 
     // DNI / NIF
@@ -377,26 +428,40 @@ export function parseReservationsFromSheetRows(rawObjects: Record<string, any>[]
 
     // Fechas
     let rawIn = findVal((k) =>
-      k.includes('entrada') || k.includes('check-in') || k.includes('checkin') || k.includes('llegada') || k.includes('start') || k.includes('arrival')
+      k.includes('fecha de inicio') ||
+      k.includes('entrada') ||
+      k.includes('check-in') ||
+      k.includes('checkin') ||
+      k.includes('llegada') ||
+      k.includes('start') ||
+      k.includes('arrival')
     );
 
     let rawOut = findVal((k) =>
-      k.includes('salida') || k.includes('check-out') || k.includes('checkout') || k.includes('departure') || k.includes('end')
+      k.includes('fecha de finalizacion') ||
+      k.includes('salida') ||
+      k.includes('check-out') ||
+      k.includes('checkout') ||
+      k.includes('departure') ||
+      k.includes('end')
     );
 
-    // Importe
-    let rawAmount = findVal((k) =>
-      k.includes('importe total') ||
-      k.includes('importe') ||
-      k.includes('amount') ||
-      k.includes('precio') ||
-      k.includes('total') ||
-      k.includes('earnings') ||
-      k.includes('cobrado')
-    );
+    // Importe: en Airbnb priorizar 'Ingresos brutos' (total íntegro pagado por el huésped)
+    let rawAmount = findVal((k) => k.includes('ingresos brutos') || k.includes('gross earnings'));
+    if (!rawAmount || parseCurrencyNumber(rawAmount) <= 0) {
+      rawAmount = findVal((k) =>
+        k.includes('importe total') ||
+        k.includes('importe') ||
+        k.includes('amount') ||
+        k.includes('precio') ||
+        k.includes('total') ||
+        k.includes('cobrado')
+      );
+    }
 
     // Código de reserva
     let rawCode = findVal((k) =>
+      (k.includes('codigo') && k.includes('confirmacion')) ||
       (k.includes('numero') && k.includes('reserva')) ||
       k.includes('codigo') ||
       k.includes('confirmation') ||
@@ -415,8 +480,8 @@ export function parseReservationsFromSheetRows(rawObjects: Record<string, any>[]
       guestName: String(rawGuest || 'Huésped Particular').trim(),
       guestFiscalId: rawDni ? String(rawDni).trim() : undefined,
       guestAddress: rawAddr ? String(rawAddr).trim() : undefined,
-      stayStartDate: normalizeDateString(String(rawIn || '')),
-      stayEndDate: normalizeDateString(String(rawOut || '')),
+      stayStartDate: normalizeDateString(String(rawIn || ''), isAirbnb),
+      stayEndDate: normalizeDateString(String(rawOut || ''), isAirbnb),
       totalAmount: Math.round(amountVal * 100) / 100,
       reservationCode: rawCode ? String(rawCode).replace(/\.0$/, '').trim() : undefined,
     });

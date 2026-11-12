@@ -20,6 +20,8 @@ import {
   ExternalLink,
   ShieldCheck,
   CheckCircle,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { Cleaner, CleaningTask, Property, ChecklistItem } from '../lib/icalParser';
 import { compressCleanerPhoto } from '../lib/imageCompressor';
@@ -64,7 +66,18 @@ export default function CleanerMagicView({
   const [filterMissing, setFilterMissing] = useState(false);
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
   const [previewPhoto, setPreviewPhoto] = useState<{ url: string; title: string } | null>(null);
+  const [showDistant, setShowDistant] = useState(false);
   const timerRef = useRef<any>(null);
+
+  // Fechas de referencia local
+  const { todayYMD, horizonYMD } = useMemo(() => {
+    const now = new Date();
+    const tYMD = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const h = new Date(now);
+    h.setDate(now.getDate() + 7);
+    const hYMD = `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`;
+    return { todayYMD: tYMD, horizonYMD: hYMD };
+  }, []);
 
   // Tareas asignadas a esta limpiadora ordenadas cronológicamente por fecha
   const myTasks = useMemo(
@@ -75,7 +88,37 @@ export default function CleanerMagicView({
     [tasks, cleaner.id]
   );
   const activeTask = myTasks.find((t) => t.id === activeTaskId);
-  const completedCount = myTasks.filter((t) => t.status === 'completed').length;
+
+  // Tareas de hoy (en progreso, del día de hoy, o pendientes anteriores)
+  const todayTasks = useMemo(() => {
+    return myTasks.filter(
+      (t) =>
+        t.status === 'in_progress' ||
+        t.date === todayYMD ||
+        (t.date < todayYMD && t.status !== 'completed')
+    );
+  }, [myTasks, todayYMD]);
+
+  // Tareas de los próximos 7 días (excluye las que ya están en curso o de hoy)
+  const upcomingTasks = useMemo(() => {
+    return myTasks.filter(
+      (t) =>
+        t.status !== 'in_progress' &&
+        t.date > todayYMD &&
+        t.date <= horizonYMD
+    );
+  }, [myTasks, todayYMD, horizonYMD]);
+
+  // Limpiezas a más de 7 días (meses posteriores)
+  const distantTasks = useMemo(() => {
+    return myTasks.filter(
+      (t) =>
+        t.status !== 'in_progress' &&
+        t.date > horizonYMD
+    );
+  }, [myTasks, horizonYMD]);
+
+  const todayCompletedCount = todayTasks.filter((t) => t.status === 'completed').length;
 
   const getTaskSeconds = (task?: CleaningTask) => {
     if (!task) return 0;
@@ -291,6 +334,150 @@ export default function CleanerMagicView({
     setIncidentPhoto(null);
   };
 
+  const renderTaskCard = (task: CleaningTask) => {
+    const prop = properties.find((p) => p.id === task.propertyId);
+    const isCompleted = task.status === 'completed';
+    const isInProgress = task.status === 'in_progress';
+    const taskSeconds = getTaskSeconds(task);
+    const taskDateFormatted = formatTaskDate(task.date);
+
+    return (
+      <div
+        key={task.id}
+        onClick={() => setActiveTaskId(task.id)}
+        className={`rounded-3xl p-5 border transition-all cursor-pointer active:scale-[0.99] relative overflow-hidden ${
+          isCompleted
+            ? 'bg-emerald-50/70 border-emerald-200 shadow-sm'
+            : isInProgress
+            ? 'bg-white border-emerald-500 ring-2 ring-emerald-500/20 shadow-md'
+            : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md'
+        }`}
+      >
+        <div className="flex items-center gap-3.5">
+          {/* Icono de estado */}
+          <div
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+              isCompleted
+                ? 'bg-emerald-100 text-emerald-600'
+                : isInProgress
+                ? 'bg-emerald-50 text-emerald-600'
+                : 'bg-slate-100 text-slate-400'
+            }`}
+          >
+            {isCompleted ? (
+              <CheckCircle2 size={24} />
+            ) : isInProgress ? (
+              <Clock size={24} className="animate-pulse" />
+            ) : (
+              <Home size={22} />
+            )}
+          </div>
+
+          {/* Info de la propiedad */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2 mb-0.5">
+              <div className="flex items-center gap-2 min-w-0">
+                <h3
+                  className={`text-base font-extrabold truncate ${
+                    isCompleted ? 'text-emerald-950' : 'text-slate-900'
+                  }`}
+                >
+                  {prop?.name || 'Alojamiento'}
+                </h3>
+                {/* Badge PAX idéntico a IVI ERP (solo si se conoce) */}
+                {task.pax ? (
+                  <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                    <User size={10} strokeWidth={3} className="text-slate-400" />
+                    {task.pax}
+                  </span>
+                ) : null}
+              </div>
+
+              {/* Fecha de la limpieza prominente */}
+              <div
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black shrink-0 ${
+                  taskDateFormatted === 'Hoy'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
+                    : 'bg-orange-50 text-orange-800 border border-orange-200/80'
+                }`}
+              >
+                <Calendar
+                  size={12}
+                  className={
+                    taskDateFormatted === 'Hoy'
+                      ? 'text-emerald-600'
+                      : 'text-orange-600'
+                  }
+                />
+                <span>{taskDateFormatted}</span>
+              </div>
+            </div>
+
+            {/* Fila de Horarios estilo IVI ERP */}
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+              {/* Salida */}
+              <div
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                  task.lateCheckoutActive
+                    ? 'bg-amber-100 text-amber-800'
+                    : 'bg-rose-50 text-rose-700'
+                }`}
+              >
+                <span className="text-[9px] uppercase font-black opacity-60">
+                  {task.lateCheckoutActive ? 'LATE OUT' : 'SALIDA'}
+                </span>
+                <span>{task.scheduledCleaningTime}h</span>
+              </div>
+
+              <span className="text-slate-300 font-bold text-xs">→</span>
+
+              {/* Entrada */}
+              <div
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                  task.sameDayCheckIn
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                <span className="text-[9px] uppercase font-black opacity-60">
+                  ENTRADA
+                </span>
+                <span>{task.sameDayCheckIn ? `${task.nextCheckInTime}h` : '-'}</span>
+              </div>
+
+              {/* Badge de Rotación Misma Día */}
+              {task.sameDayCheckIn && (
+                <span className="text-[10px] font-black bg-orange-100 text-orange-800 px-2 py-0.5 rounded-md flex items-center gap-1">
+                  <Flame size={11} className="text-orange-600" /> MISMO DÍA
+                </span>
+              )}
+            </div>
+
+            {/* Indicador de estado */}
+            <div className="mt-2.5 flex items-center gap-2 text-xs">
+              {isCompleted ? (
+                <span className="text-emerald-700 font-bold flex items-center gap-1">
+                  <CheckCircle2 size={13} /> Limpieza finalizada
+                </span>
+              ) : isInProgress ? (
+                <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse">
+                  <Clock size={13} /> En progreso · {formatTimer(taskSeconds)}
+                </span>
+              ) : (
+                <span className="text-slate-400 font-medium">
+                  {task.checklist.filter((i) => i.completed).length}/
+                  {task.checklist.length} tareas completadas
+                </span>
+              )}
+            </div>
+          </div>
+
+          <ChevronRight size={20} className="text-slate-300 shrink-0" />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-24 antialiased">
       {/* VISTA 1: DASHBOARD PRINCIPAL DE TAREAS (IVI ERP) */}
@@ -315,7 +502,8 @@ export default function CleanerMagicView({
                   Tareas de Hoy
                 </span>
                 <span className="text-2xl font-black text-slate-900">
-                  {completedCount} <span className="text-slate-400 text-lg font-bold">/ {myTasks.length}</span>
+                  {todayCompletedCount}{' '}
+                  <span className="text-slate-400 text-lg font-bold">/ {todayTasks.length}</span>
                 </span>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
@@ -327,176 +515,87 @@ export default function CleanerMagicView({
               <div
                 className="bg-emerald-500 h-2.5 rounded-full transition-all duration-500"
                 style={{
-                  width: `${myTasks.length > 0 ? (completedCount / myTasks.length) * 100 : 0}%`,
+                  width: `${todayTasks.length > 0 ? (todayCompletedCount / todayTasks.length) * 100 : 0}%`,
                 }}
               />
             </div>
           </div>
 
-          {/* Lista de Tareas */}
+          {/* Sección 1: Tareas de Hoy */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">
-                Alojamientos Asignados
+                Tareas de Hoy
               </h2>
-              <span className="text-xs font-bold bg-slate-200/80 text-slate-700 px-2.5 py-0.5 rounded-full">
-                {myTasks.length} {myTasks.length === 1 ? 'piso' : 'pisos'}
-              </span>
+              {todayTasks.length > 0 && (
+                <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                  {todayTasks.length} {todayTasks.length === 1 ? 'servicio' : 'servicios'}
+                </span>
+              )}
             </div>
 
-            {myTasks.length === 0 ? (
-              <div className="bg-white rounded-3xl p-10 text-center border-dashed border-2 border-slate-200 space-y-3">
-                <Calendar size={40} className="mx-auto text-slate-300" />
-                <p className="font-bold text-slate-700">No hay tareas asignadas para hoy.</p>
-                <p className="text-xs text-slate-400">
-                  Cuando el anfitrión tenga una salida programada, aparecerá aquí automáticamente.
+            {todayTasks.length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 text-center border border-slate-200/80 shadow-xs space-y-2">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-1">
+                  <CheckCircle2 size={24} />
+                </div>
+                <p className="font-extrabold text-slate-800 text-base">No tienes limpiezas para hoy 🎉</p>
+                <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                  Estás al día. Las próximas limpiezas programadas se muestran abajo.
                 </p>
               </div>
             ) : (
-              myTasks.map((task) => {
-                const prop = properties.find((p) => p.id === task.propertyId);
-                const isCompleted = task.status === 'completed';
-                const isInProgress = task.status === 'in_progress';
-                const taskSeconds = getTaskSeconds(task);
-
-                return (
-                  <div
-                    key={task.id}
-                    onClick={() => setActiveTaskId(task.id)}
-                    className={`rounded-3xl p-5 border transition-all cursor-pointer active:scale-[0.99] relative overflow-hidden ${
-                      isCompleted
-                        ? 'bg-emerald-50/70 border-emerald-200 shadow-sm'
-                        : isInProgress
-                        ? 'bg-white border-emerald-500 ring-2 ring-emerald-500/20 shadow-md'
-                        : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3.5">
-                      {/* Icono de estado */}
-                      <div
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                          isCompleted
-                            ? 'bg-emerald-100 text-emerald-600'
-                            : isInProgress
-                            ? 'bg-emerald-50 text-emerald-600'
-                            : 'bg-slate-100 text-slate-400'
-                        }`}
-                      >
-                        {isCompleted ? (
-                          <CheckCircle2 size={24} />
-                        ) : isInProgress ? (
-                          <Clock size={24} className="animate-pulse" />
-                        ) : (
-                          <Home size={22} />
-                        )}
-                      </div>
-
-                      {/* Info de la propiedad */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-0.5">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <h3
-                              className={`text-base font-extrabold truncate ${
-                                isCompleted ? 'text-emerald-950' : 'text-slate-900'
-                              }`}
-                            >
-                              {prop?.name || 'Alojamiento'}
-                            </h3>
-                            {/* Badge PAX idéntico a IVI ERP (solo si se conoce) */}
-                            {task.pax ? (
-                              <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
-                                <User size={10} strokeWidth={3} className="text-slate-400" />
-                                {task.pax}
-                              </span>
-                            ) : null}
-                          </div>
-
-                          {/* Fecha de la limpieza prominente */}
-                          <div
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black shrink-0 ${
-                              formatTaskDate(task.date) === 'Hoy'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
-                                : 'bg-orange-50 text-orange-800 border border-orange-200/80'
-                            }`}
-                          >
-                            <Calendar
-                              size={12}
-                              className={
-                                formatTaskDate(task.date) === 'Hoy'
-                                  ? 'text-emerald-600'
-                                  : 'text-orange-600'
-                              }
-                            />
-                            <span>{formatTaskDate(task.date)}</span>
-                          </div>
-                        </div>
-
-                        {/* Fila de Horarios estilo IVI ERP */}
-                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                          {/* Salida */}
-                          <div
-                            className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                              task.lateCheckoutActive
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-rose-50 text-rose-700'
-                            }`}
-                          >
-                            <span className="text-[9px] uppercase font-black opacity-60">
-                              {task.lateCheckoutActive ? 'LATE OUT' : 'SALIDA'}
-                            </span>
-                            <span>{task.scheduledCleaningTime}h</span>
-                          </div>
-
-                          <span className="text-slate-300 font-bold text-xs">→</span>
-
-                          {/* Entrada */}
-                          <div
-                            className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                              task.sameDayCheckIn
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-slate-100 text-slate-600'
-                            }`}
-                          >
-                            <span className="text-[9px] uppercase font-black opacity-60">
-                              ENTRADA
-                            </span>
-                            <span>{task.sameDayCheckIn ? `${task.nextCheckInTime}h` : '-'}</span>
-                          </div>
-
-                          {/* Badge de Rotación Misma Día */}
-                          {task.sameDayCheckIn && (
-                            <span className="text-[10px] font-black bg-orange-100 text-orange-800 px-2 py-0.5 rounded-md flex items-center gap-1">
-                              <Flame size={11} className="text-orange-600" /> MISMO DÍA
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Indicador de estado */}
-                        <div className="mt-2.5 flex items-center gap-2 text-xs">
-                          {isCompleted ? (
-                            <span className="text-emerald-700 font-bold flex items-center gap-1">
-                              <CheckCircle2 size={13} /> Limpieza finalizada
-                            </span>
-                          ) : isInProgress ? (
-                            <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse">
-                              <Clock size={13} /> En progreso · {formatTimer(taskSeconds)}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 font-medium">
-                              {task.checklist.filter((i) => i.completed).length}/
-                              {task.checklist.length} tareas completadas
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <ChevronRight size={20} className="text-slate-300 shrink-0" />
-                    </div>
-                  </div>
-                );
-              })
+              todayTasks.map(renderTaskCard)
             )}
           </div>
+
+          {/* Sección 2: Próximos 7 Días */}
+          {upcomingTasks.length > 0 && (
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Calendar size={18} className="text-slate-500" />
+                  <h3 className="text-base font-extrabold text-slate-800 tracking-tight">
+                    Próximos 7 Días
+                  </h3>
+                </div>
+                <span className="text-xs font-bold bg-slate-200/80 text-slate-700 px-2.5 py-0.5 rounded-full">
+                  {upcomingTasks.length} {upcomingTasks.length === 1 ? 'limpieza' : 'limpiezas'}
+                </span>
+              </div>
+              <div className="space-y-3">
+                {upcomingTasks.map(renderTaskCard)}
+              </div>
+            </div>
+          )}
+
+          {/* Sección 3: Meses Posteriores (Oculto por defecto para evitar saturar) */}
+          {distantTasks.length > 0 && (
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setShowDistant((prev) => !prev)}
+                className="w-full py-3.5 px-4 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-bold text-xs flex items-center justify-between transition shadow-xs"
+              >
+                <span className="flex items-center gap-2">
+                  <Clock size={15} className="text-slate-400" />
+                  {showDistant
+                    ? 'Ocultar limpiezas de meses posteriores'
+                    : `Ver ${distantTasks.length} limpiezas de meses posteriores`}
+                </span>
+                {showDistant ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
+
+              {showDistant && (
+                <div className="space-y-3 mt-3">
+                  <p className="text-xs text-slate-400 px-1 font-medium">
+                    Limpiezas programadas a más de una semana vista:
+                  </p>
+                  {distantTasks.map(renderTaskCard)}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

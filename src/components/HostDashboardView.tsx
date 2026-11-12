@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import {
   Calendar,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   Check,
   ExternalLink,
@@ -80,6 +82,7 @@ interface Props {
   onImportIcalText: (propertyId: string, icsText: string) => void;
   onSyncIcalUrl: (propertyId: string, url: string) => Promise<void>;
   onAssignCleaner: (taskId: string, cleanerId: string) => void;
+  onUpdateTaskTimes?: (taskId: string, scheduledCleaningTime: string, nextCheckInTime: string) => void;
   onApproveLateCheckout: (reservationId: string) => void;
   onApproveExtra?: (reservationId: string, extraId: string) => void;
   onOpenCleanerPreview: (cleanerId: string) => void;
@@ -111,6 +114,7 @@ export default function HostDashboardView({
   onImportIcalText,
   onSyncIcalUrl,
   onAssignCleaner,
+  onUpdateTaskTimes,
   onApproveLateCheckout,
   onApproveExtra,
   onOpenCleanerPreview,
@@ -182,8 +186,31 @@ export default function HostDashboardView({
   });
   const t = DASHBOARD_TRANSLATIONS[lang] || DASHBOARD_TRANSLATIONS.en;
 
-  // Filtros y modos de visualización avanzados (Cuadrante por Días, Tabla o Timeline como en IVI ERP)
-  const [scheduleView, setScheduleView] = useState<'list' | 'table' | 'timeline'>('list');
+  // Navegación por Semanas para ver el Pasado y Futuro (estilo IVI ERP Cleanings.tsx)
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [showAllHistory, setShowAllHistory] = useState(false);
+
+  const weekInfo = useMemo(() => {
+    const base = new Date();
+    base.setDate(base.getDate() + weekOffset * 7);
+
+    const day = base.getDay();
+    const diffToMonday = base.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(base.setDate(diffToMonday));
+    monday.setHours(0, 0, 0, 0);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    const mondayStr = monday.toISOString().slice(0, 10);
+    const sundayStr = sunday.toISOString().slice(0, 10);
+
+    const label = `${monday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} – ${sunday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+
+    return { mondayStr, sundayStr, label, isCurrentWeek: weekOffset === 0 };
+  }, [weekOffset]);
+
   const [schedulePropertyFilter, setSchedulePropertyFilter] = useState('all');
   const [scheduleStatusFilter, setScheduleStatusFilter] = useState<'all' | 'urgent' | 'late' | 'completed' | 'pending'>('all');
   const [scheduleSearch, setScheduleSearch] = useState('');
@@ -238,9 +265,13 @@ export default function HostDashboardView({
     0
   );
 
-  // Filtro reactivo del cuadrante de salidas
+  // Filtro reactivo del cuadrante de salidas (con soporte de semanas para ver el pasado/futuro)
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
+      // Si no estamos viendo todo el histórico, filtramos por la semana seleccionada
+      if (!showAllHistory) {
+        if (task.date < weekInfo.mondayStr || task.date > weekInfo.sundayStr) return false;
+      }
       if (schedulePropertyFilter !== 'all' && task.propertyId !== schedulePropertyFilter) return false;
       const prop = properties.find((p) => p.id === task.propertyId);
       const res = reservations.find((r) => r.id === task.reservationId);
@@ -260,7 +291,7 @@ export default function HostDashboardView({
       }
       return true;
     });
-  }, [tasks, schedulePropertyFilter, scheduleStatusFilter, scheduleSearch, properties, reservations, cleaners]);
+  }, [tasks, showAllHistory, weekInfo, schedulePropertyFilter, scheduleStatusFilter, scheduleSearch, properties, reservations, cleaners]);
 
   // Enviar parte de limpieza por WhatsApp al personal de limpieza
   const sendTaskWhatsApp = (task: CleaningTask) => {
@@ -1036,46 +1067,64 @@ export default function HostDashboardView({
 
             {cleaningsSubTab === 'schedule' ? (
               <div className="space-y-4">
-                {/* Botones de Cambio de Vista: Tabla vs Timeline Semanal */}
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex items-center gap-1 bg-slate-200/70 p-1 rounded-xl">
+                {/* NAVEGADOR DE SEMANAS (PERMITE VER EL PASADO Y EL FUTURO) */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-3 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setScheduleView('list')}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition ${
-                        scheduleView === 'list'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
+                      onClick={() => {
+                        setWeekOffset((prev) => prev - 1);
+                        setShowAllHistory(false);
+                      }}
+                      className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition border border-slate-200"
+                      title="Semana anterior (Ver pasado)"
                     >
+                      <ChevronLeft size={16} />
+                    </button>
+
+                    <div className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-800 flex items-center gap-2">
                       <Calendar size={14} className="text-orange-600" />
-                      <span>Cuadrante por Días</span>
-                    </button>
+                      <span>{showAllHistory ? 'Todo el Histórico' : weekInfo.label}</span>
+                    </div>
+
                     <button
                       type="button"
-                      onClick={() => setScheduleView('table')}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition ${
-                        scheduleView === 'table'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
+                      onClick={() => {
+                        setWeekOffset((prev) => prev + 1);
+                        setShowAllHistory(false);
+                      }}
+                      className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition border border-slate-200"
+                      title="Semana siguiente"
                     >
-                      <List size={14} />
-                      <span>Vista Tabla</span>
+                      <ChevronRight size={16} />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setScheduleView('timeline')}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition ${
-                        scheduleView === 'timeline'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      <LayoutGrid size={14} />
-                      <span>Matriz Semanal</span>
-                    </button>
+
+                    {!weekInfo.isCurrentWeek && !showAllHistory && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWeekOffset(0);
+                          setShowAllHistory(false);
+                        }}
+                        className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-xl transition ml-1"
+                      >
+                        Hoy / Esta semana
+                      </button>
+                    )}
                   </div>
+
+                  {/* Botón Ver Todo / Histórico completo */}
+                  <button
+                    type="button"
+                    onClick={() => setShowAllHistory((prev) => !prev)}
+                    className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
+                      showAllHistory
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {showAllHistory ? 'Ver solo esta semana' : 'Ver todo el histórico'}
+                  </button>
                 </div>
 
                 {/* Barra de Filtros y Búsqueda */}
@@ -1144,25 +1193,42 @@ export default function HostDashboardView({
                   </div>
                 </div>
 
-                {/* Renderizado de Vista: Tabla o Timeline */}
+                {/* CUADRANTE POR DÍAS ÚNICO Y SIMPLIFICADO */}
                 {filteredTasks.length === 0 ? (
                   <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center space-y-3 shadow-sm">
-                    <p className="font-bold text-sm text-slate-900">No hay tareas que coincidan con los filtros</p>
-                    <p className="text-xs text-slate-500">Prueba a limpiar la búsqueda o cambiar el filtro de estado.</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setScheduleSearch('');
-                        setSchedulePropertyFilter('all');
-                        setScheduleStatusFilter('all');
-                      }}
-                      className="text-xs font-bold text-orange-600 hover:text-orange-700 underline pt-2"
-                    >
-                      Restablecer filtros
-                    </button>
+                    <p className="font-bold text-sm text-slate-900">
+                      No hay limpiezas programadas {showAllHistory ? 'en el sistema' : 'para esta semana'}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {showAllHistory
+                        ? 'Comprueba que tus calendarios iCal estén sincronizados.'
+                        : 'Puedes navegar hacia atrás en el calendario o activar "Ver todo el histórico".'}
+                    </p>
+                    <div className="flex items-center justify-center gap-2 pt-2">
+                      {!showAllHistory && (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllHistory(true)}
+                          className="text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-xl transition"
+                        >
+                          Ver todo el histórico
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setScheduleSearch('');
+                          setSchedulePropertyFilter('all');
+                          setScheduleStatusFilter('all');
+                          setWeekOffset(0);
+                        }}
+                        className="text-xs font-bold text-orange-600 hover:text-orange-700 underline px-3 py-1.5"
+                      >
+                        Restablecer filtros
+                      </button>
+                    </div>
                   </div>
-                ) : scheduleView === 'list' ? (
-                  /* VISTA CUADRANTE POR DÍAS (ESTILO IVI ERP DailyCleaningListView) */
+                ) : (
                   <div className="space-y-6">
                     {Array.from(new Set(filteredTasks.map((t) => t.date))).sort().map((dateStr) => {
                       const dayTasks = filteredTasks.filter((t) => t.date === dateStr);
@@ -1206,12 +1272,17 @@ export default function HostDashboardView({
                               const isInProgress = task.status === 'in_progress';
 
                               return (
-                                <div key={task.id} className="p-4 sm:p-5 hover:bg-slate-50/50 transition space-y-3.5">
+                                <div
+                                  key={task.id}
+                                  onClick={() => setInspectingTaskPhotos(task)}
+                                  className="p-4 sm:p-5 hover:bg-slate-50/60 transition space-y-3.5 cursor-pointer group"
+                                  title="Haz clic para ver las fotos y checklist de esta limpieza"
+                                >
                                   <div className="flex flex-wrap items-start justify-between gap-3">
                                     {/* Alojamiento, PAX y Huésped */}
                                     <div className="flex items-start gap-3">
                                       <div
-                                        className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                                        className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition group-hover:scale-105 ${
                                           isCompleted
                                             ? 'bg-emerald-100 text-emerald-700'
                                             : isInProgress
@@ -1224,7 +1295,7 @@ export default function HostDashboardView({
 
                                       <div>
                                         <div className="flex items-center gap-2">
-                                          <span className="text-base font-extrabold text-slate-900">
+                                          <span className="text-base font-extrabold text-slate-900 group-hover:text-orange-600 transition">
                                             {prop?.name}
                                           </span>
                                           <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
@@ -1237,7 +1308,10 @@ export default function HostDashboardView({
                                             Salida:{' '}
                                             <button
                                               type="button"
-                                              onClick={() => res && onOpenGuestPreview(res.id)}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (res) onOpenGuestPreview(res.id);
+                                              }}
                                               className="font-bold text-slate-800 hover:text-orange-600 underline underline-offset-2"
                                             >
                                               {res?.guestName || 'Huésped'}
@@ -1281,26 +1355,95 @@ export default function HostDashboardView({
                                     </div>
                                   </div>
 
-                                  {/* Fila Operativa (Horarios, Asignación, Duración y Acciones) */}
+                                  {/* Fila Operativa (Horarios Modificables, Asignación y Comprobación de Fotos) */}
                                   <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-100/80">
                                     <div className="flex flex-wrap items-center gap-2.5 text-xs">
-                                      {/* Horarios Salida -> Entrada */}
-                                      <div className="flex items-center gap-1.5 bg-slate-100/90 px-3 py-1.5 rounded-xl font-bold">
+                                      {/* Horario de Salida Modificable */}
+                                      <div
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-bold"
+                                      >
                                         <span
-                                          className={`text-[10px] uppercase font-black ${
+                                          className={`text-[9px] uppercase font-black ${
                                             task.lateCheckoutActive ? 'text-amber-800' : 'text-rose-700'
                                           }`}
                                         >
                                           {task.lateCheckoutActive ? 'LATE OUT' : 'SALIDA'}
                                         </span>
-                                        <span className="text-slate-900">{task.scheduledCleaningTime}h</span>
-                                        <span className="text-slate-400 px-0.5">→</span>
-                                        <span className="text-[10px] uppercase font-black text-emerald-700">
+                                        <select
+                                          value={task.scheduledCleaningTime}
+                                          onChange={(e) =>
+                                            onUpdateTaskTimes?.(
+                                              task.id,
+                                              e.target.value,
+                                              task.nextCheckInTime
+                                            )
+                                          }
+                                          className="bg-transparent font-extrabold text-slate-900 text-xs outline-none cursor-pointer"
+                                          title="Modificar hora de salida"
+                                        >
+                                          {[
+                                            '09:00',
+                                            '10:00',
+                                            '10:30',
+                                            '11:00',
+                                            '11:30',
+                                            '12:00',
+                                            '12:30',
+                                            '13:00',
+                                            '14:00',
+                                            '15:00',
+                                            '16:00',
+                                            '17:00',
+                                          ].map((time) => (
+                                            <option key={time} value={time}>
+                                              {time}h
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+
+                                      <span className="text-slate-400 font-bold">→</span>
+
+                                      {/* Horario de Entrada Modificable */}
+                                      <div
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-bold"
+                                      >
+                                        <span className="text-[9px] uppercase font-black text-emerald-700">
                                           ENTRADA
                                         </span>
-                                        <span className="text-slate-900">
-                                          {task.sameDayCheckIn ? `${task.nextCheckInTime}h` : '-'}
-                                        </span>
+                                        <select
+                                          value={task.sameDayCheckIn ? task.nextCheckInTime : '-'}
+                                          onChange={(e) =>
+                                            onUpdateTaskTimes?.(
+                                              task.id,
+                                              task.scheduledCleaningTime,
+                                              e.target.value === '-' ? '15:00' : e.target.value
+                                            )
+                                          }
+                                          className="bg-transparent font-extrabold text-slate-900 text-xs outline-none cursor-pointer"
+                                          title="Modificar hora de entrada"
+                                        >
+                                          <option value="-">- (Libre)</option>
+                                          {[
+                                            '13:00',
+                                            '14:00',
+                                            '14:30',
+                                            '15:00',
+                                            '15:30',
+                                            '16:00',
+                                            '16:30',
+                                            '17:00',
+                                            '18:00',
+                                            '19:00',
+                                            '20:00',
+                                          ].map((time) => (
+                                            <option key={time} value={time}>
+                                              {time}h
+                                            </option>
+                                          ))}
+                                        </select>
                                       </div>
 
                                       {/* Rotación mismo día */}
@@ -1314,7 +1457,10 @@ export default function HostDashboardView({
                                       {res?.lateCheckoutRequested && !task.lateCheckoutActive && (
                                         <button
                                           type="button"
-                                          onClick={() => res && onApproveLateCheckout(res.id)}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (res) onApproveLateCheckout(res.id);
+                                          }}
                                           className="bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-3 py-1 rounded-xl text-xs transition shadow-xs"
                                         >
                                           Aprobar Late Out (+{prop?.lateCheckoutPrice}€)
@@ -1322,7 +1468,10 @@ export default function HostDashboardView({
                                       )}
 
                                       {/* Selector de Limpiadora Asignada */}
-                                      <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1">
+                                      <div
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1"
+                                      >
                                         <User size={13} className="text-slate-400" />
                                         <select
                                           value={task.cleanerId}
@@ -1336,34 +1485,41 @@ export default function HostDashboardView({
                                           ))}
                                         </select>
                                       </div>
-
-                                      {/* Horas estipuladas */}
-                                      <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-xl text-xs font-bold">
-                                        1.5h
-                                      </span>
-
-                                      {/* Fotos de Comprobación */}
-                                      {task.photosUploaded.length > 0 ? (
-                                        <button
-                                          type="button"
-                                          onClick={() => setInspectingTaskPhotos(task)}
-                                          className="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 px-2.5 py-1 rounded-xl font-bold transition"
-                                        >
-                                          <Camera size={13} />
-                                          <span>{task.photosUploaded.length} fotos subidas</span>
-                                        </button>
-                                      ) : (
-                                        <span className="text-slate-400 text-xs font-medium px-2 py-1">
-                                          0 fotos
-                                        </span>
-                                      )}
                                     </div>
 
-                                    {/* Acciones Rápidas: WhatsApp y Factura 10% */}
+                                    {/* Comprobación de Fotos y Factura 10% */}
                                     <div className="flex items-center gap-2">
                                       <button
                                         type="button"
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setInspectingTaskPhotos(task);
+                                        }}
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition shadow-2xs ${
+                                          task.photosUploaded.length > 0
+                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                                        }`}
+                                      >
+                                        <Camera
+                                          size={13}
+                                          className={
+                                            task.photosUploaded.length > 0
+                                              ? 'text-emerald-600'
+                                              : 'text-slate-400'
+                                          }
+                                        />
+                                        <span>
+                                          {task.photosUploaded.length > 0
+                                            ? `Ver ${task.photosUploaded.length} fotos`
+                                            : 'Ver fotos y checklist'}
+                                        </span>
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
                                           setPreselectedResIdForInvoice(task.reservationId);
                                           setShowCreateInvoiceModal(true);
                                         }}
@@ -1372,16 +1528,6 @@ export default function HostDashboardView({
                                       >
                                         <FileText size={12} className="text-emerald-600" />
                                         <span>Factura 10%</span>
-                                      </button>
-
-                                      <button
-                                        type="button"
-                                        onClick={() => sendTaskWhatsApp(task)}
-                                        className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs transition"
-                                        title="Enviar enlace mágico con checklist por WhatsApp"
-                                      >
-                                        <Send size={12} />
-                                        <span>WhatsApp</span>
                                       </button>
                                     </div>
                                   </div>
@@ -1393,267 +1539,9 @@ export default function HostDashboardView({
                       );
                     })}
                   </div>
-                ) : scheduleView === 'table' ? (
-                  <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-xs">
-                        <thead>
-                          <tr className="border-b border-slate-200 bg-slate-50/80 text-slate-500 text-xs font-semibold uppercase tracking-wider">
-                            <th className="py-3.5 px-4">Fecha Salida</th>
-                            <th className="py-3.5 px-4">Alojamiento</th>
-                            <th className="py-3.5 px-4">Huésped / Canal</th>
-                            <th className="py-3.5 px-4">Estado Rotación & Late Check-out</th>
-                            <th className="py-3.5 px-4">Hora Limpieza</th>
-                            <th className="py-3.5 px-4">Asignación</th>
-                            <th className="py-3.5 px-4">Comprobación</th>
-                            <th className="py-3.5 px-4 text-right">Acciones</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {filteredTasks.map((task) => {
-                            const prop = properties.find((p) => p.id === task.propertyId);
-                            const res = reservations.find((r) => r.id === task.reservationId);
-                            const cleaner = cleaners.find((c) => c.id === task.cleanerId);
-
-                            return (
-                              <tr key={task.id} className="hover:bg-slate-50/60 transition">
-                                <td className="py-4 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
-                                  {task.date}
-                                </td>
-                                <td className="py-4 px-4 font-bold text-slate-900">{prop?.name}</td>
-                                <td className="py-4 px-4">
-                                  <button
-                                    type="button"
-                                    onClick={() => res && onOpenGuestPreview(res.id)}
-                                    className="font-semibold text-slate-900 hover:text-orange-600 underline underline-offset-2 flex items-center gap-1"
-                                  >
-                                    <span>{res?.guestName}</span>
-                                    <span className="font-mono text-[11px] text-slate-400">
-                                      [{res?.source}]
-                                    </span>
-                                  </button>
-                                </td>
-                                <td className="py-4 px-4 text-xs">
-                                  {task.sameDayCheckIn ? (
-                                    <span className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 font-bold px-2.5 py-1 rounded-full">
-                                      <Flame size={13} />
-                                      ENTRADA HOY ({task.nextCheckInTime}H)
-                                    </span>
-                                  ) : task.lateCheckoutActive ? (
-                                    <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded-full">
-                                      <CheckCircle2 size={13} />
-                                      LATE CHECK-OUT HASTA {task.scheduledCleaningTime}H (+{prop?.lateCheckoutPrice}€)
-                                    </span>
-                                  ) : res?.lateCheckoutRequested ? (
-                                    <div className="flex items-center gap-2">
-                                      <span className="bg-amber-50 text-amber-900 border border-amber-200 font-bold px-2.5 py-1 rounded-full">
-                                        SOLICITADO POR HUÉSPED
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => res && onApproveLateCheckout(res.id)}
-                                        className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1 rounded-lg text-xs"
-                                      >
-                                        Aprobar ({prop?.lateCheckoutUntil}H)
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-2 text-slate-500">
-                                      <span>Tarde libre</span>
-                                      <button
-                                        type="button"
-                                        onClick={() => res && onApproveLateCheckout(res.id)}
-                                        className="text-orange-600 hover:text-orange-700 font-semibold underline"
-                                      >
-                                        Conceder Late Check-out
-                                      </button>
-                                    </div>
-                                  )}
-                                </td>
-                                <td className="py-4 px-4 font-mono font-bold">
-                                  <span
-                                    className={`px-2.5 py-1 rounded-lg text-xs ${
-                                      task.lateCheckoutActive
-                                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                        : 'bg-slate-100 text-slate-800'
-                                    }`}
-                                  >
-                                    {task.scheduledCleaningTime}h
-                                  </span>
-                                </td>
-                                <td className="py-4 px-4">
-                                  <select
-                                    value={task.cleanerId}
-                                    onChange={(e) => onAssignCleaner(task.id, e.target.value)}
-                                    className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-800 text-xs"
-                                  >
-                                    {cleaners.map((c) => (
-                                      <option key={c.id} value={c.id}>
-                                        {c.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </td>
-                                <td className="py-4 px-4 text-xs">
-                                  {task.photosUploaded.length > 0 ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => setInspectingTaskPhotos(task)}
-                                      className="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 px-2.5 py-1 rounded-lg font-semibold transition"
-                                      title="Ver comprobación de fotos y checklist"
-                                    >
-                                      <Camera size={13} />
-                                      <span>✓ {task.photosUploaded.length} FOTOS</span>
-                                    </button>
-                                  ) : task.status === 'completed' ? (
-                                    <span className="text-emerald-700 font-semibold">
-                                      ✓ COMPLETADA
-                                    </span>
-                                  ) : (
-                                    <span className="text-slate-400 font-medium">
-                                      PENDIENTE
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="py-4 px-4 text-right">
-                                  <div className="flex items-center justify-end gap-1.5">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setPreselectedResIdForInvoice(task.reservationId);
-                                        setShowCreateInvoiceModal(true);
-                                      }}
-                                      title="Emitir Factura Simplificada con IVA 10%"
-                                      className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-medium transition shadow-xs"
-                                    >
-                                      <FileText size={12} className="text-emerald-600" />
-                                      <span>Factura 10%</span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => sendTaskWhatsApp(task)}
-                                      title="Enviar detalles de la limpieza por WhatsApp al personal"
-                                      className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition"
-                                    >
-                                      <Send size={12} />
-                                      <span>WhatsApp</span>
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-            ) : (
-              /* Vista Timeline Semanal / Gantt */
-              <div className="space-y-4">
-                {Array.from(new Set(filteredTasks.map((t) => t.date))).sort().map((dateStr) => {
-                  const dayTasks = filteredTasks.filter((t) => t.date === dateStr);
-                  return (
-                    <div key={dateStr} className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                      <div className="bg-slate-50/80 px-5 py-3 border-b border-slate-200/80 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={15} className="text-orange-600" />
-                          <span className="text-xs font-bold text-slate-900">
-                            Fecha de Salida: {dateStr}
-                          </span>
-                        </div>
-                        <span className="text-xs font-semibold bg-white border border-slate-200 text-slate-600 px-2.5 py-0.5 rounded-full">
-                          {dayTasks.length} {dayTasks.length === 1 ? 'Limpieza' : 'Limpiezas'}
-                        </span>
-                      </div>
-
-                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {dayTasks.map((task) => {
-                          const prop = properties.find((p) => p.id === task.propertyId);
-                          const res = reservations.find((r) => r.id === task.reservationId);
-                          const cleaner = cleaners.find((c) => c.id === task.cleanerId);
-
-                          return (
-                            <div
-                              key={task.id}
-                              className={`p-4 border bg-white rounded-xl space-y-3 transition hover:shadow-sm ${
-                                task.sameDayCheckIn
-                                  ? 'border-l-4 border-l-orange-500 border-slate-200'
-                                  : task.lateCheckoutActive
-                                  ? 'border-l-4 border-l-emerald-600 border-slate-200'
-                                  : 'border-slate-200/80'
-                              }`}
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <div>
-                                  <span className="font-bold text-sm text-slate-900 block">
-                                    {prop?.name}
-                                  </span>
-                                  <span className="text-xs text-slate-500">
-                                    Huésped saliente: <strong className="text-slate-800">{res?.guestName}</strong> [{res?.source}]
-                                  </span>
-                                </div>
-                                <span className="text-xs font-bold bg-slate-900 text-white px-2.5 py-1 rounded-lg">
-                                  {task.scheduledCleaningTime}h
-                                </span>
-                              </div>
-
-                              <div className="flex flex-wrap items-center gap-2 text-xs">
-                                {task.sameDayCheckIn && (
-                                  <span className="bg-orange-50 text-orange-700 border border-orange-200/70 font-semibold px-2 py-0.5 rounded-md flex items-center gap-1">
-                                    <Flame size={12} /> ENTRADA HOY {task.nextCheckInTime}h
-                                  </span>
-                                )}
-                                {task.lateCheckoutActive && (
-                                  <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded-md">
-                                    ✓ Late Check-out activo
-                                  </span>
-                                )}
-                                <span className="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md text-xs font-medium">
-                                  Personal: <strong className="text-slate-900">{cleaner?.name}</strong>
-                                </span>
-                                <span className="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md text-xs font-medium">
-                                  Pago limpiadora: <strong className="text-slate-900">{prop?.cleaningFee ?? 0} €</strong>
-                                </span>
-                              </div>
-
-                              <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                                <span>
-                                  {task.photosUploaded.length > 0 ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => setInspectingTaskPhotos(task)}
-                                      className="inline-flex items-center gap-1 text-emerald-700 font-semibold hover:underline"
-                                      title="Ver fotos y checklist"
-                                    >
-                                      <Camera size={13} />
-                                      <span>✓ Verificada ({task.photosUploaded.length} fotos)</span>
-                                    </button>
-                                  ) : task.status === 'completed' ? (
-                                    <strong className="text-emerald-700 font-semibold">✓ Completada (0 fotos)</strong>
-                                  ) : (
-                                    <span className="text-slate-400">⏳ Pendiente de realización</span>
-                                  )}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => sendTaskWhatsApp(task)}
-                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow-sm"
-                                >
-                                  <Send size={11} />
-                                  <span>Despacho WhatsApp</span>
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
+                )}
               </div>
-            )}
-          </div>
-        ) : (
+            ) : (
           /* Sub-pestaña: Equipo de Limpiadoras y Liquidaciones */
           <div className="space-y-6">
             <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">

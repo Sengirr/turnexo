@@ -392,6 +392,13 @@ export default function App() {
     showToast('Limpiadora asignada.');
   };
 
+  const handleUpdateTaskTimes = (taskId: string, scheduledCleaningTime: string, nextCheckInTime: string) => {
+    const found = tasks.find((t) => t.id === taskId);
+    if (!found) return;
+    upsertTaskOverride({ ...found, scheduledCleaningTime, nextCheckInTime });
+    showToast('Horarios de limpieza actualizados.');
+  };
+
   const handleToggleChecklistItem = (taskId: string, itemId: string) => {
     const found = tasks.find((t) => t.id === taskId);
     if (!found) return;
@@ -698,6 +705,7 @@ export default function App() {
           onImportIcalText={handleImportIcalText}
           onSyncIcalUrl={handleSyncIcalUrl}
           onAssignCleaner={handleAssignCleaner}
+          onUpdateTaskTimes={handleUpdateTaskTimes}
           onApproveLateCheckout={handleApproveLateCheckout}
           onApproveExtra={handleApproveExtra}
           onOpenCleanerPreview={(cleanerId) => {

@@ -1487,7 +1487,7 @@ export default function HostDashboardView({
                                       </div>
                                     </div>
 
-                                    {/* Comprobación de Fotos y Factura 10% */}
+                                    {/* Comprobación de Fotos y Checklist */}
                                     <div className="flex items-center gap-2">
                                       <button
                                         type="button"
@@ -1495,7 +1495,7 @@ export default function HostDashboardView({
                                           e.stopPropagation();
                                           setInspectingTaskPhotos(task);
                                         }}
-                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition shadow-2xs ${
+                                        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-2xs ${
                                           task.photosUploaded.length > 0
                                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
                                             : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
@@ -1514,20 +1514,6 @@ export default function HostDashboardView({
                                             ? `Ver ${task.photosUploaded.length} fotos`
                                             : 'Ver fotos y checklist'}
                                         </span>
-                                      </button>
-
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setPreselectedResIdForInvoice(task.reservationId);
-                                          setShowCreateInvoiceModal(true);
-                                        }}
-                                        className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-2.5 py-1.5 rounded-xl text-xs font-bold transition shadow-xs"
-                                        title="Emitir Factura Simplificada con IVA 10%"
-                                      >
-                                        <FileText size={12} className="text-emerald-600" />
-                                        <span>Factura 10%</span>
                                       </button>
                                     </div>
                                   </div>

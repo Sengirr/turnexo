@@ -19,7 +19,7 @@ import {
 import HeroPhoneMockup from './HeroPhoneMockup';
 import { LandingLanguage, LANDING_TRANSLATIONS } from '../lib/landingTranslations';
 import { HostAccount } from '../lib/supabase';
-import { isCommunityPromoCode } from '../lib/promo';
+import { isCommunityPromoCode, getUrlPromoCode } from '../lib/promo';
 
 interface Props {
   hostAccount?: HostAccount | null;
@@ -41,7 +41,8 @@ export default function LandingPageView({
   onOpenCleanerDemo,
   onOpenLegal,
 }: Props) {
-  const hasCommunityPromo = isCommunityPromoCode(promoCode);
+  // El banner promocional de la landing solo se muestra si la URL actual contiene el parámetro explícito (?promo= / ?ref=)
+  const hasCommunityPromo = isCommunityPromoCode(getUrlPromoCode());
   // Estado de idioma (ES / EN) con persistencia en localStorage y detección automática
   const [lang, setLang] = useState<LandingLanguage>(() => {
     try {

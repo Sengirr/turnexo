@@ -13,18 +13,34 @@ export function isCommunityPromoCode(code?: string | null): boolean {
   return COMMUNITY_PROMO_CODES.some((validCode) => normalized.includes(validCode));
 }
 
-export function getStoredPromoCode(): string | null {
+export function getUrlPromoCode(): string | null {
   try {
-    // 1. Revisar URL params primero
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const urlCode = params.get('promo') || params.get('ref') || params.get('code');
-      if (urlCode) {
-        localStorage.setItem('turnexo_promo_code', urlCode.trim());
+      if (urlCode && urlCode.trim()) {
         return urlCode.trim();
       }
     }
-    // 2. Revisar localStorage
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function getStoredPromoCode(): string | null {
+  try {
+    // 1. Revisar URL params primero
+    const urlCode = getUrlPromoCode();
+    if (urlCode) {
+      localStorage.setItem('turnexo_promo_code', urlCode);
+      return urlCode;
+    }
+    // 2. Si entramos a la portada sin parámetros, limpiar la promo guardada para que no contamine la navegación normal
+    if (typeof window !== 'undefined' && (window.location.pathname === '/' || window.location.pathname === '') && !window.location.search) {
+      localStorage.removeItem('turnexo_promo_code');
+      return null;
+    }
     return localStorage.getItem('turnexo_promo_code') || null;
   } catch {
     return null;

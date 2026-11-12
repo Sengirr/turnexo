@@ -157,6 +157,8 @@ export default function App() {
         setHostAccount(updated);
         syncHostToSupabase(updated);
       }
+    } else {
+      setPromoCode(null);
     }
   }, [hostAccount]);
 

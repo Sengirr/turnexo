@@ -36,7 +36,7 @@ interface Props {
   onDeleteItemPhoto?: (taskId: string, itemId: string, photoIndex: number) => void;
   onStartTask?: (taskId: string) => void;
   onCompleteTask: (taskId: string) => void;
-  onAddIncident: (taskId: string, text: string) => void;
+  onAddIncident: (taskId: string, text: string, photoUrl?: string) => void;
   onBackToApp?: () => void;
 }
 
@@ -58,6 +58,8 @@ export default function CleanerMagicView({
   const cleaner = cleaners.find((c) => c.id === selectedCleanerId) || cleaners[0];
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [incidentText, setIncidentText] = useState('');
+  const [incidentPhoto, setIncidentPhoto] = useState<string | null>(null);
+  const [isCompressingIncident, setIsCompressingIncident] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState<Record<string, number>>({});
   const [filterMissing, setFilterMissing] = useState(false);
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
@@ -257,10 +259,36 @@ export default function CleanerMagicView({
     }
   };
 
+  const handleIncidentPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsCompressingIncident(true);
+    try {
+      const { dataUrl } = await compressCleanerPhoto(file);
+      setIncidentPhoto(dataUrl);
+    } catch {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setIncidentPhoto(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsCompressingIncident(false);
+      e.target.value = '';
+    }
+  };
+
   const handleSendIncident = (taskId: string) => {
-    if (!incidentText.trim()) return;
-    onAddIncident(taskId, incidentText.trim());
+    if (!incidentText.trim() && !incidentPhoto) return;
+    onAddIncident(
+      taskId,
+      incidentText.trim() || 'Incidencia fotográfica',
+      incidentPhoto || undefined
+    );
     setIncidentText('');
+    setIncidentPhoto(null);
   };
 
   return (
@@ -838,37 +866,106 @@ export default function CleanerMagicView({
                   </h4>
                   <p className="text-xs text-slate-500">
                     Si falta algo, encuentras un desperfecto o necesitas reposición urgente, déjalo
-                    aquí anotado.
+                    aquí anotado y adjunta foto si es necesario.
                   </p>
 
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={incidentText}
-                      onChange={(e) => setIncidentText(e.target.value)}
-                      placeholder="Ej: Faltan pastillas lavavajillas o bombilla fundida..."
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleSendIncident(activeTask.id)}
-                      className="bg-slate-900 text-white text-xs font-bold px-3 py-2 rounded-xl hover:bg-slate-800 transition"
-                    >
-                      Enviar
-                    </button>
+                  <div className="space-y-2">
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={incidentText}
+                        onChange={(e) => setIncidentText(e.target.value)}
+                        placeholder="Ej: Faltan pastillas lavavajillas o bombilla fundida..."
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 outline-none focus:border-emerald-500"
+                      />
+
+                      {/* Botón de Cámara para adjuntar foto a la incidencia */}
+                      <label
+                        className={`p-2.5 rounded-xl border flex items-center justify-center cursor-pointer transition shrink-0 ${
+                          incidentPhoto
+                            ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
+                            : 'bg-slate-50 border-slate-200 hover:border-emerald-500 text-slate-500 hover:text-emerald-600'
+                        }`}
+                        title="Hacer foto de la rotura / desperfecto"
+                      >
+                        {isCompressingIncident ? (
+                          <Clock size={16} className="animate-spin text-emerald-600" />
+                        ) : (
+                          <Camera size={16} />
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          disabled={isCompressingIncident}
+                          onChange={handleIncidentPhotoChange}
+                          className="hidden"
+                        />
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSendIncident(activeTask.id)}
+                        disabled={!incidentText.trim() && !incidentPhoto}
+                        className="bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition shrink-0"
+                      >
+                        Enviar
+                      </button>
+                    </div>
+
+                    {/* Previsualización de la foto seleccionada antes de enviar */}
+                    {incidentPhoto && (
+                      <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 w-fit">
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-slate-200 shrink-0">
+                          <img
+                            src={incidentPhoto}
+                            alt="Foto incidencia previa"
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setIncidentPhoto(null)}
+                            className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px]"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <span className="text-[11px] font-bold text-slate-600">
+                          Foto adjunta lista para enviar
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {activeTask.incidents.length > 0 && (
-                    <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                    <div className="space-y-2 pt-2 border-t border-slate-100">
                       {activeTask.incidents.map((inc) => (
                         <div
                           key={inc.id}
-                          className="text-xs bg-slate-50 rounded-xl p-2.5 border border-slate-200 flex items-start justify-between gap-2"
+                          className="text-xs bg-slate-50 rounded-xl p-3 border border-slate-200 space-y-2"
                         >
-                          <span className="text-slate-700">{inc.text}</span>
-                          <span className="text-[10px] text-slate-400 font-mono shrink-0">
-                            {inc.createdAt}
-                          </span>
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="text-slate-800 font-medium leading-relaxed">
+                              {inc.text}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono shrink-0">
+                              {inc.createdAt}
+                            </span>
+                          </div>
+                          {inc.photoUrl && (
+                            <div
+                              className="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 cursor-pointer bg-slate-100 hover:scale-105 transition shadow-2xs"
+                              onClick={() =>
+                                setPreviewPhoto({ url: inc.photoUrl!, title: inc.text })
+                              }
+                            >
+                              <img
+                                src={inc.photoUrl}
+                                alt="Foto incidencia"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

@@ -2930,12 +2930,18 @@ export default function HostDashboardView({
         const completedCount = inspectingTaskPhotos.checklist.filter((c) => c.completed).length;
         const totalChecklist = inspectingTaskPhotos.checklist.length;
 
-        // Galería de fotos recopiladas (generales y de checklist)
+        // Galería de fotos recopiladas (generales, checklist e incidencias)
         const allPhotos: { url: string; title: string }[] = [
           ...inspectingTaskPhotos.photosUploaded.map((url, i) => ({
             url,
-            title: `Habitación ${i + 1}`,
+            title: `Foto ${i + 1}`,
           })),
+          ...(inspectingTaskPhotos.incidents || [])
+            .filter((inc) => inc.photoUrl)
+            .map((inc) => ({
+              url: inc.photoUrl!,
+              title: `Incidencia: ${inc.text}`,
+            })),
         ];
 
         return (
@@ -3100,14 +3106,36 @@ export default function HostDashboardView({
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-black text-orange-950 leading-relaxed">{inc.text}</p>
                                 {inc.photoUrl && (
-                                  <a
-                                    href={inc.photoUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="inline-block mt-2 text-[10px] font-bold text-orange-700 underline"
-                                  >
-                                    Ver foto de la incidencia ↗
-                                  </a>
+                                  <div className="mt-2.5 flex items-center gap-2.5">
+                                    <div
+                                      onClick={() => {
+                                        const idx = allPhotos.findIndex(
+                                          (p) => p.url === inc.photoUrl
+                                        );
+                                        if (idx !== -1) setPreviewPhotoIndex(idx);
+                                      }}
+                                      className="w-14 h-14 rounded-xl overflow-hidden border border-orange-300 bg-orange-100 cursor-pointer hover:scale-105 transition shadow-2xs shrink-0"
+                                      title="Ampliar foto"
+                                    >
+                                      <img
+                                        src={inc.photoUrl}
+                                        alt={inc.text}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const idx = allPhotos.findIndex(
+                                          (p) => p.url === inc.photoUrl
+                                        );
+                                        if (idx !== -1) setPreviewPhotoIndex(idx);
+                                      }}
+                                      className="text-[11px] font-bold text-orange-800 hover:text-orange-900 underline"
+                                    >
+                                      Ver foto ampliada ↗
+                                    </button>
+                                  </div>
                                 )}
                               </div>
                             </div>

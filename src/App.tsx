@@ -532,7 +532,7 @@ export default function App() {
     showToast('Limpieza completada con éxito.');
   };
 
-  const handleAddIncident = (taskId: string, text: string) => {
+  const handleAddIncident = (taskId: string, text: string, photoUrl?: string) => {
     const found = tasks.find((t) => t.id === taskId);
     if (!found) return;
     upsertTaskOverride({
@@ -542,6 +542,7 @@ export default function App() {
         {
           id: `inc-${Date.now()}`,
           text,
+          photoUrl,
           createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ],

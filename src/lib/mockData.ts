@@ -280,6 +280,15 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     requestedExtras: [],
   },
   {
+    id: 'res-104',
+    propertyId: 'prop-1',
+    source: 'Airbnb',
+    guestName: 'Airbnb (Not available)',
+    checkIn: '2026-11-12',
+    checkOut: '2026-11-15',
+    requestedExtras: [],
+  },
+  {
     id: 'res-201',
     propertyId: 'prop-2',
     source: 'Booking',

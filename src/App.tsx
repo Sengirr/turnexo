@@ -235,10 +235,35 @@ export default function App() {
 
     const fetchCloud = () => {
       loadWorkspaceFromSupabase().then((cloud) => {
-        if (cloud.properties && cloud.properties.length > 0) setProperties(cloud.properties);
-        if (cloud.cleaners && cloud.cleaners.length > 0) setCleaners(cloud.cleaners);
-        if (cloud.reservations && cloud.reservations.length > 0) setReservations(cloud.reservations);
-        if (cloud.tasks && cloud.tasks.length > 0) setTaskOverrides(cloud.tasks);
+        if (cloud.properties && cloud.properties.length > 0) {
+          setProperties((prev) => {
+            const cloudIds = new Set(cloud.properties!.map((p) => p.id));
+            const localOnly = prev.filter((p) => !cloudIds.has(p.id));
+            return [...cloud.properties!, ...localOnly];
+          });
+        }
+        if (cloud.cleaners && cloud.cleaners.length > 0) {
+          setCleaners((prev) => {
+            const cloudIds = new Set(cloud.cleaners!.map((c) => c.id));
+            const localOnly = prev.filter((c) => !cloudIds.has(c.id));
+            return [...cloud.cleaners!, ...localOnly];
+          });
+        }
+        if (cloud.reservations && cloud.reservations.length > 0) {
+          setReservations((prev) => {
+            const cloudIds = new Set(cloud.reservations!.map((r) => r.id));
+            const localOnly = prev.filter((r) => !cloudIds.has(r.id));
+            localOnly.forEach((r) => syncReservationToSupabase(r));
+            return [...cloud.reservations!, ...localOnly];
+          });
+        }
+        if (cloud.tasks && cloud.tasks.length > 0) {
+          setTaskOverrides((prev) => {
+            const cloudIds = new Set(cloud.tasks!.map((t) => t.id));
+            const localOnly = prev.filter((t) => !cloudIds.has(t.id));
+            return [...cloud.tasks!, ...localOnly];
+          });
+        }
       });
     };
 
@@ -335,6 +360,7 @@ export default function App() {
     setReservations((prev) => {
       const existingIds = new Set(prev.map((r) => r.id));
       const newOnes = parsed.filter((r) => !existingIds.has(r.id));
+      newOnes.forEach((r) => syncReservationToSupabase(r));
       return [...prev, ...newOnes];
     });
     showToast(`${parsed.length} reservas procesadas del iCal.`);

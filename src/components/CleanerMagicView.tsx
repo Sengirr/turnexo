@@ -33,6 +33,8 @@ interface Props {
   properties: Property[];
   onToggleChecklistItem: (taskId: string, itemId: string) => void;
   onAddPhoto: (taskId: string, photoUrl: string) => void;
+  onAddItemPhoto?: (taskId: string, itemId: string, photoUrl: string) => void;
+  onDeleteItemPhoto?: (taskId: string, itemId: string, photoIndex: number) => void;
   onStartTask?: (taskId: string) => void;
   onCompleteTask: (taskId: string) => void;
   onAddIncident: (taskId: string, text: string) => void;
@@ -47,6 +49,8 @@ export default function CleanerMagicView({
   properties,
   onToggleChecklistItem,
   onAddPhoto,
+  onAddItemPhoto,
+  onDeleteItemPhoto,
   onStartTask,
   onCompleteTask,
   onAddIncident,
@@ -57,11 +61,37 @@ export default function CleanerMagicView({
   const [incidentText, setIncidentText] = useState('');
   const [elapsedSeconds, setElapsedSeconds] = useState<Record<string, number>>({});
   const [filterMissing, setFilterMissing] = useState(false);
+  const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
+  const [previewPhoto, setPreviewPhoto] = useState<{ url: string; title: string } | null>(null);
   const timerRef = useRef<any>(null);
 
-  const myTasks = tasks.filter((task) => task.cleanerId === cleaner.id);
+  // Tareas asignadas a esta limpiadora ordenadas cronológicamente por fecha
+  const myTasks = tasks
+    .filter((task) => task.cleanerId === cleaner.id)
+    .sort((a, b) => a.date.localeCompare(b.date));
   const activeTask = myTasks.find((t) => t.id === activeTaskId);
   const completedCount = myTasks.filter((t) => t.status === 'completed').length;
+
+  const formatTaskDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    const today = new Date();
+    const todayYMD = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const tomorrowYMD = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+
+    if (dateStr === todayYMD) return 'Hoy';
+    if (dateStr === tomorrowYMD) return 'Mañana';
+
+    const formatted = dateObj.toLocaleDateString('es-ES', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  };
 
   // Formato de fecha en español idéntico a IVI ERP
   const todayFormatted = new Date().toLocaleDateString('es-ES', {
@@ -130,8 +160,9 @@ export default function CleanerMagicView({
   const handleFinishCleaning = (task: CleaningTask) => {
     // Validación idéntica a IVI ERP: ¿Faltan tareas o fotos obligatorias?
     const pendingItems = task.checklist.filter((i) => !i.completed);
-    const requiresPhoto = task.checklist.some((i) => i.photoRequired);
-    const missingPhotos = requiresPhoto && task.photosUploaded.length === 0;
+    const missingPhotoItems = task.checklist.filter(
+      (i) => i.photoRequired && (!i.photos || i.photos.length === 0)
+    );
 
     if (pendingItems.length > 0) {
       alert(`⚠️ Faltan ${pendingItems.length} tareas por completar en el checklist.`);
@@ -139,14 +170,49 @@ export default function CleanerMagicView({
       return;
     }
 
-    if (missingPhotos) {
-      alert('📸 Se requiere subir al menos 1 foto de comprobación (nevera, llaves, baño...) antes de finalizar.');
+    if (missingPhotoItems.length > 0) {
+      alert(`📸 Hay ${missingPhotoItems.length} tarea(s) con foto obligatoria que aún no tienen foto subida. Sube la foto directamente en el item antes de finalizar.`);
+      setFilterMissing(true);
       return;
     }
 
     if (confirm('¿Seguro que deseas finalizar esta limpieza?')) {
       onCompleteTask(task.id);
       setActiveTaskId(null);
+    }
+  };
+
+  const handleItemFileChange = async (
+    taskId: string,
+    itemId: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingItemId(itemId);
+    try {
+      let photoUrl = '';
+      try {
+        const { dataUrl } = await compressCleanerPhoto(file);
+        photoUrl = dataUrl;
+      } catch {
+        photoUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (onAddItemPhoto) {
+        onAddItemPhoto(taskId, itemId, photoUrl);
+      }
+    } catch (err) {
+      console.error('Error subiendo foto de item:', err);
+      alert('Error al procesar la foto');
+    } finally {
+      setUploadingItemId(null);
+      e.target.value = '';
     }
   };
 
@@ -158,36 +224,6 @@ export default function CleanerMagicView({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-24 antialiased">
-      {/* Barra superior de modo Demo / Previsualización */}
-      {onBackToApp && (
-        <div className="bg-slate-900 text-white px-4 py-2 text-xs border-b border-slate-800 sticky top-0 z-50 shadow-sm">
-          <div className="max-w-md mx-auto flex items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={onBackToApp}
-              className="inline-flex items-center gap-1.5 font-bold text-orange-400 hover:text-orange-300 transition"
-            >
-              <ArrowLeft size={14} />
-              Volver al Panel
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-slate-400">Limpiadora:</span>
-              <select
-                value={cleaner.id}
-                onChange={(e) => onSelectCleaner(e.target.value)}
-                className="bg-slate-800 text-white rounded-lg px-2 py-1 text-xs border border-slate-700 outline-none font-medium"
-              >
-                {cleaners.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* VISTA 1: DASHBOARD PRINCIPAL DE TAREAS (IVI ERP) */}
       {!activeTaskId && (
         <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
@@ -288,21 +324,42 @@ export default function CleanerMagicView({
 
                       {/* Info de la propiedad */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <h3
-                            className={`text-base font-extrabold truncate ${
-                              isCompleted ? 'text-emerald-950' : 'text-slate-900'
+                        <div className="flex items-center justify-between gap-2 mb-0.5">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <h3
+                              className={`text-base font-extrabold truncate ${
+                                isCompleted ? 'text-emerald-950' : 'text-slate-900'
+                              }`}
+                            >
+                              {prop?.name || 'Alojamiento'}
+                            </h3>
+                            {/* Badge PAX idéntico a IVI ERP (solo si se conoce) */}
+                            {task.pax ? (
+                              <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                                <User size={10} strokeWidth={3} className="text-slate-400" />
+                                {task.pax}
+                              </span>
+                            ) : null}
+                          </div>
+
+                          {/* Fecha de la limpieza prominente */}
+                          <div
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black shrink-0 ${
+                              formatTaskDate(task.date) === 'Hoy'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
+                                : 'bg-orange-50 text-orange-800 border border-orange-200/80'
                             }`}
                           >
-                            {prop?.name || 'Alojamiento'}
-                          </h3>
-                          {/* Badge PAX idéntico a IVI ERP (solo si se conoce) */}
-                          {task.pax ? (
-                            <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
-                              <User size={10} strokeWidth={3} className="text-slate-400" />
-                              {task.pax}
-                            </span>
-                          ) : null}
+                            <Calendar
+                              size={12}
+                              className={
+                                formatTaskDate(task.date) === 'Hoy'
+                                  ? 'text-emerald-600'
+                                  : 'text-orange-600'
+                              }
+                            />
+                            <span>{formatTaskDate(task.date)}</span>
+                          </div>
                         </div>
 
                         {/* Fila de Horarios estilo IVI ERP */}
@@ -408,9 +465,15 @@ export default function CleanerMagicView({
                 <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[11px] font-black uppercase text-slate-400 tracking-wider">
-                        {activeTask.date} · PARTE DE TRABAJO
-                      </p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1.5 bg-orange-100 text-orange-800 border border-orange-200/80 text-[11px] font-black px-2.5 py-0.5 rounded-lg">
+                          <Calendar size={12} className="text-orange-600" />
+                          {formatTaskDate(activeTask.date)} ({activeTask.date})
+                        </span>
+                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                          PARTE DE TRABAJO
+                        </span>
+                      </div>
                       <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">
                         {prop?.name}
                       </h2>
@@ -615,37 +678,106 @@ export default function CleanerMagicView({
                           {items.map((item) => (
                             <div
                               key={item.id}
-                              onClick={() => onToggleChecklistItem(activeTask.id, item.id)}
-                              className={`p-3.5 flex items-start gap-3 cursor-pointer transition hover:bg-slate-50/80 ${
+                              className={`p-3.5 transition hover:bg-slate-50/80 ${
                                 item.completed ? 'bg-slate-50/40 text-slate-400' : 'text-slate-800'
                               }`}
                             >
-                              {/* Checkbox táctil */}
                               <div
-                                className={`w-5 h-5 rounded-lg border mt-0.5 flex items-center justify-center shrink-0 transition ${
-                                  item.completed
-                                    ? 'bg-emerald-600 border-emerald-600 text-white'
-                                    : 'bg-white border-slate-300'
-                                }`}
+                                onClick={() => onToggleChecklistItem(activeTask.id, item.id)}
+                                className="flex items-start gap-3 cursor-pointer"
                               >
-                                {item.completed && <CheckCircle2 size={14} />}
-                              </div>
-
-                              <div className="flex-1 min-w-0">
-                                <span
-                                  className={`text-xs font-bold leading-snug block ${
-                                    item.completed ? 'line-through text-slate-400' : 'text-slate-800'
+                                {/* Checkbox táctil */}
+                                <div
+                                  className={`w-5 h-5 rounded-lg border mt-0.5 flex items-center justify-center shrink-0 transition ${
+                                    item.completed
+                                      ? 'bg-emerald-600 border-emerald-600 text-white'
+                                      : 'bg-white border-slate-300'
                                   }`}
                                 >
-                                  {item.label}
-                                </span>
+                                  {item.completed && <CheckCircle2 size={14} />}
+                                </div>
 
-                                {item.photoRequired && (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-700 bg-amber-50 border border-amber-200/70 px-2 py-0.5 rounded-md mt-1">
-                                    <Camera size={10} /> Foto obligatoria
+                                <div className="flex-1 min-w-0">
+                                  <span
+                                    className={`text-xs font-bold leading-snug block ${
+                                      item.completed ? 'line-through text-slate-400' : 'text-slate-800'
+                                    }`}
+                                  >
+                                    {item.label}
                                   </span>
-                                )}
+
+                                  {item.photoRequired && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-700 bg-amber-50 border border-amber-200/70 px-2 py-0.5 rounded-md mt-1">
+                                      <Camera size={10} /> Foto obligatoria
+                                    </span>
+                                  )}
+                                </div>
                               </div>
+
+                              {/* Zona de subida y visualización de fotos por item */}
+                              {(item.photoRequired || (item.photos && item.photos.length > 0)) && (
+                                <div
+                                  className="mt-3 pl-8 flex flex-wrap items-center gap-2.5"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {item.photos?.map((photoUrl, pIdx) => (
+                                    <div
+                                      key={pIdx}
+                                      className="relative group w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 shrink-0 shadow-xs"
+                                    >
+                                      <img
+                                        src={photoUrl}
+                                        alt={`Foto ${item.label}`}
+                                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition"
+                                        onClick={() =>
+                                          setPreviewPhoto({ url: photoUrl, title: item.label })
+                                        }
+                                      />
+                                      {onDeleteItemPhoto && (
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            onDeleteItemPhoto(activeTask.id, item.id, pIdx)
+                                          }
+                                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-md transition"
+                                          title="Eliminar foto"
+                                        >
+                                          <Trash2 size={11} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  ))}
+
+                                  <label
+                                    className={`w-16 h-16 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition shrink-0 ${
+                                      uploadingItemId === item.id
+                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
+                                        : item.photoRequired && (!item.photos || item.photos.length === 0)
+                                        ? 'border-amber-300 hover:border-amber-400 bg-amber-50/50 text-amber-700'
+                                        : 'border-slate-300 hover:border-emerald-500 bg-slate-50 hover:bg-emerald-50/40 text-slate-400 hover:text-emerald-600'
+                                    }`}
+                                  >
+                                    {uploadingItemId === item.id ? (
+                                      <Clock size={18} className="animate-spin text-emerald-600" />
+                                    ) : (
+                                      <Camera size={18} />
+                                    )}
+                                    <span className="text-[9px] font-black uppercase mt-1">
+                                      {uploadingItemId === item.id ? 'Subiendo' : 'Subir'}
+                                    </span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      capture="environment"
+                                      disabled={uploadingItemId !== null}
+                                      onChange={(e) =>
+                                        handleItemFileChange(activeTask.id, item.id, e)
+                                      }
+                                      className="hidden"
+                                    />
+                                  </label>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -715,6 +847,37 @@ export default function CleanerMagicView({
               </div>
             );
           })()}
+        </div>
+      )}
+
+      {/* Lightbox / Modal de Previsualización de Foto a Pantalla Completa */}
+      {previewPhoto && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4"
+          onClick={() => setPreviewPhoto(null)}
+        >
+          <div
+            className="relative max-w-lg w-full max-h-[85vh] flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex items-center justify-between text-white pb-3 px-1">
+              <span className="text-sm font-bold truncate text-slate-200">
+                {previewPhoto.title}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPreviewPhoto(null)}
+                className="px-3 py-1 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs transition"
+              >
+                Cerrar ✕
+              </button>
+            </div>
+            <img
+              src={previewPhoto.url}
+              alt={previewPhoto.title}
+              className="max-h-[75vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl border border-white/10"
+            />
+          </div>
         </div>
       )}
     </div>

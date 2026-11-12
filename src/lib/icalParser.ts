@@ -41,6 +41,7 @@ export interface ChecklistItem {
   category?: string;
   photoRequired?: boolean;
   completed: boolean;
+  photos?: string[];
 }
 
 export interface PropertyCleaningItem {

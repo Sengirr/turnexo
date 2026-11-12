@@ -444,6 +444,52 @@ export default function App() {
     showToast('Foto de verificación añadida.');
   };
 
+  const handleAddItemPhoto = (taskId: string, itemId: string, photoUrl: string) => {
+    const found = tasks.find((t) => t.id === taskId);
+    if (!found) return;
+    const updatedChecklist = found.checklist.map((item) => {
+      if (item.id === itemId) {
+        const itemPhotos = item.photos || [];
+        return {
+          ...item,
+          completed: true,
+          photos: [...itemPhotos, photoUrl],
+        };
+      }
+      return item;
+    });
+    upsertTaskOverride({
+      ...found,
+      photosUploaded: [...found.photosUploaded, photoUrl],
+      checklist: updatedChecklist,
+    });
+    showToast('Foto vinculada a la tarea.');
+  };
+
+  const handleDeleteItemPhoto = (taskId: string, itemId: string, photoIndex: number) => {
+    const found = tasks.find((t) => t.id === taskId);
+    if (!found) return;
+    let deletedUrl = '';
+    const updatedChecklist = found.checklist.map((item) => {
+      if (item.id === itemId && item.photos) {
+        deletedUrl = item.photos[photoIndex];
+        const newPhotos = [...item.photos];
+        newPhotos.splice(photoIndex, 1);
+        return {
+          ...item,
+          photos: newPhotos,
+          completed: item.photoRequired && newPhotos.length === 0 ? false : item.completed,
+        };
+      }
+      return item;
+    });
+    upsertTaskOverride({
+      ...found,
+      photosUploaded: deletedUrl ? found.photosUploaded.filter((u) => u !== deletedUrl) : found.photosUploaded,
+      checklist: updatedChecklist,
+    });
+  };
+
   const handleStartTask = (taskId: string) => {
     const found = tasks.find((t) => t.id === taskId);
     if (!found) return;
@@ -787,6 +833,8 @@ export default function App() {
           properties={properties}
           onToggleChecklistItem={handleToggleChecklistItem}
           onAddPhoto={handleAddPhoto}
+          onAddItemPhoto={handleAddItemPhoto}
+          onDeleteItemPhoto={handleDeleteItemPhoto}
           onStartTask={handleStartTask}
           onCompleteTask={handleCompleteTask}
           onAddIncident={handleAddIncident}

@@ -220,21 +220,26 @@ export default function HostDashboardView({
   const [weekOffset, setWeekOffset] = useState(0);
   const [showAllHistory, setShowAllHistory] = useState(false);
 
+  const formatLocalDate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
   const weekInfo = useMemo(() => {
-    const base = new Date();
-    base.setDate(base.getDate() + weekOffset * 7);
+    const now = new Date();
+    const day = now.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+    const diffToMonday = day === 0 ? -6 : 1 - day;
 
-    const day = base.getDay();
-    const diffToMonday = base.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(base.setDate(diffToMonday));
-    monday.setHours(0, 0, 0, 0);
+    // Lunes de la semana correspondiente al weekOffset
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday + (weekOffset * 7), 0, 0, 0, 0);
 
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
+    // Domingo de esa misma semana
+    const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6, 23, 59, 59, 999);
 
-    const mondayStr = monday.toISOString().slice(0, 10);
-    const sundayStr = sunday.toISOString().slice(0, 10);
+    const mondayStr = formatLocalDate(monday);
+    const sundayStr = formatLocalDate(sunday);
 
     const label = `${monday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} – ${sunday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 
@@ -1270,7 +1275,7 @@ export default function HostDashboardView({
                   <div className="space-y-6">
                     {Array.from(new Set(filteredTasks.map((t) => t.date))).sort().map((dateStr) => {
                       const dayTasks = filteredTasks.filter((t) => t.date === dateStr);
-                      const isToday = new Date().toISOString().slice(0, 10) === dateStr;
+                      const isToday = formatLocalDate(new Date()) === dateStr;
                       const [y, m, d] = dateStr.split('-');
                       const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
                       const formattedDate = dateObj.toLocaleDateString('es-ES', {

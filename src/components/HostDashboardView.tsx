@@ -3100,6 +3100,17 @@ export default function HostDashboardView({
                       </span>
                     </div>
                   </div>
+
+                  {inspectingTaskPhotos.notes && (
+                    <div className="w-full pt-3 mt-1 border-t border-slate-200/60 text-xs flex items-start gap-2">
+                      <span className="font-extrabold text-slate-500 uppercase text-[10px] shrink-0 mt-0.5">
+                        Notas:
+                      </span>
+                      <p className="font-medium text-slate-800 leading-relaxed">
+                        {inspectingTaskPhotos.notes}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* 2 Columnas estilo IVI ERP */}
@@ -3210,8 +3221,8 @@ export default function HostDashboardView({
                     </div>
                   </div>
 
-                  {/* Columna Derecha: Checklist Verificado e Informe IA */}
-                  <div className="space-y-6">
+                  {/* Columna Derecha: Checklist Verificado */}
+                  <div className="space-y-4">
                     {/* Checklist Verificado */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -3224,7 +3235,7 @@ export default function HostDashboardView({
                         </span>
                       </div>
 
-                      <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+                      <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
                         {inspectingTaskPhotos.checklist.map((item) => (
                           <div
                             key={item.id}
@@ -3262,42 +3273,6 @@ export default function HostDashboardView({
                           </div>
                         ))}
                       </div>
-                    </div>
-
-                    {/* Resumen y Detalles del Servicio */}
-                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3">
-                      <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                        <Clock size={14} className="text-slate-400" />
-                        Detalles del Servicio
-                      </h4>
-                      <div className="grid grid-cols-2 gap-2.5 text-xs">
-                        <div className="bg-white p-3 rounded-xl border border-slate-200/60">
-                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Limpiadora</span>
-                          <span className="font-extrabold text-slate-800">{cleaner?.name || 'Asignada'}</span>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-slate-200/60">
-                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Fecha</span>
-                          <span className="font-extrabold text-slate-800">
-                            {formatSpanishDate(inspectingTaskPhotos.date, { withWeekday: true, short: true })}
-                          </span>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-slate-200/60">
-                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Salida Huésped</span>
-                          <span className="font-extrabold text-slate-800">{inspectingTaskPhotos.scheduledCleaningTime}h</span>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-slate-200/60">
-                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Próxima Entrada</span>
-                          <span className="font-extrabold text-slate-800">
-                            {inspectingTaskPhotos.sameDayCheckIn ? `${inspectingTaskPhotos.nextCheckInTime}h (Mismo día)` : 'Sin entrada hoy'}
-                          </span>
-                        </div>
-                      </div>
-                      {inspectingTaskPhotos.notes && (
-                        <div className="bg-white p-3 rounded-xl border border-slate-200/60 text-xs">
-                          <span className="text-[10px] font-bold text-slate-400 block uppercase mb-1">Notas de la Limpieza</span>
-                          <p className="font-medium text-slate-700">{inspectingTaskPhotos.notes}</p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>

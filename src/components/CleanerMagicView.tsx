@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Camera,
   CheckCircle2,
@@ -65,11 +65,29 @@ export default function CleanerMagicView({
   const timerRef = useRef<any>(null);
 
   // Tareas asignadas a esta limpiadora ordenadas cronológicamente por fecha
-  const myTasks = tasks
-    .filter((task) => task.cleanerId === cleaner.id)
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const myTasks = useMemo(
+    () =>
+      tasks
+        .filter((task) => task.cleanerId === cleaner.id)
+        .sort((a, b) => a.date.localeCompare(b.date)),
+    [tasks, cleaner.id]
+  );
   const activeTask = myTasks.find((t) => t.id === activeTaskId);
   const completedCount = myTasks.filter((t) => t.status === 'completed').length;
+
+  const getTaskSeconds = (task?: CleaningTask) => {
+    if (!task) return 0;
+    if (task.status === 'completed' && task.actualHours) {
+      return Math.round(task.actualHours * 3600);
+    }
+    if (task.status === 'in_progress') {
+      const startMs = task.startTime ? new Date(task.startTime).getTime() : 0;
+      if (startMs > 0) {
+        return Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+      }
+    }
+    return elapsedSeconds[task.id] || 0;
+  };
 
   const formatTaskDate = (dateStr?: string) => {
     if (!dateStr) return '';
@@ -102,22 +120,31 @@ export default function CleanerMagicView({
 
   // Temporizador en vivo para tareas en progreso
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setElapsedSeconds((prev) => {
-        const next = { ...prev };
+    // Si alguna tarea está en_progress pero no tiene startTime, asegurar que se guarde
+    myTasks.forEach((t) => {
+      if (t.status === 'in_progress' && !t.startTime) {
+        t.startTime = new Date().toISOString();
+        if (onStartTask) onStartTask(t.id);
+      }
+    });
+
+    const tick = () => {
+      setElapsedSeconds(() => {
+        const next: Record<string, number> = {};
         myTasks.forEach((t) => {
           if (t.status === 'in_progress') {
-            const start = t.startTime ? new Date(t.startTime).getTime() : Date.now();
-            const diff = Math.max(0, Math.floor((Date.now() - start) / 1000));
-            next[t.id] = diff;
+            const startMs = t.startTime ? new Date(t.startTime).getTime() : Date.now();
+            next[t.id] = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
           }
         });
         return next;
       });
-    }, 1000);
+    };
 
-    return () => clearInterval(timerRef.current);
-  }, [myTasks]);
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [myTasks, onStartTask]);
 
   const formatTimer = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -148,12 +175,13 @@ export default function CleanerMagicView({
   };
 
   const handleStartCleaning = (task: CleaningTask) => {
+    const nowIso = new Date().toISOString();
+    task.status = 'in_progress';
+    task.startTime = task.startTime || nowIso;
     if (onStartTask) {
       onStartTask(task.id);
-    } else {
-      task.status = 'in_progress';
-      task.startTime = new Date().toISOString();
     }
+    setElapsedSeconds((prev) => ({ ...prev, [task.id]: 0 }));
   };
 
   const handleFinishCleaning = (task: CleaningTask) => {
@@ -287,7 +315,7 @@ export default function CleanerMagicView({
                 const prop = properties.find((p) => p.id === task.propertyId);
                 const isCompleted = task.status === 'completed';
                 const isInProgress = task.status === 'in_progress';
-                const taskSeconds = elapsedSeconds[task.id] || 0;
+                const taskSeconds = getTaskSeconds(task);
 
                 return (
                   <div
@@ -451,7 +479,7 @@ export default function CleanerMagicView({
             const prop = properties.find((p) => p.id === activeTask.propertyId);
             const isCompleted = activeTask.status === 'completed';
             const isInProgress = activeTask.status === 'in_progress';
-            const taskSeconds = elapsedSeconds[activeTask.id] || 0;
+            const taskSeconds = getTaskSeconds(activeTask);
 
             // Agrupar items de checklist por categoría como en IVI ERP
             const categories = Array.from(

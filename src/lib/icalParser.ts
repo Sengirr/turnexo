@@ -332,6 +332,14 @@ export function buildCleaningTasksFromReservations(
       scheduledCleaningTime,
       lateCheckoutActive,
       status: existing?.status || 'pending',
+      startTime:
+        existing?.startTime ||
+        (existing?.status === 'in_progress' ? new Date().toISOString() : undefined),
+      endTime: existing?.endTime,
+      actualHours: existing?.actualHours,
+      notes: existing?.notes,
+      isDeepCleaning: existing?.isDeepCleaning,
+      isBagPrepared: existing?.isBagPrepared,
       photosUploaded: existing?.photosUploaded || [],
       checklist: existing?.checklist || createChecklistFromProperty(prop),
       incidents: existing?.incidents || [],

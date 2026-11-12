@@ -1398,13 +1398,22 @@ export default function HostDashboardView({
                                           ) : null}
                                         </div>
                                         {(() => {
-                                          const rawName = res?.guestName || 'Huésped';
-                                          const cleanName = rawName
-                                            .replace(/Airbnb\s*\(Not available\)/i, 'No disponible')
-                                            .replace(/\(Not available\)/i, 'No disponible')
-                                            .replace(/^Not available$/i, 'No disponible');
+                                          const rawName = res?.guestName?.trim() || '';
+                                          const isUnknown =
+                                            !rawName ||
+                                            /^(no disponible|not available|hu[eé]sped|guest|invitado|reserva|reserved|bloqueo|airbnb|booking)$/i.test(
+                                              rawName
+                                            ) ||
+                                            rawName.toLowerCase().includes('not available') ||
+                                            rawName.toLowerCase().includes('no disponible');
+
+                                          // Si el nombre no está disponible o no se conoce, no mostrar nada
+                                          if (isUnknown) return null;
+
                                           const source = res?.source || 'iCal';
-                                          const sourceAlreadyInName = cleanName.toLowerCase().includes(source.toLowerCase());
+                                          const sourceAlreadyInName = rawName
+                                            .toLowerCase()
+                                            .includes(source.toLowerCase());
 
                                           return (
                                             <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
@@ -1418,7 +1427,7 @@ export default function HostDashboardView({
                                                   }}
                                                   className="font-bold text-slate-800 hover:text-orange-600 underline underline-offset-2"
                                                 >
-                                                  {cleanName}
+                                                  {rawName}
                                                 </button>
                                               </span>
                                               {!sourceAlreadyInName && (

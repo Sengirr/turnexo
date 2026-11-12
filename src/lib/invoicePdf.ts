@@ -122,30 +122,56 @@ export function generateInvoiceHtml(invoice: Invoice): string {
 }
 
 export async function downloadSingleInvoicePdf(invoice: Invoice): Promise<void> {
+  // Carga dinámica de html2canvas y jsPDF para máxima fiabilidad y rendimiento
   // @ts-ignore
-  const html2pdf = (await import('html2pdf.js')).default;
-  const tempDiv = document.createElement('div');
-  tempDiv.style.position = 'fixed';
-  tempDiv.style.left = '-9999px';
-  tempDiv.style.top = '0';
-  tempDiv.style.width = '750px';
-  tempDiv.style.background = '#ffffff';
-  tempDiv.innerHTML = generateInvoiceHtml(invoice);
-  document.body.appendChild(tempDiv);
+  const html2canvas = (await import('html2canvas')).default;
+  const { jsPDF } = await import('jspdf');
 
-  const opt = {
-    margin: 10,
-    filename: `Factura_${invoice.invoiceNumber}.pdf`,
-    image: { type: 'jpeg' as const, quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, logging: false },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
-  };
+  // Crear contenedor temporal A4 en el DOM asegurando posición en viewport
+  const container = document.createElement('div');
+  container.innerHTML = generateInvoiceHtml(invoice);
+  container.style.position = 'fixed';
+  container.style.top = '0';
+  container.style.left = '0';
+  container.style.width = '794px'; // Ancho A4 a 96 DPI
+  container.style.backgroundColor = '#ffffff';
+  container.style.zIndex = '999999';
+  container.style.pointerEvents = 'none';
+  container.style.boxSizing = 'border-box';
+  document.body.appendChild(container);
 
   try {
-    await html2pdf().from(tempDiv).set(opt).save();
+    // Pausa breve para renderizado de fuentes del sistema y estilos
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      scrollX: 0,
+      scrollY: 0,
+      width: 794,
+      windowWidth: 794,
+      backgroundColor: '#ffffff',
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth(); // 210 mm
+    const pageHeight = pdf.internal.pageSize.getHeight(); // 297 mm
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+    pdf.save(`Factura_${invoice.invoiceNumber}.pdf`);
   } finally {
-    if (document.body.contains(tempDiv)) {
-      document.body.removeChild(tempDiv);
+    if (document.body.contains(container)) {
+      document.body.removeChild(container);
     }
   }
 }

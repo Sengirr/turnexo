@@ -7,6 +7,7 @@ import {
   getInvoiceBookingRef,
   getInvoiceChannel,
 } from '../lib/invoice';
+import { downloadSingleInvoicePdf } from '../lib/invoicePdf';
 
 interface Props {
   invoice: Invoice;
@@ -19,19 +20,9 @@ export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Pro
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownloadPdf = async () => {
-    if (!invoiceRef.current) return;
     setIsDownloading(true);
     try {
-      // @ts-ignore
-      const html2pdf = (await import('html2pdf.js')).default;
-      const opt = {
-        margin: 10,
-        filename: `Factura_${invoice.invoiceNumber}.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
-      };
-      await html2pdf().from(invoiceRef.current).set(opt).save();
+      await downloadSingleInvoicePdf(invoice);
     } catch (err) {
       console.error('Error generating PDF:', err);
       handlePrint();

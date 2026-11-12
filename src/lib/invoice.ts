@@ -219,6 +219,42 @@ export interface ImportedReservationRow {
   reservationCode?: string;
 }
 
+/**
+ * Valida si un valor corresponde verdaderamente a un DNI/NIF/NIE/CIF o pasaporte de huésped,
+ * descartando años como "2026", códigos de reserva, palabras clave o valores vacíos.
+ */
+export function isValidGuestFiscalId(val: any): boolean {
+  if (!val) return false;
+  const s = String(val).trim();
+  if (!s) return false;
+  // Descartar si es solo un año (2020-2035) o número de 4 dígitos
+  if (/^\d{4}$/.test(s)) return false;
+  // Descartar palabras clave comunes en reportes
+  if (/^(n\/?a|no|none|null|undefined|particular|-|sin\s*nif|pago|reserva)$/i.test(s)) return false;
+  // Un DNI/NIF/NIE/CIF/Pasaporte válido tiene al menos 5 caracteres
+  if (s.length < 5) return false;
+  return true;
+}
+
+/**
+ * Sanea facturas existentes eliminando NIFs espurios como "2026" procedentes de columnas de año fiscal de Airbnb
+ * y recalcula si corresponde a Factura Simplificada (<= 400 €).
+ */
+export function sanitizeInvoice(inv: Invoice): Invoice {
+  if (!inv) return inv;
+  let fiscalId = inv.guestFiscalId;
+  if (!isValidGuestFiscalId(fiscalId)) {
+    fiscalId = undefined;
+  }
+  const isSimplified = inv.totalAmount <= SIMPLIFIED_INVOICE_MAX_AMOUNT && !fiscalId;
+
+  return {
+    ...inv,
+    guestFiscalId: fiscalId,
+    isSimplified,
+  };
+}
+
 const SPANISH_MONTHS: Record<string, string> = {
   enero: '01',
   febrero: '02',
@@ -474,10 +510,30 @@ export function parseReservationsFromSheetRows(rawObjects: Record<string, any>[]
       k.includes('room')
     );
 
-    // DNI / NIF
-    let rawDni = findVal((k) =>
-      k.includes('dni') || k.includes('nif') || k.includes('cif') || k.includes('fiscal') || k.includes('identificacion')
-    );
+    // DNI / NIF (descartar expresamente "año fiscal", identificadores de reserva, etc.)
+    let rawDni = findVal((k) => {
+      if (
+        k.includes('ano') ||
+        k.includes('year') ||
+        k.includes('ejercicio') ||
+        k.includes('reserva') ||
+        k.includes('booking') ||
+        k.includes('transaccion') ||
+        k.includes('cobro')
+      ) {
+        return false;
+      }
+      return (
+        k.includes('dni') ||
+        k.includes('nif') ||
+        k.includes('cif') ||
+        k.includes('nie') ||
+        k.includes('pasaporte') ||
+        k.includes('passport') ||
+        (k.includes('fiscal') && (k.includes('id') || k.includes('num') || k.includes('doc') || k.includes('cliente') || k.includes('huesped') || k.includes('viajero'))) ||
+        (k.includes('identificacion') && (k.includes('fiscal') || k.includes('cliente') || k.includes('huesped') || k.includes('viajero')))
+      );
+    });
 
     // Dirección fiscal
     let rawAddr = findVal((k) =>
@@ -536,7 +592,7 @@ export function parseReservationsFromSheetRows(rawObjects: Record<string, any>[]
     rows.push({
       propertyName: String(rawProp || 'Alojamiento Turístico').trim(),
       guestName: String(rawGuest || 'Huésped Particular').trim(),
-      guestFiscalId: rawDni ? String(rawDni).trim() : undefined,
+      guestFiscalId: isValidGuestFiscalId(rawDni) ? String(rawDni).trim().toUpperCase() : undefined,
       guestAddress: rawAddr ? String(rawAddr).trim() : undefined,
       stayStartDate: normalizeDateString(String(rawIn || ''), isAirbnb),
       stayEndDate: normalizeDateString(String(rawOut || ''), isAirbnb),
@@ -623,9 +679,29 @@ export function parseReservationsCsv(text: string): ImportedReservationRow[] {
     (h.includes('nombre') && !h.includes('alojamiento') && !h.includes('propiedad') && !h.includes('habitacion'))
   );
 
-  let dniIdx = headerCols.findIndex((h) =>
-    h.includes('dni') || h.includes('nif') || h.includes('cif') || h.includes('fiscal') || h.includes('identificacion')
-  );
+  let dniIdx = headerCols.findIndex((h) => {
+    if (
+      h.includes('ano') ||
+      h.includes('year') ||
+      h.includes('ejercicio') ||
+      h.includes('reserva') ||
+      h.includes('booking') ||
+      h.includes('transaccion') ||
+      h.includes('cobro')
+    ) {
+      return false;
+    }
+    return (
+      h.includes('dni') ||
+      h.includes('nif') ||
+      h.includes('cif') ||
+      h.includes('nie') ||
+      h.includes('pasaporte') ||
+      h.includes('passport') ||
+      (h.includes('fiscal') && (h.includes('id') || h.includes('num') || h.includes('doc') || h.includes('cliente') || h.includes('huesped') || h.includes('viajero'))) ||
+      (h.includes('identificacion') && (h.includes('fiscal') || h.includes('cliente') || h.includes('huesped') || h.includes('viajero')))
+    );
+  });
 
   let addrIdx = headerCols.findIndex((h) =>
     h.includes('direccion') || h.includes('address') || h.includes('domicilio') || h.includes('ubicacion')
@@ -688,7 +764,7 @@ export function parseReservationsCsv(text: string): ImportedReservationRow[] {
     rows.push({
       propertyName: rawProp || 'Alojamiento Turístico',
       guestName: rawGuest || 'Huésped Particular',
-      guestFiscalId: rawDni.trim() || undefined,
+      guestFiscalId: isValidGuestFiscalId(rawDni) ? rawDni.trim().toUpperCase() : undefined,
       guestAddress: rawAddr.trim() || undefined,
       stayStartDate: normalizeDateString(rawIn),
       stayEndDate: normalizeDateString(rawOut),

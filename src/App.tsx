@@ -21,6 +21,7 @@ import {
   INITIAL_INVOICES,
   Invoice,
   isCorruptedOrMockInvoice,
+  sanitizeInvoice,
 } from './lib/invoice';
 import HostDashboardView from './components/HostDashboardView';
 import CleanerMagicView from './components/CleanerMagicView';
@@ -129,7 +130,9 @@ export default function App() {
   );
   const [invoices, setInvoices] = useState<Invoice[]>(() => {
     const stored = loadStored<Invoice[]>(STORAGE_KEYS.invoices, []);
-    return stored.filter((inv) => !isCorruptedOrMockInvoice(inv));
+    return stored
+      .filter((inv) => !isCorruptedOrMockInvoice(inv))
+      .map(sanitizeInvoice);
   });
   const [fiscalProfile, setFiscalProfile] = useState<HostFiscalProfile>(() =>
     loadStored(STORAGE_KEYS.fiscalProfile, DEFAULT_HOST_FISCAL_PROFILE)

@@ -66,6 +66,7 @@ import {
   Invoice,
   isCorruptedOrMockInvoice,
   SIMPLIFIED_INVOICE_MAX_AMOUNT,
+  sanitizeInvoice,
 } from '../lib/invoice';
 import { downloadSingleInvoicePdf } from '../lib/invoicePdf';
 import { DASHBOARD_TRANSLATIONS, DashboardLanguage } from '../lib/dashboardTranslations';
@@ -269,7 +270,9 @@ export default function HostDashboardView({
   };
 
   const allInvoices = useMemo(() => {
-    return (invoices || []).filter((inv) => !isCorruptedOrMockInvoice(inv));
+    return (invoices || [])
+      .filter((inv) => !isCorruptedOrMockInvoice(inv))
+      .map(sanitizeInvoice);
   }, [invoices]);
   const currentFiscalProfile = fiscalProfile || DEFAULT_HOST_FISCAL_PROFILE;
 

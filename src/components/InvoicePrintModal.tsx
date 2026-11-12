@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Printer, Download, X, ShieldCheck, Loader2, Pencil } from 'lucide-react';
-import { Invoice } from '../lib/invoice';
+import { Invoice, formatDisplayDate } from '../lib/invoice';
 
 interface Props {
   invoice: Invoice;
@@ -144,7 +144,7 @@ export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Pro
                 Nº: <strong className="text-slate-900 font-bold">{invoice.invoiceNumber}</strong>
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
-                Fecha de expedición: <span className="font-semibold text-slate-700">{invoice.issueDate}</span>
+                Fecha de expedición: <span className="font-semibold text-slate-700">{formatDisplayDate(invoice.issueDate)}</span>
               </p>
             </div>
             <div className="text-right">
@@ -170,7 +170,7 @@ export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Pro
             </div>
             <div>
               <p className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">
-                Huésped / Cliente
+                Huésped
               </p>
               <p className="font-bold text-slate-900 mt-1">{invoice.guestName}</p>
               {invoice.guestFiscalId ? (
@@ -221,7 +221,7 @@ export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Pro
                     <p className="text-[11px] text-slate-500">{invoice.propertyName}</p>
                   </td>
                   <td className="py-3 px-3 text-slate-600 font-mono text-[11px]">
-                    {invoice.stayStartDate} al {invoice.stayEndDate}
+                    {formatDisplayDate(invoice.stayStartDate)} al {formatDisplayDate(invoice.stayEndDate)}
                   </td>
                   <td className="py-3 px-3 text-center font-bold text-slate-700">
                     {invoice.nights}

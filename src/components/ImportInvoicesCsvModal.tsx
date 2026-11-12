@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 import {
   createInvoicesFromImportedRows,
   downloadInvoiceImportTemplate,
+  formatDisplayDate,
   HostFiscalProfile,
   ImportedReservationRow,
   Invoice,
@@ -308,7 +309,7 @@ export default function ImportInvoicesCsvModal({
                             {row.propertyName}
                           </td>
                           <td className="py-2 px-3 text-slate-500 font-mono text-[10px]">
-                            {row.stayStartDate} → {row.stayEndDate}
+                            {formatDisplayDate(row.stayStartDate)} → {formatDisplayDate(row.stayEndDate)}
                           </td>
                           <td className="py-2 px-3 font-mono text-[10px] text-slate-600">
                             {row.guestFiscalId || (

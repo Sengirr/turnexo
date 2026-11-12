@@ -59,6 +59,7 @@ import {
   computeQuarterSummaries,
   DEFAULT_HOST_FISCAL_PROFILE,
   exportInvoicesToCsv,
+  formatDisplayDate,
   HostFiscalProfile,
   INITIAL_INVOICES,
   Invoice,
@@ -2381,15 +2382,14 @@ export default function HostDashboardView({
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] text-slate-500 uppercase tracking-wider font-semibold">
-                        <th className="py-3 px-5">Nº Factura</th>
-                        <th className="py-3 px-4">Fecha Emisión</th>
+                        <th className="py-3 px-5 whitespace-nowrap">Nº Factura</th>
+                        <th className="py-3 px-4 whitespace-nowrap">Fecha Emisión</th>
                         <th className="py-3 px-4">Alojamiento</th>
-                        <th className="py-3 px-4">Huésped / Cliente</th>
-                        <th className="py-3 px-4">Tipo</th>
-                        <th className="py-3 px-4 text-right">Base Imponible</th>
-                        <th className="py-3 px-4 text-right">IVA (10%)</th>
-                        <th className="py-3 px-4 text-right">Total Factura</th>
-                        <th className="py-3 px-5 text-right">Acción</th>
+                        <th className="py-3 px-4">Huésped</th>
+                        <th className="py-3 px-4 text-right whitespace-nowrap">Base Imponible</th>
+                        <th className="py-3 px-4 text-right whitespace-nowrap">IVA (10%)</th>
+                        <th className="py-3 px-4 text-right whitespace-nowrap">Total Factura</th>
+                        <th className="py-3 px-5 text-right whitespace-nowrap">Acción</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -2410,69 +2410,38 @@ export default function HostDashboardView({
                         })
                         .map((inv) => (
                           <tr key={inv.id} className="hover:bg-slate-50/60 transition">
-                            <td className="py-3.5 px-5 font-mono font-bold text-slate-900">
-                              <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md border border-slate-200">
+                            <td className="py-3.5 px-5 whitespace-nowrap font-mono font-bold text-slate-900">
+                              <span className="inline-block whitespace-nowrap bg-slate-100 text-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/80 font-bold tracking-tight text-[11px]">
                                 {inv.invoiceNumber}
                               </span>
                             </td>
-                            <td className="py-3.5 px-4 font-mono text-slate-600">
-                              {inv.issueDate}
+                            <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-700 text-xs font-semibold">
+                              {formatDisplayDate(inv.issueDate)}
                             </td>
                             <td className="py-3.5 px-4">
                               <span className="font-semibold text-slate-900 block">
                                 {inv.propertyName}
                               </span>
-                              <span className="text-[11px] text-slate-500">
-                                {inv.stayStartDate} al {inv.stayEndDate} ({inv.nights} noches)
+                              <span className="text-[11px] text-slate-500 font-mono">
+                                {formatDisplayDate(inv.stayStartDate)} al {formatDisplayDate(inv.stayEndDate)} ({inv.nights} {inv.nights === 1 ? 'noche' : 'noches'})
                               </span>
                             </td>
                             <td className="py-3.5 px-4">
-                              <span className="font-bold text-slate-900 block">
+                              <span className="font-bold text-slate-900 block text-xs">
                                 {inv.guestName}
                               </span>
                               {inv.guestFiscalId ? (
-                                <span className="text-[11px] font-mono text-slate-500">
-                                  NIF: {inv.guestFiscalId}
+                                <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded mt-0.5">
+                                  ✓ NIF: {inv.guestFiscalId}
                                 </span>
-                              ) : inv.isSimplified ? (
-                                <div className="space-y-0.5">
-                                  <span className="text-[11px] text-slate-400 italic block">
-                                    Sin NIF requerido (≤ 400 €)
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => setSelectedInvoiceForEdit(inv)}
-                                    className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 hover:text-emerald-700 transition"
-                                  >
-                                    <Pencil size={9} />
-                                    <span>Añadir DNI</span>
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="space-y-0.5">
-                                  <span className="text-[11px] text-slate-400 italic block">
-                                    Particular (sin NIF en plataforma)
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => setSelectedInvoiceForEdit(inv)}
-                                    className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2 py-0.5 rounded-md transition"
-                                    title="Añadir DNI y dirección fiscal del cliente"
-                                  >
-                                    <Pencil size={10} />
-                                    <span>+ Añadir DNI / Dirección</span>
-                                  </button>
-                                </div>
-                              )}
-                            </td>
-                            <td className="py-3.5 px-4 text-[11px]">
-                              {inv.isSimplified ? (
-                                <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
-                                  Simplificada
+                              ) : inv.totalAmount > SIMPLIFIED_INVOICE_MAX_AMOUNT || !inv.isSimplified ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md mt-0.5 shadow-2xs">
+                                  <AlertTriangle size={11} className="text-amber-600 shrink-0" />
+                                  <span>Falta DNI (&gt; 400 €)</span>
                                 </span>
                               ) : (
-                                <span className="bg-indigo-50 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full font-semibold">
-                                  Completa
+                                <span className="text-[11px] text-slate-400 italic block mt-0.5">
+                                  Simplificada (≤ 400 € · DNI opcional)
                                 </span>
                               )}
                             </td>

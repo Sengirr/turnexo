@@ -217,6 +217,19 @@ const SPANISH_MONTHS: Record<string, string> = {
 };
 
 /**
+ * Convierte fechas YYYY-MM-DD a formato español DD/MM/YYYY
+ */
+export function formatDisplayDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const trimmed = String(dateStr).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const parts = trimmed.split('-');
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return trimmed;
+}
+
+/**
  * Normaliza fechas en formato YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY (Airbnb) o español ("2 de julio de 2026")
  */
 export function normalizeDateString(dStr: string, isAirbnb = false): string {

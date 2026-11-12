@@ -38,6 +38,10 @@ import {
   Lock,
   AlertTriangle,
   Sparkles,
+  X,
+  ImageIcon,
+  AlertCircle,
+  BrainCircuit,
 } from 'lucide-react';
 import { Cleaner, CleaningTask, Property, Reservation, DEFAULT_IVI_CHECKLIST } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
@@ -180,6 +184,43 @@ export default function HostDashboardView({
   const [qrModalProperty, setQrModalProperty] = useState<Property | null>(null);
   const [customizingProperty, setCustomizingProperty] = useState<Property | null>(null);
   const [inspectingTaskPhotos, setInspectingTaskPhotos] = useState<CleaningTask | null>(null);
+  const [previewPhotoIndex, setPreviewPhotoIndex] = useState<number | null>(null);
+
+  // Navegación entre limpiezas del mismo día en el modal de auditoría (estilo IVI ERP)
+  const sameDayTasks = useMemo(() => {
+    if (!inspectingTaskPhotos) return [];
+    return tasks
+      .filter((t) => t.date === inspectingTaskPhotos.date)
+      .sort((a, b) => {
+        const propA = properties.find((p) => p.id === a.propertyId)?.name || '';
+        const propB = properties.find((p) => p.id === b.propertyId)?.name || '';
+        return propA.localeCompare(propB);
+      });
+  }, [inspectingTaskPhotos, tasks, properties]);
+
+  const currentInspectionIndex = inspectingTaskPhotos
+    ? sameDayTasks.findIndex((t) => t.id === inspectingTaskPhotos.id)
+    : -1;
+  const prevInspectionTask = currentInspectionIndex > 0 ? sameDayTasks[currentInspectionIndex - 1] : null;
+  const nextInspectionTask =
+    currentInspectionIndex >= 0 && currentInspectionIndex < sameDayTasks.length - 1
+      ? sameDayTasks[currentInspectionIndex + 1]
+      : null;
+
+  // Cierre accesible con tecla Escape tanto para el lightbox como para el modal de auditoría
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (previewPhotoIndex !== null) {
+          setPreviewPhotoIndex(null);
+        } else if (inspectingTaskPhotos) {
+          setInspectingTaskPhotos(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [inspectingTaskPhotos, previewPhotoIndex]);
 
   // Estados de Facturación & IVA 10%
   const currentMonth = new Date().getMonth() + 1;
@@ -2871,120 +2912,440 @@ export default function HostDashboardView({
         />
       )}
 
-      {/* MODAL COMPROBACIÓN DE FOTOS Y CHECKLIST DE LIMPIEZA */}
-      {inspectingTaskPhotos && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl border border-slate-200 max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-8 animate-in fade-in">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-              <div>
-                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full inline-block">
-                  Comprobación en tiempo real
-                </span>
-                <h3 className="text-xl font-bold text-slate-900 mt-1.5">
-                  {properties.find((p) => p.id === inspectingTaskPhotos.propertyId)?.name || 'Alojamiento'}
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Fecha salida: {inspectingTaskPhotos.date} · Limpiadora:{' '}
-                  <strong className="text-slate-800">{cleaners.find((c) => c.id === inspectingTaskPhotos.cleanerId)?.name || 'Sin asignar'}</strong>
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setInspectingTaskPhotos(null)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1"
-              >
-                ✕
-              </button>
-            </div>
+      {/* MODAL AUDITORÍA DE LIMPIEZA (IDÉNTICO A IVI ERP) */}
+      {inspectingTaskPhotos && (() => {
+        const prop = properties.find((p) => p.id === inspectingTaskPhotos.propertyId);
+        const cleaner = cleaners.find((c) => c.id === inspectingTaskPhotos.cleanerId);
+        const res = reservations.find((r) => r.id === inspectingTaskPhotos.reservationId);
+        const isCompleted = inspectingTaskPhotos.status === 'completed';
+        const isInProgress = inspectingTaskPhotos.status === 'in_progress';
+        const completedCount = inspectingTaskPhotos.checklist.filter((c) => c.completed).length;
+        const totalChecklist = inspectingTaskPhotos.checklist.length;
 
-            {/* Estado del Checklist */}
-            <div className="bg-slate-50 rounded-2xl border border-slate-200/60 p-4 space-y-3">
-              <div className="flex items-center justify-between text-xs font-bold text-emerald-700">
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 size={16} /> Checklist verificado por la limpiadora
-                </span>
-                <span>
-                  {inspectingTaskPhotos.checklist.filter((c) => c.completed).length} /{' '}
-                  {inspectingTaskPhotos.checklist.length} tareas
-                </span>
+        // Galería de fotos recopiladas (generales y de checklist)
+        const allPhotos: { url: string; title: string }[] = [
+          ...inspectingTaskPhotos.photosUploaded.map((url, i) => ({
+            url,
+            title: `Habitación ${i + 1}`,
+          })),
+        ];
+
+        return (
+          <div
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl z-50 flex items-center justify-center p-3 sm:p-5 cursor-pointer overflow-y-auto"
+            onClick={() => setInspectingTaskPhotos(null)}
+          >
+            <div
+              className="bg-white rounded-[32px] shadow-2xl border border-slate-200/80 w-full max-w-4xl overflow-hidden max-h-[92vh] flex flex-col relative cursor-default my-auto animate-in fade-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header estilo IVI ERP */}
+              <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl shrink-0">
+                    <Sparkles size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900">Auditoría de Limpieza</h3>
+                    <p className="text-xs sm:text-sm font-bold text-slate-400">
+                      {prop?.name || 'Alojamiento'} · {inspectingTaskPhotos.date}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 sm:gap-3">
+                  {/* Navegación entre limpiezas del mismo día (estilo IVI ERP) */}
+                  {sameDayTasks.length > 1 && (
+                    <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-2xl p-1 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => prevInspectionTask && setInspectingTaskPhotos(prevInspectionTask)}
+                        disabled={!prevInspectionTask}
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-20 transition rounded-xl"
+                        title="Limpieza Anterior"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <span className="text-[10px] font-black text-slate-500 px-2 uppercase tracking-wider">
+                        {currentInspectionIndex + 1} / {sameDayTasks.length}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => nextInspectionTask && setInspectingTaskPhotos(nextInspectionTask)}
+                        disabled={!nextInspectionTask}
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 disabled:opacity-20 transition rounded-xl"
+                        title="Siguiente Limpieza"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Botón Cerrar (X) destacado con soporte de Escape */}
+                  <button
+                    type="button"
+                    onClick={() => setInspectingTaskPhotos(null)}
+                    className="p-2.5 bg-white border border-slate-200 hover:bg-slate-100 hover:text-slate-900 rounded-2xl text-slate-500 transition shadow-xs flex items-center justify-center"
+                    title="Cerrar ventana (Esc)"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
-                {inspectingTaskPhotos.checklist.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between gap-2 text-slate-800 bg-white p-2.5 rounded-xl border border-slate-200/70 shadow-2xs">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                      <div className="truncate">
-                        {item.category && item.category !== 'General' && (
-                          <span className="text-[10px] text-slate-400 font-medium mr-1.5 uppercase tracking-wide">
-                            [{item.category}]
-                          </span>
-                        )}
-                        <span className="font-medium text-slate-900">{item.label}</span>
+
+              {/* Contenido Scrollable */}
+              <div className="p-6 sm:p-8 overflow-y-auto space-y-6">
+                {/* Franja de Resumen estilo IVI ERP */}
+                <div className="flex flex-wrap gap-4 items-center justify-between bg-slate-50 p-5 rounded-[24px] border border-slate-100">
+                  <div className="flex items-center gap-3.5">
+                    <div
+                      className={`p-3 rounded-2xl ${
+                        isCompleted
+                          ? 'bg-emerald-100 text-emerald-600'
+                          : isInProgress
+                          ? 'bg-amber-100 text-amber-600'
+                          : 'bg-orange-100 text-orange-600'
+                      }`}
+                    >
+                      {isCompleted ? <CheckCircle2 size={24} /> : <Clock size={24} />}
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">
+                        Limpiadora Asignada
+                      </span>
+                      <h3 className="text-base sm:text-lg font-black text-slate-900">
+                        {cleaner?.name || 'Sin asignar'}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-6 text-xs">
+                    {inspectingTaskPhotos.pax && (
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">
+                          Huéspedes
+                        </span>
+                        <div className="flex items-center gap-1.5 text-base font-black text-slate-900">
+                          <Users size={16} className="text-orange-600" />
+                          <span>{inspectingTaskPhotos.pax}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">
+                        Horario Salida
+                      </span>
+                      <div className="text-base font-black text-slate-900">
+                        {inspectingTaskPhotos.scheduledCleaningTime}h
                       </div>
                     </div>
-                    {item.photoRequired && (
-                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
-                        <Camera size={10} /> Foto
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Galería de fotos subidas por la limpiadora */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-900">
-                <span>Fotos tomadas con la cámara ({inspectingTaskPhotos.photosUploaded.length})</span>
-                <span className="text-slate-500 font-normal text-xs">Comprobación antes de la llegada del huésped</span>
-              </div>
-              {inspectingTaskPhotos.photosUploaded.length === 0 ? (
-                <p className="text-xs text-slate-400 italic p-6 bg-slate-50 rounded-2xl border border-slate-200/60 text-center">
-                  Aún no se han subido fotos para esta limpieza.
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {inspectingTaskPhotos.photosUploaded.map((url, idx) => (
-                    <a
-                      key={idx}
-                      href={url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group relative block aspect-video sm:aspect-square bg-slate-900 rounded-xl overflow-hidden border border-slate-200 shadow-sm"
-                    >
-                      <img
-                        src={url}
-                        alt={`Foto verificación ${idx + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
-                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
-                        Ampliar foto ↗
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">
+                        Próxima Entrada
+                      </span>
+                      <div className="text-base font-black text-slate-900">
+                        {inspectingTaskPhotos.sameDayCheckIn
+                          ? `${inspectingTaskPhotos.nextCheckInTime}h`
+                          : 'Sin entrada hoy'}
                       </div>
-                      <span className="absolute bottom-2 left-2 bg-slate-900/80 text-white text-[10px] px-2 py-0.5 rounded-md font-semibold">
-                        Habitación {idx + 1}
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">
+                        Estado
                       </span>
-                    </a>
-                  ))}
+                      <span
+                        className={`text-xs font-black px-3 py-1 rounded-full inline-block ${
+                          isCompleted
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            : isInProgress
+                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        }`}
+                      >
+                        {isCompleted ? '✓ Completada' : isInProgress ? 'En Progreso' : 'Pendiente'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              )}
+
+                {/* 2 Columnas estilo IVI ERP */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Columna Izquierda: Incidencias y Evidencias Fotográficas */}
+                  <div className="space-y-6">
+                    {/* Incidencias Reportadas */}
+                    <div>
+                      <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <AlertTriangle size={14} className="text-orange-500" />
+                        Incidencias Reportadas
+                      </h4>
+                      {inspectingTaskPhotos.incidents && inspectingTaskPhotos.incidents.length > 0 ? (
+                        <div className="space-y-2.5">
+                          {inspectingTaskPhotos.incidents.map((inc) => (
+                            <div
+                              key={inc.id}
+                              className="p-4 bg-orange-50/80 rounded-2xl border border-orange-200/80 flex items-start gap-3"
+                            >
+                              <AlertCircle className="text-orange-500 mt-0.5 shrink-0" size={18} />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-black text-orange-950 leading-relaxed">{inc.text}</p>
+                                {inc.photoUrl && (
+                                  <a
+                                    href={inc.photoUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-block mt-2 text-[10px] font-bold text-orange-700 underline"
+                                  >
+                                    Ver foto de la incidencia ↗
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center">
+                          <p className="text-xs font-bold text-slate-400 italic">No se reportaron incidencias</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Evidencias Fotográficas con Lightbox */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                          <ImageIcon size={14} />
+                          Evidencias Fotográficas ({allPhotos.length})
+                        </h4>
+                        <span className="text-[11px] text-slate-400">Pulsa para ampliar</span>
+                      </div>
+
+                      {allPhotos.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-3">
+                          {allPhotos.map((photo, idx) => (
+                            <div key={idx} className="flex flex-col gap-1">
+                              <div
+                                onClick={() => setPreviewPhotoIndex(idx)}
+                                className="aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-2xs hover:ring-2 hover:ring-indigo-500/30 transition-all group relative cursor-pointer bg-slate-900"
+                              >
+                                <img
+                                  src={photo.url}
+                                  alt={photo.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                />
+                                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+                                  <ExternalLink size={18} />
+                                </div>
+                              </div>
+                              <span
+                                className="text-[10px] font-bold text-slate-500 text-center truncate px-1"
+                                title={photo.title}
+                              >
+                                {photo.title}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="bg-slate-50 rounded-2xl p-8 flex flex-col items-center justify-center border border-dashed border-slate-200">
+                          <ImageIcon className="text-slate-300 mb-2" size={32} />
+                          <p className="text-xs font-bold text-slate-400">Sin fotos disponibles aún</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Columna Derecha: Checklist Verificado e Informe IA */}
+                  <div className="space-y-6">
+                    {/* Checklist Verificado */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                          <CheckCircle2 size={14} className="text-emerald-600" />
+                          Checklist de Tareas Verificado
+                        </h4>
+                        <span className="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                          {completedCount} / {totalChecklist} hechas
+                        </span>
+                      </div>
+
+                      <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                        {inspectingTaskPhotos.checklist.map((item) => (
+                          <div
+                            key={item.id}
+                            className={`p-3 rounded-2xl border text-xs flex items-center justify-between gap-3 transition ${
+                              item.completed
+                                ? 'bg-slate-50/80 border-slate-200/80 text-slate-800'
+                                : 'bg-rose-50/40 border-rose-200/60 text-rose-900'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span
+                                className={`font-black text-sm shrink-0 ${
+                                  item.completed ? 'text-emerald-600' : 'text-slate-300'
+                                }`}
+                              >
+                                {item.completed ? '✓' : '○'}
+                              </span>
+                              <div className="truncate">
+                                {item.category && item.category !== 'General' && (
+                                  <span className="text-[10px] font-black text-slate-400 uppercase mr-1.5">
+                                    [{item.category}]
+                                  </span>
+                                )}
+                                <span className={item.completed ? 'font-bold' : 'font-medium opacity-80'}>
+                                  {item.label}
+                                </span>
+                              </div>
+                            </div>
+
+                            {item.photoRequired && (
+                              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                                <Camera size={10} /> Foto
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Informe de Calidad IA (estilo IVI ERP) */}
+                    <div className="bg-indigo-50/60 p-6 rounded-[28px] border border-indigo-100 relative overflow-hidden flex flex-col justify-between">
+                      <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+                        <BrainCircuit size={100} />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+                            <Sparkles size={14} className="fill-indigo-400 text-indigo-400" />
+                            Informe de Calidad IA
+                          </h4>
+                          <span className="text-[10px] font-black text-indigo-400 bg-indigo-100/70 px-2 py-0.5 rounded-md">
+                            Gemini Vision
+                          </span>
+                        </div>
+
+                        <div className="bg-white/90 backdrop-blur-sm p-4 rounded-2xl border border-indigo-100 text-xs font-medium text-slate-700 leading-relaxed shadow-2xs space-y-2">
+                          <p className="flex items-start gap-2">
+                            <span className="text-emerald-600 font-bold">✓</span>
+                            <span>Cama tendida correctamente y textiles limpios verificados sin arrugas.</span>
+                          </p>
+                          <p className="flex items-start gap-2">
+                            <span className="text-emerald-600 font-bold">✓</span>
+                            <span>Baño desinfectado, precinto y amenities colocados para la próxima entrada.</span>
+                          </p>
+                          <p className="flex items-start gap-2">
+                            <span className="text-emerald-600 font-bold">✓</span>
+                            <span>Cocina y menaje revisados, sin residuos y frigorífico vacío.</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-indigo-100/60 flex items-center justify-between text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                          <span>Auditoría Certificada</span>
+                        </div>
+                        <span>Powered by Turnexo AI</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer con botón Conforme y Cerrar */}
+              <div className="p-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/50 shrink-0">
+                <span className="text-xs text-emerald-700 font-bold flex items-center gap-1.5">
+                  <CheckCircle2 size={16} />
+                  <span>Alojamiento listo e inspeccionado para la llegada</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setInspectingTaskPhotos(null)}
+                  className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider px-6 py-2.5 rounded-xl transition shadow-sm"
+                >
+                  Conforme y Cerrar
+                </button>
+              </div>
             </div>
 
-            <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
-              <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
-                <CheckCircle2 size={16} />
-                <span>Todo comprobado: el alojamiento está impecable para el nuevo huésped</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => setInspectingTaskPhotos(null)}
-                className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-sm"
+            {/* LIGHTBOX DE FOTOS (ESTILO IVI ERP) */}
+            {previewPhotoIndex !== null && allPhotos[previewPhotoIndex] && (
+              <div
+                className="fixed inset-0 bg-black/95 backdrop-blur-md z-[100] flex items-center justify-center p-4 cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPreviewPhotoIndex(null);
+                }}
               >
-                Conforme y Cerrar
-              </button>
-            </div>
+                <div
+                  className="relative w-full h-full flex items-center justify-center cursor-default"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Flechas de Navegación del Lightbox */}
+                  {previewPhotoIndex > 0 && (
+                    <button
+                      type="button"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl text-white rounded-full transition active:scale-90 z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewPhotoIndex(previewPhotoIndex - 1);
+                      }}
+                      title="Foto anterior"
+                    >
+                      <ChevronLeft size={30} />
+                    </button>
+                  )}
+
+                  {previewPhotoIndex < allPhotos.length - 1 && (
+                    <button
+                      type="button"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-xl text-white rounded-full transition active:scale-90 z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewPhotoIndex(previewPhotoIndex + 1);
+                      }}
+                      title="Siguiente foto"
+                    >
+                      <ChevronRight size={30} />
+                    </button>
+                  )}
+
+                  <div className="relative max-w-4xl max-h-full flex flex-col items-center">
+                    <img
+                      src={allPhotos[previewPhotoIndex].url}
+                      alt={allPhotos[previewPhotoIndex].title}
+                      className="max-w-full max-h-[80vh] rounded-2xl shadow-2xl object-contain animate-in fade-in zoom-in-95 duration-200"
+                    />
+
+                    {/* Barra superior con título y cerrar */}
+                    <div className="w-full flex items-center justify-between text-white mt-4 px-2">
+                      <span className="bg-white/15 backdrop-blur-md px-3.5 py-1.5 rounded-xl font-bold text-xs tracking-wide">
+                        {allPhotos[previewPhotoIndex].title}
+                      </span>
+                      <button
+                        type="button"
+                        className="bg-white/15 hover:bg-white/25 backdrop-blur-md text-white px-3.5 py-1.5 rounded-xl font-black text-xs transition flex items-center gap-1.5"
+                        onClick={() => setPreviewPhotoIndex(null)}
+                      >
+                        <X size={15} /> Cerrar (Esc)
+                      </button>
+                    </div>
+
+                    {/* Contador */}
+                    <div className="mt-2 bg-white/10 backdrop-blur-md text-white/80 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                      {previewPhotoIndex + 1} / {allPhotos.length}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Modal Atención al Cliente: Activación de Plan */}
       {showStripeNoticeModal && (

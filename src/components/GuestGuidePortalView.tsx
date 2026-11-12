@@ -1376,11 +1376,11 @@ export default function GuestGuidePortalView({
                           >
                             {isLateCheckout
                               ? (language === 'en'
-                                  ? `Request Late Check-out · ${extra.price} €`
+                                  ? 'Request Late Check-out'
                                   : language === 'fr'
-                                  ? `Demander un départ tardif · ${extra.price} €`
-                                  : `Solicitar Late Check-out · ${extra.price} €`)
-                              : `${t('extras.request_btn')} · ${extra.price} €`}
+                                  ? 'Demander un départ tardif'
+                                  : 'Solicitar Late Check-out')
+                              : t('extras.request_btn')}
                           </Button>
                         )}
                       </div>

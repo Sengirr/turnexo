@@ -190,16 +190,6 @@ export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Pro
               {invoice.guestEmail && (
                 <p className="text-slate-500 text-[11px]">{invoice.guestEmail}</p>
               )}
-              {onEditGuest && !invoice.guestFiscalId && (
-                <button
-                  type="button"
-                  onClick={onEditGuest}
-                  className="mt-2 text-[10px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-1 rounded-md transition flex items-center gap-1 print:hidden"
-                >
-                  <Pencil size={10} />
-                  <span>+ Añadir DNI y Domicilio Fiscal</span>
-                </button>
-              )}
             </div>
           </div>
 
@@ -270,41 +260,11 @@ export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Pro
         </div>
 
         {/* Pie modal */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-100 print:hidden">
-          <div className="flex items-center gap-2">
-            {onEditGuest && (
-              <button
-                type="button"
-                onClick={onEditGuest}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition shadow-2xs"
-                title="Modificar DNI o dirección fiscal del huésped"
-              >
-                <Pencil size={13} className="text-emerald-600" />
-                <span>Editar Datos</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              disabled={isDownloading}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm disabled:opacity-50"
-            >
-              {isDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-              <span>Descargar PDF</span>
-            </button>
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition"
-            >
-              <Printer size={14} />
-              <span>Imprimir</span>
-            </button>
-          </div>
+        <div className="flex items-center justify-end pt-4 border-t border-slate-100 print:hidden">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
+            className="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
           >
             Cerrar
           </button>

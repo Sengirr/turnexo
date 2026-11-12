@@ -43,7 +43,8 @@ import {
   ImageIcon,
   AlertCircle,
   Trash2,
-  } from 'lucide-react';
+  Eye,
+} from 'lucide-react';
 import { Cleaner, CleaningTask, Property, Reservation, DEFAULT_IVI_CHECKLIST } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
 import { HostAccount, isSupabaseConfigured, STRIPE_PAYMENT_LINKS, getStripePaymentLink } from '../lib/supabase';
@@ -66,6 +67,7 @@ import {
   isCorruptedOrMockInvoice,
   SIMPLIFIED_INVOICE_MAX_AMOUNT,
 } from '../lib/invoice';
+import { downloadSingleInvoicePdf } from '../lib/invoicePdf';
 import { DASHBOARD_TRANSLATIONS, DashboardLanguage } from '../lib/dashboardTranslations';
 
 const CHECKOUT_HOURS = [
@@ -251,6 +253,20 @@ export default function HostDashboardView({
   const [showFiscalProfileModal, setShowFiscalProfileModal] = useState(false);
   const [invoiceSearch, setInvoiceSearch] = useState('');
   const [invoicePropertyFilter, setInvoicePropertyFilter] = useState('all');
+  const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<string | null>(null);
+
+  const handleDirectDownloadPdf = async (inv: Invoice) => {
+    setDownloadingInvoiceId(inv.id);
+    try {
+      await downloadSingleInvoicePdf(inv);
+    } catch (err) {
+      console.error('Error al descargar factura en PDF:', err);
+      // Fallback a modal de impresión
+      setSelectedInvoiceForPrint(inv);
+    } finally {
+      setDownloadingInvoiceId(null);
+    }
+  };
 
   const allInvoices = useMemo(() => {
     return (invoices || []).filter((inv) => !isCorruptedOrMockInvoice(inv));
@@ -2458,12 +2474,26 @@ export default function HostDashboardView({
                               <div className="inline-flex items-center gap-1.5 justify-end">
                                 <button
                                   type="button"
+                                  onClick={() => handleDirectDownloadPdf(inv)}
+                                  disabled={downloadingInvoiceId === inv.id}
+                                  className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-2.5 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
+                                  title="Descargar factura en PDF directamente"
+                                >
+                                  {downloadingInvoiceId === inv.id ? (
+                                    <RefreshCw size={12} className="animate-spin" />
+                                  ) : (
+                                    <Download size={12} />
+                                  )}
+                                  <span>Descargar</span>
+                                </button>
+                                <button
+                                  type="button"
                                   onClick={() => setSelectedInvoiceForPrint(inv)}
                                   className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white px-2.5 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
-                                  title="Ver e imprimir factura oficial"
+                                  title="Ver factura completa e imprimir"
                                 >
-                                  <Printer size={12} />
-                                  <span>Ver / PDF</span>
+                                  <Eye size={12} />
+                                  <span>Ver</span>
                                 </button>
                                 <button
                                   type="button"

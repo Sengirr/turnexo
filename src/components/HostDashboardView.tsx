@@ -53,8 +53,7 @@ import InvoicePrintModal from './InvoicePrintModal';
 import CreateInvoiceModal from './CreateInvoiceModal';
 import FiscalProfileModal from './FiscalProfileModal';
 import ImportInvoicesCsvModal from './ImportInvoicesCsvModal';
-import AutoGenerateInvoicesModal from './AutoGenerateInvoicesModal';
-import { CreditCard, ShieldCheck, FileText, Building2, Upload, Zap, HelpCircle } from 'lucide-react';
+import { CreditCard, ShieldCheck, FileText, Building2, Upload, HelpCircle } from 'lucide-react';
 import {
   computeQuarterSummaries,
   DEFAULT_HOST_FISCAL_PROFILE,
@@ -240,7 +239,6 @@ export default function HostDashboardView({
   const [selectedInvoiceForPrint, setSelectedInvoiceForPrint] = useState<Invoice | null>(null);
   const [showCreateInvoiceModal, setShowCreateInvoiceModal] = useState(false);
   const [showImportCsvModal, setShowImportCsvModal] = useState(false);
-  const [showAutoGenerateModal, setShowAutoGenerateModal] = useState(false);
   const [preselectedResIdForInvoice, setPreselectedResIdForInvoice] = useState<string | undefined>(undefined);
   const [showFiscalProfileModal, setShowFiscalProfileModal] = useState(false);
   const [invoiceSearch, setInvoiceSearch] = useState('');
@@ -2120,16 +2118,6 @@ export default function HostDashboardView({
 
                 <button
                   type="button"
-                  onClick={() => setShowAutoGenerateModal(true)}
-                  className="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-2xs"
-                  title="Generar facturas de las reservas que ya tienes en el calendario"
-                >
-                  <Zap size={14} className="text-amber-600" />
-                  <span>Auto-generar desde iCal</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => setShowFiscalProfileModal(true)}
                   className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 px-3.5 py-2 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-2xs"
                 >
@@ -2191,7 +2179,7 @@ export default function HostDashboardView({
                     3. Cero trabajo manual
                   </span>
                   <p className="text-slate-300 text-[11px] leading-relaxed">
-                    No piques facturas a mano: pulsa <strong>"Subir Excel / CSV"</strong> con las descargas de Airbnb o pulsa <strong>"Auto-generar desde iCal"</strong> para emitir todo el trimestre de golpe.
+                    No piques facturas a mano: pulsa <strong>"Subir Excel / CSV"</strong> con tus descargas de Booking o Airbnb para emitir todo el trimestre en 1 clic.
                   </p>
                 </div>
               </div>
@@ -2345,23 +2333,15 @@ export default function HostDashboardView({
                     <button
                       type="button"
                       onClick={() => setShowImportCsvModal(true)}
-                      className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 text-xs font-bold rounded-xl transition shadow-sm flex items-center gap-1.5"
+                      className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 text-xs font-bold rounded-xl transition shadow-sm flex items-center gap-1.5"
                     >
                       <Upload size={14} className="text-emerald-400" />
                       <span>Subir Excel / CSV de Reservas</span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setShowAutoGenerateModal(true)}
-                      className="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 px-4 py-2.5 text-xs font-bold rounded-xl transition shadow-2xs flex items-center gap-1.5"
-                    >
-                      <Zap size={14} className="text-amber-600" />
-                      <span>Auto-generar desde Calendario</span>
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => setShowCreateInvoiceModal(true)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-xs font-bold rounded-xl transition shadow-sm flex items-center gap-1.5"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 text-xs font-bold rounded-xl transition shadow-sm flex items-center gap-1.5"
                     >
                       <Plus size={15} />
                       <span>Emitir Individual</span>
@@ -3177,24 +3157,6 @@ export default function HostDashboardView({
             }
           }}
           onClose={() => setShowImportCsvModal(false)}
-        />
-      )}
-
-      {/* MODAL AUTO-GENERACIÓN DESDE iCAL */}
-      {showAutoGenerateModal && (
-        <AutoGenerateInvoicesModal
-          properties={properties}
-          reservations={reservations}
-          existingInvoices={allInvoices}
-          fiscalProfile={currentFiscalProfile}
-          onGenerate={(generatedInvoices) => {
-            if (onAddInvoices) {
-              onAddInvoices(generatedInvoices);
-            } else if (onAddInvoice) {
-              generatedInvoices.forEach(onAddInvoice);
-            }
-          }}
-          onClose={() => setShowAutoGenerateModal(false)}
         />
       )}
 

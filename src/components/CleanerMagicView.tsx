@@ -36,7 +36,7 @@ interface Props {
   onAddPhoto: (taskId: string, photoUrl: string) => void;
   onAddItemPhoto?: (taskId: string, itemId: string, photoUrl: string) => void;
   onDeleteItemPhoto?: (taskId: string, itemId: string, photoIndex: number) => void;
-  onStartTask?: (taskId: string) => void;
+  onStartTask?: (taskId: string, startTime?: string) => void;
   onCompleteTask: (taskId: string) => void;
   onAddIncident: (taskId: string, text: string, photoUrl?: string) => void;
   onBackToApp?: () => void;
@@ -126,8 +126,17 @@ export default function CleanerMagicView({
       return Math.round(task.actualHours * 3600);
     }
     if (task.status === 'in_progress') {
-      const startMs = task.startTime ? new Date(task.startTime).getTime() : 0;
-      if (startMs > 0) {
+      let startMs = task.startTime ? new Date(task.startTime).getTime() : 0;
+      if (!startMs || isNaN(startMs)) {
+        try {
+          const saved = localStorage.getItem(`turnexo_task_timer_${task.id}`);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.startTime) startMs = new Date(parsed.startTime).getTime();
+          }
+        } catch {}
+      }
+      if (startMs > 0 && !isNaN(startMs)) {
         return Math.max(0, Math.floor((Date.now() - startMs) / 1000));
       }
     }
@@ -163,13 +172,34 @@ export default function CleanerMagicView({
   });
   const todayCapitalized = todayFormatted.charAt(0).toUpperCase() + todayFormatted.slice(1);
 
-  // Temporizador en vivo para tareas en progreso
+  // Temporizador en vivo para tareas en progreso con persistencia indestructible
   useEffect(() => {
-    // Si alguna tarea está en_progress pero no tiene startTime, asegurar que se guarde
+    // Si alguna tarea está en_progress, asegurar que tenga su startTime persistido
     myTasks.forEach((t) => {
-      if (t.status === 'in_progress' && !t.startTime) {
-        t.startTime = new Date().toISOString();
-        if (onStartTask) onStartTask(t.id);
+      if (t.status === 'in_progress') {
+        let existingStart = t.startTime;
+        if (!existingStart) {
+          try {
+            const saved = localStorage.getItem(`turnexo_task_timer_${t.id}`);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed.startTime) existingStart = parsed.startTime;
+            }
+          } catch {}
+        }
+        if (existingStart) {
+          t.startTime = existingStart;
+        } else {
+          const nowIso = new Date().toISOString();
+          t.startTime = nowIso;
+          try {
+            localStorage.setItem(
+              `turnexo_task_timer_${t.id}`,
+              JSON.stringify({ startTime: nowIso, status: 'in_progress' })
+            );
+          } catch {}
+          if (onStartTask) onStartTask(t.id, nowIso);
+        }
       }
     });
 
@@ -178,8 +208,21 @@ export default function CleanerMagicView({
         const next: Record<string, number> = {};
         myTasks.forEach((t) => {
           if (t.status === 'in_progress') {
-            const startMs = t.startTime ? new Date(t.startTime).getTime() : Date.now();
-            next[t.id] = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+            let startMs = t.startTime ? new Date(t.startTime).getTime() : 0;
+            if (!startMs || isNaN(startMs)) {
+              try {
+                const saved = localStorage.getItem(`turnexo_task_timer_${t.id}`);
+                if (saved) {
+                  const parsed = JSON.parse(saved);
+                  if (parsed.startTime) startMs = new Date(parsed.startTime).getTime();
+                }
+              } catch {}
+            }
+            if (startMs > 0 && !isNaN(startMs)) {
+              next[t.id] = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+            } else {
+              next[t.id] = 0;
+            }
           }
         });
         return next;
@@ -220,13 +263,33 @@ export default function CleanerMagicView({
   };
 
   const handleStartCleaning = (task: CleaningTask) => {
-    const nowIso = new Date().toISOString();
-    task.status = 'in_progress';
-    task.startTime = task.startTime || nowIso;
-    if (onStartTask) {
-      onStartTask(task.id);
+    let startIso = task.startTime;
+    if (!startIso) {
+      try {
+        const saved = localStorage.getItem(`turnexo_task_timer_${task.id}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.startTime) startIso = parsed.startTime;
+        }
+      } catch {}
     }
-    setElapsedSeconds((prev) => ({ ...prev, [task.id]: 0 }));
+    if (!startIso) {
+      startIso = new Date().toISOString();
+    }
+    task.status = 'in_progress';
+    task.startTime = startIso;
+    try {
+      localStorage.setItem(
+        `turnexo_task_timer_${task.id}`,
+        JSON.stringify({ startTime: startIso, status: 'in_progress' })
+      );
+    } catch {}
+    if (onStartTask) {
+      onStartTask(task.id, startIso);
+    }
+    const startMs = new Date(startIso).getTime();
+    const initialElapsed = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+    setElapsedSeconds((prev) => ({ ...prev, [task.id]: initialElapsed }));
   };
 
   const handleFinishCleaning = (task: CleaningTask) => {
@@ -249,6 +312,9 @@ export default function CleanerMagicView({
     }
 
     if (confirm('¿Seguro que deseas finalizar esta limpieza?')) {
+      try {
+        localStorage.removeItem(`turnexo_task_timer_${task.id}`);
+      } catch {}
       onCompleteTask(task.id);
       setActiveTaskId(null);
     }

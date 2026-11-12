@@ -259,9 +259,37 @@ export default function App() {
         }
         if (cloud.tasks && cloud.tasks.length > 0) {
           setTaskOverrides((prev) => {
-            const cloudIds = new Set(cloud.tasks!.map((t) => t.id));
-            const localOnly = prev.filter((t) => !cloudIds.has(t.id));
-            return [...cloud.tasks!, ...localOnly];
+            const prevMap = new Map(prev.map((t) => [t.id, t]));
+            return cloud.tasks!.map((cloudTask) => {
+              const local = prevMap.get(cloudTask.id);
+              let localTimerStart: string | undefined = undefined;
+              try {
+                const saved = localStorage.getItem(`turnexo_task_timer_${cloudTask.id}`);
+                if (saved) {
+                  const parsed = JSON.parse(saved);
+                  if (parsed.startTime) localTimerStart = parsed.startTime;
+                }
+              } catch {}
+
+              const mergedStartTime =
+                cloudTask.startTime ||
+                local?.startTime ||
+                localTimerStart ||
+                undefined;
+
+              const mergedStatus =
+                (local?.status === 'in_progress' || localTimerStart) && cloudTask.status !== 'completed'
+                  ? 'in_progress'
+                  : cloudTask.status;
+
+              return {
+                ...cloudTask,
+                status: mergedStatus,
+                startTime: mergedStartTime,
+                endTime: cloudTask.endTime || local?.endTime,
+                actualHours: cloudTask.actualHours || local?.actualHours,
+              };
+            });
           });
         }
       });
@@ -503,13 +531,33 @@ export default function App() {
     });
   };
 
-  const handleStartTask = (taskId: string) => {
+  const handleStartTask = (taskId: string, explicitStartTime?: string) => {
     const found = tasks.find((t) => t.id === taskId);
     if (!found) return;
+    let startIso = explicitStartTime || found.startTime;
+    if (!startIso) {
+      try {
+        const saved = localStorage.getItem(`turnexo_task_timer_${taskId}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.startTime) startIso = parsed.startTime;
+        }
+      } catch {}
+    }
+    if (!startIso) {
+      startIso = new Date().toISOString();
+    }
+    try {
+      localStorage.setItem(
+        `turnexo_task_timer_${taskId}`,
+        JSON.stringify({ startTime: startIso, status: 'in_progress' })
+      );
+    } catch {}
+
     upsertTaskOverride({
       ...found,
       status: 'in_progress',
-      startTime: found.startTime || new Date().toISOString(),
+      startTime: startIso,
     });
     showToast('Limpieza iniciada. Cronómetro en marcha.');
   };
@@ -518,11 +566,24 @@ export default function App() {
     const found = tasks.find((t) => t.id === taskId);
     if (!found) return;
     const now = new Date().toISOString();
-    let actualHours = found.actualHours;
-    if (found.startTime) {
-      const diffMs = new Date(now).getTime() - new Date(found.startTime).getTime();
-      actualHours = Math.max(0.1, Number((diffMs / 3600000).toFixed(2)));
+    let startIso = found.startTime;
+    if (!startIso) {
+      try {
+        const saved = localStorage.getItem(`turnexo_task_timer_${taskId}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.startTime) startIso = parsed.startTime;
+        }
+      } catch {}
     }
+    let actualHours = found.actualHours;
+    if (startIso) {
+      const diffMs = new Date(now).getTime() - new Date(startIso).getTime();
+      actualHours = Math.max(0.01, Number((diffMs / 3600000).toFixed(2)));
+    }
+    try {
+      localStorage.removeItem(`turnexo_task_timer_${taskId}`);
+    } catch {}
     upsertTaskOverride({
       ...found,
       status: 'completed',

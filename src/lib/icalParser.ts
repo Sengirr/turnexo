@@ -321,8 +321,27 @@ export function buildCleaningTasksFromReservations(
       }
     }
 
+    const taskId = existing?.id || `task-${res.id}`;
+    let itemStartTime = existing?.startTime;
+    if (!itemStartTime && typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(`turnexo_task_timer_${taskId}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.startTime) itemStartTime = parsed.startTime;
+        }
+      } catch {}
+    }
+
+    const effectiveStatus =
+      existing?.status === 'completed'
+        ? 'completed'
+        : itemStartTime || existing?.status === 'in_progress'
+        ? 'in_progress'
+        : (existing?.status || 'pending');
+
     tasks.push({
-      id: existing?.id || `task-${res.id}`,
+      id: taskId,
       propertyId: prop.id,
       reservationId: res.id,
       date: res.checkOut,
@@ -331,10 +350,8 @@ export function buildCleaningTasksFromReservations(
       nextCheckInTime: prop.checkInTime,
       scheduledCleaningTime,
       lateCheckoutActive,
-      status: existing?.status || 'pending',
-      startTime:
-        existing?.startTime ||
-        (existing?.status === 'in_progress' ? new Date().toISOString() : undefined),
+      status: effectiveStatus,
+      startTime: itemStartTime,
       endTime: existing?.endTime,
       actualHours: existing?.actualHours,
       notes: existing?.notes,

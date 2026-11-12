@@ -374,10 +374,28 @@ export default function HostDashboardView({
       checkInInstructions: 'Introduce el código en el cajetín junto a la puerta principal.',
       videos: [
         {
-          id: `vid-${Date.now()}`,
+          id: `vid-${Date.now()}-1`,
           title: 'Cómo entrar al alojamiento y recoger las llaves',
           category: 'checkin',
-          url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+          url: 'https://www.youtube.com/watch?v=QfDf3DJVdMw',
+        },
+        {
+          id: `vid-${Date.now()}-2`,
+          title: 'Home Tour del Alojamiento',
+          category: 'hometour',
+          url: 'https://www.youtube.com/watch?v=M0PNnOe0do8',
+        },
+        {
+          id: `vid-${Date.now()}-3`,
+          title: 'Mando del Aire Acondicionado',
+          category: 'appliance',
+          url: 'https://www.youtube.com/watch?v=IsEaaEf6ALs',
+        },
+        {
+          id: `vid-${Date.now()}-4`,
+          title: 'Vitrocerámica y Cocina',
+          category: 'appliance',
+          url: 'https://www.youtube.com/watch?v=lVo8BU0aP6Q',
         },
       ],
       extras: [

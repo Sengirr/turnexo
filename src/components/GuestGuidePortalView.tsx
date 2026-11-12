@@ -700,12 +700,47 @@ export default function GuestGuidePortalView({
   const [incidentDetails, setIncidentDetails] = useState('');
   const [incidentSent, setIncidentSent] = useState(false);
 
-  // Vídeos por categoría
-  const checkinClips = (property.videos || []).filter((v) => v.category === 'checkin');
-  const homeTourClip = (property.videos || []).find((v) => v.category === 'hometour');
-  const houseClips = (property.videos || []).filter(
+  // Vídeos por categoría con sustitución de enlaces antiguos por vídeos reales
+  const rawClips = (property.videos || []).map((v) => {
+    if (v.url && v.url.includes('dQw4w9WgXcQ')) {
+      if (v.category === 'checkin') return { ...v, url: 'https://www.youtube.com/watch?v=QfDf3DJVdMw' };
+      if (v.category === 'hometour') return { ...v, url: 'https://www.youtube.com/watch?v=M0PNnOe0do8' };
+      if (/aire|ac|clima/i.test(v.title)) return { ...v, url: 'https://www.youtube.com/watch?v=IsEaaEf6ALs' };
+      if (/vitro|inducci|horno/i.test(v.title)) return { ...v, url: 'https://www.youtube.com/watch?v=lVo8BU0aP6Q' };
+      return { ...v, url: 'https://www.youtube.com/watch?v=1pwnhLu4G8s' };
+    }
+    return v;
+  });
+
+  const checkinClips = rawClips.filter((v) => v.category === 'checkin');
+  const homeTourClip = rawClips.find((v) => v.category === 'hometour');
+  
+  const existingHouseClips = rawClips.filter(
     (v) => v.category === 'appliance' || v.category === 'other'
   );
+
+  // Si no hay clips de electrodomésticos en la casa, incluir clips de prueba reales para que la pestaña CASA siempre tenga tutoriales útiles
+  const houseClips = existingHouseClips.length > 0 ? existingHouseClips : [
+    {
+      id: 'demo-app-1',
+      title: 'Mando del Aire Acondicionado (Frío / Calor)',
+      category: 'appliance' as const,
+      url: 'https://www.youtube.com/watch?v=IsEaaEf6ALs',
+    },
+    {
+      id: 'demo-app-2',
+      title: 'Cómo desbloquear y encender la Vitrocerámica',
+      category: 'appliance' as const,
+      url: 'https://www.youtube.com/watch?v=lVo8BU0aP6Q',
+    },
+    {
+      id: 'demo-app-3',
+      title: 'Cómo usar la cafetera de cápsulas Nespresso',
+      category: 'appliance' as const,
+      url: 'https://www.youtube.com/watch?v=1pwnhLu4G8s',
+    },
+  ];
+
   const hasHouseGuide = houseClips.length > 0 || Boolean(property.appliancesGuide?.trim());
 
   useEffect(() => {
@@ -796,13 +831,18 @@ export default function GuestGuidePortalView({
 
   const cleanWhatsappPhone = property.hostWhatsapp.replace(/[^0-9]/g, '');
 
+  // Solo mostramos nombre personalizado si la URL incluye expresamente el parámetro de reserva (?r= o ?guest=)
+  // En enlaces generales (/g/:slug o ?demo=1), se muestra siempre la bienvenida general acogedora
+  const hasExplicitGuestParam = Boolean(urlParams?.get('r') || urlParams?.get('res') || urlParams?.get('guest'));
+
   const isSpecificGuest =
+    hasExplicitGuestParam &&
     Boolean(reservation.guestName) &&
     reservation.guestName.trim().length > 0 &&
     !/^(hu[eé]sped|guest|invitado)$/i.test(reservation.guestName.trim());
 
   const guestFirstName = isSpecificGuest
-    ? reservation.guestName.trim().split(' ')[0]
+    ? (urlParams?.get('guest') || reservation.guestName.trim().split(' ')[0])
     : null;
 
   const welcomeGreeting = guestFirstName

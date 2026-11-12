@@ -11,6 +11,7 @@ import {
   QrCode,
   RefreshCw,
   Users,
+  User,
   CheckCircle2,
   Clock,
   FileCode2,
@@ -181,8 +182,8 @@ export default function HostDashboardView({
   });
   const t = DASHBOARD_TRANSLATIONS[lang] || DASHBOARD_TRANSLATIONS.en;
 
-  // Filtros y modos de visualización avanzados
-  const [scheduleView, setScheduleView] = useState<'table' | 'timeline'>('table');
+  // Filtros y modos de visualización avanzados (Cuadrante por Días, Tabla o Timeline como en IVI ERP)
+  const [scheduleView, setScheduleView] = useState<'list' | 'table' | 'timeline'>('list');
   const [schedulePropertyFilter, setSchedulePropertyFilter] = useState('all');
   const [scheduleStatusFilter, setScheduleStatusFilter] = useState<'all' | 'urgent' | 'late' | 'completed' | 'pending'>('all');
   const [scheduleSearch, setScheduleSearch] = useState('');
@@ -1040,6 +1041,18 @@ export default function HostDashboardView({
                   <div className="flex items-center gap-1 bg-slate-200/70 p-1 rounded-xl">
                     <button
                       type="button"
+                      onClick={() => setScheduleView('list')}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition ${
+                        scheduleView === 'list'
+                          ? 'bg-white text-slate-900 shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Calendar size={14} className="text-orange-600" />
+                      <span>Cuadrante por Días</span>
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setScheduleView('table')}
                       className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition ${
                         scheduleView === 'table'
@@ -1060,7 +1073,7 @@ export default function HostDashboardView({
                       }`}
                     >
                       <LayoutGrid size={14} />
-                      <span>Timeline Semanal (Gantt)</span>
+                      <span>Matriz Semanal</span>
                     </button>
                   </div>
                 </div>
@@ -1147,6 +1160,238 @@ export default function HostDashboardView({
                     >
                       Restablecer filtros
                     </button>
+                  </div>
+                ) : scheduleView === 'list' ? (
+                  /* VISTA CUADRANTE POR DÍAS (ESTILO IVI ERP DailyCleaningListView) */
+                  <div className="space-y-6">
+                    {Array.from(new Set(filteredTasks.map((t) => t.date))).sort().map((dateStr) => {
+                      const dayTasks = filteredTasks.filter((t) => t.date === dateStr);
+                      const isToday = new Date().toISOString().slice(0, 10) === dateStr;
+                      const [y, m, d] = dateStr.split('-');
+                      const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
+                      const formattedDate = dateObj.toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                      });
+                      const capitalizedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+
+                      return (
+                        <div key={dateStr} className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+                          {/* Cabecera del Día */}
+                          <div className="bg-slate-50/80 px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              <Calendar size={16} className={isToday ? "text-emerald-600" : "text-slate-400"} />
+                              <span className="text-sm font-extrabold text-slate-900">
+                                {isToday ? `Hoy · ${capitalizedDate}` : capitalizedDate}
+                              </span>
+                              {isToday && (
+                                <span className="text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                                  Hoy
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs font-extrabold bg-white border border-slate-200 text-slate-600 px-3 py-1 rounded-full shadow-xs">
+                              {dayTasks.length} {dayTasks.length === 1 ? 'limpieza' : 'limpiezas'}
+                            </span>
+                          </div>
+
+                          {/* Lista de Limpiezas del Día */}
+                          <div className="divide-y divide-slate-100">
+                            {dayTasks.map((task) => {
+                              const prop = properties.find((p) => p.id === task.propertyId);
+                              const res = reservations.find((r) => r.id === task.reservationId);
+                              const cleaner = cleaners.find((c) => c.id === task.cleanerId);
+                              const isCompleted = task.status === 'completed';
+                              const isInProgress = task.status === 'in_progress';
+
+                              return (
+                                <div key={task.id} className="p-4 sm:p-5 hover:bg-slate-50/50 transition space-y-3.5">
+                                  <div className="flex flex-wrap items-start justify-between gap-3">
+                                    {/* Alojamiento, PAX y Huésped */}
+                                    <div className="flex items-start gap-3">
+                                      <div
+                                        className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                                          isCompleted
+                                            ? 'bg-emerald-100 text-emerald-700'
+                                            : isInProgress
+                                            ? 'bg-amber-100 text-amber-700 animate-pulse'
+                                            : 'bg-slate-100 text-slate-500'
+                                        }`}
+                                      >
+                                        {isCompleted ? <CheckCircle2 size={20} /> : <Home size={18} />}
+                                      </div>
+
+                                      <div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-base font-extrabold text-slate-900">
+                                            {prop?.name}
+                                          </span>
+                                          <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                            <User size={10} strokeWidth={3} className="text-slate-400" />
+                                            {task.pax || 4}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                                          <span>
+                                            Salida:{' '}
+                                            <button
+                                              type="button"
+                                              onClick={() => res && onOpenGuestPreview(res.id)}
+                                              className="font-bold text-slate-800 hover:text-orange-600 underline underline-offset-2"
+                                            >
+                                              {res?.guestName || 'Huésped'}
+                                            </button>
+                                          </span>
+                                          <span className="text-[11px] font-mono text-slate-400">
+                                            [{res?.source || 'iCal'}]
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Badge de Estado estilo IVI ERP */}
+                                    <div className="flex items-center gap-2">
+                                      <span
+                                        className={`text-xs font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5 ${
+                                          isCompleted
+                                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                            : isInProgress
+                                            ? 'bg-amber-100 text-amber-800 border border-amber-200 animate-pulse'
+                                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                        }`}
+                                      >
+                                        {isCompleted ? (
+                                          <>
+                                            <CheckCircle2 size={13} />
+                                            Completada
+                                          </>
+                                        ) : isInProgress ? (
+                                          <>
+                                            <Clock size={13} className="animate-spin" />
+                                            En Progreso
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Clock size={13} />
+                                            Pendiente
+                                          </>
+                                        )}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Fila Operativa (Horarios, Asignación, Duración y Acciones) */}
+                                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-100/80">
+                                    <div className="flex flex-wrap items-center gap-2.5 text-xs">
+                                      {/* Horarios Salida -> Entrada */}
+                                      <div className="flex items-center gap-1.5 bg-slate-100/90 px-3 py-1.5 rounded-xl font-bold">
+                                        <span
+                                          className={`text-[10px] uppercase font-black ${
+                                            task.lateCheckoutActive ? 'text-amber-800' : 'text-rose-700'
+                                          }`}
+                                        >
+                                          {task.lateCheckoutActive ? 'LATE OUT' : 'SALIDA'}
+                                        </span>
+                                        <span className="text-slate-900">{task.scheduledCleaningTime}h</span>
+                                        <span className="text-slate-400 px-0.5">→</span>
+                                        <span className="text-[10px] uppercase font-black text-emerald-700">
+                                          ENTRADA
+                                        </span>
+                                        <span className="text-slate-900">
+                                          {task.sameDayCheckIn ? `${task.nextCheckInTime}h` : '-'}
+                                        </span>
+                                      </div>
+
+                                      {/* Rotación mismo día */}
+                                      {task.sameDayCheckIn && (
+                                        <span className="bg-orange-100 text-orange-800 border border-orange-200 text-[11px] font-black px-2.5 py-1 rounded-xl flex items-center gap-1">
+                                          <Flame size={12} className="text-orange-600" /> ROTACIÓN MISMO DÍA
+                                        </span>
+                                      )}
+
+                                      {/* Late Checkout Badge / Acción si solicitado */}
+                                      {res?.lateCheckoutRequested && !task.lateCheckoutActive && (
+                                        <button
+                                          type="button"
+                                          onClick={() => res && onApproveLateCheckout(res.id)}
+                                          className="bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-3 py-1 rounded-xl text-xs transition shadow-xs"
+                                        >
+                                          Aprobar Late Out (+{prop?.lateCheckoutPrice}€)
+                                        </button>
+                                      )}
+
+                                      {/* Selector de Limpiadora Asignada */}
+                                      <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1">
+                                        <User size={13} className="text-slate-400" />
+                                        <select
+                                          value={task.cleanerId}
+                                          onChange={(e) => onAssignCleaner(task.id, e.target.value)}
+                                          className="bg-transparent font-bold text-slate-800 text-xs outline-none cursor-pointer"
+                                        >
+                                          {cleaners.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                              {c.name}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+
+                                      {/* Horas estipuladas */}
+                                      <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-xl text-xs font-bold">
+                                        1.5h
+                                      </span>
+
+                                      {/* Fotos de Comprobación */}
+                                      {task.photosUploaded.length > 0 ? (
+                                        <button
+                                          type="button"
+                                          onClick={() => setInspectingTaskPhotos(task)}
+                                          className="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 px-2.5 py-1 rounded-xl font-bold transition"
+                                        >
+                                          <Camera size={13} />
+                                          <span>{task.photosUploaded.length} fotos subidas</span>
+                                        </button>
+                                      ) : (
+                                        <span className="text-slate-400 text-xs font-medium px-2 py-1">
+                                          0 fotos
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    {/* Acciones Rápidas: WhatsApp y Factura 10% */}
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setPreselectedResIdForInvoice(task.reservationId);
+                                          setShowCreateInvoiceModal(true);
+                                        }}
+                                        className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-2.5 py-1.5 rounded-xl text-xs font-bold transition shadow-xs"
+                                        title="Emitir Factura Simplificada con IVA 10%"
+                                      >
+                                        <FileText size={12} className="text-emerald-600" />
+                                        <span>Factura 10%</span>
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => sendTaskWhatsApp(task)}
+                                        className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs transition"
+                                        title="Enviar enlace mágico con checklist por WhatsApp"
+                                      >
+                                        <Send size={12} />
+                                        <span>WhatsApp</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : scheduleView === 'table' ? (
                   <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">

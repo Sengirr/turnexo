@@ -147,6 +147,13 @@ export interface CleaningTask {
   checklist: ChecklistItem[];
   incidents: CleaningIncident[];
   fee: number;
+  startTime?: string;
+  endTime?: string;
+  actualHours?: number;
+  pax?: number;
+  notes?: string;
+  isDeepCleaning?: boolean;
+  isBagPrepared?: boolean;
 }
 
 export interface Cleaner {

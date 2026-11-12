@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Camera,
   CheckCircle2,
@@ -8,11 +8,21 @@ import {
   Home,
   Plus,
   Send,
-  Wallet,
   Calendar,
   ArrowLeft,
+  ChevronRight,
+  User,
+  Sparkles,
+  MapPin,
+  Video,
+  Play,
+  Square,
+  Trash2,
+  ExternalLink,
+  ShieldCheck,
+  CheckCircle,
 } from 'lucide-react';
-import { Cleaner, CleaningTask, Property } from '../lib/icalParser';
+import { Cleaner, CleaningTask, Property, ChecklistItem } from '../lib/icalParser';
 import { compressCleanerPhoto } from '../lib/imageCompressor';
 
 interface Props {
@@ -23,16 +33,11 @@ interface Props {
   properties: Property[];
   onToggleChecklistItem: (taskId: string, itemId: string) => void;
   onAddPhoto: (taskId: string, photoUrl: string) => void;
+  onStartTask?: (taskId: string) => void;
   onCompleteTask: (taskId: string) => void;
   onAddIncident: (taskId: string, text: string) => void;
   onBackToApp?: () => void;
 }
-
-const SAMPLE_CLEAN_PHOTOS = [
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&q=80',
-];
 
 export default function CleanerMagicView({
   cleaners,
@@ -42,15 +47,58 @@ export default function CleanerMagicView({
   properties,
   onToggleChecklistItem,
   onAddPhoto,
+  onStartTask,
   onCompleteTask,
   onAddIncident,
   onBackToApp,
 }: Props) {
   const cleaner = cleaners.find((c) => c.id === selectedCleanerId) || cleaners[0];
-  const [incidentDrafts, setIncidentDrafts] = useState<Record<string, string>>({});
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [incidentText, setIncidentText] = useState('');
+  const [elapsedSeconds, setElapsedSeconds] = useState<Record<string, number>>({});
+  const [filterMissing, setFilterMissing] = useState(false);
+  const timerRef = useRef<any>(null);
 
   const myTasks = tasks.filter((task) => task.cleanerId === cleaner.id);
-  const totalEarned = myTasks.reduce((acc, task) => acc + task.fee, 0);
+  const activeTask = myTasks.find((t) => t.id === activeTaskId);
+  const completedCount = myTasks.filter((t) => t.status === 'completed').length;
+
+  // Formato de fecha en español idéntico a IVI ERP
+  const todayFormatted = new Date().toLocaleDateString('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+  const todayCapitalized = todayFormatted.charAt(0).toUpperCase() + todayFormatted.slice(1);
+
+  // Temporizador en vivo para tareas en progreso
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds((prev) => {
+        const next = { ...prev };
+        myTasks.forEach((t) => {
+          if (t.status === 'in_progress') {
+            const start = t.startTime ? new Date(t.startTime).getTime() : Date.now();
+            const diff = Math.max(0, Math.floor((Date.now() - start) / 1000));
+            next[t.id] = diff;
+          }
+        });
+        return next;
+      });
+    }, 1000);
+
+    return () => clearInterval(timerRef.current);
+  }, [myTasks]);
+
+  const formatTimer = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    if (hours > 0) {
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const handleFileChange = async (taskId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,314 +118,603 @@ export default function CleanerMagicView({
     e.target.value = '';
   };
 
+  const handleStartCleaning = (task: CleaningTask) => {
+    if (onStartTask) {
+      onStartTask(task.id);
+    } else {
+      task.status = 'in_progress';
+      task.startTime = new Date().toISOString();
+    }
+  };
+
+  const handleFinishCleaning = (task: CleaningTask) => {
+    // Validación idéntica a IVI ERP: ¿Faltan tareas o fotos obligatorias?
+    const pendingItems = task.checklist.filter((i) => !i.completed);
+    const requiresPhoto = task.checklist.some((i) => i.photoRequired);
+    const missingPhotos = requiresPhoto && task.photosUploaded.length === 0;
+
+    if (pendingItems.length > 0) {
+      alert(`⚠️ Faltan ${pendingItems.length} tareas por completar en el checklist.`);
+      setFilterMissing(true);
+      return;
+    }
+
+    if (missingPhotos) {
+      alert('📸 Se requiere subir al menos 1 foto de comprobación (nevera, llaves, baño...) antes de finalizar.');
+      return;
+    }
+
+    if (confirm('¿Seguro que deseas finalizar esta limpieza?')) {
+      onCompleteTask(task.id);
+      setActiveTaskId(null);
+    }
+  };
+
+  const handleSendIncident = (taskId: string) => {
+    if (!incidentText.trim()) return;
+    onAddIncident(taskId, incidentText.trim());
+    setIncidentText('');
+  };
+
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] pb-20">
-      {/* Barra discreta de previsualización solo cuando se abre como demo */}
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-24 antialiased">
+      {/* Barra superior de modo Demo / Previsualización */}
       {onBackToApp && (
-        <div className="bg-[#141413] text-[#F6F4EE] border-b border-white/10 px-4 py-2.5 text-xs">
-          <div className="max-w-md mx-auto flex items-center justify-between gap-2">
+        <div className="bg-slate-900 text-white px-4 py-2 text-xs border-b border-slate-800 sticky top-0 z-50 shadow-sm">
+          <div className="max-w-md mx-auto flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={onBackToApp}
-              className="inline-flex items-center gap-1.5 font-mono uppercase tracking-wider text-[#C85A32] hover:underline font-bold"
+              className="inline-flex items-center gap-1.5 font-bold text-orange-400 hover:text-orange-300 transition"
             >
               <ArrowLeft size={14} />
-              Volver a Turnexo
+              Volver al Panel
             </button>
-
-            <select
-              value={cleaner.id}
-              onChange={(e) => onSelectCleaner(e.target.value)}
-              className="bg-white/10 border border-white/20 text-white px-2.5 py-1 text-[11px] font-mono"
-            >
-              {cleaners.map((c) => (
-                <option key={c.id} value={c.id} className="text-black">
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-slate-400">Limpiadora:</span>
+              <select
+                value={cleaner.id}
+                onChange={(e) => onSelectCleaner(e.target.value)}
+                className="bg-slate-800 text-white rounded-lg px-2 py-1 text-xs border border-slate-700 outline-none font-medium"
+              >
+                {cleaners.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       )}
 
-      <div className="max-w-md mx-auto">
-        {/* Cabecera Operativa Móvil */}
-        <div className="bg-[#141413] text-[#F6F4EE] px-6 pt-10 pb-8 border-b border-[#2C2C29]">
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C85A32]">
-            TURNEXO OPERACIONES · /c/{cleaner.magicToken}
-          </span>
-          <h1 className="text-3xl font-extrabold tracking-tight mt-2">
-            Hola, {cleaner.name.split(' ')[0]}
-          </h1>
-          <p className="text-xs text-white/60 mt-0.5">
-            Parte de limpiezas actualizado en tiempo real
-          </p>
+      {/* VISTA 1: DASHBOARD PRINCIPAL DE TAREAS (IVI ERP) */}
+      {!activeTaskId && (
+        <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
+          {/* Header con saludo idéntico a IVI ERP */}
+          <header className="space-y-1">
+            <p className="text-[11px] font-black tracking-widest uppercase text-emerald-600">
+              TURNEXO CLEANING APP
+            </p>
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              Hola, {cleaner.name.split(' ')[0]} 👋
+            </h1>
+            <p className="text-sm font-medium text-slate-500">{todayCapitalized}</p>
+          </header>
 
-          <div className="mt-6 bg-[#1E1E1C] border border-white/15 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-[#1F4E3D] text-white flex items-center justify-center">
-                <Wallet size={17} />
-              </div>
+          {/* Tarjeta de Progreso del Día */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
               <div>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-white/50 block">
-                  ACUMULADO SEMANAL
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                  Tareas de Hoy
                 </span>
-                <span className="text-sm font-bold text-white">
-                  {myTasks.length} servicios asignados
+                <span className="text-2xl font-black text-slate-900">
+                  {completedCount} <span className="text-slate-400 text-lg font-bold">/ {myTasks.length}</span>
                 </span>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <CheckCircle2 size={24} />
               </div>
             </div>
-            <span className="font-mono text-2xl font-bold text-white">{totalEarned} €</span>
+            {/* Barra de progreso */}
+            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="bg-emerald-500 h-2.5 rounded-full transition-all duration-500"
+                style={{
+                  width: `${myTasks.length > 0 ? (completedCount / myTasks.length) * 100 : 0}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Lista de Tareas */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">
+                Alojamientos Asignados
+              </h2>
+              <span className="text-xs font-bold bg-slate-200/80 text-slate-700 px-2.5 py-0.5 rounded-full">
+                {myTasks.length} {myTasks.length === 1 ? 'piso' : 'pisos'}
+              </span>
+            </div>
+
+            {myTasks.length === 0 ? (
+              <div className="bg-white rounded-3xl p-10 text-center border-dashed border-2 border-slate-200 space-y-3">
+                <Calendar size={40} className="mx-auto text-slate-300" />
+                <p className="font-bold text-slate-700">No hay tareas asignadas para hoy.</p>
+                <p className="text-xs text-slate-400">
+                  Cuando el anfitrión tenga una salida programada, aparecerá aquí automáticamente.
+                </p>
+              </div>
+            ) : (
+              myTasks.map((task) => {
+                const prop = properties.find((p) => p.id === task.propertyId);
+                const isCompleted = task.status === 'completed';
+                const isInProgress = task.status === 'in_progress';
+                const taskSeconds = elapsedSeconds[task.id] || 0;
+
+                return (
+                  <div
+                    key={task.id}
+                    onClick={() => setActiveTaskId(task.id)}
+                    className={`rounded-3xl p-5 border transition-all cursor-pointer active:scale-[0.99] relative overflow-hidden ${
+                      isCompleted
+                        ? 'bg-emerald-50/70 border-emerald-200 shadow-sm'
+                        : isInProgress
+                        ? 'bg-white border-emerald-500 ring-2 ring-emerald-500/20 shadow-md'
+                        : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      {/* Icono de estado */}
+                      <div
+                        className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                          isCompleted
+                            ? 'bg-emerald-100 text-emerald-600'
+                            : isInProgress
+                            ? 'bg-emerald-50 text-emerald-600'
+                            : 'bg-slate-100 text-slate-400'
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle2 size={24} />
+                        ) : isInProgress ? (
+                          <Clock size={24} className="animate-pulse" />
+                        ) : (
+                          <Home size={22} />
+                        )}
+                      </div>
+
+                      {/* Info de la propiedad */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h3
+                            className={`text-base font-extrabold truncate ${
+                              isCompleted ? 'text-emerald-950' : 'text-slate-900'
+                            }`}
+                          >
+                            {prop?.name || 'Alojamiento'}
+                          </h3>
+                          {/* Badge PAX idéntico a IVI ERP */}
+                          <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                            <User size={10} strokeWidth={3} className="text-slate-400" />
+                            {task.pax || 4}
+                          </span>
+                        </div>
+
+                        {/* Fila de Horarios estilo IVI ERP */}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                          {/* Salida */}
+                          <div
+                            className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                              task.lateCheckoutActive
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-rose-50 text-rose-700'
+                            }`}
+                          >
+                            <span className="text-[9px] uppercase font-black opacity-60">
+                              {task.lateCheckoutActive ? 'LATE OUT' : 'SALIDA'}
+                            </span>
+                            <span>{task.scheduledCleaningTime}h</span>
+                          </div>
+
+                          <span className="text-slate-300 font-bold text-xs">→</span>
+
+                          {/* Entrada */}
+                          <div
+                            className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                              task.sameDayCheckIn
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            <span className="text-[9px] uppercase font-black opacity-60">
+                              ENTRADA
+                            </span>
+                            <span>{task.sameDayCheckIn ? `${task.nextCheckInTime}h` : '-'}</span>
+                          </div>
+
+                          {/* Badge de Rotación Misma Día */}
+                          {task.sameDayCheckIn && (
+                            <span className="text-[10px] font-black bg-orange-100 text-orange-800 px-2 py-0.5 rounded-md flex items-center gap-1">
+                              <Flame size={11} className="text-orange-600" /> MISMO DÍA
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Indicador de estado */}
+                        <div className="mt-2.5 flex items-center gap-2 text-xs">
+                          {isCompleted ? (
+                            <span className="text-emerald-700 font-bold flex items-center gap-1">
+                              <CheckCircle2 size={13} /> Limpieza finalizada
+                            </span>
+                          ) : isInProgress ? (
+                            <span className="text-emerald-600 font-bold flex items-center gap-1 animate-pulse">
+                              <Clock size={13} /> En progreso · {formatTimer(taskSeconds)}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 font-medium">
+                              {task.checklist.filter((i) => i.completed).length}/
+                              {task.checklist.length} tareas completadas
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <ChevronRight size={20} className="text-slate-300 shrink-0" />
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
+      )}
 
-        {/* Lista de Tareas */}
-        <div className="px-4 pt-6 space-y-6">
-          {myTasks.map((task) => {
-            const prop = properties.find((p) => p.id === task.propertyId);
-            if (!prop) return null;
+      {/* VISTA 2: DETALLE DE TAREA / CHECKLIST OPERATIVO (IVI ERP TaskDetail) */}
+      {activeTaskId && activeTask && (
+        <div className="max-w-md mx-auto px-4 pt-4 space-y-5">
+          {/* Botón Volver */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTaskId(null);
+              setFilterMissing(false);
+            }}
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white px-3.5 py-2 rounded-2xl border border-slate-200 shadow-xs transition"
+          >
+            <ArrowLeft size={16} />
+            Volver a Tareas de Hoy
+          </button>
 
-            const allChecked = task.checklist.every((c) => c.completed);
-            const hasEnoughPhotos = task.photosUploaded.length >= 1;
+          {/* Ficha del Alojamiento */}
+          {(() => {
+            const prop = properties.find((p) => p.id === activeTask.propertyId);
+            const isCompleted = activeTask.status === 'completed';
+            const isInProgress = activeTask.status === 'in_progress';
+            const taskSeconds = elapsedSeconds[activeTask.id] || 0;
+
+            // Agrupar items de checklist por categoría como en IVI ERP
+            const categories = Array.from(
+              new Set(activeTask.checklist.map((i) => i.category || 'General'))
+            );
 
             return (
-              <div
-                key={task.id}
-                className={`bg-[#FAF9F5] border-2 ${
-                  task.sameDayCheckIn ? 'border-[#C85A32]' : 'border-[#D5CFC0]'
-                }`}
-              >
-                {/* Franja de prioridad */}
-                {task.sameDayCheckIn ? (
-                  <div className="bg-[#C85A32] text-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <Flame size={14} />
-                      ENTRADA HOY · PRIORIDAD
-                    </span>
-                    <span>CHECK-IN {task.nextCheckInTime}H</span>
-                  </div>
-                ) : task.lateCheckoutActive ? (
-                  <div className="bg-[#1F4E3D] text-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <Clock size={14} />
-                      LATE CHECK-OUT CONCEDIDO · ENTRAR A LAS {task.scheduledCleaningTime}H
-                    </span>
-                  </div>
-                ) : (
-                  <div className="bg-[#E8E4D9] text-[#57554F] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider flex items-center justify-between">
-                    <span>SALIDA ESTÁNDAR · SIN ENTRADA HOY</span>
-                    <span>+{task.fee} €</span>
-                  </div>
-                )}
-
-                <div className="p-5 space-y-5">
-                  <div className="flex items-start justify-between gap-2 border-b border-[#E2DDD2] pb-4">
+              <div className="space-y-5">
+                {/* Cabecera del Alojamiento */}
+                <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-[#C85A32]">
-                        <Calendar size={13} />
-                        <span>{task.date}</span>
-                      </div>
-                      <h2 className="text-lg font-bold text-[#141413] mt-1 flex items-center gap-1.5">
-                        <Home size={16} className="text-[#57554F] shrink-0" />
-                        {prop.name}
-                      </h2>
-                      <p className="text-xs text-[#57554F] mt-0.5">{prop.address}</p>
-                    </div>
-                    <span className="font-mono text-xs font-bold bg-[#141413] text-white px-3 py-1.5 shrink-0">
-                      {task.scheduledCleaningTime}h
-                    </span>
-                  </div>
-
-                  {/* Checklist */}
-                  <div className="bg-white border border-[#E2DDD2] p-4 space-y-3">
-                    <div className="flex items-center justify-between pb-1 border-b border-[#E2DDD2]">
-                      <p className="font-mono text-[10px] font-bold text-[#57554F] uppercase tracking-wider">
-                        PROTOCOLO DE REVISIÓN ({task.checklist.filter((c) => c.completed).length}/{task.checklist.length})
+                      <p className="text-[11px] font-black uppercase text-slate-400 tracking-wider">
+                        {activeTask.date} · PARTE DE TRABAJO
                       </p>
-                      {task.checklist.some((c) => c.photoRequired) && (
-                        <span className="font-mono text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 inline-flex items-center gap-1">
-                          <Camera size={11} /> {task.checklist.filter((c) => c.photoRequired).length} fotos requeridas
-                        </span>
-                      )}
+                      <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">
+                        {prop?.name}
+                      </h2>
+                      <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                        <MapPin size={12} className="text-slate-400 shrink-0" />
+                        {prop?.address}
+                      </p>
                     </div>
 
-                    {/* Group by category if present */}
-                    {Object.entries(
-                      task.checklist.reduce((acc, item) => {
-                        const cat = item.category || 'General';
-                        if (!acc[cat]) acc[cat] = [];
-                        acc[cat].push(item);
-                        return acc;
-                      }, {} as Record<string, typeof task.checklist>)
-                    ).map(([cat, items]) => (
-                      <div key={cat} className="space-y-1.5 pt-1">
-                        {cat !== 'General' && (
-                          <div className="text-[10px] font-mono font-bold text-[#141413] uppercase tracking-widest bg-[#FAF9F5] px-2 py-1 border-l-2 border-[#141413]">
-                            {cat}
-                          </div>
-                        )}
-                        {items.map((item) => (
-                          <label
-                            key={item.id}
-                            className="flex items-center justify-between gap-2.5 py-1.5 px-2 hover:bg-[#FAF9F5] cursor-pointer select-none rounded transition"
-                          >
-                            <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                              <input
-                                type="checkbox"
-                                checked={item.completed}
-                                onChange={() => onToggleChecklistItem(task.id, item.id)}
-                                className="mt-0.5 h-4 w-4 accent-[#141413] shrink-0"
-                              />
-                              <span
-                                className={`text-xs leading-snug ${
-                                  item.completed
-                                    ? 'line-through text-[#57554F]/60'
-                                    : 'text-[#141413] font-medium'
-                                }`}
-                              >
-                                {item.label}
-                              </span>
-                            </div>
-                            {item.photoRequired && (
-                              <span
-                                className={`font-mono text-[10px] font-bold px-2 py-0.5 border shrink-0 inline-flex items-center gap-1 ${
-                                  item.completed
-                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                    : 'bg-amber-100 text-amber-900 border-amber-300'
-                                }`}
-                              >
-                                <Camera size={10} />
-                                <span>{item.completed ? 'Verificado' : 'Foto'}</span>
-                              </span>
-                            )}
-                          </label>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Fotos de comprobación */}
-                  <div className="space-y-2.5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-mono text-[10px] font-bold text-[#57554F] uppercase tracking-wider">
-                        FOTOS DE VERIFICACIÓN ({task.photosUploaded.length})
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <label className="cursor-pointer inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase text-white bg-[#141413] hover:bg-[#2C2C29] px-3 py-1.5 transition">
-                          <Camera size={13} />
-                          <span>Cámara / Galería</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            onChange={(e) => handleFileChange(task.id, e)}
-                            className="hidden"
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const nextImg =
-                              SAMPLE_CLEAN_PHOTOS[
-                                task.photosUploaded.length % SAMPLE_CLEAN_PHOTOS.length
-                              ];
-                            onAddPhoto(task.id, nextImg);
-                          }}
-                          className="font-mono text-[11px] font-bold border border-[#D5CFC0] bg-white px-2.5 py-1.5"
-                        >
-                          + Demo
-                        </button>
-                      </div>
-                    </div>
-
-                    {task.photosUploaded.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2 pt-1">
-                        {task.photosUploaded.map((url, idx) => (
-                          <img
-                            key={idx}
-                            src={url}
-                            alt="Verificación"
-                            className="h-20 w-full object-cover border border-[#D5CFC0]"
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Incidencias */}
-                  <div className="border-t border-[#E2DDD2] pt-4 space-y-2">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#57554F] flex items-center gap-1.5">
-                      <AlertTriangle size={12} className="text-[#C85A32]" />
-                      COMUNICAR DESPERFECTO O ROTURA
-                    </p>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={incidentDrafts[task.id] || ''}
-                        onChange={(e) =>
-                          setIncidentDrafts({ ...incidentDrafts, [task.id]: e.target.value })
-                        }
-                        placeholder="Ej: Vaso roto, mancha en sofá..."
-                        className="flex-1 text-xs bg-white border border-[#D5CFC0] px-3 py-2 focus:outline-none focus:border-[#141413]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const txt = (incidentDrafts[task.id] || '').trim();
-                          if (!txt) return;
-                          onAddIncident(task.id, txt);
-                          setIncidentDrafts({ ...incidentDrafts, [task.id]: '' });
-                        }}
-                        className="bg-[#C85A32] text-white font-mono text-xs font-bold uppercase px-3.5 py-2 flex items-center gap-1 shrink-0"
-                      >
-                        <Plus size={13} />
-                        Enviar
-                      </button>
-                    </div>
-
-                    {task.incidents.length > 0 && (
-                      <div className="space-y-1 pt-1">
-                        {task.incidents.map((inc) => (
-                          <div
-                            key={inc.id}
-                            className="text-xs bg-white border-l-2 border-[#C85A32] px-3 py-1.5 font-medium"
-                          >
-                            {inc.text}{' '}
-                            <span className="font-mono text-[10px] text-[#57554F]">
-                              ({inc.createdAt})
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Completar */}
-                  {task.status === 'completed' ? (
-                    <div className="w-full bg-[#1F4E3D] text-white font-mono text-xs font-bold uppercase tracking-wider py-3.5 flex items-center justify-center gap-2">
-                      <CheckCircle2 size={16} />
-                      LIMPIEZA REGISTRADA CORRECTAMENTE
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => onCompleteTask(task.id)}
-                      className={`w-full font-mono text-xs font-bold uppercase tracking-wider py-4 flex items-center justify-center gap-2 transition ${
-                        allChecked && hasEnoughPhotos
-                          ? 'bg-[#1F4E3D] text-white'
-                          : 'bg-[#141413] hover:bg-[#2C2C29] text-white'
+                    <span
+                      className={`text-xs font-bold px-3 py-1 rounded-full shrink-0 ${
+                        isCompleted
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : isInProgress
+                          ? 'bg-amber-100 text-amber-800 animate-pulse'
+                          : 'bg-slate-100 text-slate-700'
                       }`}
                     >
-                      <Send size={14} />
-                      FINALIZAR Y ENVIAR REPORTE
-                    </button>
+                      {isCompleted ? 'Completada' : isInProgress ? 'En Progreso' : 'Pendiente'}
+                    </span>
+                  </div>
+
+                  {/* Enlaces de ayuda y navegación */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+                    {prop?.googleMapsUrl ? (
+                      <a
+                        href={prop.googleMapsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition"
+                      >
+                        <MapPin size={13} className="text-orange-600" />
+                        Ver en Google Maps
+                      </a>
+                    ) : (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                          prop?.address || prop?.name || ''
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition"
+                      >
+                        <MapPin size={13} className="text-orange-600" />
+                        Ver en Google Maps
+                      </a>
+                    )}
+
+                    {prop?.videos && prop.videos.length > 0 && (
+                      <a
+                        href={prop.videos[0].url.includes('http') ? prop.videos[0].url : `https://www.youtube.com/watch?v=${prop.videos[0].url}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition"
+                      >
+                        <Video size={13} className="text-emerald-600" />
+                        Vídeo entrada / llaves
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Notas o instrucciones especiales */}
+                  {prop?.checkInInstructions && (
+                    <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3.5 text-xs text-amber-900 space-y-1">
+                      <span className="font-extrabold uppercase text-[10px] tracking-wider text-amber-800 block">
+                        Instrucciones de Entrada / Cajetín:
+                      </span>
+                      <p className="leading-relaxed">{prop.checkInInstructions}</p>
+                    </div>
                   )}
                 </div>
+
+                {/* BARRA DE ACCIÓN Y CRONÓMETRO IDÉNTICA A IVI ERP */}
+                <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 block">
+                        ESTADO DE LA LIMPIEZA
+                      </span>
+                      <span className="text-lg font-black text-slate-900">
+                        {isCompleted
+                          ? 'Servicio Completado'
+                          : isInProgress
+                          ? `En Curso · ${formatTimer(taskSeconds)}`
+                          : 'Listo para Iniciar'}
+                      </span>
+                    </div>
+
+                    {isInProgress && (
+                      <div className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-mono text-sm font-black flex items-center gap-1.5 border border-emerald-200">
+                        <Clock size={16} className="animate-spin text-emerald-600" />
+                        {formatTimer(taskSeconds)}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Botones de Inicio / Parada */}
+                  {!isCompleted && !isInProgress && (
+                    <button
+                      type="button"
+                      onClick={() => handleStartCleaning(activeTask)}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-sm active:scale-[0.99]"
+                    >
+                      <Play size={18} fill="currentColor" />
+                      Iniciar Limpieza (Pulsar al entrar)
+                    </button>
+                  )}
+
+                  {isInProgress && (
+                    <button
+                      type="button"
+                      onClick={() => handleFinishCleaning(activeTask)}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-sm active:scale-[0.99]"
+                    >
+                      <CheckCircle2 size={18} />
+                      Finalizar Limpieza y Salir
+                    </button>
+                  )}
+
+                  {isCompleted && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center text-xs font-bold text-emerald-800 flex items-center justify-center gap-2">
+                      <CheckCircle size={16} />
+                      Limpieza finalizada y registrada correctamente
+                    </div>
+                  )}
+                </div>
+
+                {/* CHECKLIST POR CATEGORÍAS (Cocina, Salón, Dormitorio, Baño, Extras) */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between px-1">
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
+                        Protocolo de Limpieza & Fotos
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {activeTask.checklist.filter((i) => i.completed).length} de{' '}
+                        {activeTask.checklist.length} tareas completadas
+                      </p>
+                    </div>
+
+                    {/* Botón subir foto rápida */}
+                    <label className="cursor-pointer bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition">
+                      <Camera size={14} />
+                      <span>Subir Foto</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={(e) => handleFileChange(activeTask.id, e)}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Galería de fotos subidas */}
+                  {activeTask.photosUploaded.length > 0 && (
+                    <div className="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-sm space-y-2">
+                      <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider block">
+                        Fotos de Comprobación ({activeTask.photosUploaded.length})
+                      </span>
+                      <div className="grid grid-cols-3 gap-2">
+                        {activeTask.photosUploaded.map((url, idx) => (
+                          <div
+                            key={idx}
+                            className="aspect-square rounded-2xl overflow-hidden border border-slate-200 relative group bg-slate-100"
+                          >
+                            <img
+                              src={url}
+                              alt={`Foto comprobación ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Categorías de checklist */}
+                  {categories.map((category) => {
+                    const items = activeTask.checklist.filter(
+                      (i) => (i.category || 'General') === category
+                    );
+                    const completedCatCount = items.filter((i) => i.completed).length;
+
+                    return (
+                      <div
+                        key={category}
+                        className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden"
+                      >
+                        {/* Cabecera de Categoría */}
+                        <div className="bg-slate-50/80 px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                          <span className="font-extrabold text-xs uppercase tracking-wider text-slate-800">
+                            {category}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
+                            {completedCatCount}/{items.length}
+                          </span>
+                        </div>
+
+                        {/* Items */}
+                        <div className="divide-y divide-slate-100">
+                          {items.map((item) => (
+                            <div
+                              key={item.id}
+                              onClick={() => onToggleChecklistItem(activeTask.id, item.id)}
+                              className={`p-3.5 flex items-start gap-3 cursor-pointer transition hover:bg-slate-50/80 ${
+                                item.completed ? 'bg-slate-50/40 text-slate-400' : 'text-slate-800'
+                              }`}
+                            >
+                              {/* Checkbox táctil */}
+                              <div
+                                className={`w-5 h-5 rounded-lg border mt-0.5 flex items-center justify-center shrink-0 transition ${
+                                  item.completed
+                                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                                    : 'bg-white border-slate-300'
+                                }`}
+                              >
+                                {item.completed && <CheckCircle2 size={14} />}
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <span
+                                  className={`text-xs font-bold leading-snug block ${
+                                    item.completed ? 'line-through text-slate-400' : 'text-slate-800'
+                                  }`}
+                                >
+                                  {item.label}
+                                </span>
+
+                                {item.photoRequired && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-700 bg-amber-50 border border-amber-200/70 px-2 py-0.5 rounded-md mt-1">
+                                    <Camera size={10} /> Foto obligatoria
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* REPORTE DE INCIDENCIAS */}
+                <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-3">
+                  <h4 className="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-amber-500" />
+                    Reportar Incidencia o Rotura
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Si falta algo, encuentras un desperfecto o necesitas reposición urgente, déjalo
+                    aquí anotado.
+                  </p>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={incidentText}
+                      onChange={(e) => setIncidentText(e.target.value)}
+                      placeholder="Ej: Faltan pastillas lavavajillas o bombilla fundida..."
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSendIncident(activeTask.id)}
+                      className="bg-slate-900 text-white text-xs font-bold px-3 py-2 rounded-xl hover:bg-slate-800 transition"
+                    >
+                      Enviar
+                    </button>
+                  </div>
+
+                  {activeTask.incidents.length > 0 && (
+                    <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                      {activeTask.incidents.map((inc) => (
+                        <div
+                          key={inc.id}
+                          className="text-xs bg-slate-50 rounded-xl p-2.5 border border-slate-200 flex items-start justify-between gap-2"
+                        >
+                          <span className="text-slate-700">{inc.text}</span>
+                          <span className="text-[10px] text-slate-400 font-mono shrink-0">
+                            {inc.createdAt}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* BOTÓN FLOTANTE / INFERIOR PARA FINALIZAR */}
+                {!isCompleted && (
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => handleFinishCleaning(activeTask)}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-4 px-4 rounded-3xl shadow-lg transition flex items-center justify-center gap-2 text-sm active:scale-[0.99]"
+                    >
+                      <CheckCircle2 size={18} />
+                      Finalizar Limpieza de este Alojamiento
+                    </button>
+                  </div>
+                )}
               </div>
             );
-          })}
+          })()}
         </div>
-      </div>
+      )}
     </div>
   );
 }

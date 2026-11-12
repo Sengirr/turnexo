@@ -411,11 +411,33 @@ export default function App() {
     showToast('Foto de verificación añadida.');
   };
 
+  const handleStartTask = (taskId: string) => {
+    const found = tasks.find((t) => t.id === taskId);
+    if (!found) return;
+    upsertTaskOverride({
+      ...found,
+      status: 'in_progress',
+      startTime: found.startTime || new Date().toISOString(),
+    });
+    showToast('Limpieza iniciada. Cronómetro en marcha.');
+  };
+
   const handleCompleteTask = (taskId: string) => {
     const found = tasks.find((t) => t.id === taskId);
     if (!found) return;
-    upsertTaskOverride({ ...found, status: 'completed' });
-    showToast('Limpieza registrada como completada.');
+    const now = new Date().toISOString();
+    let actualHours = found.actualHours;
+    if (found.startTime) {
+      const diffMs = new Date(now).getTime() - new Date(found.startTime).getTime();
+      actualHours = Math.max(0.1, Number((diffMs / 3600000).toFixed(2)));
+    }
+    upsertTaskOverride({
+      ...found,
+      status: 'completed',
+      endTime: now,
+      actualHours: actualHours || 1.5,
+    });
+    showToast('Limpieza completada con éxito.');
   };
 
   const handleAddIncident = (taskId: string, text: string) => {
@@ -731,6 +753,7 @@ export default function App() {
           properties={properties}
           onToggleChecklistItem={handleToggleChecklistItem}
           onAddPhoto={handleAddPhoto}
+          onStartTask={handleStartTask}
           onCompleteTask={handleCompleteTask}
           onAddIncident={handleAddIncident}
           onBackToApp={() =>

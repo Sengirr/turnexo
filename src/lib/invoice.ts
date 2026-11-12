@@ -75,12 +75,21 @@ export function generateNextInvoiceNumber(
   isSimplified = true,
   year = new Date().getFullYear()
 ): { number: string; series: string } {
-  const prefix = isSimplified ? `FS-${year}` : `FC-${year}`;
-  const sameSeries = existingInvoices.filter((inv) =>
-    inv.invoiceNumber.startsWith(prefix)
-  );
-  const nextNum = sameSeries.length + 1;
+  // Prefijo unificado anual F-YYYY para evitar que se repitan números correlativos (ej: 001) entre facturas simplificadas y completas
+  const prefix = `F-${year}`;
+
+  // Extraer el número más alto existente en cualquier factura de ese año para garantizar correlatividad única sin saltos ni duplicados
+  const existingNumbers = existingInvoices
+    .filter((inv) => inv.invoiceNumber && inv.invoiceNumber.includes(String(year)))
+    .map((inv) => {
+      const match = inv.invoiceNumber.match(/(\d+)$/);
+      return match ? parseInt(match[1], 10) : 0;
+    });
+
+  const maxNum = existingNumbers.length > 0 ? Math.max(...existingNumbers, 0) : 0;
+  const nextNum = maxNum + 1;
   const padded = String(nextNum).padStart(3, '0');
+
   return {
     series: prefix,
     number: `${prefix}-${padded}`,
@@ -651,13 +660,25 @@ export function createInvoicesFromImportedRows(
   fiscalProfile: HostFiscalProfile,
   properties?: Property[]
 ): Invoice[] {
+  // Ordenar cronológicamente por fecha de salida para que los números correlativos sigan el orden temporal de las estancias
+  const sortedRows = [...rows].sort((a, b) => {
+    const dateA = a.stayEndDate || a.stayStartDate;
+    const dateB = b.stayEndDate || b.stayStartDate;
+    return dateA.localeCompare(dateB);
+  });
+
   let invoicePool = [...existingInvoices];
   const newInvoices: Invoice[] = [];
 
-  for (const row of rows) {
+  for (const row of sortedRows) {
     // Si es <= 400 € y no tiene DNI, es Factura Simplificada
     const isSimplified = row.totalAmount <= SIMPLIFIED_INVOICE_MAX_AMOUNT && !row.guestFiscalId;
-    const { number, series } = generateNextInvoiceNumber(invoicePool, isSimplified);
+
+    const rawIssue = row.stayEndDate || new Date().toISOString().split('T')[0];
+    const issueDate = /^\d{4}-\d{2}-\d{2}$/.test(rawIssue) ? rawIssue : new Date().toISOString().split('T')[0];
+    const invoiceYear = parseInt(issueDate.split('-')[0] || String(new Date().getFullYear()), 10);
+
+    const { number, series } = generateNextInvoiceNumber(invoicePool, isSimplified, invoiceYear);
 
     // Calcular noches
     let nights = 1;
@@ -681,9 +702,6 @@ export function createInvoicesFromImportedRows(
 
     const propId = matchedProp?.id || properties?.[0]?.id || 'prop-default';
     const propName = row.propertyName || matchedProp?.name || 'Alojamiento Turístico';
-
-    const rawIssue = row.stayEndDate || new Date().toISOString().split('T')[0];
-    const issueDate = /^\d{4}-\d{2}-\d{2}$/.test(rawIssue) ? rawIssue : new Date().toISOString().split('T')[0];
 
     const invoice: Invoice = {
       id: 'inv-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),

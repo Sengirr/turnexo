@@ -2430,9 +2430,13 @@ export default function HostDashboardView({
                                 <span className="text-[11px] font-mono text-slate-500">
                                   NIF: {inv.guestFiscalId}
                                 </span>
+                              ) : inv.isSimplified ? (
+                                <span className="text-[11px] text-slate-400 italic">
+                                  Sin NIF requerido (≤ 400 €)
+                                </span>
                               ) : (
                                 <span className="text-[11px] text-slate-400 italic">
-                                  Simplificada (RD 1619/2012)
+                                  Particular (sin NIF en plataforma)
                                 </span>
                               )}
                             </td>

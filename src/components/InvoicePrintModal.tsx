@@ -88,9 +88,13 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
               <p className="font-bold text-slate-900 mt-1">{invoice.guestName}</p>
               {invoice.guestFiscalId ? (
                 <p className="text-slate-600 font-mono">NIF/ID: {invoice.guestFiscalId}</p>
-              ) : (
+              ) : invoice.isSimplified ? (
                 <p className="text-slate-400 italic">
                   Identificación simplificada (RD 1619/2012 Art. 4.1)
+                </p>
+              ) : (
+                <p className="text-slate-400 italic">
+                  Particular (identificación según reserva / Registro de Viajeros)
                 </p>
               )}
               {invoice.guestAddress && (

@@ -296,11 +296,13 @@ export default function CleanerMagicView({
                           >
                             {prop?.name || 'Alojamiento'}
                           </h3>
-                          {/* Badge PAX idéntico a IVI ERP */}
-                          <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
-                            <User size={10} strokeWidth={3} className="text-slate-400" />
-                            {task.pax || 4}
-                          </span>
+                          {/* Badge PAX idéntico a IVI ERP (solo si se conoce) */}
+                          {task.pax ? (
+                            <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                              <User size={10} strokeWidth={3} className="text-slate-400" />
+                              {task.pax}
+                            </span>
+                          ) : null}
                         </div>
 
                         {/* Fila de Horarios estilo IVI ERP */}

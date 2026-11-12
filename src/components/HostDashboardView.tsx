@@ -59,11 +59,19 @@ import {
 import { DASHBOARD_TRANSLATIONS, DashboardLanguage } from '../lib/dashboardTranslations';
 
 const CHECKOUT_HOURS = [
-  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00'
+  '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
+  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+  '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
+  '18:00', '19:00', '20:00'
 ];
 
 const CHECKIN_HOURS = [
-  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '19:00', '20:00'
+  '10:00', '11:00', '11:30', '12:00', '12:30', '13:00',
+  '13:30', '14:00', '14:30', '15:00', '15:30', '16:00',
+  '16:30', '17:00', '17:30', '18:00', '18:30', '19:00',
+  '19:30', '20:00', '20:30', '21:00', '21:30', '22:00',
+  '22:30', '23:00', '23:30', '00:00', '01:00', '02:00'
 ];
 
 interface Props {
@@ -1341,29 +1349,45 @@ export default function HostDashboardView({
                                           <span className="text-base font-extrabold text-slate-900 group-hover:text-orange-600 transition">
                                             {prop?.name}
                                           </span>
-                                          <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                            <User size={10} strokeWidth={3} className="text-slate-400" />
-                                            {task.pax || 4}
-                                          </span>
+                                          {task.pax ? (
+                                            <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                              <User size={10} strokeWidth={3} className="text-slate-400" />
+                                              {task.pax}
+                                            </span>
+                                          ) : null}
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-                                          <span>
-                                            Salida:{' '}
-                                            <button
-                                              type="button"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (res) onOpenGuestPreview(res.id);
-                                              }}
-                                              className="font-bold text-slate-800 hover:text-orange-600 underline underline-offset-2"
-                                            >
-                                              {res?.guestName || 'Huésped'}
-                                            </button>
-                                          </span>
-                                          <span className="text-[11px] font-mono text-slate-400">
-                                            [{res?.source || 'iCal'}]
-                                          </span>
-                                        </div>
+                                        {(() => {
+                                          const rawName = res?.guestName || 'Huésped';
+                                          const cleanName = rawName
+                                            .replace(/Airbnb\s*\(Not available\)/i, 'No disponible')
+                                            .replace(/\(Not available\)/i, 'No disponible')
+                                            .replace(/^Not available$/i, 'No disponible');
+                                          const source = res?.source || 'iCal';
+                                          const sourceAlreadyInName = cleanName.toLowerCase().includes(source.toLowerCase());
+
+                                          return (
+                                            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                                              <span>
+                                                Salida:{' '}
+                                                <button
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (res) onOpenGuestPreview(res.id);
+                                                  }}
+                                                  className="font-bold text-slate-800 hover:text-orange-600 underline underline-offset-2"
+                                                >
+                                                  {cleanName}
+                                                </button>
+                                              </span>
+                                              {!sourceAlreadyInName && (
+                                                <span className="text-[11px] font-mono text-slate-400">
+                                                  [{source}]
+                                                </span>
+                                              )}
+                                            </div>
+                                          );
+                                        })()}
                                       </div>
                                     </div>
 
@@ -1425,20 +1449,12 @@ export default function HostDashboardView({
                                           className="bg-transparent font-extrabold text-slate-900 text-xs outline-none cursor-pointer"
                                           title="Modificar hora de salida"
                                         >
-                                          {[
-                                            '09:00',
-                                            '10:00',
-                                            '10:30',
-                                            '11:00',
-                                            '11:30',
-                                            '12:00',
-                                            '12:30',
-                                            '13:00',
-                                            '14:00',
-                                            '15:00',
-                                            '16:00',
-                                            '17:00',
-                                          ].map((time) => (
+                                          {!CHECKOUT_HOURS.includes(task.scheduledCleaningTime) && (
+                                            <option value={task.scheduledCleaningTime}>
+                                              {task.scheduledCleaningTime}h
+                                            </option>
+                                          )}
+                                          {CHECKOUT_HOURS.map((time) => (
                                             <option key={time} value={time}>
                                               {time}h
                                             </option>
@@ -1469,19 +1485,13 @@ export default function HostDashboardView({
                                           title="Modificar hora de entrada"
                                         >
                                           <option value="-">- (Libre)</option>
-                                          {[
-                                            '13:00',
-                                            '14:00',
-                                            '14:30',
-                                            '15:00',
-                                            '15:30',
-                                            '16:00',
-                                            '16:30',
-                                            '17:00',
-                                            '18:00',
-                                            '19:00',
-                                            '20:00',
-                                          ].map((time) => (
+                                          {task.sameDayCheckIn &&
+                                            !CHECKIN_HOURS.includes(task.nextCheckInTime) && (
+                                              <option value={task.nextCheckInTime}>
+                                                {task.nextCheckInTime}h
+                                              </option>
+                                            )}
+                                          {CHECKIN_HOURS.map((time) => (
                                             <option key={time} value={time}>
                                               {time}h
                                             </option>

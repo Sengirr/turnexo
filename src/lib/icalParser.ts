@@ -246,11 +246,18 @@ export function parseICalContent(
         source = 'Airbnb';
       }
 
-      const guestName =
+      let guestName =
         rawSummary
           .replace(/Reserved\s*-?\s*/i, '')
           .replace(/CLOSED\s*-\s*/i, '')
-          .trim() || `Huésped ${source}`;
+          .replace(/Airbnb\s*\(Not available\)/i, 'No disponible')
+          .replace(/\(Not available\)/i, 'No disponible')
+          .replace(/^Not available$/i, 'No disponible')
+          .trim();
+
+      if (!guestName || guestName.toLowerCase() === 'airbnb' || guestName.toLowerCase() === 'booking') {
+        guestName = `Huésped ${source}`;
+      }
 
       reservations.push({
         id: uidMatch?.[1]?.trim() || `ical-${propertyId}-${i}-${checkIn}`,
@@ -304,6 +311,15 @@ export function buildCleaningTasksFromReservations(
       ? res.lateCheckoutTime || prop.lateCheckoutUntil
       : prop.checkOutTime;
 
+    // Solo asignar pax si viene especificado o se deduce del nombre del huésped
+    let pax = existing?.pax;
+    if (!pax && res.guestName) {
+      const match = res.guestName.match(/(\d+)\s*(?:huésped(?:es)?|persona(?:s)?|pax|guests?)/i);
+      if (match) {
+        pax = parseInt(match[1], 10);
+      }
+    }
+
     tasks.push({
       id: existing?.id || `task-${res.id}`,
       propertyId: prop.id,
@@ -319,6 +335,7 @@ export function buildCleaningTasksFromReservations(
       checklist: existing?.checklist || createChecklistFromProperty(prop),
       incidents: existing?.incidents || [],
       fee: prop.cleaningFee,
+      pax,
     });
   }
 

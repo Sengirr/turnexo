@@ -1,101 +1,121 @@
-import { Invoice, formatDisplayDate, formatInvoiceConcept } from './invoice';
+import {
+  Invoice,
+  formatDisplayDate,
+  formatInvoiceConcept,
+  getInvoiceBookingRef,
+  getInvoiceChannel,
+} from './invoice';
 
 export function generateInvoiceHtml(invoice: Invoice): string {
   const isSimplified = invoice.isSimplified;
   return `
-    <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; background: #ffffff; padding: 24px; max-width: 750px; margin: 0 auto; font-size: 13px; line-height: 1.5;">
-      <!-- Cabecera -->
-      <div style="margin-bottom: 24px; border-bottom: 2px solid #f1f5f9; padding-bottom: 16px;">
-        <h1 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.5px;">
-          ${isSimplified ? 'FACTURA SIMPLIFICADA' : 'FACTURA'}
-        </h1>
-        <p style="margin: 0 0 4px 0; font-family: monospace; font-size: 13px; color: #64748b;">
-          Nº: <strong style="color: #0f172a;">${invoice.invoiceNumber}</strong>
-        </p>
-        <p style="margin: 0; font-size: 12px; color: #64748b;">
-          Fecha de expedición: <strong style="color: #334155;">${formatDisplayDate(invoice.issueDate)}</strong>
-        </p>
-      </div>
+    <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; background: #ffffff; padding: 24px; max-width: 750px; margin: 0 auto; font-size: 12px; line-height: 1.5;">
+      <!-- Barra superior verde azulado IVI -->
+      <div style="height: 10px; background-color: #0e6f68; width: 100%; margin-bottom: 24px; border-radius: 4px;"></div>
 
-      <!-- Datos Emisor y Huésped -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-        <div>
-          <p style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #94a3b8; margin: 0 0 4px 0;">Emisor / Anfitrión</p>
-          <p style="font-weight: 800; color: #0f172a; margin: 0 0 2px 0;">${invoice.hostName}</p>
-          <p style="font-family: monospace; font-size: 12px; color: #475569; margin: 0 0 2px 0;">NIF/CIF: ${invoice.hostFiscalId}</p>
-          <p style="color: #475569; margin: 0 0 2px 0;">${invoice.hostAddress}</p>
-          <p style="color: #475569; margin: 0;">${invoice.hostPostalCode} ${invoice.hostCity}</p>
+      <!-- Cabecera: Emisor / Arrendador (Izq) y Factura de Hospedaje (Der) -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: flex-start;">
+        <div style="font-size: 11px; color: #334155; line-height: 1.5;">
+          <p style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #0f172a; margin: 0 0 4px 0; letter-spacing: 0.5px;">EMISOR / ARRENDADOR:</p>
+          <p style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0 0 3px 0;">${invoice.hostName}</p>
+          <p style="font-family: monospace; font-size: 11px; color: #475569; margin: 0 0 2px 0;">NIF / CIF: ${invoice.hostFiscalId}</p>
+          <p style="color: #475569; margin: 0 0 2px 0;">Domicilio Fiscal: ${invoice.hostAddress}, ${invoice.hostPostalCode} ${invoice.hostCity} (ES)</p>
+          <p style="color: #475569; margin: 0;">Inmueble: <strong style="color: #0f172a;">${invoice.propertyName}</strong></p>
         </div>
-        <div>
-          <p style="font-size: 10px; text-transform: uppercase; font-weight: 800; color: #94a3b8; margin: 0 0 4px 0;">Huésped</p>
-          <p style="font-weight: 800; color: #0f172a; margin: 0 0 2px 0;">${invoice.guestName}</p>
-          ${
-            invoice.guestFiscalId
-              ? `<p style="font-family: monospace; font-size: 12px; color: #475569; margin: 0 0 2px 0;">NIF/ID: ${invoice.guestFiscalId}</p>`
-              : isSimplified
-              ? `<p style="font-style: italic; font-size: 11px; color: #94a3b8; margin: 0 0 2px 0;">Identificación simplificada (RD 1619/2012 Art. 4.1)</p>`
-              : `<p style="font-style: italic; font-size: 11px; color: #94a3b8; margin: 0 0 2px 0;">Particular (identificación según reserva / Registro de Viajeros)</p>`
-          }
-          ${invoice.guestAddress ? `<p style="color: #475569; margin: 0 0 2px 0;">${invoice.guestAddress}</p>` : ''}
-          ${invoice.guestEmail ? `<p style="color: #64748b; font-size: 11px; margin: 0;">${invoice.guestEmail}</p>` : ''}
+        <div style="text-align: right; font-size: 11px; color: #475569;">
+          <h1 style="font-size: 22px; font-weight: 900; color: #0e6f68; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: -0.5px;">FACTURA DE HOSPEDAJE</h1>
+          <p style="margin: 0 0 3px 0;">Nº Factura: <strong style="color: #0f172a; font-family: monospace; font-size: 12px;">${invoice.invoiceNumber}</strong></p>
+          <p style="margin: 0 0 3px 0;">Fecha de Emisión: <strong style="color: #334155;">${formatDisplayDate(invoice.issueDate)}</strong></p>
+          <p style="margin: 0 0 3px 0;">Localizador: <strong style="color: #334155; font-family: monospace;">${getInvoiceBookingRef(invoice)}</strong></p>
+          <p style="margin: 0;">Canal de Reserva: <strong style="color: #334155;">${getInvoiceChannel(invoice)}</strong></p>
         </div>
       </div>
 
-      <!-- Tabla Concepto -->
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+      <!-- Línea divisoria horizontal -->
+      <div style="border-bottom: 2px solid #0f172a; margin: 16px 0 20px 0;"></div>
+
+      <!-- Datos del Cliente / Huésped (Receptor) -->
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
+        <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #0e6f68; margin: 0 0 4px 0; letter-spacing: 0.5px;">DATOS DEL CLIENTE / HUÉSPED (RECEPTOR)</p>
+        <p style="font-size: 13px; font-weight: 800; color: #0f172a; margin: 0 0 2px 0;">${invoice.guestName}</p>
+        ${
+          invoice.guestFiscalId
+            ? `<p style="font-family: monospace; font-size: 11px; color: #475569; margin: 0 0 2px 0;">NIF / ID: ${invoice.guestFiscalId}</p>`
+            : isSimplified
+            ? `<p style="font-style: italic; font-size: 11px; color: #94a3b8; margin: 0 0 2px 0;">Particular (identificación según reserva / Registro de Viajeros)</p>`
+            : `<p style="font-style: italic; font-size: 11px; color: #b45309; margin: 0 0 2px 0;">Particular (sin NIF registrado en plataforma)</p>`
+        }
+        ${invoice.guestAddress ? `<p style="font-size: 11px; color: #475569; margin: 0 0 2px 0;">Domicilio: ${invoice.guestAddress}</p>` : ''}
+        ${invoice.guestEmail ? `<p style="font-size: 11px; color: #64748b; margin: 0;">${invoice.guestEmail}</p>` : ''}
+      </div>
+
+      <!-- Tabla de Servicios estilo IVI -->
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; font-size: 12px;">
         <thead>
-          <tr style="background: #f1f5f9; text-align: left; font-size: 11px; color: #475569; border-bottom: 1px solid #e2e8f0;">
-            <th style="padding: 10px 12px;">Concepto / Servicio</th>
-            <th style="padding: 10px 12px;">Estancia</th>
+          <tr style="background-color: #0e6f68; color: #ffffff; text-align: left; font-size: 11px; font-weight: 800;">
+            <th style="padding: 10px 12px;">Descripción del Servicio</th>
+            <th style="padding: 10px 12px; text-align: center;">Tipo IVA</th>
+            <th style="padding: 10px 12px; text-align: right;">Base Imponible</th>
             <th style="padding: 10px 12px; text-align: right;">Total</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <tr style="background-color: #ffffff;">
             <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
-              <strong style="color: #0f172a; display: block;">${formatInvoiceConcept(invoice.concept)}</strong>
-              <span style="font-size: 11px; color: #64748b;">${invoice.propertyName}</span>
+              <strong style="color: #0f172a; display: block; font-size: 12px;">Servicio de alojamiento turístico en ${invoice.propertyName}</strong>
+              <span style="font-size: 11px; color: #64748b; display: block; margin-top: 3px;">Entrada: ${formatDisplayDate(invoice.stayStartDate)} — Salida: ${formatDisplayDate(invoice.stayEndDate)}</span>
             </td>
-            <td style="padding: 12px; font-family: monospace; font-size: 11px; color: #475569; border-bottom: 1px solid #f1f5f9;">
-              ${formatDisplayDate(invoice.stayStartDate)} al ${formatDisplayDate(invoice.stayEndDate)}
+            <td style="padding: 12px; text-align: center; color: #334155; border-bottom: 1px solid #f1f5f9;">
+              ${invoice.vatRate}%
             </td>
-            <td style="padding: 12px; text-align: right; font-weight: 800; color: #0f172a; border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 12px; text-align: right; font-family: monospace; color: #334155; border-bottom: 1px solid #f1f5f9;">
+              ${invoice.baseAmount.toFixed(2)} €
+            </td>
+            <td style="padding: 12px; text-align: right; font-weight: 800; font-family: monospace; color: #0f172a; border-bottom: 1px solid #f1f5f9;">
               ${invoice.totalAmount.toFixed(2)} €
             </td>
           </tr>
         </tbody>
       </table>
 
-      <!-- Desglose IVA -->
-      <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
-        <div style="width: 260px; font-size: 12px;">
-          <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; color: #475569;">
-            <span>Base Imponible:</span>
-            <span style="font-family: monospace; font-weight: 700;">${invoice.baseAmount.toFixed(2)} €</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; color: #475569;">
-            <span>IVA devengado (${invoice.vatRate}%):</span>
-            <span style="font-family: monospace; font-weight: 700;">${invoice.vatAmount.toFixed(2)} €</span>
-          </div>
-          ${
-            invoice.touristTaxAmount && invoice.touristTaxAmount > 0
-              ? `<div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; color: #475569;">
-                  <span>Tasa turística:</span>
-                  <span style="font-family: monospace; font-weight: 700;">${invoice.touristTaxAmount.toFixed(2)} €</span>
-                </div>`
-              : ''
-          }
-          <div style="display: flex; justify-content: space-between; padding: 10px 12px; background: #0f172a; color: #ffffff; border-radius: 8px; margin-top: 8px; font-weight: 800; font-size: 14px;">
-            <span>TOTAL FACTURA:</span>
-            <span style="font-family: monospace;">${invoice.totalAmount.toFixed(2)} €</span>
+      <!-- Bloque inferior: Estado del Pago a la izq y Totales a la der -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: flex-start; margin-bottom: 24px;">
+        <div style="font-size: 11px; color: #475569; line-height: 1.5;">
+          <p style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #0e6f68; margin: 0 0 4px 0; letter-spacing: 0.5px;">ESTADO DEL PAGO:</p>
+          <p style="margin: 0 0 3px 0; color: #1e293b; font-weight: 600;">Cobrado y confirmado a través de plataforma (${getInvoiceChannel(invoice)}).</p>
+          <p style="margin: 0; color: #64748b;">Importe íntegro satisfecho con anterioridad o durante la estancia.</p>
+        </div>
+        <div>
+          <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #f8fafc;">
+            <div style="padding: 10px 14px; font-size: 11px; color: #475569;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span>Base Imponible:</span>
+                <span style="font-family: monospace; font-weight: 700; color: #0f172a;">${invoice.baseAmount.toFixed(2)} €</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>IVA Alojamiento Turístico (${invoice.vatRate}%):</span>
+                <span style="font-family: monospace; font-weight: 700; color: #0f172a;">${invoice.vatAmount.toFixed(2)} €</span>
+              </div>
+              ${
+                invoice.touristTaxAmount && invoice.touristTaxAmount > 0
+                  ? `<div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                      <span>Tasa turística:</span>
+                      <span style="font-family: monospace; font-weight: 700; color: #0f172a;">${invoice.touristTaxAmount.toFixed(2)} €</span>
+                    </div>`
+                  : ''
+              }
+            </div>
+            <div style="background-color: #0e6f68; color: #ffffff; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-weight: 800;">
+              <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">TOTAL FACTURA:</span>
+              <span style="font-size: 15px; font-family: monospace;">${invoice.totalAmount.toFixed(2)} €</span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Pie Legal -->
-      <div style="border-top: 1px solid #e2e8f0; padding-top: 14px; font-size: 10px; color: #94a3b8; line-height: 1.4;">
-        <p style="margin: 0 0 4px 0;">* Factura expedida con arreglo a la normativa tributaria española vigente (RD 1619/2012, de 30 de noviembre). Régimen general del Impuesto sobre el Valor Añadido (IVA al tipo reducido del 10% para alojamiento turístico).</p>
-        <p style="margin: 0;">Documento expedido mediante software de gestión de alojamientos turísticos Turnexo.</p>
+      <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; font-size: 10px; color: #94a3b8; line-height: 1.4;">
+        <p style="margin: 0;">* Factura de hospedaje expedida con arreglo a la normativa tributaria española vigente (RD 1619/2012, de 30 de noviembre). Régimen general del Impuesto sobre el Valor Añadido (IVA al tipo reducido del 10% para alojamiento turístico).</p>
       </div>
     </div>
   `;

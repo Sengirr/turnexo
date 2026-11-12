@@ -32,6 +32,25 @@ export interface Invoice {
   vatAmount: number; // Cuota IVA 10%
   touristTaxAmount?: number; // Tasa turística (si aplica)
   status: 'issued' | 'cancelled';
+  channel?: 'Airbnb' | 'Booking' | 'Directo' | string;
+  bookingReference?: string; // Código de confirmación / localizador de la reserva
+}
+
+export function getInvoiceBookingRef(invoice: Invoice): string {
+  if (invoice.bookingReference) return invoice.bookingReference;
+  if (invoice.reservationId) {
+    const clean = invoice.reservationId.replace(/^(bkg-|imp-|res-)/i, '').trim();
+    if (clean && clean.length >= 3) return clean.toUpperCase();
+  }
+  return '—';
+}
+
+export function getInvoiceChannel(invoice: Invoice): string {
+  if (invoice.channel) return invoice.channel;
+  if (invoice.reservationId?.toLowerCase().includes('bkg') || invoice.reservationId?.toLowerCase().includes('booking')) {
+    return 'Booking';
+  }
+  return 'Airbnb';
 }
 
 export interface HostFiscalProfile {
@@ -759,6 +778,8 @@ export function createInvoicesFromImportedRows(
       baseAmount: breakdown.baseAmount,
       vatAmount: breakdown.vatAmount,
       status: 'issued',
+      channel: (row as any).source || 'Airbnb',
+      bookingReference: row.reservationCode || undefined,
     };
 
     newInvoices.push(invoice);

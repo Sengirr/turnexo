@@ -183,7 +183,7 @@ export const DASHBOARD_TRANSLATIONS: Record<DashboardLanguage, DashboardTranslat
     invoices: {
       badge: 'Gestión Fiscal y Modelo 303',
       title: 'Facturas a Huéspedes & Libro de IVA',
-      subtitle: 'Emisión legal de Facturas Simplificadas (< 3.000 € sin DNI obligatorio) y resumen para el Modelo 303 de Hacienda.',
+      subtitle: 'Emisión legal de Facturas Simplificadas (≤ 400 € sin DNI obligatorio) y resumen para el Modelo 303 de Hacienda.',
       newInvoiceBtn: '+ Emitir Factura',
       exportExcelBtn: 'Descargar Libro en Excel (Gestoría)',
       fiscalProfileBtn: 'Perfil Fiscal Emisor',
@@ -290,7 +290,7 @@ export const DASHBOARD_TRANSLATIONS: Record<DashboardLanguage, DashboardTranslat
     invoices: {
       badge: 'Tax Compliance & VAT Ledger',
       title: 'Guest Invoices & VAT Ledger',
-      subtitle: 'Compliant Simplified Invoices (< €3,000 without mandatory Tax ID) and summary for tax reporting.',
+      subtitle: 'Compliant Simplified Invoices (≤ €400 without mandatory Tax ID) and summary for tax reporting.',
       newInvoiceBtn: '+ Create Invoice',
       exportExcelBtn: 'Export Excel Ledger (Tax Advisor)',
       fiscalProfileBtn: 'Fiscal Profile',

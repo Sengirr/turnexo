@@ -356,6 +356,11 @@ export default function App() {
     showToast(`Factura ${newInvoice.invoiceNumber} emitida correctamente.`);
   };
 
+  const handleAddInvoices = (newInvoices: Invoice[]) => {
+    setInvoices((prev) => [...newInvoices, ...prev]);
+    showToast(`✓ ${newInvoices.length} facturas emitidas y registradas correctamente.`);
+  };
+
   const handleUpdateFiscalProfile = (updatedProfile: HostFiscalProfile) => {
     setFiscalProfile(updatedProfile);
     showToast('Datos fiscales actualizados.');
@@ -848,6 +853,7 @@ export default function App() {
           invoices={invoices}
           fiscalProfile={fiscalProfile}
           onAddInvoice={handleAddInvoice}
+          onAddInvoices={handleAddInvoices}
           onUpdateFiscalProfile={handleUpdateFiscalProfile}
           onImportIcalText={handleImportIcalText}
           onSyncIcalUrl={handleSyncIcalUrl}

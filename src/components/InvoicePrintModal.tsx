@@ -20,7 +20,7 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
           <div className="flex items-center gap-2">
             <span className="bg-emerald-100 text-emerald-800 text-xs font-black uppercase px-2.5 py-1 rounded-full flex items-center gap-1">
               <ShieldCheck size={14} />
-              {invoice.isSimplified ? 'Factura Simplificada (< 3.000 €)' : 'Factura Completa'}
+              {invoice.isSimplified ? 'Factura Simplificada (≤ 400 €)' : 'Factura Completa'}
             </span>
             <span className="text-xs text-slate-500 font-semibold">
               R.D. 1619/2012 · IVA 10%
@@ -90,7 +90,7 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
                 <p className="text-slate-600 font-mono">NIF/ID: {invoice.guestFiscalId}</p>
               ) : (
                 <p className="text-slate-400 italic">
-                  Identificación simplificada (RD 1619/2012 Art. 4.2.f)
+                  Identificación simplificada (RD 1619/2012 Art. 4.1)
                 </p>
               )}
               {invoice.guestAddress && (

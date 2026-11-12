@@ -6,6 +6,7 @@ import {
   generateNextInvoiceNumber,
   HostFiscalProfile,
   Invoice,
+  SIMPLIFIED_INVOICE_MAX_AMOUNT,
 } from '../lib/invoice';
 
 interface Props {
@@ -160,7 +161,7 @@ export default function CreateInvoiceModal({
                     : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
               >
-                Simplificada (&lt; 3.000 €)
+                Simplificada (≤ 400 €)
                 <span className="block text-[10px] opacity-80 font-normal">Sin NIF obligatorio</span>
               </button>
               <button
@@ -173,12 +174,16 @@ export default function CreateInvoiceModal({
                 }`}
               >
                 Factura Completa
-                <span className="block text-[10px] opacity-80 font-normal">Empresas / Autónomos</span>
+                <span className="block text-[10px] opacity-80 font-normal">&gt; 400 € o Empresas</span>
               </button>
             </div>
-            {isSimplified && (
+            {isSimplified ? (
               <p className="text-[11px] text-emerald-800 font-medium">
-                ✓ Válida legalmente para particulares según el R.D. 1619/2012 (Art. 4.2.f). No necesitas pedir DNI ni dirección.
+                ✓ Válida legalmente para particulares según el R.D. 1619/2012 (Art. 4.1). No necesitas pedir DNI ni dirección si el importe no excede de 400 €.
+              </p>
+            ) : (
+              <p className="text-[11px] text-indigo-800 font-medium">
+                ⓘ Obligatoria si supera los 400 € o si el huésped requiere factura para empresa/autónomo. Se requiere NIF/CIF.
               </p>
             )}
           </div>
@@ -194,7 +199,13 @@ export default function CreateInvoiceModal({
               min="1"
               max="50000"
               value={totalAmount}
-              onChange={(e) => setTotalAmount(parseFloat(e.target.value) || 0)}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value) || 0;
+                setTotalAmount(val);
+                if (val > SIMPLIFIED_INVOICE_MAX_AMOUNT && isSimplified) {
+                  setIsSimplified(false);
+                }
+              }}
               className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-slate-900 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />

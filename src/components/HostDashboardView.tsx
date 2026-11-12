@@ -51,7 +51,9 @@ import PropertyCustomizerModal from './PropertyCustomizerModal';
 import InvoicePrintModal from './InvoicePrintModal';
 import CreateInvoiceModal from './CreateInvoiceModal';
 import FiscalProfileModal from './FiscalProfileModal';
-import { CreditCard, ShieldCheck, FileText, Building2 } from 'lucide-react';
+import ImportInvoicesCsvModal from './ImportInvoicesCsvModal';
+import AutoGenerateInvoicesModal from './AutoGenerateInvoicesModal';
+import { CreditCard, ShieldCheck, FileText, Building2, Upload, Zap, HelpCircle } from 'lucide-react';
 import {
   computeQuarterSummaries,
   DEFAULT_HOST_FISCAL_PROFILE,
@@ -59,6 +61,7 @@ import {
   HostFiscalProfile,
   INITIAL_INVOICES,
   Invoice,
+  SIMPLIFIED_INVOICE_MAX_AMOUNT,
 } from '../lib/invoice';
 import { DASHBOARD_TRANSLATIONS, DashboardLanguage } from '../lib/dashboardTranslations';
 
@@ -90,6 +93,7 @@ interface Props {
   invoices?: Invoice[];
   fiscalProfile?: HostFiscalProfile;
   onAddInvoice?: (inv: Invoice) => void;
+  onAddInvoices?: (invoices: Invoice[]) => void;
   onUpdateFiscalProfile?: (prof: HostFiscalProfile) => void;
   onImportIcalText: (propertyId: string, icsText: string) => void;
   onSyncIcalUrl: (propertyId: string, url: string) => Promise<void>;
@@ -122,6 +126,7 @@ export default function HostDashboardView({
   invoices,
   fiscalProfile,
   onAddInvoice,
+  onAddInvoices,
   onUpdateFiscalProfile,
   onImportIcalText,
   onSyncIcalUrl,
@@ -231,6 +236,8 @@ export default function HostDashboardView({
   const [selectedQuarter, setSelectedQuarter] = useState<'1T' | '2T' | '3T' | '4T'>(initialQ);
   const [selectedInvoiceForPrint, setSelectedInvoiceForPrint] = useState<Invoice | null>(null);
   const [showCreateInvoiceModal, setShowCreateInvoiceModal] = useState(false);
+  const [showImportCsvModal, setShowImportCsvModal] = useState(false);
+  const [showAutoGenerateModal, setShowAutoGenerateModal] = useState(false);
   const [preselectedResIdForInvoice, setPreselectedResIdForInvoice] = useState<string | undefined>(undefined);
   const [showFiscalProfileModal, setShowFiscalProfileModal] = useState(false);
   const [invoiceSearch, setInvoiceSearch] = useState('');
@@ -2081,36 +2088,57 @@ export default function HostDashboardView({
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
-                    Régimen Fiscal Alojamientos Turísticos
+                    Normativa VUT & Directiva ViDA
                   </span>
                   <span className="text-xs text-slate-500 font-medium">
-                    IVA 10% obligatorio &lt; 30 días
+                    IVA 10% obligatorio estancias &lt; 30 días
                   </span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1">
-                  Facturas a Huéspedes & Libro de IVA
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 mt-1">
+                  Facturación & Modelo 303 (IVA 10%)
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Emisión legal de Facturas Simplificadas (&lt; 3.000 € sin DNI obligatorio) y resumen para el Modelo 303 de Hacienda.
+                  Facturas simplificadas automáticas (≤ 400 €) y completas con NIF (&gt; 400 €). Cero trabajo manual con importación masiva.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowImportCsvModal(true)}
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-sm"
+                  title="Subir archivo de exportación de Airbnb, Booking o plantilla Turnexo"
+                >
+                  <Upload size={14} className="text-emerald-400" />
+                  <span>Subir Excel / CSV</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAutoGenerateModal(true)}
+                  className="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-2xs"
+                  title="Generar facturas de las reservas que ya tienes en el calendario"
+                >
+                  <Zap size={14} className="text-amber-600" />
+                  <span>Auto-generar desde iCal</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setShowFiscalProfileModal(true)}
-                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 px-3.5 py-2 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-sm"
+                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 px-3.5 py-2 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-2xs"
                 >
-                  <Building2 size={15} className="text-slate-500" />
+                  <Building2 size={14} className="text-slate-500" />
                   <span>Mis Datos Fiscales</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={() => {
                     setPreselectedResIdForInvoice(undefined);
                     setShowCreateInvoiceModal(true);
                   }}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-sm"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-sm"
                 >
                   <Plus size={15} />
                   <span>+ Emitir Factura</span>
@@ -2119,21 +2147,47 @@ export default function HostDashboardView({
             </div>
 
             {/* AVISO LEGAL Y TRANQUILIDAD CONTABLE */}
-            <div className="bg-emerald-50/70 border border-emerald-200/80 p-5 rounded-2xl flex flex-col sm:flex-row items-start gap-4 shadow-sm">
-              <div className="p-2.5 bg-emerald-600 text-white rounded-xl shrink-0 mt-0.5 shadow-sm">
-                <ShieldCheck size={20} />
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-3xl shadow-sm space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-white text-sm">
+                    ¿Cómo facturar si las plataformas no envían DNI ni domicilio del huésped?
+                  </h3>
+                  <p className="text-slate-400 text-[11px]">
+                    Solución legal y operativa ante la AEAT para anfitriones de alquiler turístico:
+                  </p>
+                </div>
               </div>
-              <div className="space-y-1.5 text-xs">
-                <h3 className="font-bold text-emerald-950 text-sm">
-                  ¿Por qué puedes emitir Factura Simplificada sin pedir DNI al viajero?
-                </h3>
-                <p className="text-emerald-900 leading-relaxed">
-                  Conforme al <strong>Artículo 4.2.f del Real Decreto 1619/2012</strong>, en los servicios de hospedaje y alojamiento turístico se permite emitir <strong>Factura Simplificada hasta 3.000 €</strong> (IVA incluido). No estás obligado a solicitar el NIF ni el domicilio del huésped salvo que se trate de una empresa o autónomo que lo solicite para deducirse el gasto.
-                </p>
-                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-medium text-emerald-800">
-                  <span>✓ 100% Válido ante la AEAT</span>
-                  <span>✓ Serie correlativa {currentFiscalProfile.simplifiedSeriesPrefix}-XXX</span>
-                  <span>✓ Cálculo automático del 10% de IVA</span>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+                <div className="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl space-y-1">
+                  <span className="text-[10px] uppercase font-black tracking-wider text-emerald-400 block">
+                    1. Reservas ≤ 400 € (Factura Simplificada)
+                  </span>
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    Por ley (<strong>Art. 4.1 RD 1619/2012</strong>), la factura simplificada <strong>NO exige NIF ni dirección del cliente</strong>. Con el código de Airbnb/Booking y tu número correlativo es 100% legal.
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl space-y-1">
+                  <span className="text-[10px] uppercase font-black tracking-wider text-indigo-400 block">
+                    2. Reservas &gt; 400 € o Empresas
+                  </span>
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    Si el huésped pide factura para empresa o supera 400 €, se emite <strong>Factura Completa</strong> con el DNI/Pasaporte recogido en el <strong>Registro de Viajeros (SES.HOSPEDAJES)</strong>.
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl space-y-1">
+                  <span className="text-[10px] uppercase font-black tracking-wider text-amber-400 block">
+                    3. Cero trabajo manual
+                  </span>
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    No piques facturas a mano: pulsa <strong>"Subir Excel / CSV"</strong> con las descargas de Airbnb o pulsa <strong>"Auto-generar desde iCal"</strong> para emitir todo el trimestre de golpe.
+                  </p>
                 </div>
               </div>
             </div>
@@ -2270,25 +2324,44 @@ export default function HostDashboardView({
               </div>
 
               {allInvoices.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center space-y-4 shadow-sm">
-                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto border border-emerald-100">
-                    <FileText size={24} />
+                <div className="bg-white rounded-3xl border border-slate-200/80 p-10 sm:p-14 text-center space-y-4 shadow-sm">
+                  <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto border border-emerald-100 shadow-2xs">
+                    <FileSpreadsheet size={28} />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900">
+                    <h3 className="text-lg font-black text-slate-900">
                       No tienes facturas emitidas todavía
                     </h3>
                     <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
-                      Conecta tus salidas del calendario iCal o emite tu primera factura simplificada con IVA del 10% para cumplir con la normativa.
+                      Emite tus facturas con IVA del 10% en segundos sin picar datos a mano:
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateInvoiceModal(true)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 text-xs font-bold rounded-xl transition shadow-sm"
-                  >
-                    + Emitir Mi Primera Factura
-                  </button>
+                  <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowImportCsvModal(true)}
+                      className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 text-xs font-bold rounded-xl transition shadow-sm flex items-center gap-1.5"
+                    >
+                      <Upload size={14} className="text-emerald-400" />
+                      <span>Subir Excel / CSV de Reservas</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAutoGenerateModal(true)}
+                      className="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 px-4 py-2.5 text-xs font-bold rounded-xl transition shadow-2xs flex items-center gap-1.5"
+                    >
+                      <Zap size={14} className="text-amber-600" />
+                      <span>Auto-generar desde Calendario</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateInvoiceModal(true)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-xs font-bold rounded-xl transition shadow-sm flex items-center gap-1.5"
+                    >
+                      <Plus size={15} />
+                      <span>Emitir Individual</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden overflow-x-auto">
@@ -3066,6 +3139,41 @@ export default function HostDashboardView({
             setShowCreateInvoiceModal(false);
             setPreselectedResIdForInvoice(undefined);
           }}
+        />
+      )}
+
+      {/* MODAL IMPORTACIÓN MASIVA CSV / EXCEL */}
+      {showImportCsvModal && (
+        <ImportInvoicesCsvModal
+          properties={properties}
+          existingInvoices={allInvoices}
+          fiscalProfile={currentFiscalProfile}
+          onImport={(importedInvoices) => {
+            if (onAddInvoices) {
+              onAddInvoices(importedInvoices);
+            } else if (onAddInvoice) {
+              importedInvoices.forEach(onAddInvoice);
+            }
+          }}
+          onClose={() => setShowImportCsvModal(false)}
+        />
+      )}
+
+      {/* MODAL AUTO-GENERACIÓN DESDE iCAL */}
+      {showAutoGenerateModal && (
+        <AutoGenerateInvoicesModal
+          properties={properties}
+          reservations={reservations}
+          existingInvoices={allInvoices}
+          fiscalProfile={currentFiscalProfile}
+          onGenerate={(generatedInvoices) => {
+            if (onAddInvoices) {
+              onAddInvoices(generatedInvoices);
+            } else if (onAddInvoice) {
+              generatedInvoices.forEach(onAddInvoice);
+            }
+          }}
+          onClose={() => setShowAutoGenerateModal(false)}
         />
       )}
 

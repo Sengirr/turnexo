@@ -275,6 +275,22 @@ export default function HostDashboardView({
     return `${y}-${m}-${day}`;
   };
 
+  const formatSpanishDate = (
+    dateStr?: string,
+    options?: { withWeekday?: boolean; short?: boolean }
+  ) => {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    const formatted = dateObj.toLocaleDateString('es-ES', {
+      weekday: options?.withWeekday ? (options.short ? 'short' : 'long') : undefined,
+      day: 'numeric',
+      month: options?.short ? 'short' : 'long',
+      year: 'numeric',
+    });
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  };
+
   const weekInfo = useMemo(() => {
     const now = new Date();
     const day = now.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
@@ -2962,7 +2978,8 @@ export default function HostDashboardView({
                   <div>
                     <h3 className="text-xl font-black text-slate-900">Auditoría de Limpieza</h3>
                     <p className="text-xs sm:text-sm font-bold text-slate-400">
-                      {prop?.name || 'Alojamiento'} · {inspectingTaskPhotos.date}
+                      {prop?.name || 'Alojamiento'} ·{' '}
+                      {formatSpanishDate(inspectingTaskPhotos.date, { withWeekday: true })}
                     </p>
                   </div>
                 </div>
@@ -3260,7 +3277,9 @@ export default function HostDashboardView({
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-200/60">
                           <span className="text-[10px] font-bold text-slate-400 block uppercase">Fecha</span>
-                          <span className="font-extrabold text-slate-800">{inspectingTaskPhotos.date}</span>
+                          <span className="font-extrabold text-slate-800">
+                            {formatSpanishDate(inspectingTaskPhotos.date, { withWeekday: true, short: true })}
+                          </span>
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-200/60">
                           <span className="text-[10px] font-bold text-slate-400 block uppercase">Salida Huésped</span>

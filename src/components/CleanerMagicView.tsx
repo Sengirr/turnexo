@@ -537,7 +537,7 @@ export default function CleanerMagicView({
                       <div className="flex items-center gap-2 mb-1">
                         <span className="inline-flex items-center gap-1.5 bg-orange-100 text-orange-800 border border-orange-200/80 text-[11px] font-black px-2.5 py-0.5 rounded-lg">
                           <Calendar size={12} className="text-orange-600" />
-                          {formatTaskDate(activeTask.date)} ({activeTask.date})
+                          {formatTaskDate(activeTask.date)}
                         </span>
                         <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
                           PARTE DE TRABAJO

@@ -143,6 +143,8 @@ export default function HostDashboardView({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCleanerName, setNewCleanerName] = useState('');
   const [newCleanerPhone, setNewCleanerPhone] = useState('+34 ');
+  const [showAddCleanerModal, setShowAddCleanerModal] = useState(false);
+  const [copiedCleanerId, setCopiedCleanerId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showIcalModal, setShowIcalModal] = useState(false);
   const [targetPropertyId, setTargetPropertyId] = useState(properties[0]?.id || 'prop-1');
@@ -1640,99 +1642,238 @@ export default function HostDashboardView({
                 )}
               </div>
             ) : (
-          /* Sub-pestaña: Equipo de Limpiadoras y Liquidaciones */
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
-              <span className="text-slate-600">
-                Total devengado equipo:{' '}
-                <strong className="text-slate-900 text-base font-bold ml-1">
-                  {tasks.reduce((sum, t) => {
+              <div className="space-y-6">
+                {/* TARJETAS DE RESUMEN SUPERIOR */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Métrica 1: Equipo Activo */}
+                <div className="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                      Equipo de Limpieza
+                    </span>
+                    <div className="text-2xl font-black text-slate-900">
+                      {cleaners.length} <span className="text-xs font-bold text-slate-400 font-normal">limpiadoras</span>
+                    </div>
+                    <span className="text-[11px] text-emerald-600 font-bold block flex items-center gap-1">
+                      ✓ Enlaces móviles sin contraseñas
+                    </span>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+                    <Users size={22} />
+                  </div>
+                </div>
+
+                {/* Métrica 2: Servicios Asignados */}
+                <div className="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                      Servicios Asignados
+                    </span>
+                    <div className="text-2xl font-black text-slate-900">
+                      {tasks.length} <span className="text-xs font-bold text-slate-400 font-normal">turnos</span>
+                    </div>
+                    <span className="text-[11px] text-slate-500 font-medium block">
+                      {tasks.filter((t) => t.status === 'completed').length} hechos ·{' '}
+                      {tasks.filter((t) => t.status !== 'completed').length} pendientes
+                    </span>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
+                    <Calendar size={22} />
+                  </div>
+                </div>
+
+                {/* Métrica 3: Total Devengado */}
+                <div className="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                      Total a Liquidar
+                    </span>
+                    <div className="text-2xl font-black text-slate-900">
+                      {tasks.reduce((sum, t) => {
+                        const p = properties.find((prop) => prop.id === t.propertyId);
+                        return sum + (p?.cleaningFee || 40);
+                      }, 0)}{' '}
+                      <span className="text-base font-bold text-slate-400">€</span>
+                    </div>
+                    <span className="text-[11px] text-amber-700 font-medium block">
+                      Liquidaciones calculadas por servicio
+                    </span>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold shrink-0">
+                    <DollarSign size={22} />
+                  </div>
+                </div>
+              </div>
+
+              {/* CABECERA DE SECCIÓN CON BOTÓN AÑADIR LIMPIADORA */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <div>
+                  <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
+                    Miembros del Equipo
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Cada limpiadora dispone de un enlace operativo directo para ver sus salidas, check-ins y subir evidencias.
+                  </p>
+                </div>
+
+                {onAddCleaner && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (cleaners.length >= maxAllowedCleaners) {
+                        setPlanLimitReason({
+                          title: 'Equipo de limpieza múltiple',
+                          desc: isStarter
+                            ? 'El Plan Starter incluye 1 limpiador/a. Actualiza a Pro Fiscal (hasta 2) o Microgestora para coordinar un equipo sin límite.'
+                            : 'Para coordinar un equipo más amplio con liquidaciones individuales y control por persona, actualiza a Microgestora.',
+                          targetPlan: isStarter ? 'plan_pro' : 'plan_manager',
+                        });
+                      } else {
+                        setShowAddCleanerModal(true);
+                      }
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-4 py-2.5 rounded-2xl text-xs flex items-center gap-2 shadow-xs transition active:scale-[0.99]"
+                  >
+                    <Plus size={16} />
+                    <span>Añadir Limpiadora</span>
+                  </button>
+                )}
+              </div>
+
+              {/* TARJETAS REDISEÑADAS DE LIMPIADORAS */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {cleaners.map((c, cleanerIdx) => {
+                  const cleanerUrl = `${window.location.origin}/c/${c.magicToken}`;
+                  const cleanerTasks = tasks.filter((t) => t.cleanerId === c.id);
+                  const completedCount = cleanerTasks.filter((t) => t.status === 'completed').length;
+                  const totalAccrued = cleanerTasks.reduce((sum, t) => {
                     const p = properties.find((prop) => prop.id === t.propertyId);
                     return sum + (p?.cleaningFee || 40);
-                  }, 0)}{' '}
-                  €
-                </strong>
-              </span>
-              <span className="text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-3 py-1 rounded-full font-semibold">
-                ✓ Enlaces móviles directos sin contraseñas ni descargas
-              </span>
-            </div>
+                  }, 0);
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {cleaners.map((c) => {
-                const cleanerUrl = `${window.location.origin}/c/${c.magicToken}`;
-                const cleanerTasks = tasks.filter((t) => t.cleanerId === c.id);
-                const completedCount = cleanerTasks.filter((t) => t.status === 'completed').length;
-                const totalAccrued = cleanerTasks.reduce((sum, t) => {
-                  const p = properties.find((prop) => prop.id === t.propertyId);
-                  return sum + (p?.cleaningFee || 40);
-                }, 0);
+                  const initials = c.name
+                    .trim()
+                    .split(/\s+/)
+                    .slice(0, 2)
+                    .map((part) => part[0]?.toUpperCase() || '')
+                    .join('');
 
-                return (
-                  <div
-                    key={c.id}
-                    className="bg-white rounded-2xl border border-slate-200/80 p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-base text-slate-900">{c.name}</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-2 py-0.5 rounded-full">
-                            Activa
+                  const avatarGradients = [
+                    'from-emerald-500 to-teal-700',
+                    'from-indigo-500 to-purple-700',
+                    'from-amber-500 to-orange-700',
+                    'from-rose-500 to-pink-700',
+                    'from-cyan-500 to-blue-700',
+                  ];
+                  const gradient = avatarGradients[cleanerIdx % avatarGradients.length];
+
+                  return (
+                    <div
+                      key={c.id}
+                      className="bg-white rounded-3xl border border-slate-200/90 p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition relative group"
+                    >
+                      <div className="space-y-4">
+                        {/* Cabecera: Avatar, Nombre, Teléfono y Estado */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div
+                              className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${gradient} text-white font-black text-sm flex items-center justify-center shadow-xs shrink-0 tracking-wider`}
+                            >
+                              {initials || 'LP'}
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="font-extrabold text-base text-slate-900 leading-tight truncate">
+                                {c.name}
+                              </h4>
+                              <p className="text-xs font-semibold text-slate-500 mt-0.5 truncate">
+                                {c.phone}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[11px] font-black uppercase bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
+                              Activa
+                            </span>
+                            {onDeleteCleaner && cleaners.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (confirm(`¿Eliminar a ${c.name} del equipo de limpieza?`)) {
+                                    onDeleteCleaner(c.id);
+                                  }
+                                }}
+                                className="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition"
+                                title="Eliminar limpiadora"
+                              >
+                                <X size={15} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Caja de métricas limpias */}
+                        <div className="grid grid-cols-2 gap-2 bg-slate-50/90 rounded-2xl border border-slate-100 p-3 text-xs">
+                          <div>
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                              Servicios
+                            </span>
+                            <div className="font-extrabold text-slate-900 text-sm mt-0.5">
+                              {cleanerTasks.length}{' '}
+                              <span className="text-[11px] font-bold text-slate-500 font-normal">
+                                ({completedCount} hechos)
+                              </span>
+                            </div>
+                          </div>
+                          <div className="border-l border-slate-200/60 pl-3">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                              Total Devengado
+                            </span>
+                            <div className="font-black text-emerald-700 text-sm mt-0.5">
+                              {totalAccrued} €
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Enlace Mágico Elegante con Copiado en 1 clic */}
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                            Enlace de acceso móvil
                           </span>
-                          {onDeleteCleaner && cleaners.length > 1 && (
+                          <div className="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs">
+                            <div className="flex items-center gap-2 min-w-0 text-slate-700 font-mono text-[11px] truncate">
+                              <Link2 size={13} className="text-slate-400 shrink-0" />
+                              <span className="truncate">turnexo.app/c/{c.magicToken}</span>
+                            </div>
                             <button
                               type="button"
-                              onClick={() => onDeleteCleaner(c.id)}
-                              className="text-slate-400 hover:text-rose-600 text-xs px-1 transition"
-                              title="Eliminar limpiadora"
+                              onClick={() => {
+                                navigator.clipboard.writeText(cleanerUrl);
+                                setCopiedCleanerId(c.id);
+                                setTimeout(() => setCopiedCleanerId(null), 2500);
+                              }}
+                              className="text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg transition shrink-0 flex items-center gap-1 shadow-2xs"
+                              title="Copiar enlace"
                             >
-                              ✕
+                              {copiedCleanerId === c.id ? (
+                                <>
+                                  <Check size={12} className="text-emerald-600" />
+                                  <span className="text-emerald-700 font-black">Copiado</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy size={12} />
+                                  <span>Copiar</span>
+                                </>
+                              )}
                             </button>
-                          )}
-                        </div>
-                      </div>
-                      <p className="text-xs text-slate-500">{c.phone}</p>
-
-                      {/* Tarjeta de métricas devengadas */}
-                      <div className="bg-slate-50 rounded-xl border border-slate-100 p-3.5 space-y-2 text-xs">
-                        <div className="flex justify-between text-slate-600">
-                          <span>Servicios asignados:</span>
-                          <strong className="text-slate-900">{cleanerTasks.length} ({completedCount} hechos)</strong>
-                        </div>
-                        <div className="flex justify-between text-slate-600 border-t border-slate-200/60 pt-1.5">
-                          <span>Total devengado:</span>
-                          <strong className="text-emerald-700 text-sm font-bold">{totalAccrued} €</strong>
+                          </div>
                         </div>
                       </div>
 
-                      <p className="text-xs text-slate-600 font-mono bg-slate-50 border border-slate-200/70 px-3 py-2 rounded-lg truncate">
-                        {cleanerUrl}
-                      </p>
-                    </div>
-
-                    <div className="space-y-2 text-xs font-semibold">
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => copyCleanerSettlement(c)}
-                          className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-xs shadow-sm"
-                          title="Copiar desglose completo para pago vía Bizum o transferencia"
-                        >
-                          {copiedSettlementCleanerId === c.id ? <CheckCheck size={14} className="text-emerald-600" /> : <Copy size={14} />}
-                          <span>{copiedSettlementCleanerId === c.id ? '¡Copiado!' : 'Liquidación'}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => downloadCleanerSettlementCsv(c)}
-                          className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-xl flex items-center justify-center transition shadow-sm"
-                          title="Descargar liquidación en CSV"
-                        >
-                          <Download size={14} />
-                        </button>
-                      </div>
-
-                      <div className="flex gap-2">
+                      {/* Botonera de acciones: WhatsApp, Probar App y Liquidación */}
+                      <div className="space-y-2 pt-2 border-t border-slate-100">
+                        {/* Botón Principal WhatsApp */}
                         <button
                           type="button"
                           onClick={() => {
@@ -1743,91 +1884,153 @@ export default function HostDashboardView({
                               '_blank'
                             );
                           }}
-                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-xs shadow-sm"
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 text-xs transition shadow-xs active:scale-[0.99]"
                         >
-                          <Send size={12} />
-                          <span>WhatsApp</span>
+                          <Send size={13} />
+                          <span>Compartir por WhatsApp</span>
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => onOpenCleanerPreview(c.id)}
-                          className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs transition shadow-sm"
-                        >
-                          Abrir
-                        </button>
+
+                        {/* Fila secundaria: Probar App y Liquidación */}
+                        <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+                          <button
+                            type="button"
+                            onClick={() => onOpenCleanerPreview(c.id)}
+                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs"
+                            title="Ver cómo ve la app la limpiadora"
+                          >
+                            <ExternalLink size={13} className="text-slate-400" />
+                            <span>Probar App</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => copyCleanerSettlement(c)}
+                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs"
+                            title="Copiar desglose completo para pago vía Bizum o transferencia"
+                          >
+                            {copiedSettlementCleanerId === c.id ? (
+                              <>
+                                <CheckCheck size={14} className="text-emerald-600" />
+                                <span className="text-emerald-700">¡Copiado!</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileSpreadsheet size={13} className="text-slate-400" />
+                                <span>Liquidación</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            {onAddCleaner && (
-              cleaners.length >= maxAllowedCleaners ? (
-                <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5 text-amber-900 font-medium">
-                    <Users size={18} className="text-amber-700 shrink-0" />
-                    <span>
-                      Has alcanzado el límite de personal ({cleaners.length}/{maxAllowedCleaners}) de tu plan {isStarter ? 'Starter' : 'Pro Fiscal'}.
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPlanLimitReason({
-                        title: 'Equipo de limpieza múltiple',
-                        desc: isStarter
-                          ? 'El Plan Starter incluye 1 limpiador/a. Actualiza a Pro Fiscal (hasta 2) o Microgestora para coordinar un equipo sin límite.'
-                          : 'Para coordinar un equipo más amplio con liquidaciones individuales y control por persona, actualiza a Microgestora.',
-                        targetPlan: isStarter ? 'plan_pro' : 'plan_manager',
-                      });
-                    }}
-                    className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 py-2 rounded-xl transition shadow-xs whitespace-nowrap"
-                  >
-                    Actualizar Plan
-                  </button>
-                </div>
-              ) : (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!newCleanerName.trim()) return;
-                    const slugToken = `${newCleanerName
-                      .toLowerCase()
-                      .replace(/[^a-z0-9]+/g, '')
-                      .slice(0, 8)}-${Math.random().toString(36).slice(2, 6)}`;
-                    onAddCleaner({
-                      id: `cl-${Date.now()}`,
-                      name: newCleanerName.trim(),
-                      phone: newCleanerPhone.trim() || '+34 600 00 00 00',
-                      magicToken: slugToken,
-                    });
-                    setNewCleanerName('');
-                    setNewCleanerPhone('+34 ');
-                  }}
-                  className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center"
+                  );
+                })}
+              </div>
+
+              {/* MODAL LIMPIO PARA AÑADIR LIMPIADORA */}
+              {showAddCleanerModal && (
+                <div
+                  className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer"
+                  onClick={() => setShowAddCleanerModal(false)}
                 >
-                  <input
-                    placeholder="Nombre de la nueva limpiadora (ej. Rocío Díaz)"
-                    value={newCleanerName}
-                    onChange={(e) => setNewCleanerName(e.target.value)}
-                    className="flex-1 w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                  <input
-                    placeholder="Teléfono (+34...)"
-                    value={newCleanerPhone}
-                    onChange={(e) => setNewCleanerPhone(e.target.value)}
-                    className="w-full sm:w-48 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                  <button
-                    type="submit"
-                    className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shrink-0 transition shadow-sm"
+                  <div
+                    className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-5 cursor-default animate-in fade-in zoom-in-95 duration-200"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    + Crear Enlace /c/
-                  </button>
-                </form>
-              )
-            )}
-          </div>
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                          <Users size={20} />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-black text-slate-900">Añadir Limpiadora</h3>
+                          <p className="text-xs text-slate-400">Genera su enlace móvil sin contraseñas</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddCleanerModal(false)}
+                        className="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!newCleanerName.trim()) return;
+                        const slugToken = `${newCleanerName
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, '')
+                          .slice(0, 8)}-${Math.random().toString(36).slice(2, 6)}`;
+                        onAddCleaner?.({
+                          id: `cl-${Date.now()}`,
+                          name: newCleanerName.trim(),
+                          phone: newCleanerPhone.trim() || '+34 600 00 00 00',
+                          magicToken: slugToken,
+                        });
+                        setNewCleanerName('');
+                        setNewCleanerPhone('+34 ');
+                        setShowAddCleanerModal(false);
+                      }}
+                      className="space-y-4"
+                    >
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700">Nombre completo</label>
+                        <input
+                          required
+                          autoFocus
+                          placeholder="Ej. Rocío Díaz"
+                          value={newCleanerName}
+                          onChange={(e) => setNewCleanerName(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700">Teléfono (WhatsApp)</label>
+                        <input
+                          placeholder="+34 600 00 00 00"
+                          value={newCleanerPhone}
+                          onChange={(e) => setNewCleanerPhone(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                        />
+                        <p className="text-[11px] text-slate-400">
+                          Se usará para compartirle sus partes y su enlace con 1 clic.
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/70 rounded-2xl text-xs text-emerald-800 space-y-1">
+                        <p className="font-extrabold flex items-center gap-1.5">
+                          <Sparkles size={14} className="text-emerald-600" />
+                          Enlace móvil automático
+                        </p>
+                        <p className="text-[11px] text-emerald-700/90 leading-relaxed">
+                          La limpiadora no necesita usuario ni contraseña. Al crearla, obtendrá su enlace único para ver sus limpiezas asignadas y subir evidencias.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddCleanerModal(false)}
+                          className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-sm transition"
+                        >
+                          Crear Limpiadora
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+            </div>
         )}
       </div>
     )}

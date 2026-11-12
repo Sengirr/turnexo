@@ -825,7 +825,9 @@ export function createInvoicesFromImportedRows(
       return pName.includes(rowPName) || rowPName.includes(pName);
     });
 
-    const propId = matchedProp?.id || properties?.[0]?.id || 'prop-default';
+    const propId =
+      matchedProp?.id ||
+      'prop-' + (row.propertyName || 'alojamiento').toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30);
     const propName = row.propertyName || matchedProp?.name || 'Alojamiento Turístico';
 
     const invoice: Invoice = {

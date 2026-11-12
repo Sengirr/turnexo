@@ -44,6 +44,8 @@ import {
   AlertCircle,
   Trash2,
   Eye,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { Cleaner, CleaningTask, Property, Reservation, DEFAULT_IVI_CHECKLIST } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
@@ -275,6 +277,97 @@ export default function HostDashboardView({
       .map(sanitizeInvoice);
   }, [invoices]);
   const currentFiscalProfile = fiscalProfile || DEFAULT_HOST_FISCAL_PROFILE;
+
+  const [invoiceViewMode, setInvoiceViewMode] = useState<'list' | 'grouped'>('list');
+
+  // Recopilar todos los alojamientos presentes en las facturas y en la app
+  const uniqueAccommodations = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; count: number; totalAmount: number }>();
+
+    // Añadir propiedades configuradas en Turnexo
+    (properties || []).forEach((p) => {
+      const name = p.name.trim();
+      const key = name.toLowerCase();
+      map.set(key, {
+        id: p.id,
+        name,
+        count: 0,
+        totalAmount: 0,
+      });
+    });
+
+    // Añadir y contar todos los alojamientos de las facturas (Airbnb/Booking/Directo)
+    allInvoices.forEach((inv) => {
+      const rawName = (inv.propertyName || 'Alojamiento Turístico').trim();
+      const key = rawName.toLowerCase();
+      if (!map.has(key)) {
+        map.set(key, {
+          id: inv.propertyId || key,
+          name: rawName,
+          count: 0,
+          totalAmount: 0,
+        });
+      }
+      const entry = map.get(key)!;
+      entry.count++;
+      entry.totalAmount += inv.totalAmount;
+    });
+
+    return Array.from(map.values()).sort((a, b) => b.count - a.count);
+  }, [properties, allInvoices]);
+
+  const filteredInvoices = useMemo(() => {
+    return allInvoices.filter((inv) => {
+      if (invoicePropertyFilter !== 'all') {
+        const target = invoicePropertyFilter.trim().toLowerCase();
+        const invPropName = (inv.propertyName || '').trim().toLowerCase();
+        if (invPropName !== target && inv.propertyId !== invoicePropertyFilter) {
+          return false;
+        }
+      }
+      if (invoiceSearch.trim()) {
+        const q = invoiceSearch.toLowerCase();
+        const matchNum = inv.invoiceNumber.toLowerCase().includes(q);
+        const matchGuest = inv.guestName.toLowerCase().includes(q);
+        const matchProp = (inv.propertyName || '').toLowerCase().includes(q);
+        if (!matchNum && !matchGuest && !matchProp) return false;
+      }
+      return true;
+    });
+  }, [allInvoices, invoicePropertyFilter, invoiceSearch]);
+
+  const groupedInvoices = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        propertyName: string;
+        invoices: Invoice[];
+        baseAmount: number;
+        vatAmount: number;
+        totalAmount: number;
+      }
+    >();
+
+    filteredInvoices.forEach((inv) => {
+      const name = (inv.propertyName || 'Alojamiento Turístico').trim();
+      if (!map.has(name)) {
+        map.set(name, {
+          propertyName: name,
+          invoices: [],
+          baseAmount: 0,
+          vatAmount: 0,
+          totalAmount: 0,
+        });
+      }
+      const grp = map.get(name)!;
+      grp.invoices.push(inv);
+      grp.baseAmount += inv.baseAmount;
+      grp.vatAmount += inv.vatAmount;
+      grp.totalAmount += inv.totalAmount;
+    });
+
+    return Array.from(map.values()).sort((a, b) => b.invoices.length - a.invoices.length);
+  }, [filteredInvoices]);
 
   const [newPropName, setNewPropName] = useState('');
   const [newPropAddress, setNewPropAddress] = useState('');
@@ -2311,57 +2404,151 @@ export default function HostDashboardView({
 
             {/* TABLA DE FACTURAS EMITIDAS */}
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="relative">
-                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Buscar por factura o huésped..."
-                      value={invoiceSearch}
-                      onChange={(e) => setInvoiceSearch(e.target.value)}
-                      className="pl-8 pr-3.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl w-60 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
+              {/* Barra superior de Búsqueda, Filtro y Modos de Vista */}
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative">
+                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Buscar por factura o huésped..."
+                        value={invoiceSearch}
+                        onChange={(e) => setInvoiceSearch(e.target.value)}
+                        className="pl-8 pr-3.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl w-60 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+
+                    <select
+                      value={invoicePropertyFilter}
+                      onChange={(e) => setInvoicePropertyFilter(e.target.value)}
+                      className="py-1.5 px-3 text-xs bg-white border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-[240px] truncate"
+                    >
+                      <option value="all">
+                        Todos los alojamientos ({uniqueAccommodations.length})
+                      </option>
+                      {uniqueAccommodations.map((acc) => (
+                        <option key={acc.id} value={acc.name}>
+                          {acc.name} ({acc.count})
+                        </option>
+                      ))}
+                    </select>
+
+                    {uniqueAccommodations.length > 1 && (
+                      <div className="inline-flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/80 text-xs font-semibold">
+                        <button
+                          type="button"
+                          onClick={() => setInvoiceViewMode('list')}
+                          className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 ${
+                            invoiceViewMode === 'list'
+                              ? 'bg-white text-slate-900 shadow-2xs'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="Ver listado continuo de facturas"
+                        >
+                          <List size={13} />
+                          <span className="hidden sm:inline">Lista</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setInvoiceViewMode('grouped')}
+                          className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 ${
+                            invoiceViewMode === 'grouped'
+                              ? 'bg-[#0e6f68] text-white shadow-2xs'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="Ver facturas separadas por cada alojamiento"
+                        >
+                          <Building2 size={13} />
+                          <span>Separado por Alojamiento</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  <select
-                    value={invoicePropertyFilter}
-                    onChange={(e) => setInvoicePropertyFilter(e.target.value)}
-                    className="py-1.5 px-3 text-xs bg-white border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="all">Todos los alojamientos ({properties.length})</option>
-                    {properties.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex items-center gap-3">
+                    {allInvoices.length > 0 && onClearAllInvoices && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (
+                            confirm(
+                              `¿Estás seguro de que deseas eliminar todas las facturas del listado para volver a importarlas limpias?`
+                            )
+                          ) {
+                            onClearAllInvoices();
+                          }
+                        }}
+                        className="text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 shadow-2xs"
+                        title="Eliminar todas las facturas del listado"
+                      >
+                        <Trash2 size={12} />
+                        <span>Vaciar Facturas</span>
+                      </button>
+                    )}
+                    <span className="text-xs text-slate-500 font-medium">
+                      Mostrando {filteredInvoices.length} de {allInvoices.length} facturas
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  {allInvoices.length > 0 && onClearAllInvoices && (
+                {/* Pestañas de filtrado rápido por Alojamiento */}
+                {uniqueAccommodations.length > 1 && (
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs pt-1 no-scrollbar">
                     <button
                       type="button"
-                      onClick={() => {
-                        if (
-                          confirm(
-                            `¿Estás seguro de que deseas eliminar todas las facturas del listado para volver a importarlas limpias?`
-                          )
-                        ) {
-                          onClearAllInvoices();
-                        }
-                      }}
-                      className="text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 shadow-2xs"
-                      title="Eliminar todas las facturas del listado"
+                      onClick={() => setInvoicePropertyFilter('all')}
+                      className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+                        invoicePropertyFilter === 'all'
+                          ? 'bg-slate-900 text-white shadow-2xs'
+                          : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                      }`}
                     >
-                      <Trash2 size={12} />
-                      <span>Vaciar Facturas</span>
+                      <span>Todos</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                          invoicePropertyFilter === 'all'
+                            ? 'bg-white/20 text-white'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {allInvoices.length}
+                      </span>
                     </button>
-                  )}
-                  <span className="text-xs text-slate-500 font-medium">
-                    Mostrando {allInvoices.length} facturas registradas
-                  </span>
-                </div>
+                    {uniqueAccommodations.map((acc) => {
+                      const isSelected =
+                        invoicePropertyFilter.toLowerCase() === acc.name.toLowerCase() ||
+                        invoicePropertyFilter === acc.id;
+                      return (
+                        <button
+                          key={acc.id}
+                          type="button"
+                          onClick={() => setInvoicePropertyFilter(isSelected ? 'all' : acc.name)}
+                          className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-[#0e6f68] text-white shadow-2xs'
+                              : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                          }`}
+                        >
+                          <Building2
+                            size={12}
+                            className={isSelected ? 'text-white' : 'text-[#0e6f68]'}
+                          />
+                          <span className="max-w-[180px] sm:max-w-[260px] truncate">{acc.name}</span>
+                          <span
+                            className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                              isSelected
+                                ? 'bg-white/20 text-white'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {acc.count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {allInvoices.length === 0 ? (
@@ -2396,7 +2583,184 @@ export default function HostDashboardView({
                     </button>
                   </div>
                 </div>
+              ) : filteredInvoices.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-10 text-center space-y-2 shadow-sm">
+                  <p className="font-bold text-slate-800 text-sm">
+                    No se encontraron facturas para este filtro
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Prueba cambiando de alojamiento o limpiando el texto de búsqueda.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInvoicePropertyFilter('all');
+                      setInvoiceSearch('');
+                    }}
+                    className="text-xs font-bold text-emerald-700 underline pt-1"
+                  >
+                    Ver todas las facturas
+                  </button>
+                </div>
+              ) : invoiceViewMode === 'grouped' ? (
+                /* VISTA AGRUPADA SEPARADA POR CADA ALOJAMIENTO */
+                <div className="space-y-6">
+                  {groupedInvoices.map((group) => (
+                    <div
+                      key={group.propertyName}
+                      className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden"
+                    >
+                      {/* Cabecera del alojamiento con métricas específicas */}
+                      <div className="bg-slate-50/90 px-5 py-3.5 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-teal-50 text-[#0e6f68] border border-teal-100 flex items-center justify-center shrink-0">
+                            <Building2 size={16} />
+                          </div>
+                          <div>
+                            <h3 className="font-extrabold text-sm text-slate-900 tracking-tight">
+                              {group.propertyName}
+                            </h3>
+                            <p className="text-[11px] text-slate-500 font-medium">
+                              {group.invoices.length} {group.invoices.length === 1 ? 'factura registrada' : 'facturas registradas'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Subtotales del alojamiento */}
+                        <div className="flex items-center gap-3 text-xs bg-white px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                          <div>
+                            <span className="text-slate-400 text-[10px] uppercase font-bold block">Base Imponible</span>
+                            <span className="font-mono font-bold text-slate-700">{group.baseAmount.toFixed(2)} €</span>
+                          </div>
+                          <div className="h-4 w-px bg-slate-200" />
+                          <div>
+                            <span className="text-slate-400 text-[10px] uppercase font-bold block">IVA (10%)</span>
+                            <span className="font-mono font-bold text-emerald-700">+{group.vatAmount.toFixed(2)} €</span>
+                          </div>
+                          <div className="h-4 w-px bg-slate-200" />
+                          <div>
+                            <span className="text-slate-400 text-[10px] uppercase font-bold block">Total Facturas</span>
+                            <span className="font-mono font-black text-slate-900">{group.totalAmount.toFixed(2)} €</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tabla de este alojamiento */}
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs border-collapse">
+                          <thead>
+                            <tr className="bg-slate-50/50 border-b border-slate-200/80 text-[11px] text-slate-500 uppercase tracking-wider font-semibold">
+                              <th className="py-3 px-5 whitespace-nowrap">Nº Factura</th>
+                              <th className="py-3 px-4 whitespace-nowrap">Fecha Emisión</th>
+                              <th className="py-3 px-4">Huésped</th>
+                              <th className="py-3 px-4 text-right whitespace-nowrap">Base Imponible</th>
+                              <th className="py-3 px-4 text-right whitespace-nowrap">IVA (10%)</th>
+                              <th className="py-3 px-4 text-right whitespace-nowrap">Total Factura</th>
+                              <th className="py-3 px-5 text-right whitespace-nowrap">Acción</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {group.invoices.map((inv) => (
+                              <tr key={inv.id} className="hover:bg-slate-50/60 transition">
+                                <td className="py-3.5 px-5 whitespace-nowrap font-mono font-bold text-slate-900">
+                                  <span className="inline-block whitespace-nowrap bg-slate-100 text-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/80 font-bold tracking-tight text-[11px]">
+                                    {inv.invoiceNumber}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-700 text-xs font-semibold">
+                                  {formatDisplayDate(inv.issueDate)}
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className="font-bold text-slate-900 block text-xs">
+                                    {inv.guestName}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 font-mono block">
+                                    {formatDisplayDate(inv.stayStartDate)} al {formatDisplayDate(inv.stayEndDate)}
+                                  </span>
+                                  {inv.guestFiscalId ? (
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded mt-0.5">
+                                      ✓ NIF: {inv.guestFiscalId}
+                                    </span>
+                                  ) : inv.totalAmount > SIMPLIFIED_INVOICE_MAX_AMOUNT || !inv.isSimplified ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md mt-0.5 shadow-2xs">
+                                      <AlertTriangle size={11} className="text-amber-600 shrink-0" />
+                                      <span>Falta DNI (&gt; 400 €)</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-[11px] text-slate-400 italic block mt-0.5">
+                                      Simplificada (≤ 400 € · DNI opcional)
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-4 text-right font-medium text-slate-700">
+                                  {inv.baseAmount.toFixed(2)} €
+                                </td>
+                                <td className="py-3.5 px-4 text-right font-semibold text-emerald-700">
+                                  +{inv.vatAmount.toFixed(2)} €
+                                </td>
+                                <td className="py-3.5 px-4 text-right font-bold text-slate-900">
+                                  {inv.totalAmount.toFixed(2)} €
+                                </td>
+                                <td className="py-3.5 px-5 text-right">
+                                  <div className="inline-flex items-center gap-1.5 justify-end">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDirectDownloadPdf(inv)}
+                                      disabled={downloadingInvoiceId === inv.id}
+                                      className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-2.5 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
+                                      title="Descargar factura en PDF directamente"
+                                    >
+                                      {downloadingInvoiceId === inv.id ? (
+                                        <RefreshCw size={12} className="animate-spin" />
+                                      ) : (
+                                        <Download size={12} />
+                                      )}
+                                      <span>Descargar</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedInvoiceForPrint(inv)}
+                                      className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white px-2.5 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
+                                      title="Ver factura completa e imprimir"
+                                    >
+                                      <Eye size={12} />
+                                      <span>Ver</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedInvoiceForEdit(inv)}
+                                      className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 px-2 py-1.5 text-xs font-semibold rounded-lg transition shadow-2xs"
+                                      title="Completar o modificar DNI y domicilio fiscal del huésped"
+                                    >
+                                      <Pencil size={11} className="text-emerald-600" />
+                                      <span>Editar</span>
+                                    </button>
+                                    {onDeleteInvoice && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (confirm(`¿Eliminar la factura ${inv.invoiceNumber}?`)) {
+                                            onDeleteInvoice(inv.id);
+                                          }
+                                        }}
+                                        className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition"
+                                        title="Eliminar factura"
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
+                /* VISTA LISTA CONTINUA (FILTRABLE) */
                 <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
@@ -2412,119 +2776,104 @@ export default function HostDashboardView({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {allInvoices
-                        .filter((inv) => {
-                          if (
-                            invoicePropertyFilter !== 'all' &&
-                            inv.propertyId !== invoicePropertyFilter
-                          )
-                            return false;
-                          if (invoiceSearch.trim()) {
-                            const q = invoiceSearch.toLowerCase();
-                            const matchNum = inv.invoiceNumber.toLowerCase().includes(q);
-                            const matchGuest = inv.guestName.toLowerCase().includes(q);
-                            if (!matchNum && !matchGuest) return false;
-                          }
-                          return true;
-                        })
-                        .map((inv) => (
-                          <tr key={inv.id} className="hover:bg-slate-50/60 transition">
-                            <td className="py-3.5 px-5 whitespace-nowrap font-mono font-bold text-slate-900">
-                              <span className="inline-block whitespace-nowrap bg-slate-100 text-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/80 font-bold tracking-tight text-[11px]">
-                                {inv.invoiceNumber}
+                      {filteredInvoices.map((inv) => (
+                        <tr key={inv.id} className="hover:bg-slate-50/60 transition">
+                          <td className="py-3.5 px-5 whitespace-nowrap font-mono font-bold text-slate-900">
+                            <span className="inline-block whitespace-nowrap bg-slate-100 text-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/80 font-bold tracking-tight text-[11px]">
+                              {inv.invoiceNumber}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-700 text-xs font-semibold">
+                            {formatDisplayDate(inv.issueDate)}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="font-semibold text-slate-900 block">
+                              {inv.propertyName}
+                            </span>
+                            <span className="text-[11px] text-slate-500 font-mono">
+                              {formatDisplayDate(inv.stayStartDate)} al {formatDisplayDate(inv.stayEndDate)}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="font-bold text-slate-900 block text-xs">
+                              {inv.guestName}
+                            </span>
+                            {inv.guestFiscalId ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded mt-0.5">
+                                ✓ NIF: {inv.guestFiscalId}
                               </span>
-                            </td>
-                            <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-700 text-xs font-semibold">
-                              {formatDisplayDate(inv.issueDate)}
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className="font-semibold text-slate-900 block">
-                                {inv.propertyName}
+                            ) : inv.totalAmount > SIMPLIFIED_INVOICE_MAX_AMOUNT || !inv.isSimplified ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md mt-0.5 shadow-2xs">
+                                <AlertTriangle size={11} className="text-amber-600 shrink-0" />
+                                <span>Falta DNI (&gt; 400 €)</span>
                               </span>
-                              <span className="text-[11px] text-slate-500 font-mono">
-                                {formatDisplayDate(inv.stayStartDate)} al {formatDisplayDate(inv.stayEndDate)}
+                            ) : (
+                              <span className="text-[11px] text-slate-400 italic block mt-0.5">
+                                Simplificada (≤ 400 € · DNI opcional)
                               </span>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className="font-bold text-slate-900 block text-xs">
-                                {inv.guestName}
-                              </span>
-                              {inv.guestFiscalId ? (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded mt-0.5">
-                                  ✓ NIF: {inv.guestFiscalId}
-                                </span>
-                              ) : inv.totalAmount > SIMPLIFIED_INVOICE_MAX_AMOUNT || !inv.isSimplified ? (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md mt-0.5 shadow-2xs">
-                                  <AlertTriangle size={11} className="text-amber-600 shrink-0" />
-                                  <span>Falta DNI (&gt; 400 €)</span>
-                                </span>
-                              ) : (
-                                <span className="text-[11px] text-slate-400 italic block mt-0.5">
-                                  Simplificada (≤ 400 € · DNI opcional)
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-3.5 px-4 text-right font-medium text-slate-700">
-                              {inv.baseAmount.toFixed(2)} €
-                            </td>
-                            <td className="py-3.5 px-4 text-right font-semibold text-emerald-700">
-                              +{inv.vatAmount.toFixed(2)} €
-                            </td>
-                            <td className="py-3.5 px-4 text-right font-bold text-slate-900">
-                              {inv.totalAmount.toFixed(2)} €
-                            </td>
-                            <td className="py-3.5 px-5 text-right">
-                              <div className="inline-flex items-center gap-1.5 justify-end">
-                                <button
-                                  type="button"
-                                  onClick={() => handleDirectDownloadPdf(inv)}
-                                  disabled={downloadingInvoiceId === inv.id}
-                                  className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-2.5 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
-                                  title="Descargar factura en PDF directamente"
-                                >
-                                  {downloadingInvoiceId === inv.id ? (
-                                    <RefreshCw size={12} className="animate-spin" />
-                                  ) : (
-                                    <Download size={12} />
-                                  )}
-                                  <span>Descargar</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedInvoiceForPrint(inv)}
-                                  className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white px-2.5 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
-                                  title="Ver factura completa e imprimir"
-                                >
-                                  <Eye size={12} />
-                                  <span>Ver</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedInvoiceForEdit(inv)}
-                                  className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 px-2 py-1.5 text-xs font-semibold rounded-lg transition shadow-2xs"
-                                  title="Completar o modificar DNI y domicilio fiscal del huésped"
-                                >
-                                  <Pencil size={11} className="text-emerald-600" />
-                                  <span>Editar</span>
-                                </button>
-                                {onDeleteInvoice && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (confirm(`¿Eliminar la factura ${inv.invoiceNumber}?`)) {
-                                        onDeleteInvoice(inv.id);
-                                      }
-                                    }}
-                                    className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition"
-                                    title="Eliminar factura"
-                                  >
-                                    <Trash2 size={13} />
-                                  </button>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-medium text-slate-700">
+                            {inv.baseAmount.toFixed(2)} €
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-semibold text-emerald-700">
+                            +{inv.vatAmount.toFixed(2)} €
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-bold text-slate-900">
+                            {inv.totalAmount.toFixed(2)} €
+                          </td>
+                          <td className="py-3.5 px-5 text-right">
+                            <div className="inline-flex items-center gap-1.5 justify-end">
+                              <button
+                                type="button"
+                                onClick={() => handleDirectDownloadPdf(inv)}
+                                disabled={downloadingInvoiceId === inv.id}
+                                className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-2.5 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
+                                title="Descargar factura en PDF directamente"
+                              >
+                                {downloadingInvoiceId === inv.id ? (
+                                  <RefreshCw size={12} className="animate-spin" />
+                                ) : (
+                                  <Download size={12} />
                                 )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                                <span>Descargar</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedInvoiceForPrint(inv)}
+                                className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white px-2.5 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
+                                title="Ver factura completa e imprimir"
+                              >
+                                <Eye size={12} />
+                                <span>Ver</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedInvoiceForEdit(inv)}
+                                className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 px-2 py-1.5 text-xs font-semibold rounded-lg transition shadow-2xs"
+                                title="Completar o modificar DNI y domicilio fiscal del huésped"
+                              >
+                                <Pencil size={11} className="text-emerald-600" />
+                                <span>Editar</span>
+                              </button>
+                              {onDeleteInvoice && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (confirm(`¿Eliminar la factura ${inv.invoiceNumber}?`)) {
+                                      onDeleteInvoice(inv.id);
+                                    }
+                                  }}
+                                  className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition"
+                                  title="Eliminar factura"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>

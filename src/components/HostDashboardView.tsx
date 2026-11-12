@@ -2940,18 +2940,63 @@ export default function HostDashboardView({
         const completedCount = inspectingTaskPhotos.checklist.filter((c) => c.completed).length;
         const totalChecklist = inspectingTaskPhotos.checklist.length;
 
-        // Galería de fotos recopiladas (generales, checklist e incidencias)
-        const allPhotos: { url: string; title: string }[] = [
-          ...inspectingTaskPhotos.photosUploaded.map((url, i) => ({
+        // Asegurar que si hay fotos en photosUploaded pero item.photos no estaba poblado (por tareas guardadas anteriormente), se asocien al item correspondiente
+        let availableGeneralUrls = [...inspectingTaskPhotos.photosUploaded];
+        const enrichedChecklist = inspectingTaskPhotos.checklist.map((item) => {
+          if (item.photos && item.photos.length > 0) {
+            availableGeneralUrls = availableGeneralUrls.filter((u) => !item.photos?.includes(u));
+            return item;
+          }
+          if (item.completed && item.photoRequired && availableGeneralUrls.length > 0) {
+            const assignedUrl = availableGeneralUrls.shift()!;
+            return {
+              ...item,
+              photos: [assignedUrl],
+            };
+          }
+          return item;
+        });
+
+        // 1. Fotos vinculadas a elementos del checklist
+        const checklistPhotos: { url: string; title: string }[] = [];
+        enrichedChecklist.forEach((item) => {
+          (item.photos || []).forEach((url, i) => {
+            checklistPhotos.push({
+              url,
+              title: `[${item.category || 'Checklist'}] ${item.label}${
+                item.photos && item.photos.length > 1 ? ` (${i + 1})` : ''
+              }`,
+            });
+          });
+        });
+
+        // 2. Fotos de incidencias
+        const incidentPhotos: { url: string; title: string }[] = (
+          inspectingTaskPhotos.incidents || []
+        )
+          .filter((inc) => inc.photoUrl)
+          .map((inc) => ({
+            url: inc.photoUrl!,
+            title: `Incidencia: ${inc.text}`,
+          }));
+
+        // 3. Fotos puramente generales (no asociadas a ningún item ni incidencia)
+        const boundUrls = new Set([
+          ...checklistPhotos.map((p) => p.url),
+          ...incidentPhotos.map((p) => p.url),
+        ]);
+        const generalPhotos: { url: string; title: string }[] = inspectingTaskPhotos.photosUploaded
+          .filter((url) => !boundUrls.has(url))
+          .map((url, i) => ({
             url,
-            title: `Foto ${i + 1}`,
-          })),
-          ...(inspectingTaskPhotos.incidents || [])
-            .filter((inc) => inc.photoUrl)
-            .map((inc) => ({
-              url: inc.photoUrl!,
-              title: `Incidencia: ${inc.text}`,
-            })),
+            title: `Foto general ${i + 1}`,
+          }));
+
+        // Galería completa para el visor lightbox
+        const allPhotos: { url: string; title: string }[] = [
+          ...checklistPhotos,
+          ...incidentPhotos,
+          ...generalPhotos,
         ];
 
         return (
@@ -3170,52 +3215,67 @@ export default function HostDashboardView({
                       )}
                     </div>
 
-                    {/* Evidencias Fotográficas con Lightbox */}
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          <ImageIcon size={14} />
-                          Evidencias Fotográficas ({allPhotos.length})
-                        </h4>
-                        <span className="text-[11px] text-slate-400">Pulsa para ampliar</span>
-                      </div>
+                    {/* Fotos Generales o Estado de Verificación */}
+                    {generalPhotos.length > 0 ? (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <ImageIcon size={14} />
+                            Fotos Generales ({generalPhotos.length})
+                          </h4>
+                          <span className="text-[11px] text-slate-400">Pulsa para ampliar</span>
+                        </div>
 
-                      {allPhotos.length > 0 ? (
                         <div className="grid grid-cols-3 gap-3">
-                          {allPhotos.map((photo, idx) => (
-                            <div key={idx} className="flex flex-col gap-1">
-                              <div
-                                onClick={() => setPreviewPhotoIndex(idx)}
-                                className="aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-2xs hover:ring-2 hover:ring-indigo-500/30 transition-all group relative cursor-pointer bg-slate-900"
-                              >
-                                <img
-                                  src={photo.url}
-                                  alt={photo.title}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                />
-                                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
-                                  <ExternalLink size={18} />
+                          {generalPhotos.map((photo, idx) => {
+                            const pIndex = allPhotos.findIndex((p) => p.url === photo.url);
+                            return (
+                              <div key={idx} className="flex flex-col gap-1">
+                                <div
+                                  onClick={() => pIndex !== -1 && setPreviewPhotoIndex(pIndex)}
+                                  className="aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-2xs hover:ring-2 hover:ring-indigo-500/30 transition-all group relative cursor-pointer bg-slate-900"
+                                >
+                                  <img
+                                    src={photo.url}
+                                    alt={photo.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                  />
+                                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+                                    <ExternalLink size={18} />
+                                  </div>
                                 </div>
+                                <span
+                                  className="text-[10px] font-bold text-slate-500 text-center truncate px-1"
+                                  title={photo.title}
+                                >
+                                  {photo.title}
+                                </span>
                               </div>
-                              <span
-                                className="text-[10px] font-bold text-slate-500 text-center truncate px-1"
-                                title={photo.title}
-                              >
-                                {photo.title}
-                              </span>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
-                      ) : (
-                        <div className="bg-slate-50 rounded-2xl p-8 flex flex-col items-center justify-center border border-dashed border-slate-200">
-                          <ImageIcon className="text-slate-300 mb-2" size={32} />
-                          <p className="text-xs font-bold text-slate-400">Sin fotos disponibles aún</p>
+                      </div>
+                    ) : (
+                      <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 space-y-2">
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                          <span className="flex items-center gap-1.5 text-slate-900 font-extrabold">
+                            <CheckCircle2 size={15} className="text-emerald-600" />
+                            Fotos Vinculadas al Checklist
+                          </span>
+                          <span className="text-[11px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            {checklistPhotos.length} {checklistPhotos.length === 1 ? 'foto' : 'fotos'}
+                          </span>
                         </div>
-                      )}
-                    </div>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">
+                          {checklistPhotos.length > 0
+                            ? 'Cada foto de verificación está adjunta directamente en su elemento correspondiente del checklist (a la derecha).'
+                            : 'No hay fotos adicionales fuera del checklist.'}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Columna Derecha: Checklist Verificado */}
+                  {/* Columna Derecha: Checklist Verificado con Fotos por Elemento */}
                   <div className="space-y-4">
                     {/* Checklist Verificado */}
                     <div className="space-y-3">
@@ -3229,17 +3289,17 @@ export default function HostDashboardView({
                         </span>
                       </div>
 
-                      <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                        {inspectingTaskPhotos.checklist.map((item) => (
+                      <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                        {enrichedChecklist.map((item) => (
                           <div
                             key={item.id}
-                            className={`p-3 rounded-2xl border text-xs flex items-center justify-between gap-3 transition ${
+                            className={`p-3 rounded-2xl border text-xs flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 transition ${
                               item.completed
                                 ? 'bg-slate-50/80 border-slate-200/80 text-slate-800'
                                 : 'bg-rose-50/40 border-rose-200/60 text-rose-900'
                             }`}
                           >
-                            <div className="flex items-center gap-2 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
                               <span
                                 className={`font-black text-sm shrink-0 ${
                                   item.completed ? 'text-emerald-600' : 'text-slate-300'
@@ -3259,11 +3319,44 @@ export default function HostDashboardView({
                               </div>
                             </div>
 
-                            {item.photoRequired && (
-                              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
-                                <Camera size={10} /> Foto
-                              </span>
-                            )}
+                            {/* Foto vinculada a este item y estado */}
+                            <div className="flex items-center gap-2 shrink-0">
+                              {item.photos && item.photos.length > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  {item.photos.map((pUrl, pIdx) => {
+                                    const pIndex = allPhotos.findIndex((p) => p.url === pUrl);
+                                    return (
+                                      <div
+                                        key={pIdx}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (pIndex !== -1) setPreviewPhotoIndex(pIndex);
+                                        }}
+                                        className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-emerald-500 bg-slate-900 cursor-pointer hover:scale-105 transition shadow-2xs group shrink-0"
+                                        title={`Ver foto de ${item.label}`}
+                                      >
+                                        <img
+                                          src={pUrl}
+                                          alt={item.label}
+                                          className="w-full h-full object-cover group-hover:opacity-90"
+                                        />
+                                        <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
+                                          <ExternalLink size={14} />
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full flex items-center gap-1">
+                                    <Camera size={11} className="text-emerald-600" />
+                                    <span>Ver foto</span>
+                                  </span>
+                                </div>
+                              ) : item.photoRequired ? (
+                                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                                  <Camera size={10} /> Foto obligatoria
+                                </span>
+                              ) : null}
+                            </div>
                           </div>
                         ))}
                       </div>

@@ -28,6 +28,7 @@ import {
   LayoutGrid,
   List,
   MessageSquare,
+  Euro,
   DollarSign,
   CheckCheck,
   Send,
@@ -1670,10 +1671,10 @@ export default function HostDashboardView({
                       Servicios Asignados
                     </span>
                     <div className="text-2xl font-black text-slate-900">
-                      {tasks.length} <span className="text-xs font-bold text-slate-400 font-normal">turnos</span>
+                      {tasks.length} <span className="text-xs font-bold text-slate-400 font-normal">{tasks.length === 1 ? 'limpieza' : 'limpiezas'}</span>
                     </div>
                     <span className="text-[11px] text-slate-500 font-medium block">
-                      {tasks.filter((t) => t.status === 'completed').length} hechos ·{' '}
+                      {tasks.filter((t) => t.status === 'completed').length} hechas ·{' '}
                       {tasks.filter((t) => t.status !== 'completed').length} pendientes
                     </span>
                   </div>
@@ -1700,7 +1701,7 @@ export default function HostDashboardView({
                     </span>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold shrink-0">
-                    <DollarSign size={22} />
+                    <Euro size={22} />
                   </div>
                 </div>
               </div>
@@ -1821,7 +1822,7 @@ export default function HostDashboardView({
                             <div className="font-extrabold text-slate-900 text-sm mt-0.5">
                               {cleanerTasks.length}{' '}
                               <span className="text-[11px] font-bold text-slate-500 font-normal">
-                                ({completedCount} hechos)
+                                ({completedCount} hechas)
                               </span>
                             </div>
                           </div>
@@ -1871,56 +1872,17 @@ export default function HostDashboardView({
                         </div>
                       </div>
 
-                      {/* Botonera de acciones: WhatsApp, Probar App y Liquidación */}
-                      <div className="space-y-2 pt-2 border-t border-slate-100">
-                        {/* Botón Principal WhatsApp */}
+                      {/* Botón de acceso / vista previa */}
+                      <div className="pt-2 border-t border-slate-100">
                         <button
                           type="button"
-                          onClick={() => {
-                            const phoneClean = c.phone.replace(/[^0-9]/g, '');
-                            const msg = `Hola ${c.name.split(' ')[0]}, aquí tienes tu enlace directo de limpiezas Turnexo actualizado en tiempo real con tus limpiezas asignadas:\n👉 ${cleanerUrl}`;
-                            window.open(
-                              `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`,
-                              '_blank'
-                            );
-                          }}
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 text-xs transition shadow-xs active:scale-[0.99]"
+                          onClick={() => onOpenCleanerPreview(c.id)}
+                          className="w-full bg-slate-100 hover:bg-slate-200/80 text-slate-700 hover:text-slate-900 font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs transition shadow-2xs"
+                          title="Ver cómo ve la app la limpiadora"
                         >
-                          <Send size={13} />
-                          <span>Compartir por WhatsApp</span>
+                          <ExternalLink size={13} className="text-slate-400" />
+                          <span>Probar App (Vista Previa)</span>
                         </button>
-
-                        {/* Fila secundaria: Probar App y Liquidación */}
-                        <div className="grid grid-cols-2 gap-2 text-xs font-bold">
-                          <button
-                            type="button"
-                            onClick={() => onOpenCleanerPreview(c.id)}
-                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs"
-                            title="Ver cómo ve la app la limpiadora"
-                          >
-                            <ExternalLink size={13} className="text-slate-400" />
-                            <span>Probar App</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => copyCleanerSettlement(c)}
-                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs"
-                            title="Copiar desglose completo para pago vía Bizum o transferencia"
-                          >
-                            {copiedSettlementCleanerId === c.id ? (
-                              <>
-                                <CheckCheck size={14} className="text-emerald-600" />
-                                <span className="text-emerald-700">¡Copiado!</span>
-                              </>
-                            ) : (
-                              <>
-                                <FileSpreadsheet size={13} className="text-slate-400" />
-                                <span>Liquidación</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
                       </div>
                     </div>
                   );

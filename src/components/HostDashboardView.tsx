@@ -135,9 +135,39 @@ export default function HostDashboardView({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showIcalModal, setShowIcalModal] = useState(false);
   const [targetPropertyId, setTargetPropertyId] = useState(properties[0]?.id || 'prop-1');
-  const [icsInput, setIcsInput] = useState(SAMPLE_ICAL_SNIPPET);
   const [liveIcalUrl, setLiveIcalUrl] = useState('');
   const [syncingUrl, setSyncingUrl] = useState(false);
+  const [isSyncingAllIcal, setIsSyncingAllIcal] = useState(false);
+  const [syncSuccessToast, setSyncSuccessToast] = useState(false);
+
+  const handleTriggerSyncIcal = async () => {
+    const propertiesWithIcal = properties.filter(
+      (p) =>
+        (p.airbnbIcalUrl && p.airbnbIcalUrl.startsWith('http')) ||
+        (p.bookingIcalUrl && p.bookingIcalUrl.startsWith('http'))
+    );
+
+    if (propertiesWithIcal.length === 0) {
+      setShowIcalModal(true);
+      return;
+    }
+
+    setIsSyncingAllIcal(true);
+    try {
+      for (const p of propertiesWithIcal) {
+        if (p.airbnbIcalUrl && p.airbnbIcalUrl.startsWith('http')) {
+          await onSyncIcalUrl(p.id, p.airbnbIcalUrl);
+        }
+        if (p.bookingIcalUrl && p.bookingIcalUrl.startsWith('http')) {
+          await onSyncIcalUrl(p.id, p.bookingIcalUrl);
+        }
+      }
+      setSyncSuccessToast(true);
+      setTimeout(() => setSyncSuccessToast(false), 3000);
+    } finally {
+      setIsSyncingAllIcal(false);
+    }
+  };
   const [showNewPropModal, setShowNewPropModal] = useState(false);
   const [qrModalProperty, setQrModalProperty] = useState<Property | null>(null);
   const [customizingProperty, setCustomizingProperty] = useState<Property | null>(null);
@@ -783,11 +813,19 @@ export default function HostDashboardView({
               <div className="flex items-center gap-2.5">
                 <button
                   type="button"
-                  onClick={() => setShowIcalModal(true)}
-                  className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm"
+                  onClick={handleTriggerSyncIcal}
+                  disabled={isSyncingAllIcal}
+                  className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm disabled:opacity-60"
+                  title="Sincronizar reservas iCal de todos los alojamientos conectados"
                 >
-                  <RefreshCw size={14} className="text-orange-600" />
-                  <span>{lang === 'en' ? 'Sync iCal' : 'Sincronizar iCal'}</span>
+                  <RefreshCw size={14} className={`text-orange-600 ${isSyncingAllIcal ? 'animate-spin' : ''}`} />
+                  <span>
+                    {isSyncingAllIcal
+                      ? 'Sincronizando...'
+                      : syncSuccessToast
+                      ? '✓ Sincronizado'
+                      : (lang === 'en' ? 'Sync iCal' : 'Sincronizar iCal')}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -2405,78 +2443,70 @@ export default function HostDashboardView({
         )}
       </div>
 
-      {/* Modal para Sincronizar URL iCal real */}
+      {/* Modal para Conectar URL iCal */}
       {showIcalModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl my-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-xl font-bold tracking-tight text-slate-900">
-                Sincronizar Calendario iCal (.ics)
-              </h3>
+              <div>
+                <h3 className="text-xl font-bold tracking-tight text-slate-900">
+                  Conectar Calendario iCal (.ics)
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Introduce el enlace de exportación de Airbnb o Booking para sincronizar reservas en tiempo real.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowIcalModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1"
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1 rounded-lg"
               >
                 ✕
               </button>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Alojamiento de destino
-              </label>
-              <select
-                value={targetPropertyId}
-                onChange={(e) => setTargetPropertyId(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                {properties.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Alojamiento de destino
+                </label>
+                <select
+                  value={targetPropertyId}
+                  onChange={(e) => setTargetPropertyId(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  {properties.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="bg-orange-50/50 border border-orange-200/60 rounded-2xl p-4 space-y-2.5">
-              <label className="block text-xs font-bold text-orange-800">
-                Opción A · Pegar URL .ics directa de Airbnb o Booking
-              </label>
-              <div className="flex gap-2">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Enlace iCal (.ics) de Airbnb o Booking
+                </label>
                 <input
                   type="url"
                   value={liveIcalUrl}
                   onChange={(e) => setLiveIcalUrl(e.target.value)}
-                  placeholder="https://www.airbnb.es/calendar/ical/....ics"
-                  className="flex-1 text-xs bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="https://www.airbnb.es/calendar/ical/... o https://admin.booking.com/..."
+                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-mono text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
-                <button
-                  type="button"
-                  disabled={syncingUrl || !liveIcalUrl.trim()}
-                  onClick={async () => {
-                    setSyncingUrl(true);
-                    await onSyncIcalUrl(targetPropertyId, liveIcalUrl.trim());
-                    setSyncingUrl(false);
-                    setShowIcalModal(false);
-                  }}
-                  className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-xl shrink-0 transition shadow-sm"
-                >
-                  {syncingUrl ? '...' : 'Sincronizar'}
-                </button>
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">
-                Opción B · Contenido .ics de prueba
-              </label>
-              <textarea
-                rows={5}
-                value={icsInput}
-                onChange={(e) => setIcsInput(e.target.value)}
-                className="w-full font-mono text-xs bg-slate-900 text-slate-100 rounded-xl p-3 focus:outline-none"
-              />
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs text-slate-600 space-y-1.5">
+                <p className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
+                  ¿Dónde conseguir tu enlace iCal?
+                </p>
+                <p className="leading-relaxed">
+                  <strong>Airbnb:</strong> En tu anuncio &rarr; Disponibilidad &rarr; Sincronización de calendarios &rarr; <em>Exportar calendario</em>.
+                </p>
+                <p className="leading-relaxed">
+                  <strong>Booking.com:</strong> En la Extranet &rarr; Calendario &rarr; Sincronizar calendarios &rarr; <em>Exportar calendario</em>.
+                </p>
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -2489,13 +2519,16 @@ export default function HostDashboardView({
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  onImportIcalText(targetPropertyId, icsInput);
+                disabled={syncingUrl || !liveIcalUrl.trim()}
+                onClick={async () => {
+                  setSyncingUrl(true);
+                  await onSyncIcalUrl(targetPropertyId, liveIcalUrl.trim());
+                  setSyncingUrl(false);
                   setShowIcalModal(false);
                 }}
-                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-sm"
+                className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-sm"
               >
-                Importar Reservas iCal
+                {syncingUrl ? 'Sincronizando...' : 'Conectar y Sincronizar'}
               </button>
             </div>
           </div>

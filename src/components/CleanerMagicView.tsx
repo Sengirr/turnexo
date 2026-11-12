@@ -14,7 +14,6 @@ import {
   User,
   Sparkles,
   MapPin,
-  Video,
   Play,
   Square,
   Trash2,
@@ -521,27 +520,15 @@ export default function CleanerMagicView({
                         Ver en Google Maps
                       </a>
                     )}
-
-                    {prop?.videos && prop.videos.length > 0 && (
-                      <a
-                        href={prop.videos[0].url.includes('http') ? prop.videos[0].url : `https://www.youtube.com/watch?v=${prop.videos[0].url}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition"
-                      >
-                        <Video size={13} className="text-emerald-600" />
-                        Vídeo entrada / llaves
-                      </a>
-                    )}
                   </div>
 
-                  {/* Notas o instrucciones especiales */}
-                  {prop?.checkInInstructions && (
+                  {/* Notas internas de recepción o limpieza asignadas a esta tarea */}
+                  {activeTask.notes && (
                     <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3.5 text-xs text-amber-900 space-y-1">
                       <span className="font-extrabold uppercase text-[10px] tracking-wider text-amber-800 block">
-                        Instrucciones de Entrada / Cajetín:
+                        Notas de Recepción:
                       </span>
-                      <p className="leading-relaxed">{prop.checkInInstructions}</p>
+                      <p className="leading-relaxed">{activeTask.notes}</p>
                     </div>
                   )}
                 </div>

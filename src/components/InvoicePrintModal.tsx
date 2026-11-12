@@ -1,5 +1,5 @@
-import React from 'react';
-import { Printer, Download, X, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Printer, Download, X, ShieldCheck, Loader2 } from 'lucide-react';
 import { Invoice } from '../lib/invoice';
 
 interface Props {
@@ -8,8 +8,68 @@ interface Props {
 }
 
 export default function InvoicePrintModal({ invoice, onClose }: Props) {
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!invoiceRef.current) return;
+    setIsDownloading(true);
+    try {
+      // @ts-ignore
+      const html2pdf = (await import('html2pdf.js')).default;
+      const opt = {
+        margin: 10,
+        filename: `Factura_${invoice.invoiceNumber}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
+      };
+      await html2pdf().from(invoiceRef.current).set(opt).save();
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      handlePrint();
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const handlePrint = () => {
-    window.print();
+    if (!invoiceRef.current) {
+      window.print();
+      return;
+    }
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+    const htmlContent = invoiceRef.current.innerHTML;
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Factura ${invoice.invoiceNumber}</title>
+          <meta charset="utf-8" />
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @page { size: A4; margin: 15mm; }
+            body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #ffffff; color: #0f172a; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          </style>
+        </head>
+        <body class="p-6">
+          <div class="max-w-2xl mx-auto space-y-6">
+            ${htmlContent}
+          </div>
+          <script>
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 350);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   return (
@@ -18,7 +78,13 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
         {/* Cabecera modal (oculta al imprimir) */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 print:hidden">
           <div className="flex items-center gap-2">
-            <span className="bg-emerald-100 text-emerald-800 text-xs font-black uppercase px-2.5 py-1 rounded-full flex items-center gap-1">
+            <span
+              className={`text-xs font-black uppercase px-2.5 py-1 rounded-full flex items-center gap-1 ${
+                invoice.isSimplified
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-indigo-100 text-indigo-800'
+              }`}
+            >
               <ShieldCheck size={14} />
               {invoice.isSimplified ? 'Factura Simplificada (≤ 400 €)' : 'Factura Completa'}
             </span>
@@ -29,11 +95,20 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={handleDownloadPdf}
+              disabled={isDownloading}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm disabled:opacity-50"
+            >
+              {isDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+              <span>Descargar PDF</span>
+            </button>
+            <button
+              type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition shadow-sm"
             >
               <Printer size={14} />
-              Imprimir / PDF
+              <span>Imprimir</span>
             </button>
             <button
               type="button"
@@ -45,8 +120,8 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
           </div>
         </div>
 
-        {/* CONTENIDO DE LA FACTURA (Imprimible) */}
-        <div className="space-y-6 text-slate-800 font-sans print:text-black">
+        {/* CONTENIDO DE LA FACTURA (Imprimible y descargable a PDF) */}
+        <div ref={invoiceRef} className="space-y-6 text-slate-800 font-sans bg-white p-4 sm:p-6 rounded-2xl">
           {/* Encabezado y Nº Factura */}
           <div className="flex justify-between items-start gap-4">
             <div>
@@ -69,7 +144,7 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
           </div>
 
           {/* Bloque de Partes: Emisor y Huésped */}
-          <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs print:bg-white print:border-slate-300">
+          <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs">
             <div>
               <p className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">
                 Emisor / Anfitrión
@@ -166,17 +241,33 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
             <p>
               * Factura expedida con arreglo a la normativa tributaria española vigente (RD 1619/2012, de 30 de noviembre). Régimen general del Impuesto sobre el Valor Añadido (IVA al tipo reducido del 10% para alojamiento turístico).
             </p>
-            <p className="font-mono text-[9px] text-slate-400">
-              Documento generado electrónicamente mediante Turnexo · Código de verificación: {invoice.id}
+            <p className="text-[10px] text-slate-400">
+              Documento expedido mediante software de gestión de alojamientos turísticos Turnexo.
             </p>
           </div>
         </div>
 
         {/* Pie modal */}
         <div className="flex items-center justify-between pt-4 border-t border-slate-100 print:hidden">
-          <p className="text-xs text-slate-500">
-            Puedes descargar este documento en PDF con el botón <strong>Imprimir / PDF</strong>.
-          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={isDownloading}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm disabled:opacity-50"
+            >
+              {isDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+              <span>Descargar PDF</span>
+            </button>
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition"
+            >
+              <Printer size={14} />
+              <span>Imprimir</span>
+            </button>
+          </div>
           <button
             type="button"
             onClick={onClose}

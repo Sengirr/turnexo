@@ -53,7 +53,8 @@ import InvoicePrintModal from './InvoicePrintModal';
 import CreateInvoiceModal from './CreateInvoiceModal';
 import FiscalProfileModal from './FiscalProfileModal';
 import ImportInvoicesCsvModal from './ImportInvoicesCsvModal';
-import { CreditCard, ShieldCheck, FileText, Building2, Upload, HelpCircle } from 'lucide-react';
+import EditInvoiceGuestModal from './EditInvoiceGuestModal';
+import { CreditCard, ShieldCheck, FileText, Building2, Upload, HelpCircle, Pencil } from 'lucide-react';
 import {
   computeQuarterSummaries,
   DEFAULT_HOST_FISCAL_PROFILE,
@@ -95,6 +96,7 @@ interface Props {
   fiscalProfile?: HostFiscalProfile;
   onAddInvoice?: (inv: Invoice) => void;
   onAddInvoices?: (invoices: Invoice[]) => void;
+  onUpdateInvoice?: (inv: Invoice) => void;
   onDeleteInvoice?: (id: string) => void;
   onClearAllInvoices?: () => void;
   onUpdateFiscalProfile?: (prof: HostFiscalProfile) => void;
@@ -130,6 +132,7 @@ export default function HostDashboardView({
   fiscalProfile,
   onAddInvoice,
   onAddInvoices,
+  onUpdateInvoice,
   onDeleteInvoice,
   onClearAllInvoices,
   onUpdateFiscalProfile,
@@ -240,6 +243,7 @@ export default function HostDashboardView({
     currentMonth <= 3 ? '1T' : currentMonth <= 6 ? '2T' : currentMonth <= 9 ? '3T' : '4T';
   const [selectedQuarter, setSelectedQuarter] = useState<'1T' | '2T' | '3T' | '4T'>(initialQ);
   const [selectedInvoiceForPrint, setSelectedInvoiceForPrint] = useState<Invoice | null>(null);
+  const [selectedInvoiceForEdit, setSelectedInvoiceForEdit] = useState<Invoice | null>(null);
   const [showCreateInvoiceModal, setShowCreateInvoiceModal] = useState(false);
   const [showImportCsvModal, setShowImportCsvModal] = useState(false);
   const [preselectedResIdForInvoice, setPreselectedResIdForInvoice] = useState<string | undefined>(undefined);
@@ -2431,13 +2435,34 @@ export default function HostDashboardView({
                                   NIF: {inv.guestFiscalId}
                                 </span>
                               ) : inv.isSimplified ? (
-                                <span className="text-[11px] text-slate-400 italic">
-                                  Sin NIF requerido (≤ 400 €)
-                                </span>
+                                <div className="space-y-0.5">
+                                  <span className="text-[11px] text-slate-400 italic block">
+                                    Sin NIF requerido (≤ 400 €)
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedInvoiceForEdit(inv)}
+                                    className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 hover:text-emerald-700 transition"
+                                  >
+                                    <Pencil size={9} />
+                                    <span>Añadir DNI</span>
+                                  </button>
+                                </div>
                               ) : (
-                                <span className="text-[11px] text-slate-400 italic">
-                                  Particular (sin NIF en plataforma)
-                                </span>
+                                <div className="space-y-0.5">
+                                  <span className="text-[11px] text-slate-400 italic block">
+                                    Particular (sin NIF en plataforma)
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedInvoiceForEdit(inv)}
+                                    className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2 py-0.5 rounded-md transition"
+                                    title="Añadir DNI y dirección fiscal del cliente"
+                                  >
+                                    <Pencil size={10} />
+                                    <span>+ Añadir DNI / Dirección</span>
+                                  </button>
+                                </div>
                               )}
                             </td>
                             <td className="py-3.5 px-4 text-[11px]">
@@ -2465,10 +2490,20 @@ export default function HostDashboardView({
                                 <button
                                   type="button"
                                   onClick={() => setSelectedInvoiceForPrint(inv)}
-                                  className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
+                                  className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white px-2.5 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
+                                  title="Ver e imprimir factura oficial"
                                 >
                                   <Printer size={12} />
                                   <span>Ver / PDF</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedInvoiceForEdit(inv)}
+                                  className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 px-2 py-1.5 text-xs font-semibold rounded-lg transition shadow-2xs"
+                                  title="Completar o modificar DNI y domicilio fiscal del huésped"
+                                >
+                                  <Pencil size={11} className="text-emerald-600" />
+                                  <span>Editar</span>
                                 </button>
                                 {onDeleteInvoice && (
                                   <button
@@ -3149,7 +3184,22 @@ export default function HostDashboardView({
       {selectedInvoiceForPrint && (
         <InvoicePrintModal
           invoice={selectedInvoiceForPrint}
+          onEditGuest={() => setSelectedInvoiceForEdit(selectedInvoiceForPrint)}
           onClose={() => setSelectedInvoiceForPrint(null)}
+        />
+      )}
+
+      {/* MODAL EDITAR / COMPLETAR DATOS FISCALES DEL HUÉSPED (DNI, DIRECCIÓN) */}
+      {selectedInvoiceForEdit && (
+        <EditInvoiceGuestModal
+          invoice={selectedInvoiceForEdit}
+          onSave={(updated) => {
+            onUpdateInvoice?.(updated);
+            if (selectedInvoiceForPrint?.id === updated.id) {
+              setSelectedInvoiceForPrint(updated);
+            }
+          }}
+          onClose={() => setSelectedInvoiceForEdit(null)}
         />
       )}
 

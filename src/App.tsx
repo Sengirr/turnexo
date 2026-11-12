@@ -368,6 +368,13 @@ export default function App() {
     showToast('Factura eliminada.');
   };
 
+  const handleUpdateInvoice = (updatedInvoice: Invoice) => {
+    setInvoices((prev) =>
+      prev.map((inv) => (inv.id === updatedInvoice.id ? updatedInvoice : inv))
+    );
+    showToast(`✓ Datos fiscales de ${updatedInvoice.invoiceNumber} actualizados.`);
+  };
+
   const handleClearAllInvoices = () => {
     setInvoices([]);
     try {
@@ -869,6 +876,7 @@ export default function App() {
           fiscalProfile={fiscalProfile}
           onAddInvoice={handleAddInvoice}
           onAddInvoices={handleAddInvoices}
+          onUpdateInvoice={handleUpdateInvoice}
           onDeleteInvoice={handleDeleteInvoice}
           onClearAllInvoices={handleClearAllInvoices}
           onUpdateFiscalProfile={handleUpdateFiscalProfile}

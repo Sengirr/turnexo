@@ -1,13 +1,14 @@
 import React, { useRef, useState } from 'react';
-import { Printer, Download, X, ShieldCheck, Loader2 } from 'lucide-react';
+import { Printer, Download, X, ShieldCheck, Loader2, Pencil } from 'lucide-react';
 import { Invoice } from '../lib/invoice';
 
 interface Props {
   invoice: Invoice;
+  onEditGuest?: () => void;
   onClose: () => void;
 }
 
-export default function InvoicePrintModal({ invoice, onClose }: Props) {
+export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Props) {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -93,6 +94,17 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            {onEditGuest && (
+              <button
+                type="button"
+                onClick={onEditGuest}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition shadow-2xs"
+                title="Modificar DNI o dirección fiscal del huésped"
+              >
+                <Pencil size={13} className="text-emerald-600" />
+                <span>Editar Datos</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handleDownloadPdf}
@@ -178,6 +190,16 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
               {invoice.guestEmail && (
                 <p className="text-slate-500 text-[11px]">{invoice.guestEmail}</p>
               )}
+              {onEditGuest && !invoice.guestFiscalId && (
+                <button
+                  type="button"
+                  onClick={onEditGuest}
+                  className="mt-2 text-[10px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-1 rounded-md transition flex items-center gap-1 print:hidden"
+                >
+                  <Pencil size={10} />
+                  <span>+ Añadir DNI y Domicilio Fiscal</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -250,6 +272,17 @@ export default function InvoicePrintModal({ invoice, onClose }: Props) {
         {/* Pie modal */}
         <div className="flex items-center justify-between pt-4 border-t border-slate-100 print:hidden">
           <div className="flex items-center gap-2">
+            {onEditGuest && (
+              <button
+                type="button"
+                onClick={onEditGuest}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition shadow-2xs"
+                title="Modificar DNI o dirección fiscal del huésped"
+              >
+                <Pencil size={13} className="text-emerald-600" />
+                <span>Editar Datos</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handleDownloadPdf}

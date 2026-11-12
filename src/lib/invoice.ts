@@ -212,7 +212,7 @@ const SPANISH_MONTHS: Record<string, string> = {
  */
 export function normalizeDateString(dStr: string): string {
   if (!dStr) return new Date().toISOString().split('T')[0];
-  const trimmed = dStr.trim();
+  const trimmed = String(dStr).trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
     const parts = trimmed.split('/');
@@ -226,7 +226,8 @@ export function normalizeDateString(dStr: string): string {
     const year = match[3];
     return `${year}-${month}-${day}`;
   }
-  return trimmed;
+  // Si no coincide con formato de fecha, devolver fecha de hoy para evitar textos residuales
+  return new Date().toISOString().split('T')[0];
 }
 
 /**
@@ -614,13 +615,16 @@ export function createInvoicesFromImportedRows(
     });
 
     const propId = matchedProp?.id || properties?.[0]?.id || 'prop-default';
-    const propName = matchedProp?.name || row.propertyName;
+    const propName = row.propertyName || matchedProp?.name || 'Alojamiento Turístico';
+
+    const rawIssue = row.stayEndDate || new Date().toISOString().split('T')[0];
+    const issueDate = /^\d{4}-\d{2}-\d{2}$/.test(rawIssue) ? rawIssue : new Date().toISOString().split('T')[0];
 
     const invoice: Invoice = {
       id: 'inv-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       invoiceNumber: number,
       series,
-      issueDate: row.stayEndDate || new Date().toISOString().split('T')[0],
+      issueDate,
       reservationId: row.reservationCode ? `bkg-${row.reservationCode}` : 'imp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
       propertyId: propId,
       propertyName: propName,
@@ -651,82 +655,19 @@ export function createInvoicesFromImportedRows(
   return newInvoices;
 }
 
-export const INITIAL_INVOICES: Invoice[] = [
-  {
-    id: 'inv-101',
-    invoiceNumber: 'FS-2026-001',
-    series: 'FS-2026',
-    issueDate: '2026-11-03',
-    reservationId: 'res-101',
-    propertyId: 'prop-1',
-    propertyName: 'Ático Vista Marina · Playa',
-    stayStartDate: '2026-10-30',
-    stayEndDate: '2026-11-03',
-    nights: 4,
-    guestName: 'Sophie Laurent',
-    guestEmail: 'sophie.laurent@example.fr',
-    isSimplified: true,
-    hostName: 'Carlos Mendizábal (Particular)',
-    hostFiscalId: '34892110A',
-    hostAddress: 'Paseo Marítimo 42, 4ºA',
-    hostPostalCode: '29602',
-    hostCity: 'Marbella (Málaga)',
-    concept: 'Alojamiento turístico estancia corta (4 noches)',
-    totalAmount: 480.0,
-    vatRate: 10,
-    baseAmount: 436.36,
-    vatAmount: 43.64,
-    status: 'issued',
-  },
-  {
-    id: 'inv-102',
-    invoiceNumber: 'FS-2026-002',
-    series: 'FS-2026',
-    issueDate: '2026-11-08',
-    reservationId: 'res-102',
-    propertyId: 'prop-1',
-    propertyName: 'Ático Vista Marina · Playa',
-    stayStartDate: '2026-11-05',
-    stayEndDate: '2026-11-08',
-    nights: 3,
-    guestName: 'Markus Weber',
-    guestEmail: 'm.weber@example.de',
-    isSimplified: true,
-    hostName: 'Carlos Mendizábal (Particular)',
-    hostFiscalId: '34892110A',
-    hostAddress: 'Paseo Marítimo 42, 4ºA',
-    hostPostalCode: '29602',
-    hostCity: 'Marbella (Málaga)',
-    concept: 'Alojamiento turístico estancia corta (3 noches)',
-    totalAmount: 375.0,
-    vatRate: 10,
-    baseAmount: 340.91,
-    vatAmount: 34.09,
-    status: 'issued',
-  },
-  {
-    id: 'inv-201',
-    invoiceNumber: 'FS-2026-003',
-    series: 'FS-2026',
-    issueDate: '2026-11-02',
-    reservationId: 'res-201',
-    propertyId: 'prop-2',
-    propertyName: 'Loft Centro Histórico Catedral',
-    stayStartDate: '2026-10-31',
-    stayEndDate: '2026-11-02',
-    nights: 2,
-    guestName: 'James & Emily Carter',
-    isSimplified: true,
-    hostName: 'Carlos Mendizábal (Particular)',
-    hostFiscalId: '34892110A',
-    hostAddress: 'Paseo Marítimo 42, 4ºA',
-    hostPostalCode: '29602',
-    hostCity: 'Marbella (Málaga)',
-    concept: 'Alojamiento turístico estancia corta (2 noches)',
-    totalAmount: 260.0,
-    vatRate: 10,
-    baseAmount: 236.36,
-    vatAmount: 23.64,
-    status: 'issued',
-  },
-];
+/**
+ * Detecta facturas mock de ejemplo o facturas corruptas generadas por desplazamientos previos de columnas
+ */
+export function isCorruptedOrMockInvoice(inv: Invoice): boolean {
+  if (!inv) return true;
+  if (['inv-101', 'inv-102', 'inv-201'].includes(inv.id)) return true;
+  if (['Sophie Laurent', 'Markus Weber', 'James & Emily Carter'].includes(inv.guestName)) return true;
+  if (inv.issueDate === 'Spain' || !/^\d{4}-\d{2}-\d{2}$/.test(inv.issueDate)) return true;
+  if (inv.guestName === 'Edificio Vistamarina A' || inv.guestName?.includes('Planta 1')) return true;
+  if (inv.stayEndDate === 'Spain' || inv.stayStartDate?.includes('Planta 1')) return true;
+  if (inv.propertyName?.includes('Planta 1 Torremolinos')) return true;
+  if (inv.totalAmount > 20000 && (inv.concept?.includes('1 noches') || inv.nights === 1)) return true;
+  return false;
+}
+
+export const INITIAL_INVOICES: Invoice[] = [];

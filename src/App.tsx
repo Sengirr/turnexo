@@ -20,6 +20,7 @@ import {
   HostFiscalProfile,
   INITIAL_INVOICES,
   Invoice,
+  isCorruptedOrMockInvoice,
 } from './lib/invoice';
 import HostDashboardView from './components/HostDashboardView';
 import CleanerMagicView from './components/CleanerMagicView';
@@ -128,7 +129,7 @@ export default function App() {
   );
   const [invoices, setInvoices] = useState<Invoice[]>(() => {
     const stored = loadStored<Invoice[]>(STORAGE_KEYS.invoices, []);
-    return stored.filter((inv) => !['inv-101', 'inv-102', 'inv-201'].includes(inv.id));
+    return stored.filter((inv) => !isCorruptedOrMockInvoice(inv));
   });
   const [fiscalProfile, setFiscalProfile] = useState<HostFiscalProfile>(() =>
     loadStored(STORAGE_KEYS.fiscalProfile, DEFAULT_HOST_FISCAL_PROFILE)
@@ -365,6 +366,14 @@ export default function App() {
   const handleDeleteInvoice = (invoiceId: string) => {
     setInvoices((prev) => prev.filter((inv) => inv.id !== invoiceId));
     showToast('Factura eliminada.');
+  };
+
+  const handleClearAllInvoices = () => {
+    setInvoices([]);
+    try {
+      localStorage.removeItem(STORAGE_KEYS.invoices);
+    } catch {}
+    showToast('Todas las facturas han sido eliminadas.');
   };
 
   const handleUpdateFiscalProfile = (updatedProfile: HostFiscalProfile) => {
@@ -861,6 +870,7 @@ export default function App() {
           onAddInvoice={handleAddInvoice}
           onAddInvoices={handleAddInvoices}
           onDeleteInvoice={handleDeleteInvoice}
+          onClearAllInvoices={handleClearAllInvoices}
           onUpdateFiscalProfile={handleUpdateFiscalProfile}
           onImportIcalText={handleImportIcalText}
           onSyncIcalUrl={handleSyncIcalUrl}

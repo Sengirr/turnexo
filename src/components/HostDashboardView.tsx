@@ -61,6 +61,7 @@ import {
   HostFiscalProfile,
   INITIAL_INVOICES,
   Invoice,
+  isCorruptedOrMockInvoice,
   SIMPLIFIED_INVOICE_MAX_AMOUNT,
 } from '../lib/invoice';
 import { DASHBOARD_TRANSLATIONS, DashboardLanguage } from '../lib/dashboardTranslations';
@@ -95,6 +96,7 @@ interface Props {
   onAddInvoice?: (inv: Invoice) => void;
   onAddInvoices?: (invoices: Invoice[]) => void;
   onDeleteInvoice?: (id: string) => void;
+  onClearAllInvoices?: () => void;
   onUpdateFiscalProfile?: (prof: HostFiscalProfile) => void;
   onImportIcalText: (propertyId: string, icsText: string) => void;
   onSyncIcalUrl: (propertyId: string, url: string) => Promise<void>;
@@ -129,6 +131,7 @@ export default function HostDashboardView({
   onAddInvoice,
   onAddInvoices,
   onDeleteInvoice,
+  onClearAllInvoices,
   onUpdateFiscalProfile,
   onImportIcalText,
   onSyncIcalUrl,
@@ -245,7 +248,7 @@ export default function HostDashboardView({
   const [invoicePropertyFilter, setInvoicePropertyFilter] = useState('all');
 
   const allInvoices = useMemo(() => {
-    return (invoices || []).filter((inv) => !['inv-101', 'inv-102', 'inv-201'].includes(inv.id));
+    return (invoices || []).filter((inv) => !isCorruptedOrMockInvoice(inv));
   }, [invoices]);
   const currentFiscalProfile = fiscalProfile || DEFAULT_HOST_FISCAL_PROFILE;
 
@@ -2311,9 +2314,30 @@ export default function HostDashboardView({
                   </select>
                 </div>
 
-                <span className="text-xs text-slate-500 font-medium">
-                  Mostrando {allInvoices.length} facturas registradas
-                </span>
+                <div className="flex items-center gap-3">
+                  {allInvoices.length > 0 && onClearAllInvoices && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (
+                          confirm(
+                            `¿Estás seguro de que deseas eliminar todas las facturas del listado para volver a importarlas limpias?`
+                          )
+                        ) {
+                          onClearAllInvoices();
+                        }
+                      }}
+                      className="text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 shadow-2xs"
+                      title="Eliminar todas las facturas del listado"
+                    >
+                      <Trash2 size={12} />
+                      <span>Vaciar Facturas</span>
+                    </button>
+                  )}
+                  <span className="text-xs text-slate-500 font-medium">
+                    Mostrando {allInvoices.length} facturas registradas
+                  </span>
+                </div>
               </div>
 
               {allInvoices.length === 0 ? (

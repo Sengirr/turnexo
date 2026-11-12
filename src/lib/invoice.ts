@@ -1,4 +1,5 @@
 import { Property } from './icalParser';
+import * as XLSX from 'xlsx';
 
 export const SIMPLIFIED_INVOICE_MAX_AMOUNT = 400; // Art. 4.1 RD 1619/2012 (Factura simplificada hasta 400€ con IVA)
 
@@ -294,10 +295,153 @@ export function downloadInvoiceImportTemplate(): void {
 }
 
 /**
+ * Parsea un importe en formato numérico o string con soporte para divisas (€, $, EUR) y comas/puntos decimales
+ */
+export function parseCurrencyNumber(val: any): number {
+  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  if (!val) return 0;
+  let str = String(val).trim();
+  str = str.replace(/[^0-9.,\-]/g, '');
+  if (!str) return 0;
+  if (str.includes('.') && str.includes(',')) {
+    if (str.lastIndexOf(',') > str.lastIndexOf('.')) {
+      str = str.replace(/\./g, '').replace(',', '.');
+    } else {
+      str = str.replace(/,/g, '');
+    }
+  } else if (str.includes(',')) {
+    str = str.replace(',', '.');
+  }
+  const n = parseFloat(str);
+  return isNaN(n) ? 0 : n;
+}
+
+/**
+ * Parsea un array de objetos obtenido directamente de SheetJS (evita problemas de saltos de línea dentro de celdas de Excel)
+ */
+export function parseReservationsFromSheetRows(rawObjects: Record<string, any>[]): ImportedReservationRow[] {
+  if (!Array.isArray(rawObjects) || rawObjects.length === 0) return [];
+
+  const rows: ImportedReservationRow[] = [];
+
+  for (const row of rawObjects) {
+    if (!row || typeof row !== 'object') continue;
+
+    const entries = Object.entries(row);
+    if (entries.length === 0) continue;
+
+    const findVal = (predicate: (cleanKey: string) => boolean): any => {
+      const found = entries.find(([k]) => {
+        const cleanK = k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        return predicate(cleanK);
+      });
+      return found ? found[1] : undefined;
+    };
+
+    // Si el estado es cancelado o anulado, ignorar
+    const statusVal = String(findVal((k) => k.includes('estado') || k.includes('status')) || '').toLowerCase();
+    if (statusVal.includes('cancel') || statusVal.includes('anula')) {
+      continue;
+    }
+
+    // Alojamiento (evitar columnas como "ubicación" o "dirección")
+    let rawProp = findVal((k) =>
+      k.includes('alojamiento') ||
+      k.includes('listing') ||
+      k.includes('propiedad') ||
+      k.includes('apartamento') ||
+      k.includes('habitacion') ||
+      k.includes('room')
+    );
+
+    // Huésped (evitar "nombre del alojamiento" o "cliente genius")
+    let rawGuest = findVal((k) =>
+      k.includes('titular') ||
+      k.includes('huesped') ||
+      k.includes('viajero') ||
+      k.includes('guest') ||
+      (k.includes('cliente') && !k.includes('genius')) ||
+      (k.includes('nombre') && !k.includes('alojamiento') && !k.includes('propiedad') && !k.includes('habitacion'))
+    );
+
+    // DNI / NIF
+    let rawDni = findVal((k) =>
+      k.includes('dni') || k.includes('nif') || k.includes('cif') || k.includes('fiscal') || k.includes('identificacion')
+    );
+
+    // Dirección fiscal
+    let rawAddr = findVal((k) =>
+      k.includes('direccion fiscal') || k.includes('domicilio fiscal') || k.includes('fiscal address')
+    );
+
+    // Fechas
+    let rawIn = findVal((k) =>
+      k.includes('entrada') || k.includes('check-in') || k.includes('checkin') || k.includes('llegada') || k.includes('start') || k.includes('arrival')
+    );
+
+    let rawOut = findVal((k) =>
+      k.includes('salida') || k.includes('check-out') || k.includes('checkout') || k.includes('departure') || k.includes('end')
+    );
+
+    // Importe
+    let rawAmount = findVal((k) =>
+      k.includes('importe total') ||
+      k.includes('importe') ||
+      k.includes('amount') ||
+      k.includes('precio') ||
+      k.includes('total') ||
+      k.includes('earnings') ||
+      k.includes('cobrado')
+    );
+
+    // Código de reserva
+    let rawCode = findVal((k) =>
+      (k.includes('numero') && k.includes('reserva')) ||
+      k.includes('codigo') ||
+      k.includes('confirmation') ||
+      k.includes('book number')
+    );
+
+    // Fallbacks si no se encontraron por nombres exactos
+    if (!rawProp && entries[0]) rawProp = entries[0][1];
+    if (!rawGuest && entries[1]) rawGuest = entries[1][1];
+
+    const amountVal = parseCurrencyNumber(rawAmount);
+    if (amountVal <= 0) continue;
+
+    rows.push({
+      propertyName: String(rawProp || 'Alojamiento Turístico').trim(),
+      guestName: String(rawGuest || 'Huésped Particular').trim(),
+      guestFiscalId: rawDni ? String(rawDni).trim() : undefined,
+      guestAddress: rawAddr ? String(rawAddr).trim() : undefined,
+      stayStartDate: normalizeDateString(String(rawIn || '')),
+      stayEndDate: normalizeDateString(String(rawOut || '')),
+      totalAmount: Math.round(amountVal * 100) / 100,
+      reservationCode: rawCode ? String(rawCode).replace(/\.0$/, '').trim() : undefined,
+    });
+  }
+
+  return rows;
+}
+
+/**
  * Parsea CSV de reservas (plantilla Turnexo, Airbnb o Booking)
  */
 export function parseReservationsCsv(text: string): ImportedReservationRow[] {
   if (!text || !text.trim()) return [];
+
+  // 1. Intentar primero con SheetJS que maneja comillas y saltos de línea multilínea dentro de celdas
+  try {
+    const wb = XLSX.read(text, { type: 'string', raw: true });
+    const firstSheetName = wb.SheetNames[0];
+    if (firstSheetName && wb.Sheets[firstSheetName]) {
+      const sheetRows = XLSX.utils.sheet_to_json<Record<string, any>>(wb.Sheets[firstSheetName]);
+      const res = parseReservationsFromSheetRows(sheetRows);
+      if (res.length > 0) return res;
+    }
+  } catch {
+    // Seguir al parser manual si SheetJS falla
+  }
 
   // Limpiar BOM si existe
   const cleanText = text.replace(/^\uFEFF/, '').trim();

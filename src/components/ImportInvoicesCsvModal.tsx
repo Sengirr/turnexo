@@ -8,6 +8,7 @@ import {
   ImportedReservationRow,
   Invoice,
   parseReservationsCsv,
+  parseReservationsFromSheetRows,
   SIMPLIFIED_INVOICE_MAX_AMOUNT,
 } from '../lib/invoice';
 import { Property } from '../lib/icalParser';
@@ -36,7 +37,22 @@ export default function ImportInvoicesCsvModal({
 
   const processCsvText = (text: string) => {
     try {
-      const rows = parseReservationsCsv(text);
+      let rows: ImportedReservationRow[] = [];
+      try {
+        const workbook = XLSX.read(text, { type: 'string', raw: true });
+        const firstSheetName = workbook.SheetNames[0];
+        if (firstSheetName && workbook.Sheets[firstSheetName]) {
+          const rawObjects = XLSX.utils.sheet_to_json<Record<string, any>>(workbook.Sheets[firstSheetName]);
+          rows = parseReservationsFromSheetRows(rawObjects);
+        }
+      } catch {
+        // Fallback al parseador de texto directo
+      }
+
+      if (rows.length === 0) {
+        rows = parseReservationsCsv(text);
+      }
+
       if (rows.length === 0) {
         setErrorMsg(
           'No se encontraron reservas con importes válidos en el contenido. Verifica que incluya cabeceras de columnas o prueba pegando el texto directamente.'
@@ -61,7 +77,7 @@ export default function ImportInvoicesCsvModal({
     const isExcel = /\.(xlsx|xls)$/i.test(file.name);
 
     if (isExcel) {
-      // Procesar archivo Excel (.xls o .xlsx) con SheetJS
+      // Procesar archivo Excel (.xls o .xlsx) directamente como objetos estructurados
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
@@ -69,8 +85,17 @@ export default function ImportInvoicesCsvModal({
           const workbook = XLSX.read(data, { type: 'array' });
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
-          const csvFromXls = XLSX.utils.sheet_to_csv(worksheet);
-          processCsvText(csvFromXls);
+          const rawObjects = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
+          const rows = parseReservationsFromSheetRows(rawObjects);
+          if (rows.length === 0) {
+            setErrorMsg(
+              'No se encontraron reservas con importes válidos en el archivo Excel. Verifica que incluya cabeceras de columnas.'
+            );
+            setParsedRows([]);
+          } else {
+            setParsedRows(rows);
+            setErrorMsg(null);
+          }
         } catch (excelErr: any) {
           setErrorMsg('No se pudo leer el archivo Excel: ' + (excelErr?.message || 'Archivo corrupto o no compatible'));
         }

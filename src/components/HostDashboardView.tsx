@@ -41,8 +41,7 @@ import {
   X,
   ImageIcon,
   AlertCircle,
-  BrainCircuit,
-} from 'lucide-react';
+  } from 'lucide-react';
 import { Cleaner, CleaningTask, Property, Reservation, DEFAULT_IVI_CHECKLIST } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
 import { HostAccount, isSupabaseConfigured, STRIPE_PAYMENT_LINKS, getStripePaymentLink } from '../lib/supabase';
@@ -3180,7 +3179,7 @@ export default function HostDashboardView({
                         </span>
                       </div>
 
-                      <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                      <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
                         {inspectingTaskPhotos.checklist.map((item) => (
                           <div
                             key={item.id}
@@ -3220,46 +3219,38 @@ export default function HostDashboardView({
                       </div>
                     </div>
 
-                    {/* Informe de Calidad IA (estilo IVI ERP) */}
-                    <div className="bg-indigo-50/60 p-6 rounded-[28px] border border-indigo-100 relative overflow-hidden flex flex-col justify-between">
-                      <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
-                        <BrainCircuit size={100} />
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                            <Sparkles size={14} className="fill-indigo-400 text-indigo-400" />
-                            Informe de Calidad IA
-                          </h4>
-                          <span className="text-[10px] font-black text-indigo-400 bg-indigo-100/70 px-2 py-0.5 rounded-md">
-                            Gemini Vision
+                    {/* Resumen y Detalles del Servicio */}
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                      <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                        <Clock size={14} className="text-slate-400" />
+                        Detalles del Servicio
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2.5 text-xs">
+                        <div className="bg-white p-3 rounded-xl border border-slate-200/60">
+                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Limpiadora</span>
+                          <span className="font-extrabold text-slate-800">{cleaner?.name || 'Asignada'}</span>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-slate-200/60">
+                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Fecha</span>
+                          <span className="font-extrabold text-slate-800">{inspectingTaskPhotos.date}</span>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-slate-200/60">
+                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Salida Huésped</span>
+                          <span className="font-extrabold text-slate-800">{inspectingTaskPhotos.scheduledCleaningTime}h</span>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-slate-200/60">
+                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Próxima Entrada</span>
+                          <span className="font-extrabold text-slate-800">
+                            {inspectingTaskPhotos.sameDayCheckIn ? `${inspectingTaskPhotos.nextCheckInTime}h (Mismo día)` : 'Sin entrada hoy'}
                           </span>
                         </div>
-
-                        <div className="bg-white/90 backdrop-blur-sm p-4 rounded-2xl border border-indigo-100 text-xs font-medium text-slate-700 leading-relaxed shadow-2xs space-y-2">
-                          <p className="flex items-start gap-2">
-                            <span className="text-emerald-600 font-bold">✓</span>
-                            <span>Cama tendida correctamente y textiles limpios verificados sin arrugas.</span>
-                          </p>
-                          <p className="flex items-start gap-2">
-                            <span className="text-emerald-600 font-bold">✓</span>
-                            <span>Baño desinfectado, precinto y amenities colocados para la próxima entrada.</span>
-                          </p>
-                          <p className="flex items-start gap-2">
-                            <span className="text-emerald-600 font-bold">✓</span>
-                            <span>Cocina y menaje revisados, sin residuos y frigorífico vacío.</span>
-                          </p>
-                        </div>
                       </div>
-
-                      <div className="mt-4 pt-3 border-t border-indigo-100/60 flex items-center justify-between text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                          <span>Auditoría Certificada</span>
+                      {inspectingTaskPhotos.notes && (
+                        <div className="bg-white p-3 rounded-xl border border-slate-200/60 text-xs">
+                          <span className="text-[10px] font-bold text-slate-400 block uppercase mb-1">Notas de la Limpieza</span>
+                          <p className="font-medium text-slate-700">{inspectingTaskPhotos.notes}</p>
                         </div>
-                        <span>Powered by Turnexo AI</span>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>

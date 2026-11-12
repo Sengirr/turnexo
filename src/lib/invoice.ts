@@ -185,6 +185,79 @@ export interface ImportedReservationRow {
   stayStartDate: string;
   stayEndDate: string;
   totalAmount: number;
+  reservationCode?: string;
+}
+
+const SPANISH_MONTHS: Record<string, string> = {
+  enero: '01',
+  febrero: '02',
+  marzo: '03',
+  abril: '04',
+  mayo: '05',
+  junio: '06',
+  julio: '07',
+  agosto: '08',
+  septiembre: '09',
+  setiembre: '09',
+  octubre: '10',
+  noviembre: '11',
+  diciembre: '12',
+};
+
+/**
+ * Normaliza fechas en formato YYYY-MM-DD, DD/MM/YYYY o español ("2 de julio de 2026")
+ */
+export function normalizeDateString(dStr: string): string {
+  if (!dStr) return new Date().toISOString().split('T')[0];
+  const trimmed = dStr.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
+    const parts = trimmed.split('/');
+    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+  }
+  const match = trimmed.match(/^(\d{1,2})\s+de\s+([a-záéíóú]+)\s+de\s+(\d{4})$/i);
+  if (match) {
+    const day = match[1].padStart(2, '0');
+    const monthName = match[2].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const month = SPANISH_MONTHS[monthName] || '01';
+    const year = match[3];
+    return `${year}-${month}-${day}`;
+  }
+  return trimmed;
+}
+
+/**
+ * Divide líneas CSV respetando saltos de línea dentro de campos entrecomillados
+ */
+export function splitCsvLines(text: string): string[] {
+  const lines: string[] = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') {
+      if (inQuotes && text[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if ((c === '\n' || c === '\r') && !inQuotes) {
+      if (c === '\r' && text[i + 1] === '\n') {
+        i++;
+      }
+      if (cur.trim()) {
+        lines.push(cur);
+      }
+      cur = '';
+    } else {
+      cur += c;
+    }
+  }
+  if (cur.trim()) {
+    lines.push(cur);
+  }
+  return lines;
 }
 
 /**
@@ -226,12 +299,12 @@ export function parseReservationsCsv(text: string): ImportedReservationRow[] {
 
   // Limpiar BOM si existe
   const cleanText = text.replace(/^\uFEFF/, '').trim();
-  const lines = cleanText.split(/\r?\n/).filter((line) => line.trim().length > 0);
+  const lines = splitCsvLines(cleanText);
   if (lines.length < 2) return [];
 
-  // Detectar delimitador (punto y coma o coma)
+  // Detectar delimitador (punto y coma, tabulador o coma)
   const firstLine = lines[0];
-  const delimiter = firstLine.includes(';') ? ';' : ',';
+  const delimiter = firstLine.includes('\t') ? '\t' : firstLine.includes(';') ? ';' : ',';
 
   // Función auxiliar para parsear línea respetando comillas
   const parseLine = (line: string): string[] => {
@@ -262,16 +335,54 @@ export function parseReservationsCsv(text: string): ImportedReservationRow[] {
     h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
   );
 
-  // Mapear índices de columnas de forma flexible (compatible con Plantilla Turnexo, Airbnb y Booking)
-  let propIdx = headerCols.findIndex((h) => h.includes('alojamiento') || h.includes('listing') || h.includes('propiedad') || h.includes('habitacion') || h.includes('room'));
-  let guestIdx = headerCols.findIndex((h) => h.includes('huesped') || h.includes('guest') || h.includes('cliente') || h.includes('viajero') || h.includes('nombre'));
-  let dniIdx = headerCols.findIndex((h) => h.includes('dni') || h.includes('nif') || h.includes('cif') || h.includes('fiscal') || h.includes('identificacion'));
-  let addrIdx = headerCols.findIndex((h) => h.includes('direccion') || h.includes('address') || h.includes('domicilio'));
-  let checkInIdx = headerCols.findIndex((h) => h.includes('entrada') || h.includes('check-in') || h.includes('checkin') || h.includes('llegada') || h.includes('start'));
-  let checkOutIdx = headerCols.findIndex((h) => h.includes('salida') || h.includes('check-out') || h.includes('checkout') || h.includes('departure') || h.includes('end'));
-  let amountIdx = headerCols.findIndex((h) => h.includes('importe') || h.includes('amount') || h.includes('precio') || h.includes('total') || h.includes('earnings') || h.includes('cobrado'));
+  // Mapear índices de columnas de forma flexible (compatible con Booking.com, Airbnb y Plantilla Turnexo)
+  let propIdx = headerCols.findIndex((h) =>
+    h.includes('alojamiento') ||
+    h.includes('listing') ||
+    h.includes('propiedad') ||
+    h.includes('habitacion') ||
+    h.includes('room')
+  );
 
-  // Fallbacks si no se encontraron columnas por nombre (asumir orden estándar de plantilla)
+  let guestIdx = headerCols.findIndex((h) =>
+    h.includes('titular') ||
+    h.includes('huesped') ||
+    h.includes('viajero') ||
+    h.includes('guest') ||
+    (h.includes('cliente') && !h.includes('genius')) ||
+    (h.includes('nombre') && !h.includes('alojamiento') && !h.includes('propiedad') && !h.includes('habitacion'))
+  );
+
+  let dniIdx = headerCols.findIndex((h) =>
+    h.includes('dni') || h.includes('nif') || h.includes('cif') || h.includes('fiscal') || h.includes('identificacion')
+  );
+
+  let addrIdx = headerCols.findIndex((h) =>
+    h.includes('direccion') || h.includes('address') || h.includes('domicilio') || h.includes('ubicacion')
+  );
+
+  let checkInIdx = headerCols.findIndex((h) =>
+    h.includes('entrada') || h.includes('check-in') || h.includes('checkin') || h.includes('llegada') || h.includes('start')
+  );
+
+  let checkOutIdx = headerCols.findIndex((h) =>
+    h.includes('salida') || h.includes('check-out') || h.includes('checkout') || h.includes('departure') || h.includes('end')
+  );
+
+  let amountIdx = headerCols.findIndex((h) =>
+    h.includes('importe') || h.includes('amount') || h.includes('precio') || h.includes('total') || h.includes('earnings') || h.includes('cobrado')
+  );
+
+  let resCodeIdx = headerCols.findIndex((h) =>
+    (h.includes('numero') && h.includes('reserva')) ||
+    h.includes('codigo') ||
+    h.includes('confirmation') ||
+    h.includes('book number')
+  );
+
+  let statusIdx = headerCols.findIndex((h) => h.includes('estado') || h.includes('status'));
+
+  // Fallbacks si no se encontraron columnas por nombre
   if (guestIdx === -1 && headerCols.length >= 2) guestIdx = 1;
   if (propIdx === -1 && headerCols.length >= 1) propIdx = 0;
   if (checkInIdx === -1 && headerCols.length >= 5) checkInIdx = 4;
@@ -284,39 +395,35 @@ export function parseReservationsCsv(text: string): ImportedReservationRow[] {
     const cols = parseLine(lines[i]);
     if (cols.length === 0 || cols.every((c) => !c)) continue;
 
+    // Si el estado es cancelado/anulado, saltar
+    if (statusIdx !== -1) {
+      const st = cols[statusIdx]?.toLowerCase() || '';
+      if (st.includes('cancel') || st.includes('anula')) continue;
+    }
+
     const rawProp = propIdx !== -1 ? cols[propIdx] : 'Alojamiento Turístico';
-    const rawGuest = guestIdx !== -1 ? cols[guestIdx] : 'Huésped';
+    const rawGuest = guestIdx !== -1 ? cols[guestIdx] : 'Huésped Particular';
     const rawDni = dniIdx !== -1 ? cols[dniIdx] : '';
     const rawAddr = addrIdx !== -1 ? cols[addrIdx] : '';
     const rawIn = checkInIdx !== -1 ? cols[checkInIdx] : '';
     const rawOut = checkOutIdx !== -1 ? cols[checkOutIdx] : '';
     const rawAmount = amountIdx !== -1 ? cols[amountIdx] : '0';
+    const rawCode = resCodeIdx !== -1 ? cols[resCodeIdx]?.replace(/\.0$/, '') : '';
 
     // Normalizar importe (manejar comas decimales, signos €, espacios)
     const cleanedAmount = rawAmount.replace(/[^0-9.,]/g, '').replace(',', '.');
     const amountVal = parseFloat(cleanedAmount) || 0;
     if (amountVal <= 0) continue; // Saltear filas sin importe válido
 
-    // Normalizar fechas (soportar YYYY-MM-DD y DD/MM/YYYY)
-    const normalizeDate = (dStr: string): string => {
-      if (!dStr) return new Date().toISOString().split('T')[0];
-      const trimmed = dStr.trim();
-      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
-        const parts = trimmed.split('/');
-        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-      }
-      return trimmed;
-    };
-
     rows.push({
       propertyName: rawProp || 'Alojamiento Turístico',
       guestName: rawGuest || 'Huésped Particular',
       guestFiscalId: rawDni.trim() || undefined,
       guestAddress: rawAddr.trim() || undefined,
-      stayStartDate: normalizeDate(rawIn),
-      stayEndDate: normalizeDate(rawOut),
+      stayStartDate: normalizeDateString(rawIn),
+      stayEndDate: normalizeDateString(rawOut),
       totalAmount: Math.round(amountVal * 100) / 100,
+      reservationCode: rawCode.trim() || undefined,
     });
   }
 

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Upload, FileSpreadsheet, Download, X, CheckCircle2, AlertTriangle, ShieldCheck, FileText } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, X, CheckCircle2, AlertTriangle, ShieldCheck, Clipboard, FileText } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import {
   createInvoicesFromImportedRows,
   downloadInvoiceImportTemplate,
@@ -27,9 +28,29 @@ export default function ImportInvoicesCsvModal({
   onClose,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<'upload' | 'paste'>('upload');
   const [fileName, setFileName] = useState<string | null>(null);
+  const [pastedText, setPastedText] = useState<string>('');
   const [parsedRows, setParsedRows] = useState<ImportedReservationRow[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const processCsvText = (text: string) => {
+    try {
+      const rows = parseReservationsCsv(text);
+      if (rows.length === 0) {
+        setErrorMsg(
+          'No se encontraron reservas con importes válidos en el contenido. Verifica que incluya cabeceras de columnas o prueba pegando el texto directamente.'
+        );
+        setParsedRows([]);
+      } else {
+        setParsedRows(rows);
+        setErrorMsg(null);
+      }
+    } catch (err: any) {
+      setErrorMsg('Error al procesar los datos: ' + (err?.message || 'Formato desconocido'));
+      setParsedRows([]);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,25 +58,43 @@ export default function ImportInvoicesCsvModal({
     setFileName(file.name);
     setErrorMsg(null);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      try {
-        const rows = parseReservationsCsv(text);
-        if (rows.length === 0) {
-          setErrorMsg(
-            'No se encontraron reservas con importes válidos en el archivo. Revisa el delimitador (punto y coma o coma) o descarga la plantilla oficial.'
-          );
-          setParsedRows([]);
-        } else {
-          setParsedRows(rows);
+    const isExcel = /\.(xlsx|xls)$/i.test(file.name);
+
+    if (isExcel) {
+      // Procesar archivo Excel (.xls o .xlsx) con SheetJS
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = new Uint8Array(event.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const csvFromXls = XLSX.utils.sheet_to_csv(worksheet);
+          processCsvText(csvFromXls);
+        } catch (excelErr: any) {
+          setErrorMsg('No se pudo leer el archivo Excel: ' + (excelErr?.message || 'Archivo corrupto o no compatible'));
         }
-      } catch (err: any) {
-        setErrorMsg('Error al leer el archivo CSV: ' + (err?.message || 'Formato desconocido'));
-        setParsedRows([]);
-      }
-    };
-    reader.readAsText(file, 'utf-8');
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      // Procesar archivo de texto (.csv, .tsv, .txt)
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result as string;
+        processCsvText(text);
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+  };
+
+  const handlePastedChange = (text: string) => {
+    setPastedText(text);
+    if (!text.trim()) {
+      setParsedRows([]);
+      setErrorMsg(null);
+      return;
+    }
+    processCsvText(text);
   };
 
   const handleConfirmImport = () => {
@@ -92,10 +131,10 @@ export default function ImportInvoicesCsvModal({
                 Importación Masiva · Cero Trabajo Manual
               </div>
               <h2 className="text-xl font-black text-slate-900 mt-1">
-                Subir Reservas desde Excel / CSV
+                Subir Reservas (Excel XLS, XLSX o CSV)
               </h2>
               <p className="text-xs text-slate-500">
-                Importa tu exportación de Airbnb, Booking o la plantilla Turnexo y genera todas tus facturas oficiales del trimestre en 1 clic.
+                Soporta descargas de Booking.com, Airbnb o plantilla Turnexo para emitir todas tus facturas oficiales del trimestre.
               </p>
             </div>
           </div>
@@ -108,46 +147,94 @@ export default function ImportInvoicesCsvModal({
           </button>
         </div>
 
+        {/* Selector de Modo: Subir Archivo vs Pegar Texto */}
+        <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-2xl text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => setActiveTab('upload')}
+            className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-2 transition ${
+              activeTab === 'upload'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Upload size={14} />
+            <span>Subir Archivo (.xls, .xlsx, .csv)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('paste')}
+            className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-2 transition ${
+              activeTab === 'paste'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Clipboard size={14} />
+            <span>Pegar Tabla Copiada</span>
+          </button>
+        </div>
+
         {/* Zona de Subida y Descarga de Plantilla */}
         <div className="space-y-4 text-xs">
-          <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
-            <div>
-              <span className="font-bold text-slate-800 block">¿No tienes un CSV preparado?</span>
-              <span className="text-slate-500 text-[11px]">
-                Descarga la plantilla oficial en Excel/CSV con los campos listos:
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={downloadInvoiceImportTemplate}
-              className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
-            >
-              <Download size={13} className="text-emerald-600" />
-              <span>Descargar Plantilla CSV</span>
-            </button>
-          </div>
+          {activeTab === 'upload' ? (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div>
+                  <span className="font-bold text-slate-800 block">¿Descargaste tu archivo de Booking o Airbnb?</span>
+                  <span className="text-slate-500 text-[11px]">
+                    Súbelo directamente aquí (incluso con extensión .xls o .xlsx) o descarga la plantilla oficial:
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={downloadInvoiceImportTemplate}
+                  className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+                >
+                  <Download size={13} className="text-emerald-600" />
+                  <span>Descargar Plantilla CSV</span>
+                </button>
+              </div>
 
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-3xl p-6 sm:p-8 text-center cursor-pointer transition bg-slate-50/50 hover:bg-emerald-50/20 group"
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv,.txt"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            <div className="w-12 h-12 bg-white rounded-2xl border border-slate-200 flex items-center justify-center mx-auto text-slate-400 group-hover:text-emerald-600 group-hover:scale-105 transition shadow-xs">
-              <Upload size={22} />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-3xl p-6 sm:p-8 text-center cursor-pointer transition bg-slate-50/50 hover:bg-emerald-50/20 group"
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv,.txt,.xls,.xlsx,.tsv"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <div className="w-12 h-12 bg-white rounded-2xl border border-slate-200 flex items-center justify-center mx-auto text-slate-400 group-hover:text-emerald-600 group-hover:scale-105 transition shadow-xs">
+                  <Upload size={22} />
+                </div>
+                <p className="font-extrabold text-slate-800 text-sm mt-3">
+                  {fileName ? fileName : 'Haz clic o arrastra tu archivo .XLS, .XLSX o .CSV aquí'}
+                </p>
+                <p className="text-[11px] text-slate-500 mt-1 max-w-sm mx-auto">
+                  Detecta automáticamente archivos de Booking.com, Airbnb y plantilla Turnexo.
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="space-y-2">
+              <label className="block font-bold text-slate-700">
+                Pega aquí las filas copiadas de tu Excel o Booking.com:
+              </label>
+              <textarea
+                rows={6}
+                value={pastedText}
+                onChange={(e) => handlePastedChange(e.target.value)}
+                placeholder="Pega aquí el texto con cabeceras (ej: Nombre del alojamiento, Titular de la reserva, Llegada, Salida, Importe total...)"
+                className="w-full p-3 font-mono text-[11px] rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/60"
+              />
+              <p className="text-[11px] text-slate-400">
+                Tip: Abre tu archivo en Excel, selecciona las filas, copia (Ctrl+C) y pégalas (Ctrl+V) aquí directamente.
+              </p>
             </div>
-            <p className="font-extrabold text-slate-800 text-sm mt-3">
-              {fileName ? fileName : 'Haz clic o arrastra tu archivo CSV aquí'}
-            </p>
-            <p className="text-[11px] text-slate-500 mt-1 max-w-sm mx-auto">
-              Compatible con exportaciones de Airbnb, Booking y plantilla Turnexo.
-            </p>
-          </div>
+          )}
 
           {errorMsg && (
             <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl flex items-start gap-2.5">
@@ -163,7 +250,7 @@ export default function ImportInvoicesCsvModal({
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={18} className="text-emerald-600" />
                   <span className="font-extrabold text-emerald-950 text-xs">
-                    {parsedRows.length} reservas listas para facturar
+                    {parsedRows.length} reservas detectadas y listas para facturar
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-900">
@@ -188,12 +275,12 @@ export default function ImportInvoicesCsvModal({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {parsedRows.slice(0, 15).map((row, idx) => {
+                    {parsedRows.slice(0, 20).map((row, idx) => {
                       const isSimp = row.totalAmount <= SIMPLIFIED_INVOICE_MAX_AMOUNT && !row.guestFiscalId;
                       return (
                         <tr key={idx} className="hover:bg-slate-50">
                           <td className="py-2 px-3 font-bold text-slate-900">{row.guestName}</td>
-                          <td className="py-2 px-3 text-slate-600 truncate max-w-[120px]">
+                          <td className="py-2 px-3 text-slate-600 truncate max-w-[130px]" title={row.propertyName}>
                             {row.propertyName}
                           </td>
                           <td className="py-2 px-3 text-slate-500 font-mono text-[10px]">
@@ -223,9 +310,9 @@ export default function ImportInvoicesCsvModal({
                     })}
                   </tbody>
                 </table>
-                {parsedRows.length > 15 && (
+                {parsedRows.length > 20 && (
                   <p className="p-2 text-center text-slate-400 bg-slate-50 text-[10px]">
-                    ... y {parsedRows.length - 15} reservas más incluidas en la importación.
+                    ... y {parsedRows.length - 20} reservas más incluidas en la importación.
                   </p>
                 )}
               </div>

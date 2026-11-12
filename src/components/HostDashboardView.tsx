@@ -1771,10 +1771,9 @@ export default function HostDashboardView({
                   return (
                     <div
                       key={c.id}
-                      className="bg-white rounded-3xl border border-slate-200/90 p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition relative group"
+                      className="bg-white rounded-3xl border border-slate-200/90 p-5 space-y-4 shadow-sm hover:shadow-md transition relative group"
                     >
-                      <div className="space-y-4">
-                        {/* Cabecera: Avatar, Nombre, Teléfono y Estado */}
+                      {/* Cabecera: Avatar, Nombre, Teléfono y Estado */}
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-center gap-3 min-w-0">
                             <div
@@ -1871,21 +1870,7 @@ export default function HostDashboardView({
                           </div>
                         </div>
                       </div>
-
-                      {/* Botón de acceso / vista previa */}
-                      <div className="pt-2 border-t border-slate-100">
-                        <button
-                          type="button"
-                          onClick={() => onOpenCleanerPreview(c.id)}
-                          className="w-full bg-slate-100 hover:bg-slate-200/80 text-slate-700 hover:text-slate-900 font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs transition shadow-2xs"
-                          title="Ver cómo ve la app la limpiadora"
-                        >
-                          <ExternalLink size={13} className="text-slate-400" />
-                          <span>Probar App (Vista Previa)</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
+                    );
                 })}
               </div>
 

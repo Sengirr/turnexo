@@ -89,7 +89,7 @@ export default function CreateInvoiceModal({
       hostAddress: fiscalProfile.fiscalAddress,
       hostPostalCode: fiscalProfile.postalCode,
       hostCity: fiscalProfile.city,
-      concept: `Alojamiento turístico (${nights} ${nights === 1 ? 'noche' : 'noches'} · IVA 10%)`,
+      concept: 'Alojamiento turístico (IVA 10%)',
       totalAmount: breakdown.totalAmount,
       vatRate: 10,
       baseAmount: breakdown.baseAmount,

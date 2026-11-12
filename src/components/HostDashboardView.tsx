@@ -2439,7 +2439,7 @@ export default function HostDashboardView({
                                 {inv.propertyName}
                               </span>
                               <span className="text-[11px] text-slate-500 font-mono">
-                                {formatDisplayDate(inv.stayStartDate)} al {formatDisplayDate(inv.stayEndDate)} ({inv.nights} {inv.nights === 1 ? 'noche' : 'noches'})
+                                {formatDisplayDate(inv.stayStartDate)} al {formatDisplayDate(inv.stayEndDate)}
                               </span>
                             </td>
                             <td className="py-3.5 px-4">

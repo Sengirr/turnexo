@@ -1,28 +1,20 @@
-import { Invoice, formatDisplayDate } from './invoice';
+import { Invoice, formatDisplayDate, formatInvoiceConcept } from './invoice';
 
 export function generateInvoiceHtml(invoice: Invoice): string {
   const isSimplified = invoice.isSimplified;
   return `
     <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; background: #ffffff; padding: 24px; max-width: 750px; margin: 0 auto; font-size: 13px; line-height: 1.5;">
       <!-- Cabecera -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 2px solid #f1f5f9; padding-bottom: 16px;">
-        <div>
-          <h1 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.5px;">
-            ${isSimplified ? 'FACTURA SIMPLIFICADA' : 'FACTURA'}
-          </h1>
-          <p style="margin: 0 0 4px 0; font-family: monospace; font-size: 13px; color: #64748b;">
-            Nº: <strong style="color: #0f172a;">${invoice.invoiceNumber}</strong>
-          </p>
-          <p style="margin: 0; font-size: 12px; color: #64748b;">
-            Fecha de expedición: <strong style="color: #334155;">${formatDisplayDate(invoice.issueDate)}</strong>
-          </p>
-        </div>
-        <div style="text-align: right;">
-          <div style="display: inline-block; background: #0f172a; color: #ffffff; font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 6px;">
-            Turnexo Hospitality
-          </div>
-          <p style="margin: 4px 0 0 0; font-size: 11px; color: #94a3b8;">Estancias de corta duración</p>
-        </div>
+      <div style="margin-bottom: 24px; border-bottom: 2px solid #f1f5f9; padding-bottom: 16px;">
+        <h1 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.5px;">
+          ${isSimplified ? 'FACTURA SIMPLIFICADA' : 'FACTURA'}
+        </h1>
+        <p style="margin: 0 0 4px 0; font-family: monospace; font-size: 13px; color: #64748b;">
+          Nº: <strong style="color: #0f172a;">${invoice.invoiceNumber}</strong>
+        </p>
+        <p style="margin: 0; font-size: 12px; color: #64748b;">
+          Fecha de expedición: <strong style="color: #334155;">${formatDisplayDate(invoice.issueDate)}</strong>
+        </p>
       </div>
 
       <!-- Datos Emisor y Huésped -->
@@ -55,21 +47,17 @@ export function generateInvoiceHtml(invoice: Invoice): string {
           <tr style="background: #f1f5f9; text-align: left; font-size: 11px; color: #475569; border-bottom: 1px solid #e2e8f0;">
             <th style="padding: 10px 12px;">Concepto / Servicio</th>
             <th style="padding: 10px 12px;">Estancia</th>
-            <th style="padding: 10px 12px; text-align: center;">Noches</th>
             <th style="padding: 10px 12px; text-align: right;">Total</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
-              <strong style="color: #0f172a; display: block;">${invoice.concept}</strong>
+              <strong style="color: #0f172a; display: block;">${formatInvoiceConcept(invoice.concept)}</strong>
               <span style="font-size: 11px; color: #64748b;">${invoice.propertyName}</span>
             </td>
             <td style="padding: 12px; font-family: monospace; font-size: 11px; color: #475569; border-bottom: 1px solid #f1f5f9;">
               ${formatDisplayDate(invoice.stayStartDate)} al ${formatDisplayDate(invoice.stayEndDate)}
-            </td>
-            <td style="padding: 12px; text-align: center; font-weight: 700; color: #334155; border-bottom: 1px solid #f1f5f9;">
-              ${invoice.nights}
             </td>
             <td style="padding: 12px; text-align: right; font-weight: 800; color: #0f172a; border-bottom: 1px solid #f1f5f9;">
               ${invoice.totalAmount.toFixed(2)} €

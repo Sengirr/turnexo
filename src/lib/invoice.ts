@@ -217,16 +217,33 @@ const SPANISH_MONTHS: Record<string, string> = {
 };
 
 /**
- * Convierte fechas YYYY-MM-DD a formato español DD/MM/YYYY
+ * Convierte cualquier fecha a formato oficial español DD/MM/YYYY
  */
 export function formatDisplayDate(dateStr: string): string {
   if (!dateStr) return '';
   const trimmed = String(dateStr).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    const parts = trimmed.split('-');
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) {
+    return trimmed;
+  }
+  const match = trimmed.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (match) {
+    const y = match[1];
+    const m = match[2].padStart(2, '0');
+    const d = match[3].padStart(2, '0');
+    return `${d}/${m}/${y}`;
   }
   return trimmed;
+}
+
+/**
+ * Limpia el texto del concepto para no mostrar el número de noches en la factura
+ */
+export function formatInvoiceConcept(concept: string): string {
+  if (!concept) return 'Alojamiento turístico (IVA 10%)';
+  return concept
+    .replace(/\s*\(\d+\s+noches?\s*·\s*/i, ' (')
+    .replace(/\s*\(\d+\s+noches?\)/i, '')
+    .trim();
 }
 
 /**
@@ -736,7 +753,7 @@ export function createInvoicesFromImportedRows(
       hostAddress: fiscalProfile.fiscalAddress,
       hostPostalCode: fiscalProfile.postalCode,
       hostCity: fiscalProfile.city,
-      concept: `Alojamiento turístico (${nights} ${nights === 1 ? 'noche' : 'noches'} · IVA 10%)`,
+      concept: 'Alojamiento turístico (IVA 10%)',
       totalAmount: breakdown.totalAmount,
       vatRate: fiscalProfile.defaultVatRate || 10,
       baseAmount: breakdown.baseAmount,

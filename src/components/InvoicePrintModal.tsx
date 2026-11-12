@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Printer, Download, X, ShieldCheck, Loader2, Pencil } from 'lucide-react';
-import { Invoice, formatDisplayDate } from '../lib/invoice';
+import { Invoice, formatDisplayDate, formatInvoiceConcept } from '../lib/invoice';
 
 interface Props {
   invoice: Invoice;
@@ -135,23 +135,17 @@ export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Pro
         {/* CONTENIDO DE LA FACTURA (Imprimible y descargable a PDF) */}
         <div ref={invoiceRef} className="space-y-6 text-slate-800 font-sans bg-white p-4 sm:p-6 rounded-2xl">
           {/* Encabezado y Nº Factura */}
-          <div className="flex justify-between items-start gap-4">
+          <div className="flex justify-between items-start gap-4 pb-2 border-b border-slate-100">
             <div>
-              <h1 className="text-xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                 {invoice.isSimplified ? 'FACTURA SIMPLIFICADA' : 'FACTURA'}
               </h1>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">
-                Nº: <strong className="text-slate-900 font-bold">{invoice.invoiceNumber}</strong>
+              <p className="text-xs text-slate-500 font-mono mt-1">
+                Nº: <strong className="text-slate-900 font-bold text-sm">{invoice.invoiceNumber}</strong>
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
-                Fecha de expedición: <span className="font-semibold text-slate-700">{formatDisplayDate(invoice.issueDate)}</span>
+                Fecha de expedición: <span className="font-semibold text-slate-800">{formatDisplayDate(invoice.issueDate)}</span>
               </p>
-            </div>
-            <div className="text-right">
-              <div className="inline-block bg-slate-900 text-white text-[11px] font-black uppercase px-2.5 py-1 rounded-lg">
-                Turnexo Hospitality
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1">Estancias de corta duración</p>
             </div>
           </div>
 
@@ -200,21 +194,17 @@ export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Pro
                 <tr>
                   <th className="py-2.5 px-3">Concepto / Servicio</th>
                   <th className="py-2.5 px-3">Estancia</th>
-                  <th className="py-2.5 px-3 text-center">Noches</th>
                   <th className="py-2.5 px-3 text-right">Total</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 <tr>
                   <td className="py-3 px-3">
-                    <p className="font-bold text-slate-900">{invoice.concept}</p>
+                    <p className="font-bold text-slate-900">{formatInvoiceConcept(invoice.concept)}</p>
                     <p className="text-[11px] text-slate-500">{invoice.propertyName}</p>
                   </td>
                   <td className="py-3 px-3 text-slate-600 font-mono text-[11px]">
                     {formatDisplayDate(invoice.stayStartDate)} al {formatDisplayDate(invoice.stayEndDate)}
-                  </td>
-                  <td className="py-3 px-3 text-center font-bold text-slate-700">
-                    {invoice.nights}
                   </td>
                   <td className="py-3 px-3 text-right font-bold text-slate-900">
                     {invoice.totalAmount.toFixed(2)} €

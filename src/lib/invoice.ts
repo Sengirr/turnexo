@@ -1,3 +1,5 @@
+import { Property } from './icalParser';
+
 export const SIMPLIFIED_INVOICE_MAX_AMOUNT = 400; // Art. 4.1 RD 1619/2012 (Factura simplificada hasta 400€ con IVA)
 
 export interface Invoice {
@@ -437,7 +439,7 @@ export function createInvoicesFromImportedRows(
   rows: ImportedReservationRow[],
   existingInvoices: Invoice[],
   fiscalProfile: HostFiscalProfile,
-  defaultPropertyId?: string
+  properties?: Property[]
 ): Invoice[] {
   let invoicePool = [...existingInvoices];
   const newInvoices: Invoice[] = [];
@@ -460,14 +462,24 @@ export function createInvoicesFromImportedRows(
 
     const breakdown = calculateBreakdown(row.totalAmount, fiscalProfile.defaultVatRate || 10, 0);
 
+    // Cruzar con alojamientos existentes en el sistema por coincidencia de nombre
+    const matchedProp = properties?.find((p) => {
+      const pName = p.name.toLowerCase().trim();
+      const rowPName = row.propertyName.toLowerCase().trim();
+      return pName.includes(rowPName) || rowPName.includes(pName);
+    });
+
+    const propId = matchedProp?.id || properties?.[0]?.id || 'prop-default';
+    const propName = matchedProp?.name || row.propertyName;
+
     const invoice: Invoice = {
       id: 'inv-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       invoiceNumber: number,
       series,
       issueDate: row.stayEndDate || new Date().toISOString().split('T')[0],
-      reservationId: 'imp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-      propertyId: defaultPropertyId || 'prop-default',
-      propertyName: row.propertyName,
+      reservationId: row.reservationCode ? `bkg-${row.reservationCode}` : 'imp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      propertyId: propId,
+      propertyName: propName,
       stayStartDate: row.stayStartDate,
       stayEndDate: row.stayEndDate,
       nights,

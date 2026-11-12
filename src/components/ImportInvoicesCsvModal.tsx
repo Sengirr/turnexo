@@ -99,12 +99,11 @@ export default function ImportInvoicesCsvModal({
 
   const handleConfirmImport = () => {
     if (parsedRows.length === 0) return;
-    const defaultPropId = properties[0]?.id || 'prop-default';
     const newInvoices = createInvoicesFromImportedRows(
       parsedRows,
       existingInvoices,
       fiscalProfile,
-      defaultPropId
+      properties
     );
     onImport(newInvoices);
     onClose();

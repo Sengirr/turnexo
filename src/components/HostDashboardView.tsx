@@ -42,6 +42,7 @@ import {
   X,
   ImageIcon,
   AlertCircle,
+  Trash2,
   } from 'lucide-react';
 import { Cleaner, CleaningTask, Property, Reservation, DEFAULT_IVI_CHECKLIST } from '../lib/icalParser';
 import { SAMPLE_ICAL_SNIPPET } from '../lib/mockData';
@@ -94,6 +95,7 @@ interface Props {
   fiscalProfile?: HostFiscalProfile;
   onAddInvoice?: (inv: Invoice) => void;
   onAddInvoices?: (invoices: Invoice[]) => void;
+  onDeleteInvoice?: (id: string) => void;
   onUpdateFiscalProfile?: (prof: HostFiscalProfile) => void;
   onImportIcalText: (propertyId: string, icsText: string) => void;
   onSyncIcalUrl: (propertyId: string, url: string) => Promise<void>;
@@ -127,6 +129,7 @@ export default function HostDashboardView({
   fiscalProfile,
   onAddInvoice,
   onAddInvoices,
+  onDeleteInvoice,
   onUpdateFiscalProfile,
   onImportIcalText,
   onSyncIcalUrl,
@@ -243,7 +246,9 @@ export default function HostDashboardView({
   const [invoiceSearch, setInvoiceSearch] = useState('');
   const [invoicePropertyFilter, setInvoicePropertyFilter] = useState('all');
 
-  const allInvoices = invoices || INITIAL_INVOICES;
+  const allInvoices = useMemo(() => {
+    return (invoices || []).filter((inv) => !['inv-101', 'inv-102', 'inv-201'].includes(inv.id));
+  }, [invoices]);
   const currentFiscalProfile = fiscalProfile || DEFAULT_HOST_FISCAL_PROFILE;
 
   const [newPropName, setNewPropName] = useState('');
@@ -2448,14 +2453,30 @@ export default function HostDashboardView({
                               {inv.totalAmount.toFixed(2)} €
                             </td>
                             <td className="py-3.5 px-5 text-right">
-                              <button
-                                type="button"
-                                onClick={() => setSelectedInvoiceForPrint(inv)}
-                                className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
-                              >
-                                <Printer size={12} />
-                                <span>Ver / PDF</span>
-                              </button>
+                              <div className="inline-flex items-center gap-1.5 justify-end">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedInvoiceForPrint(inv)}
+                                  className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-semibold rounded-lg transition shadow-sm"
+                                >
+                                  <Printer size={12} />
+                                  <span>Ver / PDF</span>
+                                </button>
+                                {onDeleteInvoice && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (confirm(`¿Eliminar la factura ${inv.invoiceNumber}?`)) {
+                                        onDeleteInvoice(inv.id);
+                                      }
+                                    }}
+                                    className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition"
+                                    title="Eliminar factura"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}

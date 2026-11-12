@@ -126,9 +126,10 @@ export default function App() {
   const [taskOverrides, setTaskOverrides] = useState<CleaningTask[]>(() =>
     loadStored(STORAGE_KEYS.taskOverrides, INITIAL_TASK_OVERRIDES)
   );
-  const [invoices, setInvoices] = useState<Invoice[]>(() =>
-    loadStored(STORAGE_KEYS.invoices, INITIAL_INVOICES)
-  );
+  const [invoices, setInvoices] = useState<Invoice[]>(() => {
+    const stored = loadStored<Invoice[]>(STORAGE_KEYS.invoices, []);
+    return stored.filter((inv) => !['inv-101', 'inv-102', 'inv-201'].includes(inv.id));
+  });
   const [fiscalProfile, setFiscalProfile] = useState<HostFiscalProfile>(() =>
     loadStored(STORAGE_KEYS.fiscalProfile, DEFAULT_HOST_FISCAL_PROFILE)
   );
@@ -359,6 +360,11 @@ export default function App() {
   const handleAddInvoices = (newInvoices: Invoice[]) => {
     setInvoices((prev) => [...newInvoices, ...prev]);
     showToast(`✓ ${newInvoices.length} facturas emitidas y registradas correctamente.`);
+  };
+
+  const handleDeleteInvoice = (invoiceId: string) => {
+    setInvoices((prev) => prev.filter((inv) => inv.id !== invoiceId));
+    showToast('Factura eliminada.');
   };
 
   const handleUpdateFiscalProfile = (updatedProfile: HostFiscalProfile) => {
@@ -854,6 +860,7 @@ export default function App() {
           fiscalProfile={fiscalProfile}
           onAddInvoice={handleAddInvoice}
           onAddInvoices={handleAddInvoices}
+          onDeleteInvoice={handleDeleteInvoice}
           onUpdateFiscalProfile={handleUpdateFiscalProfile}
           onImportIcalText={handleImportIcalText}
           onSyncIcalUrl={handleSyncIcalUrl}

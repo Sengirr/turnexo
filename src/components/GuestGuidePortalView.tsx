@@ -767,12 +767,7 @@ export default function GuestGuidePortalView({
     baseExtras.unshift({
       id: `ext-late-${property.id}`,
       title: `Late Check-out hasta las ${property.lateCheckoutUntil || '17:00'}h`,
-      description:
-        language === 'en'
-          ? 'Afternoon departure on request. Subject to host confirmation.'
-          : language === 'fr'
-          ? 'Départ l’après-midi sur demande. Sous réserve de confirmation par l’hôte.'
-          : 'Salida por la tarde bajo petición. Sujeto a confirmación del anfitrión.',
+      description: '',
       price: property.lateCheckoutPrice || 35,
       priceUnit: 'reserva',
       icon: 'clock',
@@ -1277,13 +1272,13 @@ export default function GuestGuidePortalView({
                 const isLateCheckout = Boolean(
                   extra.onlyWhenFreeNextDay || extra.id === 'ext-late' || /late/i.test(extra.title)
                 );
-                const extraDescription = isLateCheckout
-                  ? (language === 'en'
-                      ? 'Afternoon departure on request. Subject to host confirmation.'
-                      : language === 'fr'
-                      ? 'Départ l’après-midi sur demande. Sous réserve de confirmation par l’hôte.'
-                      : 'Salida por la tarde bajo petición y confirmación del anfitrión.')
-                  : extra.description;
+                const isGenericDescription =
+                  !extra.description ||
+                  isLateCheckout ||
+                  /^(solicitado desde la gu[ií]a|requested via digital guide|salida por la tarde|el hu[eé]sped lo solicita|demandez|sur demande|on request|afternoon departure)/i.test(
+                    extra.description.trim()
+                  );
+                const extraDescription = isGenericDescription ? null : extra.description;
 
                 const alreadyRequested =
                   (isLateCheckout && reservation.lateCheckoutRequested) ||
@@ -1316,15 +1311,15 @@ export default function GuestGuidePortalView({
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <h3 className="font-black text-gray-900 italic">{extra.title}</h3>
-                              {isLateCheckout && (
-                                <span className="text-[9px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                                  <span>{language === 'en' ? 'On Request' : language === 'fr' ? 'Sur Demande' : 'Bajo Petición'}</span>
-                                </span>
-                              )}
+                              <span className="text-[9px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                                <span>{language === 'en' ? 'On Request' : language === 'fr' ? 'Sur Demande' : 'Bajo Petición'}</span>
+                              </span>
                             </div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-pre-line leading-relaxed mt-0.5">
-                              {extraDescription}
-                            </p>
+                            {extraDescription && (
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-pre-line leading-relaxed mt-0.5">
+                                {extraDescription}
+                              </p>
+                            )}
                           </div>
                           <span className="px-2.5 py-1 rounded-xl bg-primary-ivi-light text-primary-ivi font-black text-xs shrink-0">
                             {extra.price} € / {extra.priceUnit}

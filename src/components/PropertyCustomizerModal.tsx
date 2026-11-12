@@ -197,13 +197,7 @@ export default function PropertyCustomizerModal({
     const newExt: PropertyExtra = {
       id: `ext-${Date.now()}`,
       title: newExtraTitle.trim(),
-      description:
-        newExtraDesc.trim() ||
-        (isLate
-          ? (isEn
-              ? 'Requested by guest from guide, subject to host confirmation in dashboard.'
-              : 'El huésped lo solicita desde la guía y tú decides si confirmarlo en tu panel.')
-          : (isEn ? 'Requested via digital guide' : 'Solicitado desde la guía')),
+      description: newExtraDesc.trim() || '',
       price: newExtraPrice,
       priceUnit: newExtraUnit,
       icon: isLate ? 'clock' : 'sparkles',

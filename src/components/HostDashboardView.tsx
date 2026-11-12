@@ -1174,95 +1174,122 @@ export default function HostDashboardView({
 
             {cleaningsSubTab === 'schedule' ? (
               <div className="space-y-4">
-                {/* NAVEGADOR DE SEMANAS (PERMITE VER EL PASADO Y EL FUTURO) */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-3 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setWeekOffset((prev) => prev - 1);
-                        setShowAllHistory(false);
-                      }}
-                      className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition border border-slate-200"
-                      title="Semana anterior (Ver pasado)"
-                    >
-                      <ChevronLeft size={16} />
-                    </button>
-
-                    <div className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-800 flex items-center gap-2">
-                      <Calendar size={14} className="text-orange-600" />
-                      <span>{showAllHistory ? 'Todo el Histórico' : weekInfo.label}</span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setWeekOffset((prev) => prev + 1);
-                        setShowAllHistory(false);
-                      }}
-                      className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition border border-slate-200"
-                      title="Semana siguiente"
-                    >
-                      <ChevronRight size={16} />
-                    </button>
-
-                    {!weekInfo.isCurrentWeek && !showAllHistory && (
+                {/* BARRA UNIFICADA Y COMPACTA DE FECHAS Y FILTROS */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-3.5 shadow-sm space-y-2.5">
+                  {/* Fila 1: Navegador de Semanas y Filtros Rápidos de Estado */}
+                  <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                    {/* Navegador de Semanas */}
+                    <div className="flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={() => {
-                          setWeekOffset(0);
+                          setWeekOffset((prev) => prev - 1);
                           setShowAllHistory(false);
                         }}
-                        className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-xl transition ml-1"
+                        className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition border border-slate-200"
+                        title="Semana anterior (Ver pasado)"
                       >
-                        Hoy / Esta semana
+                        <ChevronLeft size={15} />
                       </button>
-                    )}
+
+                      <div className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-800 flex items-center gap-2">
+                        <Calendar size={13} className="text-orange-600" />
+                        <span>{showAllHistory ? 'Todo el Histórico' : weekInfo.label}</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWeekOffset((prev) => prev + 1);
+                          setShowAllHistory(false);
+                        }}
+                        className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition border border-slate-200"
+                        title="Semana siguiente"
+                      >
+                        <ChevronRight size={15} />
+                      </button>
+
+                      {!weekInfo.isCurrentWeek && !showAllHistory && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setWeekOffset(0);
+                            setShowAllHistory(false);
+                          }}
+                          className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-xl transition"
+                        >
+                          Hoy
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Filtros de Estado Pills + Histórico */}
+                    <div className="flex flex-wrap items-center gap-1">
+                      {(
+                        [
+                          { id: 'all', label: 'Todos' },
+                          { id: 'urgent', label: '🔥 Mismo Día' },
+                          { id: 'late', label: '⏱ Late Out' },
+                          { id: 'pending', label: '⏳ Pendientes' },
+                          { id: 'completed', label: '✓ Hechas' },
+                        ] as const
+                      ).map((st) => (
+                        <button
+                          key={st.id}
+                          type="button"
+                          onClick={() => setScheduleStatusFilter(st.id)}
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition ${
+                            scheduleStatusFilter === st.id
+                              ? 'bg-slate-900 text-white shadow-xs'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {st.label}
+                        </button>
+                      ))}
+
+                      <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block" />
+
+                      <button
+                        type="button"
+                        onClick={() => setShowAllHistory((prev) => !prev)}
+                        className={`px-3 py-1 text-xs font-bold rounded-lg transition ${
+                          showAllHistory
+                            ? 'bg-orange-600 text-white'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {showAllHistory ? 'Ver solo esta semana' : 'Histórico completo'}
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Botón Ver Todo / Histórico completo */}
-                  <button
-                    type="button"
-                    onClick={() => setShowAllHistory((prev) => !prev)}
-                    className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
-                      showAllHistory
-                        ? 'bg-slate-900 text-white'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    {showAllHistory ? 'Ver solo esta semana' : 'Ver todo el histórico'}
-                  </button>
-                </div>
-
-                {/* Barra de Filtros y Búsqueda */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
-                    {/* Buscador */}
+                  {/* Fila 2: Búsqueda y Selector de Alojamiento */}
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
                     <div className="relative flex-1 min-w-[200px]">
-                      <Search size={15} className="absolute left-3 top-2.5 text-slate-400" />
+                      <Search size={14} className="absolute left-3 top-2 text-slate-400" />
                       <input
                         type="text"
                         value={scheduleSearch}
                         onChange={(e) => setScheduleSearch(e.target.value)}
                         placeholder="Buscar por huésped, alojamiento o limpiadora..."
-                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition"
+                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition"
                       />
                       {scheduleSearch && (
                         <button
                           type="button"
                           onClick={() => setScheduleSearch('')}
-                          className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 text-xs"
+                          className="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-700 text-xs"
                         >
                           ✕
                         </button>
                       )}
                     </div>
 
-                    {/* Filtro Propiedad */}
                     <select
                       value={schedulePropertyFilter}
                       onChange={(e) => setSchedulePropertyFilter(e.target.value)}
-                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-medium text-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-medium text-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
                     >
                       <option value="all">Todos los alojamientos ({properties.length})</option>
                       {properties.map((p) => (
@@ -1271,32 +1298,6 @@ export default function HostDashboardView({
                         </option>
                       ))}
                     </select>
-                  </div>
-
-                  {/* Filtro Estado */}
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {(
-                      [
-                        { id: 'all', label: 'Todos' },
-                        { id: 'urgent', label: '🔥 Mismo Día' },
-                        { id: 'late', label: '⏱ Late Out' },
-                        { id: 'pending', label: '⏳ Pendientes' },
-                        { id: 'completed', label: '✓ Hechas' },
-                      ] as const
-                    ).map((st) => (
-                      <button
-                        key={st.id}
-                        type="button"
-                        onClick={() => setScheduleStatusFilter(st.id)}
-                        className={`px-3 py-1.5 text-xs font-semibold rounded-full transition ${
-                          scheduleStatusFilter === st.id
-                            ? 'bg-orange-600 text-white shadow-xs'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
-                        }`}
-                      >
-                        {st.label}
-                      </button>
-                    ))}
                   </div>
                 </div>
 
@@ -1382,258 +1383,251 @@ export default function HostDashboardView({
                                 <div
                                   key={task.id}
                                   onClick={() => setInspectingTaskPhotos(task)}
-                                  className="p-4 sm:p-5 hover:bg-slate-50/60 transition space-y-3.5 cursor-pointer group"
+                                  className="p-3.5 sm:p-4 hover:bg-slate-50/80 transition cursor-pointer group flex flex-col xl:flex-row xl:items-center justify-between gap-3"
                                   title="Haz clic para ver las fotos y checklist de esta limpieza"
                                 >
-                                  <div className="flex flex-wrap items-start justify-between gap-3">
-                                    {/* Alojamiento, PAX y Huésped */}
-                                    <div className="flex items-start gap-3">
-                                      <div
-                                        className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition group-hover:scale-105 ${
-                                          isCompleted
-                                            ? 'bg-emerald-100 text-emerald-700'
-                                            : isInProgress
-                                            ? 'bg-amber-100 text-amber-700 animate-pulse'
-                                            : 'bg-slate-100 text-slate-500'
-                                        }`}
-                                      >
-                                        {isCompleted ? <CheckCircle2 size={20} /> : <Home size={18} />}
-                                      </div>
-
-                                      <div>
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-base font-extrabold text-slate-900 group-hover:text-orange-600 transition">
-                                            {prop?.name}
-                                          </span>
-                                          {task.pax ? (
-                                            <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                              <User size={10} strokeWidth={3} className="text-slate-400" />
-                                              {task.pax}
-                                            </span>
-                                          ) : null}
-                                        </div>
-                                        {(() => {
-                                          const rawName = res?.guestName?.trim() || '';
-                                          const isUnknown =
-                                            !rawName ||
-                                            /^(no disponible|not available|hu[eé]sped|guest|invitado|reserva|reserved|bloqueo|airbnb|booking)$/i.test(
-                                              rawName
-                                            ) ||
-                                            rawName.toLowerCase().includes('not available') ||
-                                            rawName.toLowerCase().includes('no disponible');
-
-                                          // Si el nombre no está disponible o no se conoce, no mostrar nada
-                                          if (isUnknown) return null;
-
-                                          const source = res?.source || 'iCal';
-                                          const sourceAlreadyInName = rawName
-                                            .toLowerCase()
-                                            .includes(source.toLowerCase());
-
-                                          return (
-                                            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-                                              <span>
-                                                Salida:{' '}
-                                                <button
-                                                  type="button"
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (res) onOpenGuestPreview(res.id);
-                                                  }}
-                                                  className="font-bold text-slate-800 hover:text-orange-600 underline underline-offset-2"
-                                                >
-                                                  {rawName}
-                                                </button>
-                                              </span>
-                                              {!sourceAlreadyInName && (
-                                                <span className="text-[11px] font-mono text-slate-400">
-                                                  [{source}]
-                                                </span>
-                                              )}
-                                            </div>
-                                          );
-                                        })()}
-                                      </div>
+                                  {/* Bloque Izquierdo: Alojamiento + PAX */}
+                                  <div className="flex items-center gap-3 min-w-[200px] shrink-0">
+                                    <div
+                                      className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition group-hover:scale-105 ${
+                                        isCompleted
+                                          ? 'bg-emerald-100 text-emerald-700'
+                                          : isInProgress
+                                          ? 'bg-amber-100 text-amber-700 animate-pulse'
+                                          : 'bg-slate-100 text-slate-500'
+                                      }`}
+                                    >
+                                      {isCompleted ? <CheckCircle2 size={20} /> : <Home size={18} />}
                                     </div>
 
-                                    {/* Badge de Estado estilo IVI ERP */}
-                                    <div className="flex items-center gap-2">
-                                      <span
-                                        className={`text-xs font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5 ${
-                                          isCompleted
-                                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                                            : isInProgress
-                                            ? 'bg-amber-100 text-amber-800 border border-amber-200 animate-pulse'
-                                            : 'bg-rose-50 text-rose-700 border border-rose-200'
-                                        }`}
-                                      >
-                                        {isCompleted ? (
-                                          <>
-                                            <CheckCircle2 size={13} />
-                                            Completada
-                                          </>
-                                        ) : isInProgress ? (
-                                          <>
-                                            <Clock size={13} className="animate-spin" />
-                                            En Progreso
-                                          </>
-                                        ) : (
-                                          <>
-                                            <Clock size={13} />
-                                            Pendiente
-                                          </>
-                                        )}
-                                      </span>
+                                    <div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm sm:text-base font-extrabold text-slate-900 group-hover:text-orange-600 transition">
+                                          {prop?.name}
+                                        </span>
+                                        {task.pax ? (
+                                          <span className="text-[11px] font-black bg-slate-900/5 text-slate-700 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                            <User size={10} strokeWidth={3} className="text-slate-400" />
+                                            {task.pax}
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                      {(() => {
+                                        const rawName = res?.guestName?.trim() || '';
+                                        const isUnknown =
+                                          !rawName ||
+                                          /^(no disponible|not available|hu[eé]sped|guest|invitado|reserva|reserved|bloqueo|airbnb|booking)$/i.test(
+                                            rawName
+                                          ) ||
+                                          rawName.toLowerCase().includes('not available') ||
+                                          rawName.toLowerCase().includes('no disponible');
+
+                                        // Si el nombre no está disponible o no se conoce, no mostrar nada
+                                        if (isUnknown) return null;
+
+                                        const source = res?.source || 'iCal';
+                                        const sourceAlreadyInName = rawName
+                                          .toLowerCase()
+                                          .includes(source.toLowerCase());
+
+                                        return (
+                                          <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5">
+                                            <span>Salida:</span>
+                                            <button
+                                              type="button"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (res) onOpenGuestPreview(res.id);
+                                              }}
+                                              className="font-bold text-slate-800 hover:text-orange-600 underline underline-offset-2"
+                                            >
+                                              {rawName}
+                                            </button>
+                                            {!sourceAlreadyInName && (
+                                              <span className="font-mono text-[10px] text-slate-400">
+                                                [{source}]
+                                              </span>
+                                            )}
+                                          </div>
+                                        );
+                                      })()}
                                     </div>
                                   </div>
 
-                                  {/* Fila Operativa (Horarios Modificables, Asignación y Comprobación de Fotos) */}
-                                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-100/80">
-                                    <div className="flex flex-wrap items-center gap-2.5 text-xs">
-                                      {/* Horario de Salida Modificable */}
-                                      <div
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-bold"
+                                  {/* Bloque Central: Horarios de Salida y Entrada, Mismo Día, Late Out y Asignación de Limpiadora */}
+                                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                                    {/* Horario de Salida */}
+                                    <div
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200 rounded-xl px-2.5 py-1 font-bold"
+                                    >
+                                      <span
+                                        className={`text-[9px] uppercase font-black ${
+                                          task.lateCheckoutActive ? 'text-amber-800' : 'text-rose-700'
+                                        }`}
                                       >
-                                        <span
-                                          className={`text-[9px] uppercase font-black ${
-                                            task.lateCheckoutActive ? 'text-amber-800' : 'text-rose-700'
-                                          }`}
-                                        >
-                                          {task.lateCheckoutActive ? 'LATE OUT' : 'SALIDA'}
-                                        </span>
-                                        <select
-                                          value={task.scheduledCleaningTime}
-                                          onChange={(e) =>
-                                            onUpdateTaskTimes?.(
-                                              task.id,
-                                              e.target.value,
-                                              task.nextCheckInTime
-                                            )
-                                          }
-                                          className="bg-transparent font-extrabold text-slate-900 text-xs outline-none cursor-pointer"
-                                          title="Modificar hora de salida"
-                                        >
-                                          {!CHECKOUT_HOURS.includes(task.scheduledCleaningTime) && (
-                                            <option value={task.scheduledCleaningTime}>
-                                              {task.scheduledCleaningTime}h
-                                            </option>
-                                          )}
-                                          {CHECKOUT_HOURS.map((time) => (
-                                            <option key={time} value={time}>
-                                              {time}h
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </div>
-
-                                      <span className="text-slate-400 font-bold">→</span>
-
-                                      {/* Horario de Entrada Modificable */}
-                                      <div
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-bold"
+                                        {task.lateCheckoutActive ? 'LATE OUT' : 'SALIDA'}
+                                      </span>
+                                      <select
+                                        value={task.scheduledCleaningTime}
+                                        onChange={(e) =>
+                                          onUpdateTaskTimes?.(
+                                            task.id,
+                                            e.target.value,
+                                            task.nextCheckInTime
+                                          )
+                                        }
+                                        className="bg-transparent font-extrabold text-slate-900 text-xs outline-none cursor-pointer"
+                                        title="Modificar hora de salida"
                                       >
-                                        <span className="text-[9px] uppercase font-black text-emerald-700">
-                                          ENTRADA
-                                        </span>
-                                        <select
-                                          value={task.sameDayCheckIn ? task.nextCheckInTime : '-'}
-                                          onChange={(e) =>
-                                            onUpdateTaskTimes?.(
-                                              task.id,
-                                              task.scheduledCleaningTime,
-                                              e.target.value === '-' ? '15:00' : e.target.value
-                                            )
-                                          }
-                                          className="bg-transparent font-extrabold text-slate-900 text-xs outline-none cursor-pointer"
-                                          title="Modificar hora de entrada"
-                                        >
-                                          <option value="-">- (Libre)</option>
-                                          {task.sameDayCheckIn &&
-                                            !CHECKIN_HOURS.includes(task.nextCheckInTime) && (
-                                              <option value={task.nextCheckInTime}>
-                                                {task.nextCheckInTime}h
-                                              </option>
-                                            )}
-                                          {CHECKIN_HOURS.map((time) => (
-                                            <option key={time} value={time}>
-                                              {time}h
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </div>
-
-                                      {/* Rotación mismo día */}
-                                      {task.sameDayCheckIn && (
-                                        <span className="bg-orange-100 text-orange-800 border border-orange-200 text-[11px] font-black px-2.5 py-1 rounded-xl flex items-center gap-1">
-                                          <Flame size={12} className="text-orange-600" /> ROTACIÓN MISMO DÍA
-                                        </span>
-                                      )}
-
-                                      {/* Late Checkout Badge / Acción si solicitado */}
-                                      {res?.lateCheckoutRequested && !task.lateCheckoutActive && (
-                                        <button
-                                          type="button"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (res) onApproveLateCheckout(res.id);
-                                          }}
-                                          className="bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-3 py-1 rounded-xl text-xs transition shadow-xs"
-                                        >
-                                          Aprobar Late Out (+{prop?.lateCheckoutPrice}€)
-                                        </button>
-                                      )}
-
-                                      {/* Selector de Limpiadora Asignada */}
-                                      <div
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1"
-                                      >
-                                        <User size={13} className="text-slate-400" />
-                                        <select
-                                          value={task.cleanerId}
-                                          onChange={(e) => onAssignCleaner(task.id, e.target.value)}
-                                          className="bg-transparent font-bold text-slate-800 text-xs outline-none cursor-pointer"
-                                        >
-                                          {cleaners.map((c) => (
-                                            <option key={c.id} value={c.id}>
-                                              {c.name}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </div>
+                                        {!CHECKOUT_HOURS.includes(task.scheduledCleaningTime) && (
+                                          <option value={task.scheduledCleaningTime}>
+                                            {task.scheduledCleaningTime}h
+                                          </option>
+                                        )}
+                                        {CHECKOUT_HOURS.map((time) => (
+                                          <option key={time} value={time}>
+                                            {time}h
+                                          </option>
+                                        ))}
+                                      </select>
                                     </div>
 
-                                    {/* Comprobación de Fotos y Checklist */}
-                                    <div className="flex items-center gap-2">
+                                    <span className="text-slate-300 font-bold">→</span>
+
+                                    {/* Horario de Entrada */}
+                                    <div
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200 rounded-xl px-2.5 py-1 font-bold"
+                                    >
+                                      <span className="text-[9px] uppercase font-black text-emerald-700">
+                                        ENTRADA
+                                      </span>
+                                      <select
+                                        value={task.sameDayCheckIn ? task.nextCheckInTime : '-'}
+                                        onChange={(e) =>
+                                          onUpdateTaskTimes?.(
+                                            task.id,
+                                            task.scheduledCleaningTime,
+                                            e.target.value === '-' ? '15:00' : e.target.value
+                                          )
+                                        }
+                                        className="bg-transparent font-extrabold text-slate-900 text-xs outline-none cursor-pointer"
+                                        title="Modificar hora de entrada"
+                                      >
+                                        <option value="-">- (Libre)</option>
+                                        {task.sameDayCheckIn &&
+                                          !CHECKIN_HOURS.includes(task.nextCheckInTime) && (
+                                            <option value={task.nextCheckInTime}>
+                                              {task.nextCheckInTime}h
+                                            </option>
+                                          )}
+                                        {CHECKIN_HOURS.map((time) => (
+                                          <option key={time} value={time}>
+                                            {time}h
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+
+                                    {/* Rotación Mismo Día */}
+                                    {task.sameDayCheckIn && (
+                                      <span className="bg-orange-100 text-orange-800 border border-orange-200 text-[11px] font-black px-2.5 py-1 rounded-xl flex items-center gap-1">
+                                        <Flame size={12} className="text-orange-600" /> MISMO DÍA
+                                      </span>
+                                    )}
+
+                                    {/* Botón Late Out si solicitado */}
+                                    {res?.lateCheckoutRequested && !task.lateCheckoutActive && (
                                       <button
                                         type="button"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          setInspectingTaskPhotos(task);
+                                          if (res) onApproveLateCheckout(res.id);
                                         }}
-                                        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-2xs ${
-                                          task.photosUploaded.length > 0
-                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                                        }`}
+                                        className="bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-3 py-1 rounded-xl text-xs transition shadow-xs"
                                       >
-                                        <Camera
-                                          size={13}
-                                          className={
-                                            task.photosUploaded.length > 0
-                                              ? 'text-emerald-600'
-                                              : 'text-slate-400'
-                                          }
-                                        />
-                                        <span>
-                                          {task.photosUploaded.length > 0
-                                            ? `Ver ${task.photosUploaded.length} fotos`
-                                            : 'Ver fotos y checklist'}
-                                        </span>
+                                        Aprobar Late Out (+{prop?.lateCheckoutPrice}€)
                                       </button>
+                                    )}
+
+                                    {/* Selector de Limpiadora */}
+                                    <div
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1"
+                                    >
+                                      <User size={13} className="text-slate-400" />
+                                      <select
+                                        value={task.cleanerId}
+                                        onChange={(e) => onAssignCleaner(task.id, e.target.value)}
+                                        className="bg-transparent font-bold text-slate-800 text-xs outline-none cursor-pointer"
+                                      >
+                                        {cleaners.map((c) => (
+                                          <option key={c.id} value={c.id}>
+                                            {c.name}
+                                          </option>
+                                        ))}
+                                      </select>
                                     </div>
+                                  </div>
+
+                                  {/* Bloque Derecho: Estado + Botón Fotos */}
+                                  <div className="flex items-center gap-2.5 shrink-0 self-end xl:self-center">
+                                    {/* Badge de Estado */}
+                                    <span
+                                      className={`text-xs font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5 ${
+                                        isCompleted
+                                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                          : isInProgress
+                                          ? 'bg-amber-100 text-amber-800 border border-amber-200 animate-pulse'
+                                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                      }`}
+                                    >
+                                      {isCompleted ? (
+                                        <>
+                                          <CheckCircle2 size={13} />
+                                          Completada
+                                        </>
+                                      ) : isInProgress ? (
+                                        <>
+                                          <Clock size={13} className="animate-spin" />
+                                          En Progreso
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Clock size={13} />
+                                          Pendiente
+                                        </>
+                                      )}
+                                    </span>
+
+                                    {/* Botón Ver Fotos / Checklist */}
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setInspectingTaskPhotos(task);
+                                      }}
+                                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition shadow-2xs ${
+                                        task.photosUploaded.length > 0
+                                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                                      }`}
+                                    >
+                                      <Camera
+                                        size={13}
+                                        className={
+                                          task.photosUploaded.length > 0
+                                            ? 'text-emerald-600'
+                                            : 'text-slate-400'
+                                        }
+                                      />
+                                      <span>
+                                        {task.photosUploaded.length > 0
+                                          ? `Ver ${task.photosUploaded.length} fotos`
+                                          : 'Ver fotos y checklist'}
+                                      </span>
+                                    </button>
                                   </div>
                                 </div>
                               );

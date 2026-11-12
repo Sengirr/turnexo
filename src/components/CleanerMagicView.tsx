@@ -243,6 +243,20 @@ export default function CleanerMagicView({
     }
   };
 
+  const handleItemClick = (item: ChecklistItem) => {
+    // Si exige foto obligatoria y no tiene fotos aún, abrir la cámara/subida en vez de marcarla
+    if (item.photoRequired && (!item.photos || item.photos.length === 0)) {
+      const inputEl = document.getElementById(`file-item-${item.id}`) as HTMLInputElement | null;
+      if (inputEl) {
+        inputEl.click();
+      }
+      return;
+    }
+    if (activeTask) {
+      onToggleChecklistItem(activeTask.id, item.id);
+    }
+  };
+
   const handleSendIncident = (taskId: string) => {
     if (!incidentText.trim()) return;
     onAddIncident(taskId, incidentText.trim());
@@ -698,7 +712,7 @@ export default function CleanerMagicView({
                               }`}
                             >
                               <div
-                                onClick={() => onToggleChecklistItem(activeTask.id, item.id)}
+                                onClick={() => handleItemClick(item)}
                                 className="flex items-start gap-3 cursor-pointer"
                               >
                                 {/* Checkbox táctil */}
@@ -706,10 +720,24 @@ export default function CleanerMagicView({
                                   className={`w-5 h-5 rounded-lg border mt-0.5 flex items-center justify-center shrink-0 transition ${
                                     item.completed
                                       ? 'bg-emerald-600 border-emerald-600 text-white'
+                                      : item.photoRequired &&
+                                        (!item.photos || item.photos.length === 0)
+                                      ? 'bg-amber-50/80 border-amber-300 text-amber-600'
                                       : 'bg-white border-slate-300'
                                   }`}
+                                  title={
+                                    item.photoRequired &&
+                                    (!item.photos || item.photos.length === 0)
+                                      ? 'Requiere subir foto para completarse'
+                                      : ''
+                                  }
                                 >
-                                  {item.completed && <CheckCircle2 size={14} />}
+                                  {item.completed ? (
+                                    <CheckCircle2 size={14} />
+                                  ) : item.photoRequired &&
+                                    (!item.photos || item.photos.length === 0) ? (
+                                    <Camera size={11} className="text-amber-600" />
+                                  ) : null}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
@@ -781,6 +809,7 @@ export default function CleanerMagicView({
                                       {uploadingItemId === item.id ? 'Subiendo' : 'Subir'}
                                     </span>
                                     <input
+                                      id={`file-item-${item.id}`}
                                       type="file"
                                       accept="image/*"
                                       capture="environment"

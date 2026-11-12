@@ -428,6 +428,19 @@ export default function App() {
   const handleToggleChecklistItem = (taskId: string, itemId: string) => {
     const found = tasks.find((t) => t.id === taskId);
     if (!found) return;
+    const targetItem = found.checklist.find((i) => i.id === itemId);
+    if (!targetItem) return;
+
+    // Si la tarea exige foto obligatoria y no tiene fotos subidas, no permitir marcarla manualmente
+    if (
+      targetItem.photoRequired &&
+      (!targetItem.photos || targetItem.photos.length === 0) &&
+      !targetItem.completed
+    ) {
+      showToast('📸 Esta tarea exige foto obligatoria. Sube la foto para marcarla.');
+      return;
+    }
+
     const updatedChecklist = found.checklist.map((item) =>
       item.id === itemId ? { ...item, completed: !item.completed } : item
     );

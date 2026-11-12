@@ -341,7 +341,14 @@ export function buildCleaningTasksFromReservations(
       isDeepCleaning: existing?.isDeepCleaning,
       isBagPrepared: existing?.isBagPrepared,
       photosUploaded: existing?.photosUploaded || [],
-      checklist: existing?.checklist || createChecklistFromProperty(prop),
+      checklist: (existing?.checklist || createChecklistFromProperty(prop)).map((item) => ({
+        ...item,
+        // Si requiere foto obligatoria y no tiene fotos subidas, no puede figurar como completada
+        completed:
+          item.photoRequired && (!item.photos || item.photos.length === 0)
+            ? false
+            : item.completed,
+      })),
       incidents: existing?.incidents || [],
       fee: prop.cleaningFee,
       pax,

@@ -3215,8 +3215,8 @@ export default function HostDashboardView({
                       )}
                     </div>
 
-                    {/* Fotos Generales o Estado de Verificación */}
-                    {generalPhotos.length > 0 ? (
+                    {/* Fotos Generales (solo si existen fotos fuera del checklist) */}
+                    {generalPhotos.length > 0 && (
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -3254,23 +3254,6 @@ export default function HostDashboardView({
                             );
                           })}
                         </div>
-                      </div>
-                    ) : (
-                      <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 space-y-2">
-                        <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                          <span className="flex items-center gap-1.5 text-slate-900 font-extrabold">
-                            <CheckCircle2 size={15} className="text-emerald-600" />
-                            Fotos Vinculadas al Checklist
-                          </span>
-                          <span className="text-[11px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                            {checklistPhotos.length} {checklistPhotos.length === 1 ? 'foto' : 'fotos'}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">
-                          {checklistPhotos.length > 0
-                            ? 'Cada foto de verificación está adjunta directamente en su elemento correspondiente del checklist (a la derecha).'
-                            : 'No hay fotos adicionales fuera del checklist.'}
-                        </p>
                       </div>
                     )}
                   </div>

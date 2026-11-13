@@ -37,19 +37,21 @@ function verifyAdminToken(authHeader: string | undefined, secret: string): boole
   }
 }
 
-function buildEmailBody(companyName: string): string {
+function buildEmailBody(companyName: string, city?: string): string {
+  const area = city && city.trim() ? city.trim() : 'la zona';
   return [
     `Hola equipo de ${companyName},`,
     '',
-    'Os escribo desde Turnexo. Trabajamos con propietarios de viviendas turísticas en la Costa del Sol para que no lleguen al cierre trimestral con extractos sueltos de Airbnb y Booking sin facturar.',
+    `¿Lleváis clientes particulares con viviendas turísticas en ${area}?`,
     '',
-    'Con Turnexo suben el Excel/CSV de cobros de Airbnb o Booking y en 1 clic generan todas las facturas legales con IVA del 10% (simplificadas y completas) más el resumen trimestral listo para entregaros.',
+    'Con la entrada en vigor del IVA del 10% este 1 de diciembre, muchos propietarios os van a empezar a mandar extractos sueltos de Airbnb y Booking sin saber emitir la factura de cada estancia para el Modelo 303.',
     '',
-    'Tienen un plan gratuito para 1 alojamiento por si queréis recomendarlo a algún cliente que os dé más guerra con la documentación. Si queréis probarlo o ver cómo funciona en 1 minuto, decidme y os paso acceso.',
+    'En Turnexo hemos hecho una herramienta muy simple para que el propio propietario suba su Excel/CSV de Airbnb o Booking y genere en 1 clic todas las facturas legales al 10% + el resumen listo para entregaros (gratis para 1 alojamiento).',
+    '',
+    'Si queréis echarle un ojo antes de diciembre, ¿os paso un acceso de prueba gratuito?',
     '',
     'Un saludo,',
-    'Iván Álvarez',
-    'Turnexo · https://turnexo.app',
+    'Iván Álvarez · Turnexo',
   ].join('\n');
 }
 
@@ -141,8 +143,8 @@ export default async function handler(req: any, res: any) {
           body: JSON.stringify({
             to: [lead.email],
             displayName: 'Iván Álvarez · Turnexo',
-            subject: 'Facturas 10% IVA de Airbnb/Booking para vuestros clientes propietarios',
-            text: buildEmailBody(lead.company_name),
+            subject: 'Pisos turísticos desde diciembre',
+            text: buildEmailBody(lead.company_name, lead.city),
           }),
         }
       );

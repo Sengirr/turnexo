@@ -449,6 +449,12 @@ export default function App() {
     showToast(`${parsed.length} reservas procesadas del iCal.`);
   };
 
+  const handleAddDirectReservation = (res: Reservation) => {
+    setReservations((prev) => [...prev, res]);
+    syncReservationToSupabase(res);
+    showToast('Reserva directa añadida. Limpieza creada en el cuadrante.');
+  };
+
   const handleSyncIcalUrl = async (propertyId: string, url: string, silent = false) => {
     try {
       const res = await fetch(`/api/fetch-ical?url=${encodeURIComponent(url)}`);
@@ -910,6 +916,7 @@ export default function App() {
           onKeepOnlyInvoices={handleKeepOnlyInvoices}
           onUpdateFiscalProfile={handleUpdateFiscalProfile}
           onImportIcalText={handleImportIcalText}
+          onAddDirectReservation={handleAddDirectReservation}
           onSyncIcalUrl={handleSyncIcalUrl}
           onAssignCleaner={handleAssignCleaner}
           onUpdateTaskTimes={handleUpdateTaskTimes}

@@ -111,6 +111,7 @@ interface Props {
   onKeepOnlyInvoices?: (keepIds: string[]) => void;
   onUpdateFiscalProfile?: (prof: HostFiscalProfile) => void;
   onImportIcalText: (propertyId: string, icsText: string) => void;
+  onAddDirectReservation?: (reservation: Reservation) => void;
   onSyncIcalUrl: (propertyId: string, url: string) => Promise<void>;
   onAssignCleaner: (taskId: string, cleanerId: string) => void;
   onUpdateTaskTimes?: (taskId: string, scheduledCleaningTime: string, nextCheckInTime: string) => void;
@@ -148,6 +149,7 @@ export default function HostDashboardView({
   onKeepOnlyInvoices,
   onUpdateFiscalProfile,
   onImportIcalText,
+  onAddDirectReservation,
   onSyncIcalUrl,
   onAssignCleaner,
   onUpdateTaskTimes,
@@ -169,6 +171,15 @@ export default function HostDashboardView({
   const [newCleanerName, setNewCleanerName] = useState('');
   const [newCleanerPhone, setNewCleanerPhone] = useState('+34 ');
   const [showAddCleanerModal, setShowAddCleanerModal] = useState(false);
+  const [showDirectResModal, setShowDirectResModal] = useState(false);
+  const [directResPropertyId, setDirectResPropertyId] = useState(properties[0]?.id || '');
+  const [directResCheckIn, setDirectResCheckIn] = useState(() => new Date().toISOString().split('T')[0]);
+  const [directResCheckOut, setDirectResCheckOut] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  });
+  const [directResGuestName, setDirectResGuestName] = useState('');
   const [copiedCleanerId, setCopiedCleanerId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showIcalModal, setShowIcalModal] = useState(false);
@@ -1325,8 +1336,25 @@ export default function HostDashboardView({
                 </h2>
               </div>
 
-              {/* Sub-pestañas: Cuadrante vs Equipo */}
-              <div className="flex items-center gap-1 bg-slate-200/70 p-1 rounded-xl">
+              {/* Sub-pestañas: Cuadrante vs Equipo + Botón Reserva Directa */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                {cleaningsSubTab === 'schedule' && onAddDirectReservation && properties.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDirectResPropertyId((prev) =>
+                        properties.some((p) => p.id === prev) ? prev : properties[0]?.id || ''
+                      );
+                      setShowDirectResModal(true);
+                    }}
+                    className="px-3.5 py-2 text-xs font-bold rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-sm flex items-center gap-1.5 transition"
+                  >
+                    <Plus size={14} />
+                    <span>{lang === 'en' ? 'New Direct Booking' : 'Nueva Reserva Directa'}</span>
+                  </button>
+                )}
+
+                <div className="flex items-center gap-1 bg-slate-200/70 p-1 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setCleaningsSubTab('schedule')}
@@ -1351,6 +1379,7 @@ export default function HostDashboardView({
                   <Users size={14} className="text-emerald-600" />
                   <span>{t.schedule.tabTeam} ({cleaners.length})</span>
                 </button>
+                </div>
               </div>
             </div>
 
@@ -4452,6 +4481,134 @@ export default function HostDashboardView({
                 Ver todos los planes
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Nueva Reserva Directa (para generar limpieza y poder facturar sin iCal) */}
+      {showDirectResModal && onAddDirectReservation && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-black text-slate-900">
+                  {lang === 'en' ? 'New Direct Booking' : 'Nueva Reserva Directa'}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {lang === 'en'
+                    ? 'Creates the cleaning task for check-out day and makes it available for invoicing.'
+                    : 'Crea la limpieza en el cuadrante para el día de salida y la deja lista para facturar.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDirectResModal(false)}
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!directResPropertyId || !directResCheckIn || !directResCheckOut) return;
+                const safeCheckOut =
+                  directResCheckOut < directResCheckIn ? directResCheckIn : directResCheckOut;
+                onAddDirectReservation({
+                  id: `direct-${Date.now()}`,
+                  propertyId: directResPropertyId,
+                  source: 'Directo',
+                  guestName: directResGuestName.trim() || 'Reserva Directa',
+                  checkIn: directResCheckIn,
+                  checkOut: safeCheckOut,
+                });
+                setDirectResGuestName('');
+                setShowDirectResModal(false);
+              }}
+              className="space-y-4 text-xs"
+            >
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  {lang === 'en' ? 'Property' : 'Alojamiento'}
+                </label>
+                <select
+                  value={directResPropertyId}
+                  onChange={(e) => setDirectResPropertyId(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                >
+                  {properties.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    {lang === 'en' ? 'Check-in' : 'Fecha de entrada'}
+                  </label>
+                  <input
+                    type="date"
+                    value={directResCheckIn}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setDirectResCheckIn(val);
+                      if (directResCheckOut < val) {
+                        setDirectResCheckOut(val);
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    {lang === 'en' ? 'Check-out (cleaning day)' : 'Fecha de salida (limpieza)'}
+                  </label>
+                  <input
+                    type="date"
+                    min={directResCheckIn}
+                    value={directResCheckOut}
+                    onChange={(e) => setDirectResCheckOut(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  {lang === 'en' ? 'Guest name (optional)' : 'Nombre del huésped (opcional)'}
+                </label>
+                <input
+                  type="text"
+                  value={directResGuestName}
+                  onChange={(e) => setDirectResGuestName(e.target.value)}
+                  placeholder={lang === 'en' ? 'e.g. Carlos Mendoza' : 'Ej. Carlos Mendoza'}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDirectResModal(false)}
+                  className="px-4 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-100 transition"
+                >
+                  {lang === 'en' ? 'Cancel' : 'Cancelar'}
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2.5 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition"
+                >
+                  {lang === 'en' ? 'Save & Create Cleaning' : 'Guardar y Crear Limpieza'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -2287,17 +2287,6 @@ export default function HostDashboardView({
 
                 <button
                   type="button"
-                  onClick={() => setPlatformGuideModal({ open: true, topic: 'csv', platform: 'airbnb' })}
-                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200/80 px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-2xs"
-                  title="Ver cómo descargar el Excel o CSV de reservas en Airbnb o Booking"
-                >
-                  <HelpCircle size={14} className="text-indigo-600" />
-                  <span className="hidden sm:inline">¿Cómo sacar el archivo?</span>
-                  <span className="sm:hidden">Guía</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => setShowFiscalProfileModal(true)}
                   className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 px-3.5 py-2 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-2xs"
                 >

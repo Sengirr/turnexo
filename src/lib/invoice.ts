@@ -385,15 +385,15 @@ export function downloadInvoiceImportTemplate(): void {
     'Nombre Huésped',
     'DNI_NIF (Obligatorio si > 400€)',
     'Dirección Fiscal (Opcional si <= 400€)',
-    'Fecha Entrada (AAAA-MM-DD)',
-    'Fecha Salida (AAAA-MM-DD)',
+    'Fecha Entrada (DD/MM/AAAA)',
+    'Fecha Salida (DD/MM/AAAA)',
     'Importe Total con IVA (€)',
   ];
 
   const sampleRows = [
-    ['Ático Vista Marina', 'Carlos Mendoza', '', '', '2026-11-01', '2026-11-04', '350.00'],
-    ['Ático Vista Marina', 'Empresa Consultora S.L.', 'B87654321', 'Paseo de la Castellana 100, Madrid', '2026-11-08', '2026-11-12', '620.00'],
-    ['Loft Centro Histórico', 'Laura Pausini', '', '', '2026-11-15', '2026-11-18', '280.00'],
+    ['Ático Vista Marina', 'Carlos Mendoza', '', '', '01/11/2026', '04/11/2026', '350.00'],
+    ['Ático Vista Marina', 'Empresa Consultora S.L.', 'B87654321', 'Paseo de la Castellana 100, Madrid', '08/11/2026', '12/11/2026', '620.00'],
+    ['Loft Centro Histórico', 'Laura Pausini', '', '', '15/11/2026', '18/11/2026', '280.00'],
   ];
 
   const csvContent = '\uFEFF' + [headers.join(';'), ...sampleRows.map((r) => r.join(';'))].join('\r\n');

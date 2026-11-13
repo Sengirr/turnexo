@@ -19,6 +19,32 @@ interface Props {
   onClose: () => void;
 }
 
+function isPlaceholderGuestName(name?: string): boolean {
+  if (!name) return true;
+  const clean = name.trim().toLowerCase();
+  return (
+    !clean ||
+    clean === 'no disponible' ||
+    clean === 'not available' ||
+    clean === 'unavailable' ||
+    clean === 'reserved' ||
+    clean === 'reservado' ||
+    clean === 'bloqueado' ||
+    clean === 'blocked' ||
+    clean.includes('not available') ||
+    clean.includes('no disponible')
+  );
+}
+
+function formatShortDateES(d?: string): string {
+  if (!d) return '';
+  const parts = d.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return d;
+}
+
 export default function CreateInvoiceModal({
   properties,
   reservations,
@@ -31,32 +57,49 @@ export default function CreateInvoiceModal({
   const defaultRes =
     reservations.find((r) => r.id === initialReservationId) || reservations[0];
 
+  const [bookingSource, setBookingSource] = useState<'ical' | 'manual'>(
+    reservations.length > 0 ? 'ical' : 'manual'
+  );
   const [selectedResId, setSelectedResId] = useState<string>(defaultRes?.id || '');
   const selectedRes = reservations.find((r) => r.id === selectedResId) || defaultRes;
-  const selectedProp = properties.find((p) => p.id === selectedRes?.propertyId);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [manualPropertyId, setManualPropertyId] = useState<string>(properties[0]?.id || '');
+  const [manualCheckIn, setManualCheckIn] = useState<string>(todayStr);
+  const [manualCheckOut, setManualCheckOut] = useState<string>(todayStr);
+
+  const selectedProp =
+    bookingSource === 'manual'
+      ? properties.find((p) => p.id === manualPropertyId) || properties[0]
+      : properties.find((p) => p.id === selectedRes?.propertyId);
+
+  const effectiveCheckIn = bookingSource === 'manual' ? manualCheckIn : selectedRes?.checkIn || todayStr;
+  const effectiveCheckOut = bookingSource === 'manual' ? manualCheckOut : selectedRes?.checkOut || todayStr;
 
   // Calcular noches por defecto
   const nights = React.useMemo(() => {
-    if (!selectedRes) return 1;
-    const start = new Date(selectedRes.checkIn);
-    const end = new Date(selectedRes.checkOut);
+    if (!effectiveCheckIn || !effectiveCheckOut) return 1;
+    const start = new Date(effectiveCheckIn);
+    const end = new Date(effectiveCheckOut);
     const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     return Math.max(1, diff || 1);
-  }, [selectedRes]);
+  }, [effectiveCheckIn, effectiveCheckOut]);
 
   const [isSimplified, setIsSimplified] = useState(true);
   const [totalAmount, setTotalAmount] = useState<number>(300);
-  const [guestName, setGuestName] = useState(selectedRes?.guestName || 'Huésped Particular');
+  const [guestName, setGuestName] = useState(
+    selectedRes && !isPlaceholderGuestName(selectedRes.guestName) ? selectedRes.guestName : ''
+  );
   const [guestFiscalId, setGuestFiscalId] = useState('');
   const [guestAddress, setGuestAddress] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
 
   // Actualizar al cambiar reserva
   React.useEffect(() => {
-    if (selectedRes) {
-      setGuestName(selectedRes.guestName);
+    if (bookingSource === 'ical' && selectedRes) {
+      setGuestName(isPlaceholderGuestName(selectedRes.guestName) ? '' : selectedRes.guestName);
     }
-  }, [selectedRes]);
+  }, [selectedRes, bookingSource]);
 
   const breakdown = React.useMemo(() => {
     return calculateBreakdown(totalAmount, 10, 0);
@@ -64,7 +107,8 @@ export default function CreateInvoiceModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedRes || !selectedProp) return;
+    if (!selectedProp) return;
+    if (bookingSource === 'ical' && !selectedRes) return;
 
     const { number, series } = generateNextInvoiceNumber(existingInvoices, isSimplified);
 
@@ -73,13 +117,13 @@ export default function CreateInvoiceModal({
       invoiceNumber: number,
       series,
       issueDate: new Date().toISOString().split('T')[0],
-      reservationId: selectedRes.id,
+      reservationId: bookingSource === 'manual' ? `manual-${Date.now()}` : selectedRes!.id,
       propertyId: selectedProp.id,
       propertyName: selectedProp.name,
-      stayStartDate: selectedRes.checkIn,
-      stayEndDate: selectedRes.checkOut,
+      stayStartDate: effectiveCheckIn,
+      stayEndDate: effectiveCheckOut,
       nights,
-      guestName,
+      guestName: guestName.trim() || 'Huésped Particular',
       guestEmail: guestEmail.trim() || undefined,
       guestFiscalId: isSimplified ? (guestFiscalId.trim() || undefined) : guestFiscalId.trim(),
       guestAddress: isSimplified ? (guestAddress.trim() || undefined) : guestAddress.trim(),
@@ -127,25 +171,103 @@ export default function CreateInvoiceModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          {/* Selector de Reserva */}
-          <div>
-            <label className="block font-bold text-slate-700 mb-1">
-              Reserva asociada (del calendario iCal)
-            </label>
-            <select
-              value={selectedResId}
-              onChange={(e) => setSelectedResId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              {reservations.map((r) => {
-                const prop = properties.find((p) => p.id === r.propertyId);
-                return (
-                  <option key={r.id} value={r.id}>
-                    {r.guestName} · {prop?.name} ({r.checkIn} → {r.checkOut})
-                  </option>
-                );
-              })}
-            </select>
+          {/* Origen de la reserva: iCal o Directa / Manual */}
+          <div className="space-y-2.5">
+            {reservations.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setBookingSource('ical')}
+                  className={`py-1.5 px-3 rounded-lg font-bold transition ${
+                    bookingSource === 'ical'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  Del calendario iCal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBookingSource('manual')}
+                  className={`py-1.5 px-3 rounded-lg font-bold transition ${
+                    bookingSource === 'manual'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  Reserva directa / manual
+                </button>
+              </div>
+            )}
+
+            {bookingSource === 'ical' && reservations.length > 0 ? (
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Reserva asociada (del calendario iCal)
+                </label>
+                <select
+                  value={selectedResId}
+                  onChange={(e) => setSelectedResId(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {reservations.map((r) => {
+                    const prop = properties.find((p) => p.id === r.propertyId);
+                    const propLabel = prop?.name || 'Alojamiento';
+                    const datesLabel = `${formatShortDateES(r.checkIn)} → ${formatShortDateES(r.checkOut)}`;
+                    const label = isPlaceholderGuestName(r.guestName)
+                      ? `${propLabel} · ${datesLabel}`
+                      : `${r.guestName} · ${propLabel} (${datesLabel})`;
+                    return (
+                      <option key={r.id} value={r.id}>
+                        {label}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            ) : (
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Alojamiento
+                  </label>
+                  <select
+                    value={manualPropertyId}
+                    onChange={(e) => setManualPropertyId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  >
+                    {properties.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Fecha entrada</label>
+                    <input
+                      type="date"
+                      value={manualCheckIn}
+                      onChange={(e) => setManualCheckIn(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-800"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Fecha salida</label>
+                    <input
+                      type="date"
+                      value={manualCheckOut}
+                      onChange={(e) => setManualCheckOut(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-800"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Selector Tipo de Factura: Simplificada o Completa */}
@@ -235,6 +357,7 @@ export default function CreateInvoiceModal({
                 type="text"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
+                placeholder="Ej. Carlos Mendoza (o Huésped Particular)"
                 className="w-full px-3 py-2 rounded-xl border border-slate-200"
                 required
               />

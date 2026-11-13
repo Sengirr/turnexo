@@ -2236,7 +2236,7 @@ export default function HostDashboardView({
                 <button
                   type="button"
                   onClick={() => {
-                    const stripeUrl = getStripePaymentLink('plan_pro', isAnnualBilling);
+                    const stripeUrl = getStripePaymentLink('plan_pro', isAnnualBilling, hostAccount);
                     if (stripeUrl && stripeUrl.startsWith('http')) {
                       window.open(stripeUrl, '_blank');
                     } else {
@@ -3267,7 +3267,7 @@ export default function HostDashboardView({
                       type="button"
                       onClick={() => {
                         const planKey = hostAccount?.plan || 'plan_pro';
-                        const stripeUrl = getStripePaymentLink(planKey, isAnnualBilling) || getStripePaymentLink('plan_pro', isAnnualBilling);
+                        const stripeUrl = getStripePaymentLink(planKey, isAnnualBilling, hostAccount) || getStripePaymentLink('plan_pro', isAnnualBilling, hostAccount);
                         if (stripeUrl && stripeUrl.startsWith('http')) {
                           window.open(stripeUrl, '_blank');
                         } else {
@@ -4457,7 +4457,7 @@ export default function HostDashboardView({
               <button
                 type="button"
                 onClick={() => {
-                  const stripeUrl = getStripePaymentLink(planLimitReason.targetPlan, isAnnualBilling);
+                  const stripeUrl = getStripePaymentLink(planLimitReason.targetPlan, isAnnualBilling, hostAccount);
                   if (stripeUrl && stripeUrl.startsWith('http')) {
                     window.open(stripeUrl, '_blank');
                   } else {

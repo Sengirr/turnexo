@@ -64,6 +64,11 @@ const STORAGE_KEYS = {
   fiscalProfile: 'turnexo_fiscal_profile_v2',
 };
 
+const DEMO_PROPERTY_IDS = new Set(INITIAL_PROPERTIES.map((p) => p.id));
+const DEMO_CLEANER_IDS = new Set(INITIAL_CLEANERS.map((c) => c.id));
+const DEMO_RESERVATION_IDS = new Set(INITIAL_RESERVATIONS.map((r) => r.id));
+const DEMO_INVOICE_IDS = new Set(INITIAL_INVOICES.map((i) => i.id));
+
 function loadStored<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
@@ -212,10 +217,10 @@ export default function App() {
         console.warn('[Turnexo] Error leyendo host de Supabase:', err);
       }
 
-      // El plan respeta siempre la elección guardada (localStorage o DB) antes que el fallback
+      // El plan de Supabase (ej. actualizado por webhook de Stripe) tiene prioridad sobre localStorage
       const effectivePlan =
-        (storedHost?.plan && storedHost.plan !== 'plan_starter' ? storedHost.plan : null) ||
         dbPlan ||
+        (storedHost?.plan && storedHost.plan !== 'plan_starter' ? storedHost.plan : null) ||
         meta.subscription_plan ||
         storedHost?.plan ||
         'plan_pro';
@@ -237,6 +242,12 @@ export default function App() {
       syncHostToSupabase(account);
     };
 
+    // Detectar retorno desde Stripe (?payment=success)
+    if (window.location.search.includes('payment=success')) {
+      showToast('¡Pago confirmado! Tu suscripción se ha activado.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
     // Detectar si venimos de un login con OAuth (Google) o sesión activa
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -252,28 +263,29 @@ export default function App() {
 
     const fetchCloud = () => {
       loadWorkspaceFromSupabase().then((cloud) => {
-        if (cloud.properties && cloud.properties.length > 0) {
+        if (cloud.properties) {
           setProperties((prev) => {
             const cloudIds = new Set(cloud.properties!.map((p) => p.id));
-            const localOnly = prev.filter((p) => !cloudIds.has(p.id));
+            const localOnly = prev.filter((p) => !cloudIds.has(p.id) && !DEMO_PROPERTY_IDS.has(p.id));
             return [...cloud.properties!, ...localOnly];
           });
         }
-        if (cloud.cleaners && cloud.cleaners.length > 0) {
+        if (cloud.cleaners) {
           setCleaners((prev) => {
             const cloudIds = new Set(cloud.cleaners!.map((c) => c.id));
-            const localOnly = prev.filter((c) => !cloudIds.has(c.id));
+            const localOnly = prev.filter((c) => !cloudIds.has(c.id) && !DEMO_CLEANER_IDS.has(c.id));
             return [...cloud.cleaners!, ...localOnly];
           });
         }
-        if (cloud.reservations && cloud.reservations.length > 0) {
+        if (cloud.reservations) {
           setReservations((prev) => {
             const cloudIds = new Set(cloud.reservations!.map((r) => r.id));
-            const localOnly = prev.filter((r) => !cloudIds.has(r.id));
+            const localOnly = prev.filter((r) => !cloudIds.has(r.id) && !DEMO_RESERVATION_IDS.has(r.id));
             localOnly.forEach((r) => syncReservationToSupabase(r));
             return [...cloud.reservations!, ...localOnly];
           });
         }
+        setInvoices((prev) => prev.filter((inv) => !DEMO_INVOICE_IDS.has(inv.id)));
         if (cloud.tasks && cloud.tasks.length > 0) {
           setTaskOverrides((prev) => {
             const prevMap = new Map(prev.map((t) => [t.id, t]));
@@ -795,6 +807,12 @@ export default function App() {
   const handleAuthSuccess = (account: HostAccount) => {
     setHostAccount(account);
     localStorage.setItem(STORAGE_KEYS.host, JSON.stringify(account));
+    if (isSupabaseConfigured && !account.id.startsWith('demo')) {
+      setProperties((prev) => prev.filter((p) => !DEMO_PROPERTY_IDS.has(p.id)));
+      setCleaners((prev) => prev.filter((c) => !DEMO_CLEANER_IDS.has(c.id)));
+      setReservations((prev) => prev.filter((r) => !DEMO_RESERVATION_IDS.has(r.id)));
+      setInvoices((prev) => prev.filter((inv) => !DEMO_INVOICE_IDS.has(inv.id)));
+    }
     applyPlanToProperties(account.plan);
     syncHostToSupabase(account);
     navigate('/app', { kind: 'app' });

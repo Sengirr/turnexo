@@ -33,7 +33,30 @@ export const STRIPE_PAYMENT_LINKS = {
   module_guide: import.meta.env.VITE_STRIPE_LINK_GUIDE || '',
 };
 
-export const getStripePaymentLink = (plan: string, isAnnual: boolean = false): string => {
+function appendStripeCustomerParams(
+  baseUrl: string,
+  host?: { id?: string; email?: string } | null
+): string {
+  if (!baseUrl || !host) return baseUrl;
+  try {
+    const url = new URL(baseUrl);
+    if (host.id && !host.id.startsWith('demo')) {
+      url.searchParams.set('client_reference_id', host.id);
+    }
+    if (host.email) {
+      url.searchParams.set('prefilled_email', host.email);
+    }
+    return url.toString();
+  } catch {
+    return baseUrl;
+  }
+}
+
+export const getStripePaymentLink = (
+  plan: string,
+  isAnnual: boolean = false,
+  host?: { id?: string; email?: string } | null
+): string => {
   const targetKey = isAnnual ? `${plan}_yearly` : plan;
 
   try {
@@ -41,16 +64,16 @@ export const getStripePaymentLink = (plan: string, isAnnual: boolean = false): s
     if (adminConfig) {
       const parsed = JSON.parse(adminConfig);
       if (parsed[targetKey] && typeof parsed[targetKey] === 'string' && parsed[targetKey].startsWith('http')) {
-        return parsed[targetKey];
+        return appendStripeCustomerParams(parsed[targetKey], host);
       }
       if (!isAnnual && parsed[plan] && typeof parsed[plan] === 'string' && parsed[plan].startsWith('http')) {
-        return parsed[plan];
+        return appendStripeCustomerParams(parsed[plan], host);
       }
     }
   } catch {}
 
   const envLink = (STRIPE_PAYMENT_LINKS as Record<string, string>)[targetKey] || (STRIPE_PAYMENT_LINKS as Record<string, string>)[plan] || '';
-  if (envLink && envLink.startsWith('http')) return envLink;
+  if (envLink && envLink.startsWith('http')) return appendStripeCustomerParams(envLink, host);
   return '';
 };
 

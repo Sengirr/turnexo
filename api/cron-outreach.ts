@@ -48,7 +48,7 @@ function buildEmailBody(companyName: string, city?: string): string {
     '',
     'En Turnexo hemos hecho una herramienta muy simple para que el propio propietario suba su Excel/CSV de Airbnb o Booking y genere en 1 clic todas las facturas legales al 10% + el resumen listo para entregaros (gratis para 1 alojamiento).',
     '',
-    'Si queréis echarle un ojo antes de diciembre, ¿os paso un acceso de prueba gratuito?',
+    'Si tenéis algún cliente que os dé guerra con los extractos, ¿os paso el enlace para que se lo podáis recomendar directamente? A la asesoría no os cuesta nada.',
     '',
     'Un saludo,',
     'Iván Álvarez · Turnexo',

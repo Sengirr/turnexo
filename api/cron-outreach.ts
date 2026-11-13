@@ -131,7 +131,14 @@ export default async function handler(req: any, res: any) {
     const results: Array<{ email: string; ok: boolean; status: number }> = [];
     let sentCount = 0;
 
-    for (const lead of pendingLeads) {
+    // Escalonado entre envíos (7.5s por defecto para 6 correos ≈ 37.5s, capado a 40s totales)
+    const delayMs =
+      pendingLeads.length > 1
+        ? Math.min(7500, Math.floor(40000 / (pendingLeads.length - 1)))
+        : 0;
+
+    for (let i = 0; i < pendingLeads.length; i += 1) {
+      const lead = pendingLeads[i];
       const sendResp = await fetch(
         `https://api.mail.hostinger.com/api/v1/mailboxes/${encodeURIComponent(mailboxId)}/send`,
         {
@@ -164,6 +171,10 @@ export default async function handler(req: any, res: any) {
             }),
           }
         );
+      }
+
+      if (i < pendingLeads.length - 1 && delayMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     }
 

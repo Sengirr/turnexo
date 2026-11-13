@@ -595,14 +595,14 @@ export default function VatCalculatorView({
           </section>
         )}
 
-        {/* Guía práctica paso a paso */}
+        {/* Guía práctica paso a paso y dudas clave */}
         <section className="bg-white border border-[#D5CFC0] p-6 sm:p-8 space-y-5">
           <div>
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#1F4E3D]">
               Checklist práctico · 1 de diciembre
             </span>
             <h2 className="text-xl sm:text-2xl font-extrabold text-[#141413] mt-1">
-              Qué tienes que hacer paso a paso como propietario
+              Qué tienes que hacer paso a paso y dudas clave
             </h2>
           </div>
 
@@ -610,7 +610,7 @@ export default function VatCalculatorView({
             <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5">
               <p className="font-mono font-bold text-[#C85A32]">1. Alta en IVA (Modelo 036)</p>
               <p className="text-[#57554F] leading-relaxed">
-                Avisa a tu gestoría para darte de alta en el régimen de IVA en Hacienda antes del 1 de diciembre (en Canarias aplica IGIC).
+                Avisa a tu gestoría para darte de alta en el régimen de IVA en Hacienda antes del <strong>1 de diciembre</strong> en Península y Baleares (en Canarias aplica IGIC).
               </p>
             </div>
             <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5">
@@ -631,10 +631,16 @@ export default function VatCalculatorView({
                 Aunque el huésped no te la pida, debes emitir factura (simplificada o completa si te piden NIF) por el total pagado (Turnexo te las genera todas desde tu CSV).
               </p>
             </div>
-            <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5 md:col-span-2 lg:col-span-2">
+            <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5">
               <p className="font-mono font-bold text-[#C85A32]">5. Presentación trimestral (Modelo 303)</p>
               <p className="text-[#57554F] leading-relaxed">
-                Cada trimestre entregas a tu asesoría tus facturas emitidas (IVA 10%) y tus facturas de gastos (IVA 21%). Si el IVA de tus gastos supera al IVA cobrado, te queda saldo a favor (se compensa en siguientes trimestres o Hacienda te lo devuelve en el 4º trimestre).
+                Cada trimestre entregas a tu asesoría tus facturas emitidas (IVA 10%) y tus gastos (IVA 21%). Si el IVA de tus gastos supera al cobrado, se compensa o Hacienda te lo devuelve en el 4º trimestre.
+              </p>
+            </div>
+            <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5">
+              <p className="font-mono font-bold text-[#C85A32]">6. ¿Sobre el ingreso del banco o el total?</p>
+              <p className="text-[#57554F] leading-relaxed">
+                El 10% se calcula siempre sobre el <strong>total que paga el huésped</strong> (alojamiento + limpieza). La comisión de Airbnb o Booking es un gasto aparte con su propia factura al 21%.
               </p>
             </div>
           </div>
@@ -662,32 +668,6 @@ export default function VatCalculatorView({
             <FileSpreadsheet size={16} />
             <span>Probar Gratis en Turnexo</span>
           </button>
-        </section>
-
-        {/* Guía / Preguntas Frecuentes SEO */}
-        <section className="space-y-5">
-          <h2 className="text-2xl font-extrabold text-[#141413]">
-            Preguntas rápidas sobre el IVA del 10% en pisos turísticos
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <article className="bg-white border border-[#D5CFC0] p-5 space-y-2">
-              <h3 className="font-bold text-sm text-[#141413]">
-                ¿Cuándo entra en vigor el IVA del 10% en alquiler vacacional?
-              </h3>
-              <p className="text-xs text-[#57554F] leading-relaxed">
-                El <strong>1 de diciembre</strong> en Península y Baleares (en Canarias aplica IGIC). A partir de esa fecha tendrás que emitir factura con IVA al 10% por las estancias turísticas sujetas y declararlo en el <strong>Modelo 303</strong>.
-              </p>
-            </article>
-
-            <article className="bg-white border border-[#D5CFC0] p-5 space-y-2">
-              <h3 className="font-bold text-sm text-[#141413]">
-                ¿El 10% se aplica sobre lo que me ingresa Airbnb/Booking en el banco?
-              </h3>
-              <p className="text-xs text-[#57554F] leading-relaxed">
-                No. Se aplica sobre el <strong>total que paga el huésped</strong> (alojamiento + limpieza). La comisión que te cobra el portal es un gasto aparte con su propia factura.
-              </p>
-            </article>
-          </div>
         </section>
       </main>
 

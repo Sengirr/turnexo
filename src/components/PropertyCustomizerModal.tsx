@@ -174,8 +174,8 @@ export default function PropertyCustomizerModal({
     if (
       window.confirm(
         isEn
-          ? 'Reset all cleaning tasks to official IVI ERP standard (36 tasks with required photos)?'
-          : '¿Restablecer todo el checklist a las 36 tareas estándar de la ERP de IVI con sus fotos obligatorias?'
+          ? 'Reset all cleaning tasks to Turnexo default standard checklist (with required verification photos)?'
+          : '¿Restablecer todo el checklist a la plantilla estándar de Turnexo con sus fotos obligatorias?'
       )
     ) {
       setDraft({
@@ -1027,8 +1027,8 @@ export default function PropertyCustomizerModal({
                     </div>
                     <p className="text-[11px] text-slate-500 mt-0.5">
                       {isEn
-                        ? 'Protocol configured from IVI ERP. Mark which tasks require a verification photo from the cleaner.'
-                        : 'Protocolo basado en la ERP de IVI. Señala qué tareas exigen foto de comprobación a la limpiadora y cuáles no.'}
+                        ? 'Professional turnover protocol. Mark which tasks require a verification photo from the cleaner.'
+                        : 'Protocolo profesional de limpieza turística. Señala qué tareas exigen foto de comprobación a la limpiadora y cuáles no.'}
                     </p>
                   </div>
 
@@ -1036,10 +1036,10 @@ export default function PropertyCustomizerModal({
                     type="button"
                     onClick={resetToIviChecklist}
                     className="text-[11px] font-bold text-slate-700 hover:text-orange-600 bg-white border border-slate-200 hover:border-orange-300 px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
-                    title={isEn ? 'Restore default IVI ERP checklist' : 'Restablecer al checklist por defecto de IVI ERP'}
+                    title={isEn ? 'Restore Turnexo default checklist' : 'Restablecer a la plantilla estándar de Turnexo'}
                   >
                     <RotateCcw size={12} />
-                    <span>{isEn ? 'Reset IVI ERP Defaults' : 'Restablecer Plantilla IVI ERP'}</span>
+                    <span>{isEn ? 'Reset Default Template' : 'Restablecer Plantilla Base'}</span>
                   </button>
                 </div>
 

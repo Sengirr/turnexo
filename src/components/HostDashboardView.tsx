@@ -2520,7 +2520,7 @@ export default function HostDashboardView({
                         </span>
                       </div>
                       <p className="text-xs text-amber-800/90 mt-1 max-w-2xl leading-relaxed">
-                        El archivo importado contenía reservas de otros apartamentos de IVI. En Turnexo tienes registrado <strong>{properties[0]?.name || 'tu alojamiento'}</strong> ({registeredInvoices.length} facturas).
+                        El archivo importado contenía reservas de otros apartamentos que no coinciden con tu cuenta. En Turnexo tienes registrado <strong>{properties[0]?.name || 'tu alojamiento'}</strong> ({registeredInvoices.length} facturas).
                       </p>
                     </div>
                   </div>

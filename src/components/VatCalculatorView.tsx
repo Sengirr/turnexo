@@ -555,18 +555,6 @@ export default function VatCalculatorView({
                     €
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-1.5 mt-2.5">
-                  {['300', '500', '850', '1200'].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setGuestPaidInput(preset)}
-                      className="px-2.5 py-1 text-xs font-mono border border-[#D5CFC0] hover:border-[#141413] text-[#57554F] hover:text-[#141413] transition"
-                    >
-                      {preset} €
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="pt-4 border-t border-[#EAE5D9]">
@@ -574,40 +562,20 @@ export default function VatCalculatorView({
                   htmlFor="platform-comm"
                   className="block text-sm font-bold text-[#141413] mb-1"
                 >
-                  ¿Qué comisión te cobra la plataforma?
+                  Comisión de la plataforma (% · 0 si es reserva directa)
                 </label>
-                <div className="flex flex-wrap gap-2 my-2.5">
-                  {[
-                    { label: 'Airbnb / Booking (~15%)', val: '15' },
-                    { label: 'Airbnb antiguo (~3%)', val: '3' },
-                    { label: 'Reserva directa (0%)', val: '0' },
-                  ].map((opt) => (
-                    <button
-                      key={opt.label}
-                      type="button"
-                      onClick={() => setCommissionPctInput(opt.val)}
-                      className={`px-3 py-1.5 text-xs font-mono border transition ${
-                        commissionPctInput === opt.val
-                          ? 'border-[#C85A32] bg-[#C85A32]/10 text-[#141413] font-bold'
-                          : 'border-[#D5CFC0] text-[#57554F] hover:border-[#141413]'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
                 <div className="flex items-center gap-2 mt-2">
                   <input
                     id="platform-comm"
                     type="number"
                     min="0"
                     max="35"
-                    step="0.5"
+                    step="0.1"
                     value={commissionPctInput}
                     onChange={(e) => setCommissionPctInput(e.target.value)}
-                    className="w-24 px-3 py-1.5 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-sm font-mono font-bold text-[#141413] focus:outline-none focus:border-[#C85A32]"
+                    className="w-28 px-3 py-2 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-sm font-mono font-bold text-[#141413] focus:outline-none focus:border-[#C85A32]"
                   />
-                  <span className="text-xs text-[#57554F]">% personalizado</span>
+                  <span className="text-xs font-mono text-[#57554F]">%</span>
                 </div>
               </div>
             </div>

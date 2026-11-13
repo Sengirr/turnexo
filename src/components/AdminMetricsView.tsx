@@ -133,29 +133,63 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
     }
   };
 
+  const SEED_ASESORIAS = [
+    { company_name: 'Asesoría Torremolinos S.L.', email: 'asetorre@asesoriatorremolinos.es', city: 'Torremolinos', segment: 'asesoria' },
+    { company_name: 'Asesoramientos Maresol', email: 'info@asesoramientosmaresol.com', city: 'Torremolinos', segment: 'asesoria' },
+    { company_name: 'Gestoría Administrativa Torremolinos', email: 'gestorremolinos@hotmail.com', city: 'Torremolinos', segment: 'asesoria' },
+    { company_name: 'BCM Asesores', email: 'consultas@bcmasesor.es', city: 'Benalmádena', segment: 'asesoria' },
+    { company_name: 'Fortes & Rodríguez Asesores', email: 'info@fortesyrodriguez.es', city: 'Benalmádena', segment: 'asesoria' },
+    { company_name: 'Asesoría Benamiel', email: 'abenamiel@gmail.com', city: 'Benalmádena', segment: 'asesoria' },
+    { company_name: 'Asesoría Elisa Vázquez', email: 'elisavf@asesoriaelisavazquez.com', city: 'Benalmádena', segment: 'asesoria' },
+    { company_name: 'Abogados Tributarios', email: 'at@abogadostributarios.es', city: 'Málaga', segment: 'asesoria' },
+    { company_name: 'Asesoramiento Farotru y Asociados', email: 'fiscalrasociados@gmail.com', city: 'Málaga', segment: 'asesoria' },
+    { company_name: 'Málaga Asesores', email: 'info@malagaasesores.es', city: 'Málaga', segment: 'asesoria' },
+    { company_name: 'Asesoría Fiscal Málaga SL', email: 'info@asesoriafiscalmalaga.es', city: 'Málaga', segment: 'asesoria' },
+    { company_name: 'Te Hago La Renta', email: 'info@tehagolarenta.com', city: 'Málaga', segment: 'asesoria' },
+    { company_name: 'Asesoría Fiscal Marbella', email: 'info@asesoriafiscalmarbella.es', city: 'Marbella', segment: 'asesoria' },
+    { company_name: 'Asesoría Geconte', email: 'info@asesoriageconte.com', city: 'Marbella', segment: 'asesoria' },
+    { company_name: 'MERAC Abogados & Asesores Fiscales', email: 'info@merac.es', city: 'Marbella', segment: 'asesoria' },
+    { company_name: 'P-60 Asesoría Fiscal y Contable', email: 'info@p-60.com', city: 'Fuengirola', segment: 'asesoria' },
+    { company_name: 'BC Asesoría', email: 'info@bcasesoria.com', city: 'Fuengirola', segment: 'asesoria' },
+    { company_name: 'Activa Asesores', email: 'info@activa-asesores.com', city: 'Fuengirola', segment: 'asesoria' },
+    { company_name: 'Asesoría COFIMA', email: 'cofima@asesoriacofima.es', city: 'Fuengirola', segment: 'asesoria' },
+    { company_name: 'Aventis Asesores', email: 'info@aventisasesores.com', city: 'Fuengirola', segment: 'asesoria' },
+    { company_name: 'Aspiazu Asesores', email: 'info@aspiazuasesores.com', city: 'Fuengirola', segment: 'asesoria' },
+    { company_name: 'Two Asesores', email: 'info@twoasesores.com', city: 'Estepona', segment: 'asesoria' },
+    { company_name: 'Asesoramos', email: 'info@ar-asesoramos.es', city: 'Estepona', segment: 'asesoria' },
+    { company_name: 'AFIGEST Gestión Empresarial', email: 'info@afg-asesoria.com', city: 'Estepona', segment: 'asesoria' },
+    { company_name: 'Tu Asesoría Fiscal Málaga', email: 'info@tuasesoriafiscalmalaga.es', city: 'Mijas', segment: 'asesoria' },
+    { company_name: 'Asesoría Gedofu', email: 'info@gedofu.es', city: 'Mijas', segment: 'asesoria' },
+    { company_name: 'Way to Live Asesoría', email: 'contabilidad@waytolive.es', city: 'Mijas', segment: 'asesoria' },
+    { company_name: 'Domínguez Asesoría', email: 'nerja@dominguezasesoria.es', city: 'Nerja', segment: 'asesoria' },
+    { company_name: 'Asesoría Sur', email: 'info@asesoriasur.com', city: 'Vélez-Málaga', segment: 'asesoria' },
+    { company_name: 'Asesoría LAFIS', email: 'info@lafis-asesores.es', city: 'Málaga', segment: 'asesoria' },
+    { company_name: 'Gascón Medina Asesores', email: 'info@gasconmedinaasesores.com', city: 'Benidorm', segment: 'asesoria' },
+    { company_name: 'Gestoría Ballesteros', email: 'info@gestoriaballesteros.es', city: 'Benidorm', segment: 'asesoria' },
+    { company_name: 'Morales & Zaragoza Asesoría', email: 'info@moraleszaragoza.com', city: 'Benidorm', segment: 'asesoria' },
+    { company_name: 'Asesoría Miguel Ángel García', email: 'info@asesoriamiguelangel.com', city: 'Benidorm', segment: 'asesoria' },
+    { company_name: 'AGS Asesoría y Consultoría', email: 'ags@agsasesoria.com', city: 'Benidorm', segment: 'asesoria' },
+    { company_name: 'Neofin Asesores', email: 'info@neofin.es', city: 'Benidorm', segment: 'asesoria' },
+    { company_name: 'TributaLey (Asesoría NG)', email: 'info@asesoriang.com', city: 'Valencia', segment: 'asesoria' },
+    { company_name: 'Confialia Asesores', email: 'info@confialia.com', city: 'Palma de Mallorca', segment: 'asesoria' },
+    { company_name: 'Ibinova Asesores', email: 'info@ibinovaasesores.es', city: 'Ibiza', segment: 'asesoria' },
+    { company_name: 'Asesores del Aljarafe', email: 'info@asesoresdelaljarafe.com', city: 'Sevilla', segment: 'asesoria' },
+    { company_name: 'Zamorano Cruz Asesores', email: 'info@zamoranocruz.com', city: 'Sevilla', segment: 'asesoria' },
+  ];
+
+  const missingSeedLeads = SEED_ASESORIAS.filter(
+    (seed) => !leads.some((l) => l.email.toLowerCase() === seed.email.toLowerCase())
+  );
+
   const handleSeedMalagaLeads = async () => {
     if (!adminToken) return;
-    const initialBatch = [
-      { company_name: 'Asesoría Torremolinos S.L.', email: 'asetorre@asesoriatorremolinos.es', city: 'Torremolinos', segment: 'asesoria' },
-      { company_name: 'Asesoramientos Maresol', email: 'info@asesoramientosmaresol.com', city: 'Torremolinos', segment: 'asesoria' },
-      { company_name: 'Gestoría Administrativa Torremolinos', email: 'gestorremolinos@hotmail.com', city: 'Torremolinos', segment: 'asesoria' },
-      { company_name: 'BCM Asesores', email: 'consultas@bcmasesor.es', city: 'Benalmádena', segment: 'asesoria' },
-      { company_name: 'Fortes & Rodríguez Asesores', email: 'info@fortesyrodriguez.es', city: 'Benalmádena', segment: 'asesoria' },
-      { company_name: 'Asesoría Benamiel', email: 'abenamiel@gmail.com', city: 'Benalmádena', segment: 'asesoria' },
-      { company_name: 'Asesoría Elisa Vázquez', email: 'elisavf@asesoriaelisavazquez.com', city: 'Benalmádena', segment: 'asesoria' },
-      { company_name: 'Abogados Tributarios', email: 'at@abogadostributarios.es', city: 'Málaga', segment: 'asesoria' },
-      { company_name: 'Asesoramiento Farotru y Asociados', email: 'fiscalrasociados@gmail.com', city: 'Málaga', segment: 'asesoria' },
-      { company_name: 'Málaga Asesores', email: 'info@malagaasesores.es', city: 'Málaga', segment: 'asesoria' },
-      { company_name: 'Asesoría Fiscal Málaga SL', email: 'info@asesoriafiscalmalaga.es', city: 'Málaga', segment: 'asesoria' },
-      { company_name: 'Te Hago La Renta', email: 'info@tehagolarenta.com', city: 'Málaga', segment: 'asesoria' },
-    ];
     const resp = await fetch('/api/admin-outreach', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${adminToken}`,
       },
-      body: JSON.stringify({ leads: initialBatch }),
+      body: JSON.stringify({ leads: missingSeedLeads.length > 0 ? missingSeedLeads : SEED_ASESORIAS }),
     });
     if (resp.ok) {
       fetchOutreachLeads(adminToken);
@@ -1016,13 +1050,13 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {leads.length === 0 && (
+              {missingSeedLeads.length > 0 && (
                 <button
                   type="button"
                   onClick={handleSeedMalagaLeads}
                   className="px-3 py-1.5 bg-[#C85A32] hover:bg-[#B24D28] text-white text-xs font-mono font-bold uppercase transition"
                 >
-                  + Cargar 12 Asesorías (Málaga / Costa del Sol)
+                  + Cargar {missingSeedLeads.length} Asesorías
                 </button>
               )}
               {leads.some((l) => l.status === 'pendiente') && (

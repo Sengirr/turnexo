@@ -55,6 +55,20 @@ function buildEmailBody(companyName: string, city?: string): string {
   ].join('\n');
 }
 
+function buildFollowupBody(companyName: string, city?: string): string {
+  const area = city && city.trim() ? city.trim() : 'la zona';
+  return [
+    `Hola de nuevo, equipo de ${companyName}:`,
+    '',
+    `Os subo este correo por si quedó abajo con el lío de la semana. Con la entrada del IVA del 10% el 1 de diciembre, si algún cliente con pisos turísticos en ${area} os pregunta cómo sacar las facturas legales de Airbnb o Booking para el Modelo 303, Turnexo lo hace en 1 clic (gratis para 1 alojamiento).`,
+    '',
+    'Si queréis, os paso el enlace para que se lo reenviéis directamente cuando os pregunten.',
+    '',
+    'Un saludo,',
+    'Iván Álvarez · Turnexo',
+  ].join('\n');
+}
+
 async function resolveMailboxId(mailApiKey: string): Promise<string | null> {
   if (process.env.HOSTINGER_MAILBOX_ID) {
     return process.env.HOSTINGER_MAILBOX_ID;
@@ -123,22 +137,54 @@ export default async function handler(req: any, res: any) {
     }
 
     const pendingLeads = (await leadsResp.json()) as any[];
-    if (pendingLeads.length === 0) {
-      res.status(200).json({ ok: true, sentCount: 0, message: 'No hay leads pendientes.' });
+    const queue: Array<{ lead: any; kind: 'initial' | 'followup' }> = pendingLeads.map((lead) => ({
+      lead,
+      kind: 'initial',
+    }));
+
+    // Si quedan huecos en el cupo diario, enviamos 1 único follow-up a leads sin respuesta tras 4+ días
+    const remainingSlots = batchLimit - queue.length;
+    if (remainingSlots > 0) {
+      const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
+      const followupResp = await fetch(
+        `${supabaseUrl}/rest/v1/outreach_leads?status=eq.enviado&followup_sent_at=is.null&sent_at=lte.${encodeURIComponent(
+          fourDaysAgo
+        )}&order=sent_at.asc&limit=${remainingSlots}`,
+        { headers: sbHeaders }
+      );
+      if (followupResp.ok) {
+        const followupLeads = (await followupResp.json()) as any[];
+        for (const lead of followupLeads) {
+          queue.push({ lead, kind: 'followup' });
+        }
+      }
+    }
+
+    if (queue.length === 0) {
+      res.status(200).json({ ok: true, sentCount: 0, message: 'No hay leads pendientes ni follow-ups.' });
       return;
     }
 
-    const results: Array<{ email: string; ok: boolean; status: number }> = [];
+    const results: Array<{ email: string; kind: 'initial' | 'followup'; ok: boolean; status: number }> = [];
     let sentCount = 0;
 
     // Escalonado entre envíos (7.5s por defecto para 6 correos ≈ 37.5s, capado a 40s totales)
     const delayMs =
-      pendingLeads.length > 1
-        ? Math.min(7500, Math.floor(40000 / (pendingLeads.length - 1)))
+      queue.length > 1
+        ? Math.min(7500, Math.floor(40000 / (queue.length - 1)))
         : 0;
 
-    for (let i = 0; i < pendingLeads.length; i += 1) {
-      const lead = pendingLeads[i];
+    for (let i = 0; i < queue.length; i += 1) {
+      const { lead, kind } = queue[i];
+      const subject =
+        kind === 'followup'
+          ? 'Re: Nuevo IVA 10% en alquiler vacacional'
+          : 'Nuevo IVA 10% en alquiler vacacional';
+      const text =
+        kind === 'followup'
+          ? buildFollowupBody(lead.company_name, lead.city)
+          : buildEmailBody(lead.company_name, lead.city);
+
       const sendResp = await fetch(
         `https://api.mail.hostinger.com/api/v1/mailboxes/${encodeURIComponent(mailboxId)}/send`,
         {
@@ -150,30 +196,32 @@ export default async function handler(req: any, res: any) {
           body: JSON.stringify({
             to: [lead.email],
             displayName: 'Iván Álvarez · Turnexo',
-            subject: 'Nuevo IVA 10% en alquiler vacacional',
-            text: buildEmailBody(lead.company_name, lead.city),
+            subject,
+            text,
           }),
         }
       );
 
-      results.push({ email: lead.email, ok: sendResp.ok, status: sendResp.status });
+      results.push({ email: lead.email, kind, ok: sendResp.ok, status: sendResp.status });
 
       if (sendResp.ok) {
         sentCount += 1;
+        const nowIso = new Date().toISOString();
+        const patchBody =
+          kind === 'followup'
+            ? { followup_sent_at: nowIso }
+            : { status: 'enviado', sent_at: nowIso };
         await fetch(
           `${supabaseUrl}/rest/v1/outreach_leads?id=eq.${encodeURIComponent(lead.id)}`,
           {
             method: 'PATCH',
             headers: sbHeaders,
-            body: JSON.stringify({
-              status: 'enviado',
-              sent_at: new Date().toISOString(),
-            }),
+            body: JSON.stringify(patchBody),
           }
         );
       }
 
-      if (i < pendingLeads.length - 1 && delayMs > 0) {
+      if (i < queue.length - 1 && delayMs > 0) {
         await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     }

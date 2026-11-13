@@ -150,39 +150,52 @@ export default function LandingPageView({
           </a>
 
           {/* Columna 2: Navegación Directa */}
-          <nav className="hidden lg:flex items-center gap-2 text-sm font-medium text-[#57554F] whitespace-nowrap">
+          <nav className="hidden lg:flex items-center gap-1 text-sm font-medium text-[#57554F] whitespace-nowrap">
             <a
               href="#modulos"
-              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+              className="px-3 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
               {t.nav.includes}
             </a>
 
             <a
               href="#comparativa"
-              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+              className="px-3 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
               {t.nav.comparison}
             </a>
 
             <a
               href="#precios"
-              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+              className="px-3 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
               {t.nav.pricing}
             </a>
 
             <a
               href="#faq"
-              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+              className="px-3 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
               {t.nav.faq}
+            </a>
+
+            <a
+              href="/calculadora-iva-alquiler-vacacional"
+              onClick={(e) => {
+                if (onOpenVatCalculator) {
+                  e.preventDefault();
+                  onOpenVatCalculator();
+                }
+              }}
+              className="px-3 py-2 text-[#C85A32] font-semibold hover:bg-[#C85A32]/10 transition whitespace-nowrap"
+            >
+              {lang === 'en' ? '10% VAT Calculator' : 'Calculadora IVA 10%'}
             </a>
 
             <button
               type="button"
               onClick={() => openContactModal(t.nav.contact)}
-              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
+              className="px-3 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition whitespace-nowrap"
             >
               {t.nav.contact}
             </button>
@@ -323,6 +336,19 @@ export default function LandingPageView({
                 className="p-3 bg-white border border-[#D5CFC0]"
               >
                 {t.nav.faq}
+              </a>
+              <a
+                href="/calculadora-iva-alquiler-vacacional"
+                onClick={(e) => {
+                  setMobileMenuOpen(false);
+                  if (onOpenVatCalculator) {
+                    e.preventDefault();
+                    onOpenVatCalculator();
+                  }
+                }}
+                className="p-3 bg-[#C85A32]/10 text-[#C85A32] border border-[#C85A32]/30 col-span-2"
+              >
+                {lang === 'en' ? '10% VAT Calculator' : 'Calculadora IVA 10%'}
               </a>
               <button
                 type="button"

@@ -372,5 +372,54 @@ export function buildCleaningTasksFromReservations(
     });
   }
 
-  return tasks.sort((a, b) => a.date.localeCompare(b.date));
+  // Deduplicar limpiezas por alojamiento y fecha:
+  // Un mismo piso solo puede tener 1 limpieza programada por día de salida.
+  // Si coinciden dos reservas con la misma fecha de salida (ej. reserva mock + evento iCal, o solapamiento entre canales),
+  // se unifican conservando la que tenga fotos, progreso o sea la reserva activa.
+  const taskMap = new Map<string, CleaningTask>();
+
+  const getTaskPriority = (t: CleaningTask): number => {
+    let score = 0;
+    if (t.photosUploaded && t.photosUploaded.length > 0) score += 100 * t.photosUploaded.length;
+    if (t.status === 'completed') score += 50;
+    if (t.status === 'in_progress') score += 40;
+    if (t.startTime) score += 20;
+    if (t.incidents && t.incidents.length > 0) score += 10;
+    if (t.notes && t.notes.trim().length > 0) score += 5;
+    if (t.checklist && t.checklist.some((c) => c.completed || (c.photos && c.photos.length > 0))) score += 15;
+    if (t.reservationId && !t.reservationId.startsWith('res-')) score += 10;
+    return score;
+  };
+
+  for (const t of tasks) {
+    const key = `${t.propertyId}__${t.date}`;
+    if (!taskMap.has(key)) {
+      taskMap.set(key, t);
+    } else {
+      const existing = taskMap.get(key)!;
+      const scoreExisting = getTaskPriority(existing);
+      const scoreNew = getTaskPriority(t);
+
+      const combinedPhotos = Array.from(
+        new Set([...(existing.photosUploaded || []), ...(t.photosUploaded || [])])
+      );
+      const combinedSameDayCheckIn = existing.sameDayCheckIn || t.sameDayCheckIn;
+
+      if (scoreNew > scoreExisting) {
+        taskMap.set(key, {
+          ...t,
+          photosUploaded: combinedPhotos,
+          sameDayCheckIn: combinedSameDayCheckIn,
+        });
+      } else {
+        taskMap.set(key, {
+          ...existing,
+          photosUploaded: combinedPhotos,
+          sameDayCheckIn: combinedSameDayCheckIn,
+        });
+      }
+    }
+  }
+
+  return Array.from(taskMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 }

@@ -122,9 +122,21 @@ export default function App() {
   const [cleaners, setCleaners] = useState(() =>
     loadStored(STORAGE_KEYS.cleaners, INITIAL_CLEANERS)
   );
-  const [reservations, setReservations] = useState<Reservation[]>(() =>
-    loadStored(STORAGE_KEYS.reservations, INITIAL_RESERVATIONS)
-  );
+  const [reservations, setReservations] = useState<Reservation[]>(() => {
+    const raw = loadStored<Reservation[]>(STORAGE_KEYS.reservations, INITIAL_RESERVATIONS);
+    // Descartar reservas demo 'res-' si para la misma fecha y alojamiento ya existe una reserva de iCal
+    const realCheckoutKeys = new Set(
+      raw
+        .filter((r) => !r.id.startsWith('res-'))
+        .map((r) => `${r.propertyId}__${r.checkOut}`)
+    );
+    return raw.filter((r) => {
+      if (r.id.startsWith('res-') && realCheckoutKeys.has(`${r.propertyId}__${r.checkOut}`)) {
+        return false;
+      }
+      return true;
+    });
+  });
   const [taskOverrides, setTaskOverrides] = useState<CleaningTask[]>(() =>
     loadStored(STORAGE_KEYS.taskOverrides, INITIAL_TASK_OVERRIDES)
   );
@@ -421,10 +433,18 @@ export default function App() {
       return;
     }
     setReservations((prev) => {
-      const existingIds = new Set(prev.map((r) => r.id));
+      // Si el iCal trae reservas para este alojamiento, descartamos reservas demo que coincidan en fecha de salida
+      const newCheckoutKeys = new Set(parsed.map((r) => `${r.propertyId}__${r.checkOut}`));
+      const filteredPrev = prev.filter((r) => {
+        if (r.propertyId === propertyId && r.id.startsWith('res-') && newCheckoutKeys.has(`${r.propertyId}__${r.checkOut}`)) {
+          return false;
+        }
+        return true;
+      });
+      const existingIds = new Set(filteredPrev.map((r) => r.id));
       const newOnes = parsed.filter((r) => !existingIds.has(r.id));
       newOnes.forEach((r) => syncReservationToSupabase(r));
-      return [...prev, ...newOnes];
+      return [...filteredPrev, ...newOnes];
     });
     showToast(`${parsed.length} reservas procesadas del iCal.`);
   };

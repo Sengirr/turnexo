@@ -674,7 +674,7 @@ export default function VatCalculatorView({
             <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5 md:col-span-2 lg:col-span-2">
               <p className="font-mono font-bold text-[#C85A32]">5. Presentación trimestral (Modelo 303)</p>
               <p className="text-[#57554F] leading-relaxed">
-                Cada trimestre entregas a tu asesoría tus facturas emitidas (IVA 10%) y tus facturas de gastos (IVA 21%). Si los gastos superan lo cobrado, la diferencia se compensa o Hacienda te devuelve.
+                Cada trimestre entregas a tu asesoría tus facturas emitidas (IVA 10%) y tus facturas de gastos (IVA 21%). Si el IVA de tus gastos supera al IVA cobrado, te queda saldo a favor (se compensa en siguientes trimestres o Hacienda te lo devuelve en el 4º trimestre).
               </p>
             </div>
           </div>

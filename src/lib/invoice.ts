@@ -818,17 +818,13 @@ export function createInvoicesFromImportedRows(
 
     const breakdown = calculateBreakdown(row.totalAmount, fiscalProfile.defaultVatRate || 10, 0);
 
-    // Cruzar con alojamientos existentes en el sistema por coincidencia de nombre
-    const matchedProp = properties?.find((p) => {
-      const pName = p.name.toLowerCase().trim();
-      const rowPName = row.propertyName.toLowerCase().trim();
-      return pName.includes(rowPName) || rowPName.includes(pName);
-    });
+    // Cruzar con alojamientos existentes en el sistema por coincidencia inteligente
+    const matchedProp = properties?.find((p) => matchPropertyWithText(p.name, row.propertyName));
 
     const propId =
       matchedProp?.id ||
       'prop-' + (row.propertyName || 'alojamiento').toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30);
-    const propName = row.propertyName || matchedProp?.name || 'Alojamiento Turístico';
+    const propName = matchedProp?.name || row.propertyName || 'Alojamiento Turístico';
 
     const invoice: Invoice = {
       id: 'inv-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
@@ -880,6 +876,65 @@ export function isCorruptedOrMockInvoice(inv: Invoice): boolean {
   if (inv.propertyName?.includes('Planta 1 Torremolinos')) return true;
   if (inv.totalAmount > 20000 && (inv.concept?.includes('1 noches') || inv.nights === 1)) return true;
   return false;
+}
+
+/**
+ * Comprueba de forma inteligente si un nombre de alojamiento en reserva/factura coincide con una propiedad registrada
+ */
+export function matchPropertyWithText(propertyName: string, targetName: string): boolean {
+  if (!propertyName || !targetName) return false;
+  const a = propertyName.toLowerCase().trim();
+  const b = targetName.toLowerCase().trim();
+  if (a === b) return true;
+  if (a.includes(b) || b.includes(a)) return true;
+
+  // Normalizar eliminando caracteres especiales
+  const cleanA = a.replace(/[^a-z0-9áéíóúñ\s]/gi, ' ').replace(/\s+/g, ' ');
+  const cleanB = b.replace(/[^a-z0-9áéíóúñ\s]/gi, ' ').replace(/\s+/g, ' ');
+  if (cleanA.includes(cleanB) || cleanB.includes(cleanA)) return true;
+
+  // Stop words comunes en nombres de anuncios turísticos y agencias
+  const stopWords = new Set([
+    'by', 'ivi', 'real', 'estate', 'playa', 'beach', 'piscina', 'pool', 'garaje',
+    'garage', 'parking', 'vistas', 'views', 'terraza', 'terrace', 'al', 'mar', 'sea',
+    'el', 'la', 'los', 'las', 'de', 'del', 'en', 'con', 'y', 'a', 'edif', 'edificio'
+  ]);
+  const tokensA = cleanA.split(' ').filter((w) => w.length >= 2 && !stopWords.has(w));
+  const tokensB = cleanB.split(' ').filter((w) => w.length >= 2 && !stopWords.has(w));
+
+  // Tokens con dígitos (ej: a201, 201, 417, 8b, 1d)
+  const codeTokensA = tokensA.filter((w) => /\d/.test(w));
+  const codeTokensB = tokensB.filter((w) => /\d/.test(w));
+
+  if (codeTokensA.length > 0 && codeTokensB.length > 0) {
+    const hasCommonCode = codeTokensA.some((c) => codeTokensB.includes(c));
+    if (!hasCommonCode) return false;
+    // Si comparten el código de unidad (ej. a201), comprobar si comparten algún token del nombre (ej. vistamarina)
+    const nameTokensA = tokensA.filter((w) => !/\d/.test(w));
+    const nameTokensB = tokensB.filter((w) => !/\d/.test(w));
+    if (nameTokensA.length > 0 && nameTokensB.length > 0) {
+      return nameTokensA.some((t) => nameTokensB.includes(t) || t.includes(nameTokensB[0]) || nameTokensB.some((tb) => tb.includes(t)));
+    }
+    return true;
+  }
+
+  // Tokens significativos largos (>= 4 letras)
+  const mainTokensA = tokensA.filter((w) => w.length >= 4);
+  const mainTokensB = tokensB.filter((w) => w.length >= 4);
+  if (mainTokensA.length > 0 && mainTokensB.length > 0) {
+    const matchCount = mainTokensA.filter((t) => mainTokensB.includes(t)).length;
+    if (matchCount >= 2 || (mainTokensA.length === 1 && matchCount === 1)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function isInvoiceForProperty(inv: Invoice, p: Property): boolean {
+  if (!inv || !p) return false;
+  if (inv.propertyId && inv.propertyId === p.id) return true;
+  return matchPropertyWithText(p.name, inv.propertyName || '');
 }
 
 export const INITIAL_INVOICES: Invoice[] = [];

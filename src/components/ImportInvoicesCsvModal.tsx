@@ -8,6 +8,7 @@ import {
   HostFiscalProfile,
   ImportedReservationRow,
   Invoice,
+  matchPropertyWithText,
   parseReservationsCsv,
   parseReservationsFromSheetRows,
   SIMPLIFIED_INVOICE_MAX_AMOUNT,
@@ -35,6 +36,32 @@ export default function ImportInvoicesCsvModal({
   const [pastedText, setPastedText] = useState<string>('');
   const [parsedRows, setParsedRows] = useState<ImportedReservationRow[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [filterOnlyRegistered, setFilterOnlyRegistered] = useState(true);
+
+  // Comprobar si hay reservas que coincidan con los alojamientos registrados en Turnexo
+  const matchingRows = React.useMemo(() => {
+    if (!properties || properties.length === 0) return parsedRows;
+    return parsedRows.filter((r) =>
+      properties.some((p) => matchPropertyWithText(p.name, r.propertyName))
+    );
+  }, [parsedRows, properties]);
+
+  const hasMultiplePropertiesInCsv = React.useMemo(() => {
+    const names = new Set(parsedRows.map((r) => r.propertyName.toLowerCase().trim()));
+    return names.size > 1;
+  }, [parsedRows]);
+
+  const rowsToImport = React.useMemo(() => {
+    if (
+      filterOnlyRegistered &&
+      hasMultiplePropertiesInCsv &&
+      matchingRows.length > 0 &&
+      matchingRows.length < parsedRows.length
+    ) {
+      return matchingRows;
+    }
+    return parsedRows;
+  }, [filterOnlyRegistered, hasMultiplePropertiesInCsv, matchingRows, parsedRows]);
 
   const processCsvText = (text: string) => {
     try {
@@ -124,9 +151,9 @@ export default function ImportInvoicesCsvModal({
   };
 
   const handleConfirmImport = () => {
-    if (parsedRows.length === 0) return;
+    if (rowsToImport.length === 0) return;
     const newInvoices = createInvoicesFromImportedRows(
-      parsedRows,
+      rowsToImport,
       existingInvoices,
       fiscalProfile,
       properties
@@ -135,11 +162,11 @@ export default function ImportInvoicesCsvModal({
     onClose();
   };
 
-  const simplifiedCount = parsedRows.filter(
+  const simplifiedCount = rowsToImport.filter(
     (r) => r.totalAmount <= SIMPLIFIED_INVOICE_MAX_AMOUNT && !r.guestFiscalId
   ).length;
-  const completeCount = parsedRows.length - simplifiedCount;
-  const totalAmount = parsedRows.reduce((sum, r) => sum + r.totalAmount, 0);
+  const completeCount = rowsToImport.length - simplifiedCount;
+  const totalAmount = rowsToImport.reduce((sum, r) => sum + r.totalAmount, 0);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
@@ -268,14 +295,81 @@ export default function ImportInvoicesCsvModal({
             </div>
           )}
 
+          {/* Selector de filtrado si el archivo es multi-alojamiento */}
+          {parsedRows.length > 0 && hasMultiplePropertiesInCsv && matchingRows.length > 0 && matchingRows.length < parsedRows.length && (
+            <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-emerald-600" />
+                  Archivo con múltiples alojamientos de agencia detectado
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full">
+                  Filtro Inteligente
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-800 leading-relaxed">
+                Este archivo contiene reservas de varios inmuebles gestionados por la agencia. Puedes emitir únicamente las facturas correspondientes a tu alojamiento registrado o importarlas todas.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+                <label
+                  className={`p-3 rounded-xl border flex items-start gap-2.5 cursor-pointer transition ${
+                    filterOnlyRegistered
+                      ? 'bg-white border-emerald-500 shadow-xs text-slate-900 font-bold'
+                      : 'bg-white/50 border-slate-200/80 text-slate-600 hover:bg-white'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="importFilterOption"
+                    checked={filterOnlyRegistered}
+                    onChange={() => setFilterOnlyRegistered(true)}
+                    className="mt-0.5 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <div>
+                    <span className="block text-slate-900">
+                      Solo mi alojamiento ({matchingRows.length} reservas)
+                    </span>
+                    <span className="block text-[10px] font-normal text-slate-500 mt-0.5">
+                      {properties.map((p) => p.name).join(', ')}
+                    </span>
+                  </div>
+                </label>
+
+                <label
+                  className={`p-3 rounded-xl border flex items-start gap-2.5 cursor-pointer transition ${
+                    !filterOnlyRegistered
+                      ? 'bg-white border-emerald-500 shadow-xs text-slate-900 font-bold'
+                      : 'bg-white/50 border-slate-200/80 text-slate-600 hover:bg-white'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="importFilterOption"
+                    checked={!filterOnlyRegistered}
+                    onChange={() => setFilterOnlyRegistered(false)}
+                    className="mt-0.5 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <div>
+                    <span className="block text-slate-900">
+                      Todas las reservas ({parsedRows.length})
+                    </span>
+                    <span className="block text-[10px] font-normal text-slate-500 mt-0.5">
+                      Incluye las {parsedRows.length - matchingRows.length} reservas de otros apartamentos
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          )}
+
           {/* Vista Previa de Filas Parseadas */}
-          {parsedRows.length > 0 && (
+          {rowsToImport.length > 0 && (
             <div className="space-y-3 pt-2">
               <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-emerald-50/80 border border-emerald-200 rounded-2xl">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={18} className="text-emerald-600" />
                   <span className="font-extrabold text-emerald-950 text-xs">
-                    {parsedRows.length} reservas detectadas y listas para facturar
+                    {rowsToImport.length} reservas listas para facturar
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-900">
@@ -300,7 +394,7 @@ export default function ImportInvoicesCsvModal({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {parsedRows.slice(0, 20).map((row, idx) => {
+                    {rowsToImport.slice(0, 20).map((row, idx) => {
                       const isSimp = row.totalAmount <= SIMPLIFIED_INVOICE_MAX_AMOUNT && !row.guestFiscalId;
                       return (
                         <tr key={idx} className="hover:bg-slate-50">
@@ -335,9 +429,9 @@ export default function ImportInvoicesCsvModal({
                     })}
                   </tbody>
                 </table>
-                {parsedRows.length > 20 && (
+                {rowsToImport.length > 20 && (
                   <p className="p-2 text-center text-slate-400 bg-slate-50 text-[10px]">
-                    ... y {parsedRows.length - 20} reservas más incluidas en la importación.
+                    ... y {rowsToImport.length - 20} reservas más incluidas en la importación.
                   </p>
                 )}
               </div>
@@ -356,12 +450,12 @@ export default function ImportInvoicesCsvModal({
           </button>
           <button
             type="button"
-            disabled={parsedRows.length === 0}
+            disabled={rowsToImport.length === 0}
             onClick={handleConfirmImport}
             className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-extrabold text-xs shadow-md transition flex items-center gap-2"
           >
             <CheckCircle2 size={16} />
-            <span>Emitir {parsedRows.length} Facturas Oficiales</span>
+            <span>Emitir {rowsToImport.length} Facturas Oficiales</span>
           </button>
         </div>
       </div>

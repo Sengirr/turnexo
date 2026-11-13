@@ -67,6 +67,8 @@ import {
   INITIAL_INVOICES,
   Invoice,
   isCorruptedOrMockInvoice,
+  isInvoiceForProperty,
+  matchPropertyWithText,
   SIMPLIFIED_INVOICE_MAX_AMOUNT,
   sanitizeInvoice,
 } from '../lib/invoice';
@@ -105,6 +107,7 @@ interface Props {
   onUpdateInvoice?: (inv: Invoice) => void;
   onDeleteInvoice?: (id: string) => void;
   onClearAllInvoices?: () => void;
+  onKeepOnlyInvoices?: (keepIds: string[]) => void;
   onUpdateFiscalProfile?: (prof: HostFiscalProfile) => void;
   onImportIcalText: (propertyId: string, icsText: string) => void;
   onSyncIcalUrl: (propertyId: string, url: string) => Promise<void>;
@@ -141,6 +144,7 @@ export default function HostDashboardView({
   onUpdateInvoice,
   onDeleteInvoice,
   onClearAllInvoices,
+  onKeepOnlyInvoices,
   onUpdateFiscalProfile,
   onImportIcalText,
   onSyncIcalUrl,
@@ -280,49 +284,72 @@ export default function HostDashboardView({
 
   const [invoiceViewMode, setInvoiceViewMode] = useState<'list' | 'grouped'>('list');
 
-  // Recopilar todos los alojamientos presentes en las facturas y en la app
+  // Facturas pertenecientes a las propiedades registradas en Turnexo
+  const registeredInvoices = useMemo(() => {
+    if (!properties || properties.length === 0) return allInvoices;
+    return allInvoices.filter((inv) =>
+      properties.some((p) => isInvoiceForProperty(inv, p))
+    );
+  }, [allInvoices, properties]);
+
+  // Facturas de otros alojamientos de la agencia no dados de alta por el usuario en Turnexo
+  const unassignedInvoices = useMemo(() => {
+    if (!properties || properties.length === 0) return [];
+    return allInvoices.filter(
+      (inv) => !properties.some((p) => isInvoiceForProperty(inv, p))
+    );
+  }, [allInvoices, properties]);
+
+  // Alojamientos del anfitrión registrados en Turnexo
   const uniqueAccommodations = useMemo(() => {
-    const map = new Map<string, { id: string; name: string; count: number; totalAmount: number }>();
-
-    // Añadir propiedades configuradas en Turnexo
-    (properties || []).forEach((p) => {
-      const name = p.name.trim();
-      const key = name.toLowerCase();
-      map.set(key, {
-        id: p.id,
-        name,
-        count: 0,
-        totalAmount: 0,
+    if (!properties || properties.length === 0) {
+      // Fallback si el usuario aún no tiene ninguna propiedad registrada
+      const map = new Map<string, { id: string; name: string; count: number; totalAmount: number }>();
+      allInvoices.forEach((inv) => {
+        const rawName = (inv.propertyName || 'Alojamiento Turístico').trim();
+        const key = rawName.toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, { id: inv.propertyId || key, name: rawName, count: 0, totalAmount: 0 });
+        }
+        const entry = map.get(key)!;
+        entry.count++;
+        entry.totalAmount += inv.totalAmount;
       });
-    });
+      return Array.from(map.values()).sort((a, b) => b.count - a.count);
+    }
 
-    // Añadir y contar todos los alojamientos de las facturas (Airbnb/Booking/Directo)
-    allInvoices.forEach((inv) => {
-      const rawName = (inv.propertyName || 'Alojamiento Turístico').trim();
-      const key = rawName.toLowerCase();
-      if (!map.has(key)) {
-        map.set(key, {
-          id: inv.propertyId || key,
-          name: rawName,
-          count: 0,
-          totalAmount: 0,
-        });
-      }
-      const entry = map.get(key)!;
-      entry.count++;
-      entry.totalAmount += inv.totalAmount;
+    return properties.map((p) => {
+      const pInvoices = allInvoices.filter((inv) => isInvoiceForProperty(inv, p));
+      return {
+        id: p.id,
+        name: p.name,
+        count: pInvoices.length,
+        totalAmount: pInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0),
+      };
     });
-
-    return Array.from(map.values()).sort((a, b) => b.count - a.count);
   }, [properties, allInvoices]);
 
   const filteredInvoices = useMemo(() => {
     return allInvoices.filter((inv) => {
-      if (invoicePropertyFilter !== 'all') {
+      if (invoicePropertyFilter === 'unassigned') {
+        if (properties.some((p) => isInvoiceForProperty(inv, p))) return false;
+      } else if (invoicePropertyFilter === 'all') {
+        // Si hay facturas registradas y facturas huérfanas de agencia, mostrar prioritariamente las registradas en la vista principal
+        if (unassignedInvoices.length > 0 && registeredInvoices.length > 0) {
+          if (!properties.some((p) => isInvoiceForProperty(inv, p))) return false;
+        }
+      } else {
         const target = invoicePropertyFilter.trim().toLowerCase();
-        const invPropName = (inv.propertyName || '').trim().toLowerCase();
-        if (invPropName !== target && inv.propertyId !== invoicePropertyFilter) {
-          return false;
+        const matchedProp = properties.find(
+          (p) => p.id === invoicePropertyFilter || p.name.toLowerCase() === target
+        );
+        if (matchedProp) {
+          if (!isInvoiceForProperty(inv, matchedProp)) return false;
+        } else {
+          const invPropName = (inv.propertyName || '').trim().toLowerCase();
+          if (invPropName !== target && inv.propertyId !== invoicePropertyFilter) {
+            return false;
+          }
         }
       }
       if (invoiceSearch.trim()) {
@@ -334,7 +361,7 @@ export default function HostDashboardView({
       }
       return true;
     });
-  }, [allInvoices, invoicePropertyFilter, invoiceSearch]);
+  }, [allInvoices, invoicePropertyFilter, invoiceSearch, properties, unassignedInvoices.length, registeredInvoices.length]);
 
   const groupedInvoices = useMemo(() => {
     const map = new Map<
@@ -349,7 +376,8 @@ export default function HostDashboardView({
     >();
 
     filteredInvoices.forEach((inv) => {
-      const name = (inv.propertyName || 'Alojamiento Turístico').trim();
+      const matchedProp = properties.find((p) => isInvoiceForProperty(inv, p));
+      const name = (matchedProp?.name || inv.propertyName || 'Alojamiento Turístico').trim();
       if (!map.has(name)) {
         map.set(name, {
           propertyName: name,
@@ -367,7 +395,7 @@ export default function HostDashboardView({
     });
 
     return Array.from(map.values()).sort((a, b) => b.invoices.length - a.invoices.length);
-  }, [filteredInvoices]);
+  }, [filteredInvoices, properties]);
 
   const [newPropName, setNewPropName] = useState('');
   const [newPropAddress, setNewPropAddress] = useState('');
@@ -2336,7 +2364,13 @@ export default function HostDashboardView({
                   <button
                     type="button"
                     onClick={() => {
-                      const qInvoices = allInvoices.filter(
+                      const invoicesForCsv =
+                        invoicePropertyFilter === 'unassigned'
+                          ? unassignedInvoices
+                          : registeredInvoices.length > 0
+                          ? registeredInvoices
+                          : allInvoices;
+                      const qInvoices = invoicesForCsv.filter(
                         (inv) =>
                           inv.status === 'issued' &&
                           inv.issueDate.startsWith(String(new Date().getFullYear()))
@@ -2354,7 +2388,13 @@ export default function HostDashboardView({
 
               {/* Tarjetas de Métricas del Trimestre */}
               {(() => {
-                const summaries = computeQuarterSummaries(allInvoices);
+                const invoicesForQuarter =
+                  invoicePropertyFilter === 'unassigned'
+                    ? unassignedInvoices
+                    : registeredInvoices.length > 0
+                    ? registeredInvoices
+                    : allInvoices;
+                const summaries = computeQuarterSummaries(invoicesForQuarter);
                 const currentSummary = summaries.find((s) => s.quarter === selectedQuarter) || summaries[0];
                 return (
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -2404,6 +2444,50 @@ export default function HostDashboardView({
 
             {/* TABLA DE FACTURAS EMITIDAS */}
             <div className="space-y-4">
+              {/* Banner de aviso si hay reservas de otros alojamientos de agencia en el listado */}
+              {unassignedInvoices.length > 0 && onKeepOnlyInvoices && (
+                <div className="p-4 sm:p-5 bg-amber-50/90 border border-amber-200/90 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                      <AlertTriangle size={20} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-amber-950">
+                          Detectadas {unassignedInvoices.length} reservas de otros alojamientos de la agencia
+                        </h4>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wide bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full">
+                          CSV de Agencia
+                        </span>
+                      </div>
+                      <p className="text-xs text-amber-800/90 mt-1 max-w-2xl leading-relaxed">
+                        El archivo importado contenía reservas de otros apartamentos de IVI. En Turnexo tienes registrado <strong>{properties[0]?.name || 'tu alojamiento'}</strong> ({registeredInvoices.length} facturas).
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (
+                          confirm(
+                            `¿Deseas conservar únicamente las ${registeredInvoices.length} facturas de "${properties[0]?.name || 'tu alojamiento'}" y descartar las ${unassignedInvoices.length} de otros alojamientos de la agencia?`
+                          )
+                        ) {
+                          onKeepOnlyInvoices(registeredInvoices.map((inv) => inv.id));
+                          setInvoicePropertyFilter('all');
+                        }
+                      }}
+                      className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-2 whitespace-nowrap"
+                      title="Eliminar del listado las facturas de otros alojamientos"
+                    >
+                      <CheckCircle2 size={15} />
+                      <span>Conservar solo {properties[0]?.name?.split(' ')[0] || 'mi alojamiento'} ({registeredInvoices.length})</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Barra superior de Búsqueda, Filtro y Modos de Vista */}
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -2419,20 +2503,46 @@ export default function HostDashboardView({
                       />
                     </div>
 
-                    <select
-                      value={invoicePropertyFilter}
-                      onChange={(e) => setInvoicePropertyFilter(e.target.value)}
-                      className="py-1.5 px-3 text-xs bg-white border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-[240px] truncate"
-                    >
-                      <option value="all">
-                        Todos los alojamientos ({uniqueAccommodations.length})
-                      </option>
-                      {uniqueAccommodations.map((acc) => (
-                        <option key={acc.id} value={acc.name}>
-                          {acc.name} ({acc.count})
+                    {uniqueAccommodations.length > 1 ? (
+                      <select
+                        value={invoicePropertyFilter}
+                        onChange={(e) => setInvoicePropertyFilter(e.target.value)}
+                        className="py-1.5 px-3 text-xs bg-white border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-[240px] truncate"
+                      >
+                        <option value="all">
+                          Todos mis alojamientos ({registeredInvoices.length})
                         </option>
-                      ))}
-                    </select>
+                        {uniqueAccommodations.map((acc) => (
+                          <option key={acc.id} value={acc.name}>
+                            {acc.name} ({acc.count})
+                          </option>
+                        ))}
+                        {unassignedInvoices.length > 0 && (
+                          <option value="unassigned">
+                            Otros no registrados ({unassignedInvoices.length})
+                          </option>
+                        )}
+                      </select>
+                    ) : unassignedInvoices.length > 0 ? (
+                      <select
+                        value={invoicePropertyFilter}
+                        onChange={(e) => setInvoicePropertyFilter(e.target.value)}
+                        className="py-1.5 px-3 text-xs bg-white border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-[260px] truncate"
+                      >
+                        <option value="all">
+                          {properties[0]?.name || 'Mi Alojamiento'} ({registeredInvoices.length})
+                        </option>
+                        <option value="unassigned">
+                          Otros alojamientos de agencia ({unassignedInvoices.length})
+                        </option>
+                      </select>
+                    ) : (
+                      <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl max-w-[260px] truncate">
+                        <Building2 size={13} className="text-[#0e6f68] shrink-0" />
+                        <span className="truncate">{properties[0]?.name || 'Mi Alojamiento'}</span>
+                        <span className="text-slate-400 font-normal">({registeredInvoices.length})</span>
+                      </div>
+                    )}
 
                     {uniqueAccommodations.length > 1 && (
                       <div className="inline-flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/80 text-xs font-semibold">
@@ -2487,7 +2597,7 @@ export default function HostDashboardView({
                       </button>
                     )}
                     <span className="text-xs text-slate-500 font-medium">
-                      Mostrando {filteredInvoices.length} de {allInvoices.length} facturas
+                      Mostrando {filteredInvoices.length} facturas
                     </span>
                   </div>
                 </div>

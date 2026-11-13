@@ -386,6 +386,11 @@ export default function App() {
     showToast('Todas las facturas han sido eliminadas.');
   };
 
+  const handleKeepOnlyInvoices = (keepIds: string[]) => {
+    setInvoices((prev) => prev.filter((inv) => keepIds.includes(inv.id)));
+    showToast('Facturas no registradas eliminadas del listado.');
+  };
+
   const handleUpdateFiscalProfile = (updatedProfile: HostFiscalProfile) => {
     setFiscalProfile(updatedProfile);
     showToast('Datos fiscales actualizados.');
@@ -882,6 +887,7 @@ export default function App() {
           onUpdateInvoice={handleUpdateInvoice}
           onDeleteInvoice={handleDeleteInvoice}
           onClearAllInvoices={handleClearAllInvoices}
+          onKeepOnlyInvoices={handleKeepOnlyInvoices}
           onUpdateFiscalProfile={handleUpdateFiscalProfile}
           onImportIcalText={handleImportIcalText}
           onSyncIcalUrl={handleSyncIcalUrl}

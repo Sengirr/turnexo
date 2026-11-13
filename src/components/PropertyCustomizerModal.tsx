@@ -522,9 +522,28 @@ export default function PropertyCustomizerModal({
 
               {/* Acceso: WiFi y Códigos */}
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-3">
-                <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
-                  {isEn ? 'Access Codes & WiFi (Guest View)' : 'Códigos de Acceso y WiFi del Alojamiento'}
-                </span>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
+                    {isEn ? 'Access, Keys & WiFi (Guest View)' : 'Acceso, Entrega de Llaves y WiFi'}
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {[
+                      { label: isEn ? 'Keybox' : 'Buzón / Caja', value: draft.doorCode && !draft.doorCode.startsWith('Entrega') && !draft.doorCode.startsWith('Recepción') ? draft.doorCode : '' },
+                      { label: isEn ? 'Smart Lock' : 'Cerradura PIN', value: draft.doorCode && !draft.doorCode.startsWith('Entrega') && !draft.doorCode.startsWith('Recepción') ? draft.doorCode : '' },
+                      { label: isEn ? 'In Person' : 'Entrega en mano', value: isEn ? 'In-person key handover on arrival' : 'Entrega en mano al llegar' },
+                      { label: isEn ? 'Reception' : 'Recepción / Portería', value: isEn ? 'Key pickup at reception' : 'Recogida en recepción / portería' },
+                    ].map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => setDraft({ ...draft, doorCode: preset.value })}
+                        className="px-2 py-0.5 text-[10px] font-bold rounded-lg border border-slate-200 bg-white hover:border-orange-400 hover:text-orange-700 text-slate-600 transition"
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">{isEn ? 'WiFi Name (SSID)' : 'Nombre WiFi (SSID)'}</label>
@@ -543,15 +562,16 @@ export default function PropertyCustomizerModal({
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">{isEn ? 'Door / Keybox Code' : 'Código Buzón / Puerta'}</label>
+                    <label className="block font-bold text-slate-700 mb-1">{isEn ? 'Key / Access Info (Optional)' : 'Acceso / Llaves (Opcional)'}</label>
                     <input
                       value={draft.doorCode}
+                      placeholder={isEn ? 'PIN, lockbox or In-person' : 'Código, PIN o Entrega en mano'}
                       onChange={(e) => setDraft({ ...draft, doorCode: e.target.value })}
                       className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">{isEn ? 'Intercom Code' : 'Código Portero'}</label>
+                    <label className="block font-bold text-slate-700 mb-1">{isEn ? 'Intercom Code (Optional)' : 'Código Portero (Opcional)'}</label>
                     <input
                       value={draft.intercomCode || ''}
                       placeholder={isEn ? 'e.g. 4B + Bell' : 'Ej. 4ºA + Campana'}
@@ -608,10 +628,12 @@ export default function PropertyCustomizerModal({
                   />
                   <div>
                     <p className="font-bold text-slate-900 text-xs">
-                      {isEn ? 'Unlock door codes after watching check-in video' : 'Desbloquear códigos de acceso tras ver el vídeo de entrada'}
+                      {isEn ? 'Unlock door codes after watching check-in video (only if you add a video)' : 'Desbloquear códigos de acceso tras ver el vídeo de entrada (solo si subes vídeo)'}
                     </p>
                     <p className="text-[11px] text-slate-500">
-                      {isEn ? 'Blurs door codes on the mobile screen until the guest hits play.' : 'Difumina el código en el móvil del huésped hasta que reproduzca el vídeo explicativo.'}
+                      {isEn
+                        ? 'Blurs door codes until the guest hits play. If you do not add any check-in video, codes are shown immediately.'
+                        : 'Difumina el código hasta que reproduzca el vídeo. Si no añades ningún vídeo de llegada, los códigos se muestran directamente.'}
                     </p>
                   </div>
                 </label>
@@ -706,7 +728,7 @@ export default function PropertyCustomizerModal({
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
-                    {isEn ? `Videos in Digital Guide (${draft.videos?.length || 0})` : `Vídeos de la Guía Digital (${draft.videos?.length || 0})`}
+                    {isEn ? `Videos in Digital Guide (Optional · ${draft.videos?.length || 0})` : `Vídeos de la Guía Digital (Opcional · ${draft.videos?.length || 0})`}
                   </span>
                   <span className="text-[11px] text-slate-400">
                     {isEn ? 'YouTube, Shorts, TikTok or Drive' : 'YouTube, Shorts o Google Drive'}
@@ -746,8 +768,10 @@ export default function PropertyCustomizerModal({
                     </div>
                   ))}
                   {(draft.videos || []).length === 0 && (
-                    <p className="text-slate-400 text-xs italic py-1">
-                      {isEn ? 'No videos added yet.' : 'No has añadido vídeos aún. Añade uno abajo para sorprender al huésped:'}
+                    <p className="text-slate-500 text-xs bg-white border border-dashed border-slate-200 rounded-xl p-3">
+                      {isEn
+                        ? 'No videos added (completely optional). Your guide works normally with written instructions, WiFi and access details.'
+                        : 'Sin vídeos añadidos (100% opcional). Si no quieres usar vídeos, la guía funciona igualmente con tus instrucciones escritas, WiFi, normas y acceso visibles directamente.'}
                     </p>
                   )}
                 </div>

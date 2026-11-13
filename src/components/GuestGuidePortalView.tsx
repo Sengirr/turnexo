@@ -80,7 +80,7 @@ const GUEST_TRANSLATIONS: Record<Language, Record<string, any>> = {
         '¡Gracias por confirmar! 🎉 Nuestro equipo ya sabe que has leído las instrucciones. ¡Te esperamos!',
       additional_guides: 'Guías adicionales',
       intercom_code: 'Código Portero',
-      door_code: 'Código Buzón',
+      door_code: 'Acceso / Llaves',
       video_unlock: 'Mira el vídeo de la guía para ver el código',
       unlock_manual: 'Mostrar código ahora',
       arrival_confirm_desc: 'Avisar al equipo de mi llegada',

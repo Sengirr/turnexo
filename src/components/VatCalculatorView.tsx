@@ -8,7 +8,6 @@ import {
   Info,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
 } from 'lucide-react';
 
 interface VatCalculatorViewProps {
@@ -16,7 +15,7 @@ interface VatCalculatorViewProps {
   onNavigateToApp: () => void;
 }
 
-type CalculatorTab = 'balance' | 'booking' | 'pricing';
+type CalculatorTab = 'balance' | 'booking';
 
 function formatEur(value: number): string {
   return new Intl.NumberFormat('es-ES', {
@@ -44,10 +43,6 @@ export default function VatCalculatorView({
   // Pestaña 2: Desglose de una reserva concreta
   const [guestPaidInput, setGuestPaidInput] = useState<string>('500');
   const [commissionPctInput, setCommissionPctInput] = useState<string>('15');
-
-  // Pestaña 3: Cómo ajustar tu tarifa por noche el 1 de diciembre
-  const [currentNightRateInput, setCurrentNightRateInput] = useState<string>('100');
-  const [nightsPerMonthInput, setNightsPerMonthInput] = useState<string>('15');
 
   const [copied, setCopied] = useState(false);
 
@@ -150,25 +145,6 @@ export default function VatCalculatorView({
     return { total, commPct, base, vat, commission, ownerNet };
   }, [guestPaidInput, commissionPctInput]);
 
-  const pricingCalc = useMemo(() => {
-    const currentRate = Math.max(0, Number(currentNightRateInput.replace(',', '.')) || 0);
-    const nightsPerMonth = Math.min(31, Math.max(1, Math.round(Number(nightsPerMonthInput) || 15)));
-
-    const recommendedRate = Math.round(currentRate * 1.1 * 100) / 100;
-    const vatIfUnchanged = Math.round((currentRate - currentRate / 1.1) * 100) / 100;
-    const netIfUnchanged = Math.round((currentRate - vatIfUnchanged) * 100) / 100;
-    const monthlyLossIfUnchanged = Math.round(vatIfUnchanged * nightsPerMonth * 100) / 100;
-
-    return {
-      currentRate,
-      nightsPerMonth,
-      recommendedRate,
-      vatIfUnchanged,
-      netIfUnchanged,
-      monthlyLossIfUnchanged,
-    };
-  }, [currentNightRateInput, nightsPerMonthInput]);
-
   const handleCopySummary = async () => {
     const text =
       tab === 'balance'
@@ -186,20 +162,13 @@ export default function VatCalculatorView({
             `• Antes (sin IVA): ${formatEur(balanceCalc.netBefore)}`,
             `• Ahora (con IVA 10%): ${formatEur(balanceCalc.netAfter)} (${balanceCalc.pocketDiff >= 0 ? '+' : ''}${formatEur(balanceCalc.pocketDiff)})`,
           ].join('\n')
-        : tab === 'booking'
-        ? [
+        : [
             'Resumen reserva con IVA 10% (Turnexo)',
             `Total pagado por huésped: ${formatEur(bookingCalc.total)}`,
             `IVA 10% para Hacienda (Modelo 303): ${formatEur(bookingCalc.vat)}`,
             `Base imponible factura: ${formatEur(bookingCalc.base)}`,
             `Comisión plataforma (${bookingCalc.commPct}%): -${formatEur(bookingCalc.commission)}`,
             `Limpio para ti (antes de IRPF/gastos): ${formatEur(bookingCalc.ownerNet)}`,
-          ].join('\n')
-        : [
-            'Ajuste tarifa IVA 10% desde 1 de diciembre (Turnexo)',
-            `Tu tarifa actual: ${formatEur(pricingCalc.currentRate)}/noche`,
-            `Tarifa recomendada para ganar lo mismo: ${formatEur(pricingCalc.recommendedRate)}/noche`,
-            `Si no la subes, pierdes ${formatEur(pricingCalc.vatIfUnchanged)}/noche en IVA (~${formatEur(pricingCalc.monthlyLossIfUnchanged)}/mes en ${pricingCalc.nightsPerMonth} noches).`,
           ].join('\n');
 
     try {
@@ -325,8 +294,8 @@ export default function VatCalculatorView({
           </p>
         </section>
 
-        {/* Selector de 3 preguntas reales */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Selector de 2 preguntas reales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl">
           <button
             type="button"
             onClick={() => setTab('balance')}
@@ -359,24 +328,6 @@ export default function VatCalculatorView({
               <p className="text-sm font-bold">2. ¿Cuánto me queda de 1 reserva?</p>
               <p className={`text-xs mt-0.5 ${tab === 'booking' ? 'text-white/75' : 'text-[#57554F]'}`}>
                 Mete lo que pagó el huésped y mira cuánto va a IVA, comisión y tu bolsillo.
-              </p>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setTab('pricing')}
-            className={`p-4 text-left border transition flex items-start gap-3 ${
-              tab === 'pricing'
-                ? 'bg-[#141413] text-white border-[#141413]'
-                : 'bg-white text-[#141413] border-[#D5CFC0] hover:border-[#141413]'
-            }`}
-          >
-            <TrendingUp size={18} className="shrink-0 mt-0.5 text-[#C85A32]" />
-            <div>
-              <p className="text-sm font-bold">3. ¿Subo el precio de mi piso?</p>
-              <p className={`text-xs mt-0.5 ${tab === 'pricing' ? 'text-white/75' : 'text-[#57554F]'}`}>
-                Calcula tu nueva tarifa por noche para no perder margen el 1 de diciembre.
               </p>
             </div>
           </button>
@@ -744,105 +695,6 @@ export default function VatCalculatorView({
                   *Antes de tus gastos (limpieza, luz, agua) y de tu IRPF anual. Recuerda que el IVA se calcula sobre el total que pagó el huésped, no sobre lo que te transfirió el portal.
                 </span>
               </p>
-            </div>
-          </section>
-        )}
-
-        {/* PESTAÑA 2: AJUSTE DE PRECIO */}
-        {tab === 'pricing' && (
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-6 bg-white border border-[#D5CFC0] p-6 space-y-6">
-              <div>
-                <label
-                  htmlFor="current-rate"
-                  className="block text-sm font-bold text-[#141413] mb-1"
-                >
-                  ¿A cuánto cobras la noche ahora mismo (sin IVA)?
-                </label>
-                <div className="relative mt-2">
-                  <input
-                    id="current-rate"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={currentNightRateInput}
-                    onChange={(e) => setCurrentNightRateInput(e.target.value)}
-                    className="w-full px-4 py-3 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-xl font-mono font-extrabold text-[#141413] focus:outline-none focus:border-[#C85A32]"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-bold text-[#57554F]">
-                    € / noche
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 mt-2.5">
-                  {['75', '100', '130', '180'].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setCurrentNightRateInput(preset)}
-                      className="px-2.5 py-1 text-xs font-mono border border-[#D5CFC0] hover:border-[#141413] text-[#57554F] hover:text-[#141413] transition"
-                    >
-                      {preset} €
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-[#EAE5D9]">
-                <label
-                  htmlFor="nights-month"
-                  className="block text-sm font-bold text-[#141413] mb-1"
-                >
-                  ¿Cuántas noches sueles alquilar al mes?
-                </label>
-                <input
-                  id="nights-month"
-                  type="number"
-                  min="1"
-                  max="31"
-                  step="1"
-                  value={nightsPerMonthInput}
-                  onChange={(e) => setNightsPerMonthInput(e.target.value)}
-                  className="w-28 px-3 py-2 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-sm font-mono font-bold text-[#141413] focus:outline-none focus:border-[#C85A32]"
-                />
-              </div>
-            </div>
-
-            <div className="lg:col-span-6 bg-[#141413] text-[#F6F4EE] p-6 space-y-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#C85A32] font-bold">
-                  Qué pasa el 1 de diciembre
-                </span>
-                <button
-                  type="button"
-                  onClick={handleCopySummary}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-[11px] font-mono uppercase transition"
-                >
-                  {copied ? <Check size={12} /> : <Copy size={12} />}
-                  <span>{copied ? 'Copiado' : 'Copiar'}</span>
-                </button>
-              </div>
-
-              <div className="p-4 bg-[#1F4E3D]/40 border border-[#1F4E3D] space-y-1">
-                <p className="text-xs text-emerald-200">
-                  Para seguir ganando exactamente {formatEur(pricingCalc.currentRate)} limpios/noche:
-                </p>
-                <p className="text-2xl font-mono font-extrabold text-white">
-                  Pon tu anuncio a {formatEur(pricingCalc.recommendedRate)} / noche
-                </p>
-              </div>
-
-              <div className="p-4 bg-white/5 border border-white/10 space-y-1.5">
-                <p className="text-xs text-white/75">
-                  Si dejas el precio igual ({formatEur(pricingCalc.currentRate)}/noche):
-                </p>
-                <p className="text-sm text-white">
-                  De cada noche van <strong className="text-[#C85A32] font-mono">{formatEur(pricingCalc.vatIfUnchanged)}</strong> a Hacienda y te quedan{' '}
-                  <strong className="font-mono">{formatEur(pricingCalc.netIfUnchanged)}</strong>.
-                </p>
-                <p className="text-xs text-[#C85A32] font-mono font-bold pt-1">
-                  En {pricingCalc.nightsPerMonth} noches/mes son {formatEur(pricingCalc.monthlyLossIfUnchanged)} menos al mes si no actualizas tarifas.
-                </p>
-              </div>
             </div>
           </section>
         )}

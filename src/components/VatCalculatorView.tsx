@@ -668,7 +668,7 @@ export default function VatCalculatorView({
             <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5">
               <p className="font-mono font-bold text-[#C85A32]">4. Emite factura al 10% por estancia</p>
               <p className="text-[#57554F] leading-relaxed">
-                Aunque el huésped no te la pida, debes emitir factura simplificada por el total pagado (Turnexo te las genera todas desde tu CSV).
+                Aunque el huésped no te la pida, debes emitir factura (simplificada o completa si te piden NIF) por el total pagado (Turnexo te las genera todas desde tu CSV).
               </p>
             </div>
             <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5 md:col-span-2 lg:col-span-2">

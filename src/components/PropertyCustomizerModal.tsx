@@ -128,6 +128,11 @@ export default function PropertyCustomizerModal({
   });
   const [tab, setTab] = useState<EditorTab>('general');
   const [showIcalHelp, setShowIcalHelp] = useState(false);
+  const [accessMode, setAccessMode] = useState<'keybox' | 'smart_lock' | 'in_person'>(() => {
+    const code = (property.doorCode || '').toLowerCase();
+    if (code.includes('mano') || code.includes('personal') || code.includes('person')) return 'in_person';
+    return 'keybox';
+  });
 
   // Campos temporales para añadir vídeos, extras, normas, recomendaciones y checklist
   const [newVideoTitle, setNewVideoTitle] = useState('');
@@ -520,7 +525,7 @@ export default function PropertyCustomizerModal({
                 </div>
               </div>
 
-              {/* Acceso: WiFi y Códigos */}
+              {/* Acceso: WiFi y Entrega de Llaves */}
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
@@ -528,23 +533,40 @@ export default function PropertyCustomizerModal({
                   </span>
                   <div className="flex flex-wrap items-center gap-1.5">
                     {[
-                      { label: isEn ? 'Keybox' : 'Buzón / Caja', value: draft.doorCode && !draft.doorCode.startsWith('Entrega') && !draft.doorCode.startsWith('Recepción') ? draft.doorCode : '' },
-                      { label: isEn ? 'Smart Lock' : 'Cerradura PIN', value: draft.doorCode && !draft.doorCode.startsWith('Entrega') && !draft.doorCode.startsWith('Recepción') ? draft.doorCode : '' },
-                      { label: isEn ? 'In Person' : 'Entrega en mano', value: isEn ? 'In-person key handover on arrival' : 'Entrega en mano al llegar' },
-                      { label: isEn ? 'Reception' : 'Recepción / Portería', value: isEn ? 'Key pickup at reception' : 'Recogida en recepción / portería' },
-                    ].map((preset) => (
+                      { id: 'keybox' as const, label: isEn ? 'Keybox' : 'Cajetín llaves' },
+                      { id: 'smart_lock' as const, label: isEn ? 'Smart Lock' : 'Cerradura electrónica' },
+                      { id: 'in_person' as const, label: isEn ? 'In-person' : 'Personal' },
+                    ].map((opt) => (
                       <button
-                        key={preset.label}
+                        key={opt.id}
                         type="button"
-                        onClick={() => setDraft({ ...draft, doorCode: preset.value })}
-                        className="px-2 py-0.5 text-[10px] font-bold rounded-lg border border-slate-200 bg-white hover:border-orange-400 hover:text-orange-700 text-slate-600 transition"
+                        onClick={() => {
+                          setAccessMode(opt.id);
+                          if (opt.id === 'in_person') {
+                            setDraft({
+                              ...draft,
+                              doorCode: isEn ? 'In-person key handover on arrival' : 'Entrega en mano al llegar',
+                              intercomCode: '',
+                            });
+                          } else if (
+                            (draft.doorCode || '').toLowerCase().includes('mano') ||
+                            (draft.doorCode || '').toLowerCase().includes('person')
+                          ) {
+                            setDraft({ ...draft, doorCode: '' });
+                          }
+                        }}
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition ${
+                          accessMode === opt.id
+                            ? 'bg-slate-900 text-white border-slate-900'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                        }`}
                       >
-                        {preset.label}
+                        {opt.label}
                       </button>
                     ))}
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div className={`grid grid-cols-1 ${accessMode === 'in_person' ? 'sm:grid-cols-3' : 'sm:grid-cols-4'} gap-3`}>
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">{isEn ? 'WiFi Name (SSID)' : 'Nombre WiFi (SSID)'}</label>
                     <input
@@ -562,23 +584,45 @@ export default function PropertyCustomizerModal({
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">{isEn ? 'Key / Access Info (Optional)' : 'Acceso / Llaves (Opcional)'}</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      {accessMode === 'in_person'
+                        ? isEn
+                          ? 'Handover Note (Optional)'
+                          : 'Nota de entrega (Opcional)'
+                        : accessMode === 'smart_lock'
+                        ? isEn
+                          ? 'Smart Lock PIN'
+                          : 'PIN Cerradura Electrónica'
+                        : isEn
+                        ? 'Keybox Code'
+                        : 'Código Cajetín Llaves'}
+                    </label>
                     <input
                       value={draft.doorCode}
-                      placeholder={isEn ? 'PIN, lockbox or In-person' : 'Código, PIN o Entrega en mano'}
+                      placeholder={
+                        accessMode === 'in_person'
+                          ? isEn
+                            ? 'In-person handover on arrival'
+                            : 'Entrega en mano al llegar'
+                          : accessMode === 'smart_lock'
+                          ? 'Ej. 4829#'
+                          : 'Ej. 1244'
+                      }
                       onChange={(e) => setDraft({ ...draft, doorCode: e.target.value })}
-                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-mono"
+                      className={`w-full border border-slate-200 bg-white rounded-xl px-3 py-2 ${accessMode === 'in_person' ? '' : 'font-mono'}`}
                     />
                   </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">{isEn ? 'Intercom Code (Optional)' : 'Código Portero (Opcional)'}</label>
-                    <input
-                      value={draft.intercomCode || ''}
-                      placeholder={isEn ? 'e.g. 4B + Bell' : 'Ej. 4ºA + Campana'}
-                      onChange={(e) => setDraft({ ...draft, intercomCode: e.target.value })}
-                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-mono"
-                    />
-                  </div>
+                  {accessMode !== 'in_person' && (
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">{isEn ? 'Intercom Code (Optional)' : 'Código Portero (Opcional)'}</label>
+                      <input
+                        value={draft.intercomCode || ''}
+                        placeholder={isEn ? 'e.g. 4B + Bell' : 'Ej. 4ºA + Campana'}
+                        onChange={(e) => setDraft({ ...draft, intercomCode: e.target.value })}
+                        className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-mono"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

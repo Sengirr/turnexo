@@ -29,6 +29,7 @@ import GuestGuidePortalView from './components/GuestGuidePortalView';
 import LandingPageView from './components/LandingPageView';
 import AuthOnboardingView from './components/AuthOnboardingView';
 import AdminMetricsView from './components/AdminMetricsView';
+import VatCalculatorView from './components/VatCalculatorView';
 import LegalModal from './components/LegalModal';
 import CookieBanner from './components/CookieBanner';
 import { getStoredPromoCode, isCommunityPromoCode } from './lib/promo';
@@ -49,6 +50,7 @@ import {
 
 type RouteState =
   | { kind: 'landing' }
+  | { kind: 'calculator' }
   | { kind: 'app' }
   | { kind: 'admin' }
   | { kind: 'cleaner'; token: string; fromApp?: boolean; fromLanding?: boolean }
@@ -94,6 +96,9 @@ function parseCurrentLocation(): RouteState {
     return { kind: 'app' };
   }
 
+  if (path.startsWith('/calculadora-iva-alquiler-vacacional')) {
+    return { kind: 'calculator' };
+  }
   if (path.startsWith('/admin') || params.get('admin') !== null) {
     return { kind: 'admin' };
   }
@@ -888,6 +893,18 @@ export default function App() {
             window.open(`/c/${c.magicToken}?demo=1`, '_blank');
           }}
           onOpenLegal={(tab = 'privacy') => setLegalModalTab(tab)}
+          onOpenVatCalculator={() => navigate('/calculadora-iva-alquiler-vacacional', { kind: 'calculator' })}
+        />
+      )}
+
+      {route.kind === 'calculator' && (
+        <VatCalculatorView
+          onBackToLanding={() => navigate('/', { kind: 'landing' })}
+          onNavigateToApp={() => {
+            setAuthInitialMode('register');
+            setAuthInitialPlan('plan_starter');
+            navigate('/app', { kind: 'app' });
+          }}
         />
       )}
 

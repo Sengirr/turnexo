@@ -1,8 +1,9 @@
 User-agent: *
 Allow: /
 Allow: /g/
+Allow: /calculadora-iva-alquiler-vacacional
 Disallow: /app
 Disallow: /c/
 Disallow: /api/
 
-Sitemap: https://turnexo.vercel.app/sitemap.xml
+Sitemap: https://turnexo.app/sitemap.xml

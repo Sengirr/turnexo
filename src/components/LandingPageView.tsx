@@ -31,6 +31,7 @@ interface Props {
   onOpenGuestDemo: () => void;
   onOpenCleanerDemo: () => void;
   onOpenLegal?: (tab?: 'privacy' | 'terms' | 'legal') => void;
+  onOpenVatCalculator?: () => void;
 }
 
 export default function LandingPageView({
@@ -40,6 +41,7 @@ export default function LandingPageView({
   onOpenGuestDemo,
   onOpenCleanerDemo,
   onOpenLegal,
+  onOpenVatCalculator,
 }: Props) {
   // El banner promocional de la landing solo se muestra si la URL actual contiene el parámetro explícito (?promo= / ?ref=)
   const hasCommunityPromo = isCommunityPromoCode(getUrlPromoCode());
@@ -1060,6 +1062,21 @@ export default function LandingPageView({
               <li>
                 <a href="#faq" className="hover:text-white transition">
                   {t.footer.linkFaq}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/calculadora-iva-alquiler-vacacional"
+                  onClick={(e) => {
+                    if (onOpenVatCalculator) {
+                      e.preventDefault();
+                      onOpenVatCalculator();
+                    }
+                  }}
+                  className="text-white/90 hover:text-[#C85A32] transition inline-flex items-center gap-1 font-semibold"
+                >
+                  <span>Calculadora IVA 10% (Gratis)</span>
+                  <ArrowUpRight size={13} />
                 </a>
               </li>
               <li>

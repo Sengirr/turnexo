@@ -388,13 +388,13 @@ export default function PropertyCustomizerModal({
                 <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
                   {isEn ? 'Schedule & Staff' : 'Horarios y Personal'}
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">{isEn ? 'Check-in Hour' : 'Hora Check-in'}</label>
                     <select
                       value={draft.checkInTime || '15:00'}
                       onChange={(e) => setDraft({ ...draft, checkInTime: e.target.value })}
-                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800"
+                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800 text-xs"
                     >
                       {CHECKIN_HOURS.map((h) => (
                         <option key={h} value={h}>{h}</option>
@@ -406,7 +406,7 @@ export default function PropertyCustomizerModal({
                     <select
                       value={draft.checkOutTime || '11:00'}
                       onChange={(e) => setDraft({ ...draft, checkOutTime: e.target.value })}
-                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800"
+                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800 text-xs"
                     >
                       {CHECKOUT_HOURS.map((h) => (
                         <option key={h} value={h}>{h}</option>
@@ -426,18 +426,18 @@ export default function PropertyCustomizerModal({
                       className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800 text-xs"
                     >
                       <option value="">
-                        {isEn ? 'No fixed cleaner (Rotating / Assign per turn)' : 'Sin limpiadora fija (Rotativa / Asignar por turno)'}
+                        {isEn ? 'No fixed cleaner (Rotating)' : 'Sin limpiadora fija (Rotativa)'}
                       </option>
                       {cleaners.map((c) => (
                         <option key={c.id} value={c.id}>
-                          {c.name} ({c.phone})
+                          {c.name}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">
-                      {isEn ? 'Cleaner Pay per turn (€)' : 'Pago a la limpiadora (€)'}{' '}
+                      {isEn ? 'Cleaner Pay per cleaning (€)' : 'Pago a la limpiadora (€)'}{' '}
                       <span className="font-normal text-[10px] text-slate-400">
                         ({isEn ? 'Optional' : 'Opcional'})
                       </span>
@@ -457,8 +457,8 @@ export default function PropertyCustomizerModal({
                     />
                     <span className="text-[10px] text-slate-400 block mt-1 leading-tight">
                       {isEn
-                        ? 'Amount paid to the cleaner per turnover (used for payroll, not the guest fee)'
-                        : 'Tarifa por turno abonada a la limpiadora (para liquidaciones, no es lo cobrado al huésped)'}
+                        ? 'Amount paid to the cleaner per cleaning (not the fee charged to the guest)'
+                        : 'Importe que pagas a la limpiadora por cada limpieza (no es lo que cobras al huésped)'}
                     </span>
                   </div>
                 </div>

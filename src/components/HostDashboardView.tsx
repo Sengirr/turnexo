@@ -1189,7 +1189,7 @@ export default function HostDashboardView({
                             {t.overview.cleaningStaff}
                           </span>
                           <span className="font-semibold text-slate-900 mt-1 block truncate">
-                            {cleaner?.name || (lang === 'en' ? 'Rotating / By turn' : 'Rotativa / Por turno')}
+                            {cleaner?.name || (lang === 'en' ? 'Rotating / By schedule' : 'Rotativa / Según cuadrante')}
                           </span>
                         </div>
                         <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
@@ -3527,7 +3527,7 @@ export default function HostDashboardView({
                     onChange={(e) => setNewPropCleaningFee(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono text-center shadow-2xs"
                   />
-                  <span className="text-[10px] text-slate-400 block mt-0.5">Tarifa que abonas a la limpiadora por turno</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Importe que pagas a la limpiadora por cada limpieza</span>
                 </div>
               </div>
 
@@ -3543,7 +3543,7 @@ export default function HostDashboardView({
                   <option value="">Sin limpiadora fija (Rotativa / Asignar en cada salida)</option>
                   {cleaners.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name} ({c.phone})
+                      {c.name}
                     </option>
                   ))}
                 </select>

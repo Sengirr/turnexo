@@ -412,15 +412,15 @@ function AirbnbIcalInstructions({ compact }: { compact?: boolean }) {
     <div className="space-y-3.5 text-xs">
       <div className="flex items-center justify-between bg-rose-50/70 border border-rose-200/80 p-3 rounded-2xl">
         <div className="flex items-center gap-2">
-          <span className="font-extrabold text-rose-950">Sección: Anuncios de Airbnb</span>
+          <span className="font-extrabold text-rose-950">Sección: Calendario de Airbnb</span>
         </div>
         <a
-          href="https://www.airbnb.es/hosting/listings"
+          href="https://www.airbnb.es/hosting/calendar"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#FF385C] hover:bg-[#e03150] text-white rounded-xl font-bold transition shadow-2xs"
         >
-          <span>Ir a mis Anuncios</span>
+          <span>Abrir Calendario Airbnb</span>
           <ExternalLink size={12} />
         </a>
       </div>
@@ -431,7 +431,7 @@ function AirbnbIcalInstructions({ compact }: { compact?: boolean }) {
             1
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Entra en tu panel de Airbnb y pulsa en <strong>Anuncios</strong>. Haz clic sobre el alojamiento que deseas sincronizar.
+            Entra en tu cuenta de anfitrión en Airbnb (preferiblemente desde navegador web) y ve a la pestaña <strong>«Calendario»</strong>.
           </div>
         </div>
 
@@ -440,7 +440,7 @@ function AirbnbIcalInstructions({ compact }: { compact?: boolean }) {
             2
           </span>
           <div className="text-slate-700 leading-relaxed">
-            En el menú de configuración del anuncio, haz clic en la pestaña <strong>«Precios y disponibilidad»</strong> (o <em>«Disponibilidad»</em>).
+            Selecciona tu alojamiento y, en el panel derecho de configuración, haz clic en <strong>«Disponibilidad»</strong>.
           </div>
         </div>
 
@@ -449,7 +449,7 @@ function AirbnbIcalInstructions({ compact }: { compact?: boolean }) {
             3
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Baja hasta la sección <strong>«Sincronización de calendarios»</strong> y haz clic en <strong>«Exportar calendario»</strong>.
+            Baja hasta el final a la sección <strong>«Sincronización del calendario»</strong> / <strong>«Conectar calendarios»</strong> y pulsa en <strong>«Conectar con otro sitio web»</strong> (o <em>Exportar calendario</em>).
           </div>
         </div>
 
@@ -458,7 +458,7 @@ function AirbnbIcalInstructions({ compact }: { compact?: boolean }) {
             4
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Aparecerá una ventana con una URL que empieza por <code>https://www.airbnb.es/calendar/ical/...</code> y termina en <code>.ics</code>. Haz clic en <strong>Copiar enlace</strong> y pégala aquí en Turnexo.
+            Verás la URL de tu calendario (empieza por <code>https://www.airbnb.es/calendar/ical/...</code> y termina en <code>.ics</code>). Pulsa <strong>«Copiar enlace»</strong> y pégalo aquí en Turnexo.
           </div>
         </div>
       </div>
@@ -502,7 +502,7 @@ function BookingIcalInstructions({ compact }: { compact?: boolean }) {
             2
           </span>
           <div className="text-slate-700 leading-relaxed">
-            En el menú superior, pulsa en <strong>«Tarifas y disponibilidad»</strong> (o <em>«Calendario»</em>) y entra en <strong>«Sincronizar calendarios»</strong>.
+            En el menú superior, pulsa en <strong>«Tarifas y disponibilidad»</strong> (o <em>«Calendario y precios»</em>) y entra en <strong>«Sincronizar calendarios»</strong>.
           </div>
         </div>
 
@@ -511,7 +511,7 @@ function BookingIcalInstructions({ compact }: { compact?: boolean }) {
             3
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Haz clic en el botón azul <strong>«Añadir conexión de calendario»</strong> (o busca la opción de exportar calendario).
+            Si ya tienes conexiones creadas verás directamente el botón <strong>«Exportar calendario»</strong>. Si es la primera vez, haz clic en <strong>«Añadir conexión de calendario»</strong>.
           </div>
         </div>
 
@@ -520,7 +520,7 @@ function BookingIcalInstructions({ compact }: { compact?: boolean }) {
             4
           </span>
           <div className="text-slate-700 leading-relaxed">
-            En el paso 1, Booking te facilita tu enlace iCal personal (empieza por <code>https://ical.booking.com/...</code>). Cópialo y pégalo en Turnexo.
+            <strong>Truco importante:</strong> Primero Booking te pedirá pegar un enlace para <em>importar</em>. Si solo quieres obtener tu enlace de Booking, pulsa abajo en <strong>«Saltar este paso»</strong> (u <em>Omitir</em>) para pasar al bloque <strong>«Exportar calendario»</strong>, dale un nombre (ej. <em>Turnexo</em>), copia la URL <code>https://ical.booking.com/...</code> y pégala aquí.
           </div>
         </div>
       </div>

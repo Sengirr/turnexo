@@ -143,7 +143,7 @@ export default async function handler(req: any, res: any) {
           body: JSON.stringify({
             to: [lead.email],
             displayName: 'Iván Álvarez · Turnexo',
-            subject: 'Pisos turísticos desde diciembre',
+            subject: 'Nuevo IVA 10% en alquiler vacacional',
             text: buildEmailBody(lead.company_name, lead.city),
           }),
         }

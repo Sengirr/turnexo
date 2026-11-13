@@ -2,8 +2,16 @@ import crypto from 'node:crypto';
 
 /**
  * Serverless Function (/api/admin-auth)
- * Valida la contraseña de administrador en servidor usando ADMIN_PASSWORD (sin exponerla en el bundle).
+ * Valida la contraseña de administrador en servidor usando ADMIN_PASSWORD
+ * y devuelve un token HMAC temporal (12h) para consultar /api/admin-metrics.
  */
+function signAdminToken(secret: string): string {
+  const exp = Date.now() + 12 * 60 * 60 * 1000;
+  const payload = Buffer.from(JSON.stringify({ exp })).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+  return `${payload}.${sig}`;
+}
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method Not Allowed' });
@@ -27,5 +35,6 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  res.status(200).json({ ok: true });
+  const token = signAdminToken(expected);
+  res.status(200).json({ ok: true, token });
 }

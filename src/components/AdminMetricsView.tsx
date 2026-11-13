@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp,
   Users,
@@ -23,11 +23,11 @@ import {
   KeyRound,
   LogOut,
   AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import {
   computeSaasMetrics,
   exportUsersToCsv,
-  INITIAL_SAAS_USERS,
   SaasUser,
 } from '../lib/saasMetrics';
 import { isSupabaseConfigured } from '../lib/supabase';
@@ -38,11 +38,15 @@ interface Props {
 }
 
 const SESSION_AUTH_KEY = 'turnexo_admin_auth_v1';
+const SESSION_TOKEN_KEY = 'turnexo_admin_token_v1';
 
 export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props) {
   // Autenticación de Administrador en memoria de sesión (se borra al cerrar la pestaña)
+  const [adminToken, setAdminToken] = useState<string>(() => {
+    return sessionStorage.getItem(SESSION_TOKEN_KEY) || '';
+  });
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem(SESSION_AUTH_KEY) === 'true';
+    return sessionStorage.getItem(SESSION_AUTH_KEY) === 'true' && Boolean(sessionStorage.getItem(SESSION_TOKEN_KEY));
   });
 
   const [passwordInput, setPasswordInput] = useState('');
@@ -54,6 +58,55 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
   const [newAdminPass, setNewAdminPass] = useState('');
   const [passChangedMsg, setPassChangedMsg] = useState(false);
 
+  const [users, setUsers] = useState<SaasUser[]>([]);
+  const [platformTotals, setPlatformTotals] = useState<{ reservationsCount: number; cleaningTasksCount: number }>({
+    reservationsCount: 0,
+    cleaningTasksCount: 0,
+  });
+  const [loadingMetrics, setLoadingMetrics] = useState(false);
+  const [metricsError, setMetricsError] = useState<string | null>(null);
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+
+  const fetchRealMetrics = useCallback(async (tokenToUse: string) => {
+    if (!tokenToUse) return;
+    setLoadingMetrics(true);
+    setMetricsError(null);
+    try {
+      const resp = await fetch('/api/admin-metrics', {
+        headers: { Authorization: `Bearer ${tokenToUse}` },
+      });
+      if (resp.status === 401) {
+        sessionStorage.removeItem(SESSION_AUTH_KEY);
+        sessionStorage.removeItem(SESSION_TOKEN_KEY);
+        setIsAuthenticated(false);
+        setAdminToken('');
+        return;
+      }
+      const data = await resp.json();
+      if (!resp.ok) {
+        setMetricsError(data?.error || 'Error al cargar datos de Supabase.');
+        return;
+      }
+      setUsers(Array.isArray(data.users) ? data.users : []);
+      if (data.totals) {
+        setPlatformTotals({
+          reservationsCount: Number(data.totals.reservationsCount || 0),
+          cleaningTasksCount: Number(data.totals.cleaningTasksCount || 0),
+        });
+      }
+    } catch {
+      setMetricsError('No se pudo conectar con /api/admin-metrics.');
+    } finally {
+      setLoadingMetrics(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && adminToken) {
+      fetchRealMetrics(adminToken);
+    }
+  }, [isAuthenticated, adminToken, fetchRealMetrics]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
@@ -64,8 +117,11 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: passwordInput.trim() }),
       });
-      if (resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      if (resp.ok && data.token) {
         sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+        sessionStorage.setItem(SESSION_TOKEN_KEY, data.token);
+        setAdminToken(data.token);
         setIsAuthenticated(true);
         setPasswordInput('');
       } else if (resp.status === 503) {
@@ -82,6 +138,8 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
 
   const handleLogout = () => {
     sessionStorage.removeItem(SESSION_AUTH_KEY);
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
+    setAdminToken('');
     setIsAuthenticated(false);
   };
 
@@ -91,15 +149,6 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
     setShowChangePassModal(false);
     setNewAdminPass('');
   };
-
-  const [users, setUsers] = useState<SaasUser[]>(() => {
-    try {
-      const stored = localStorage.getItem('turnexo_saas_users_v2');
-      return stored ? JSON.parse(stored) : INITIAL_SAAS_USERS;
-    } catch {
-      return INITIAL_SAAS_USERS;
-    }
-  });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [planFilter, setPlanFilter] = useState<'all' | 'starter' | 'pro' | 'manager'>('all');
@@ -163,54 +212,52 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
 
   const metrics = computeSaasMetrics(users);
 
-  const saveUsers = (updated: SaasUser[]) => {
-    setUsers(updated);
-    localStorage.setItem('turnexo_saas_users_v2', JSON.stringify(updated));
-  };
-
   const handleAddUser = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail.trim()) return;
-
-    const spendMap = {
-      plan_starter: 0,
-      plan_pro: 19,
-      plan_manager: 39,
-    };
-
-    const newUser: SaasUser = {
-      id: `user-${Date.now()}`,
-      email: newEmail.trim(),
-      fullName: newName.trim() || 'Nuevo Anfitrión',
-      companyName: newCompany.trim() || 'Apartamentos Turísticos',
-      whatsapp: newWhatsapp.trim(),
-      plan: newPlan,
-      status: 'active',
-      registeredAt: new Date().toISOString().split('T')[0],
-      propertiesCount: newPropsCount,
-      monthlySpend: spendMap[newPlan],
-      lastActiveAt: 'Justo ahora',
-    };
-
-    saveUsers([newUser, ...users]);
     setShowAddUserModal(false);
-    setNewEmail('');
-    setNewName('');
-    setNewCompany('');
   };
 
-  const handleTogglePlan = (userId: string) => {
-    const updated = users.map((u) => {
-      if (u.id !== userId) return u;
-      if (u.plan === 'plan_starter') {
-        return { ...u, plan: 'plan_pro' as const, monthlySpend: 19, status: 'active' as const };
+  const handleTogglePlan = async (userId: string) => {
+    const target = users.find((u) => u.id === userId);
+    if (!target || !adminToken) return;
+
+    const nextPlan: 'plan_starter' | 'plan_pro' | 'plan_manager' =
+      target.plan === 'plan_starter'
+        ? 'plan_pro'
+        : target.plan === 'plan_pro'
+        ? 'plan_manager'
+        : 'plan_starter';
+    const nextSpend = nextPlan === 'plan_manager' ? 39 : nextPlan === 'plan_pro' ? 19 : 0;
+
+    setUpdatingUserId(userId);
+    try {
+      const resp = await fetch('/api/admin-metrics', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify({
+          hostId: userId,
+          plan: nextPlan,
+          status: 'active',
+        }),
+      });
+      if (resp.ok) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === userId ? { ...u, plan: nextPlan, monthlySpend: nextSpend, status: 'active' } : u
+          )
+        );
+      } else {
+        const err = await resp.json().catch(() => ({}));
+        setMetricsError(err?.error || 'No se pudo actualizar el plan en Supabase.');
       }
-      if (u.plan === 'plan_pro') {
-        return { ...u, plan: 'plan_manager' as const, monthlySpend: 39, status: 'active' as const };
-      }
-      return { ...u, plan: 'plan_starter' as const, monthlySpend: 0, status: 'active' as const };
-    });
-    saveUsers(updated);
+    } catch {
+      setMetricsError('Error de red al actualizar el plan.');
+    } finally {
+      setUpdatingUserId(null);
+    }
   };
 
   const filteredUsers = users.filter((u) => {
@@ -317,11 +364,20 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
             Turnexo Founder Dashboard
           </h1>
           <p className="text-xs text-[#57554F] mt-0.5">
-            Monitor confidencial de captación, MRR, conversión de planes y usuarios registrados.
+            Datos en tiempo real de Supabase: {users.length} anfitriones · {platformTotals.reservationsCount} reservas · {platformTotals.cleaningTasksCount} limpiezas.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => fetchRealMetrics(adminToken)}
+            disabled={loadingMetrics}
+            className="px-3 py-2 text-xs font-mono font-bold uppercase text-[#141413] bg-white border border-[#D5CFC0] hover:bg-[#FAF9F5] flex items-center gap-1.5 transition disabled:opacity-50"
+          >
+            <RefreshCw size={13} className={loadingMetrics ? 'animate-spin' : ''} />
+            <span>{loadingMetrics ? 'Cargando...' : 'Actualizar'}</span>
+          </button>
           <button
             type="button"
             onClick={() => setShowChangePassModal(true)}
@@ -349,6 +405,12 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
       </div>
 
       <div className="max-w-7xl mx-auto space-y-8">
+        {metricsError && (
+          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-xs font-medium flex items-center gap-2">
+            <AlertTriangle size={16} className="shrink-0 text-red-600" />
+            <span>{metricsError}</span>
+          </div>
+        )}
         {/* TARJETAS DE KPIS PRINCIPALES (MRR, ARR, USUARIOS, ALOJAMIENTOS) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* MRR */}
@@ -523,16 +585,18 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => setShowAddUserModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-mono font-bold uppercase transition"
+                onClick={() => fetchRealMetrics(adminToken)}
+                disabled={loadingMetrics}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-mono font-bold uppercase transition disabled:opacity-50"
               >
-                <Plus size={13} />
-                <span>+ Añadir Usuario</span>
+                <RefreshCw size={13} className={loadingMetrics ? 'animate-spin' : ''} />
+                <span>{loadingMetrics ? 'Sincronizando...' : 'Actualizar'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => exportUsersToCsv(users)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1F4E3D] hover:bg-[#163A2D] text-white text-xs font-mono font-bold uppercase transition"
+                disabled={users.length === 0}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1F4E3D] hover:bg-[#163A2D] text-white text-xs font-mono font-bold uppercase transition disabled:opacity-50"
                 title="Exportar base de datos a Excel / CSV"
               >
                 <Download size={13} />

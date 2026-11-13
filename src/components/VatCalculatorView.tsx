@@ -2,8 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   Calculator,
-  Check,
-  Copy,
   FileSpreadsheet,
   Info,
   ShieldCheck,
@@ -43,8 +41,6 @@ export default function VatCalculatorView({
   // Pestaña 2: Desglose de una reserva concreta
   const [guestPaidInput, setGuestPaidInput] = useState<string>('500');
   const [commissionPctInput, setCommissionPctInput] = useState<string>('15');
-
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const prevTitle = document.title;
@@ -157,42 +153,6 @@ export default function VatCalculatorView({
       ownerNet,
     };
   }, [guestPaidInput, commissionPctInput]);
-
-  const handleCopySummary = async () => {
-    const text =
-      tab === 'balance'
-        ? [
-            `📊 IVA 10% EN VUT: TU CASO REAL (Mes de ${formatEur(balanceCalc.grossIncome)})`,
-            '(Sin subir el precio al huésped)',
-            '',
-            `INGRESO: ${formatEur(balanceCalc.incomeBase)} + ${formatEur(balanceCalc.outputVat10)} IVA (10%)`,
-            `TOTAL IVA DEDUCIBLE EN GASTOS: -${formatEur(balanceCalc.totalDeductibleVat)}`,
-            balanceCalc.vatBalanceToPay <= 0
-              ? `✅ RESULTADO HACIENDA: Te devuelve / compensa ${formatEur(Math.abs(balanceCalc.vatBalanceToPay))}`
-              : `📌 RESULTADO HACIENDA: Pagas ${formatEur(balanceCalc.vatBalanceToPay)}`,
-            '',
-            `💰 EN TU BOLSILLO:`,
-            `• Antes (sin IVA): ${formatEur(balanceCalc.netBefore)}`,
-            `• Ahora (con IVA 10%): ${formatEur(balanceCalc.netAfter)} (${balanceCalc.pocketDiff >= 0 ? '+' : ''}${formatEur(balanceCalc.pocketDiff)})`,
-          ].join('\n')
-        : [
-            'Resumen reserva con IVA 10% (Turnexo)',
-            `Total pagado por huésped: ${formatEur(bookingCalc.total)}`,
-            `IVA 10% cobrado: ${formatEur(bookingCalc.vat)}`,
-            `Comisión plataforma (${bookingCalc.commPct}% + 21% IVA): -${formatEur(bookingCalc.commissionTotal)} (${formatEur(bookingCalc.commissionBase)} + ${formatEur(bookingCalc.commissionVat)} IVA deducible)`,
-            `IVA neto a Hacienda (tras deducir IVA comisión): ${formatEur(bookingCalc.netVatToPay)}`,
-            `Base imponible factura: ${formatEur(bookingCalc.base)}`,
-            `Limpio para ti (antes de IRPF/gastos): ${formatEur(bookingCalc.ownerNet)}`,
-          ].join('\n');
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard blocked in restricted context
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col">
@@ -452,19 +412,9 @@ export default function VatCalculatorView({
             </div>
 
             <div className="lg:col-span-6 bg-[#141413] text-[#F6F4EE] p-6 space-y-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#C85A32] font-bold">
-                  Resultado real (sin subir precio)
-                </span>
-                <button
-                  type="button"
-                  onClick={handleCopySummary}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-[11px] font-mono uppercase transition"
-                >
-                  {copied ? <Check size={12} /> : <Copy size={12} />}
-                  <span>{copied ? 'Copiado' : 'Copiar'}</span>
-                </button>
-              </div>
+              <span className="text-xs font-mono uppercase tracking-wider text-[#C85A32] font-bold block">
+                Resultado real (sin subir precio)
+              </span>
 
               <div className="space-y-2 text-xs border-b border-white/15 pb-4">
                 <div className="flex justify-between">
@@ -595,19 +545,9 @@ export default function VatCalculatorView({
             </div>
 
             <div className="lg:col-span-6 bg-[#141413] text-[#F6F4EE] p-6 space-y-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#C85A32] font-bold">
-                  Así se reparte ese dinero
-                </span>
-                <button
-                  type="button"
-                  onClick={handleCopySummary}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-[11px] font-mono uppercase transition"
-                >
-                  {copied ? <Check size={12} /> : <Copy size={12} />}
-                  <span>{copied ? 'Copiado' : 'Copiar'}</span>
-                </button>
-              </div>
+              <span className="text-xs font-mono uppercase tracking-wider text-[#C85A32] font-bold block">
+                Así se reparte ese dinero
+              </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-3.5 bg-white/5 border border-white/10">

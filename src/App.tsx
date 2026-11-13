@@ -438,10 +438,10 @@ export default function App() {
     syncCleaningTaskToSupabase(updated);
   };
 
-  const handleImportIcalText = (propertyId: string, icsText: string) => {
+  const handleImportIcalText = (propertyId: string, icsText: string, silent = false) => {
     const parsed = parseICalContent(icsText, propertyId);
     if (parsed.length === 0) {
-      showToast('No se encontraron eventos VEVENT en el calendario iCal.');
+      if (!silent) showToast('No se encontraron eventos VEVENT en el calendario iCal.');
       return;
     }
     setReservations((prev) => {
@@ -458,7 +458,9 @@ export default function App() {
       newOnes.forEach((r) => syncReservationToSupabase(r));
       return [...filteredPrev, ...newOnes];
     });
-    showToast(`${parsed.length} reservas procesadas del iCal.`);
+    if (!silent) {
+      showToast(`${parsed.length} reservas procesadas del iCal.`);
+    }
   };
 
   const handleAddDirectReservation = (res: Reservation) => {
@@ -472,7 +474,7 @@ export default function App() {
       const res = await fetch(`/api/fetch-ical?url=${encodeURIComponent(url)}`);
       if (!res.ok) throw new Error('Error');
       const icsText = await res.text();
-      handleImportIcalText(propertyId, icsText);
+      handleImportIcalText(propertyId, icsText, silent);
       const now = Date.now();
       setProperties((prev) =>
         prev.map((p) =>
@@ -494,7 +496,7 @@ export default function App() {
 
   // Sincronización bajo demanda al abrir (/app, /c/:token o /g/:slug) con caché de 30 minutos (0€ en Cron)
   useEffect(() => {
-    if (route.kind === 'landing') return;
+    if (route.kind === 'landing' || route.kind === 'admin') return;
     properties.forEach((prop) => {
       if (shouldAutoSyncProperty(prop)) {
         // Marcamos timestamp para evitar lecturas duplicadas durante los próximos 30 min

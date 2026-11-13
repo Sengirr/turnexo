@@ -299,7 +299,7 @@ function AirbnbCsvInstructions({ compact }: { compact?: boolean }) {
             1
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Inicia sesión en Airbnb <strong>desde un ordenador / navegador web</strong> (la app móvil no permite exportar) en <strong>Modo Anfitrión</strong> y entra en <strong>Menú → Ingresos</strong>.
+            Inicia sesión en Airbnb <strong>desde un ordenador / navegador web</strong> (la app móvil no permite exportar) en <strong>Modo Anfitrión</strong> y entra en <strong>Menú (≡) → Ingresos</strong>.
           </div>
         </div>
 
@@ -308,7 +308,7 @@ function AirbnbCsvInstructions({ compact }: { compact?: boolean }) {
             2
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Pulsa en <strong>«Ver todos los pagados»</strong> (o entra en el historial de transacciones completadas) y utiliza los filtros de fecha para elegir el trimestre a facturar.
+            En el menú de la izquierda, entra en <strong>«Cobros recibidos»</strong> (o en <strong>«Informes»</strong> para bajar resúmenes mensuales o anuales).
           </div>
         </div>
 
@@ -317,7 +317,7 @@ function AirbnbCsvInstructions({ compact }: { compact?: boolean }) {
             3
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Haz clic en el botón <strong>«Exportar CSV»</strong> (en la parte superior del listado) y confirma en la ventana emergente para descargar el archivo <code>.csv</code>.
+            Filtra por el rango de fechas del trimestre a facturar y pulsa en <strong>«Exportar CSV»</strong> (en la parte superior del listado) para descargar el archivo <code>.csv</code>.
           </div>
         </div>
 

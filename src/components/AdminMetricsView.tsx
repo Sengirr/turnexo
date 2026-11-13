@@ -86,6 +86,8 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
   const [newLeadEmail, setNewLeadEmail] = useState('');
   const [newLeadCity, setNewLeadCity] = useState('Málaga');
   const [newLeadSegment, setNewLeadSegment] = useState<'asesoria' | 'gestora' | 'otro'>('asesoria');
+  const [sendingOutreach, setSendingOutreach] = useState(false);
+  const [outreachSendMsg, setOutreachSendMsg] = useState<string | null>(null);
 
   const fetchOutreachLeads = useCallback(async (tokenToUse: string) => {
     if (!tokenToUse) return;
@@ -192,6 +194,34 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
     });
     if (resp.ok) {
       setLeads((prev) => prev.filter((l) => l.id !== id));
+    }
+  };
+
+  const handleSendOutreachBatch = async () => {
+    if (!adminToken) return;
+    setSendingOutreach(true);
+    setOutreachSendMsg(null);
+    setMetricsError(null);
+    try {
+      const resp = await fetch('/api/cron-outreach', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify({ limit: 6 }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        setMetricsError(data?.error || 'Error enviando lote de emails.');
+        return;
+      }
+      setOutreachSendMsg(`Lote completado: ${data.sentCount || 0} emails enviados desde info@turnexo.app.`);
+      fetchOutreachLeads(adminToken);
+    } catch {
+      setMetricsError('No se pudo conectar con /api/cron-outreach.');
+    } finally {
+      setSendingOutreach(false);
     }
   };
 
@@ -995,6 +1025,17 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
                   + Cargar 12 Asesorías (Málaga / Costa del Sol)
                 </button>
               )}
+              {leads.some((l) => l.status === 'pendiente') && (
+                <button
+                  type="button"
+                  onClick={handleSendOutreachBatch}
+                  disabled={sendingOutreach}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1F4E3D] hover:bg-[#163A2D] text-white text-xs font-mono font-bold uppercase transition disabled:opacity-50"
+                >
+                  <Mail size={13} />
+                  <span>{sendingOutreach ? 'Enviando...' : 'Enviar 6 pendientes'}</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => fetchOutreachLeads(adminToken)}
@@ -1006,6 +1047,12 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
               </button>
             </div>
           </div>
+
+          {outreachSendMsg && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-2 text-xs font-medium">
+              {outreachSendMsg}
+            </div>
+          )}
 
           {/* Resumen rápido de estados */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">

@@ -138,6 +138,86 @@ export default function PropertyCustomizerModal({
   const [newVideoTitle, setNewVideoTitle] = useState('');
   const [newVideoCategory, setNewVideoCategory] = useState<PropertyVideo['category']>('checkin');
   const [newVideoUrl, setNewVideoUrl] = useState('');
+  const [uploadingGuideFile, setUploadingGuideFile] = useState(false);
+
+  const handleGuideFileUpload = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadingGuideFile(true);
+    try {
+      let dataUrl = '';
+      if (file.type.startsWith('image/')) {
+        dataUrl = await new Promise<string>((resolve, reject) => {
+          const img = new Image();
+          const objectUrl = URL.createObjectURL(file);
+          img.onload = () => {
+            const maxDim = 1200;
+            const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+            const w = Math.max(1, Math.round(img.width * scale));
+            const h = Math.max(1, Math.round(img.height * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              URL.revokeObjectURL(objectUrl);
+              reject(new Error('Canvas no disponible'));
+              return;
+            }
+            ctx.drawImage(img, 0, 0, w, h);
+            URL.revokeObjectURL(objectUrl);
+            resolve(canvas.toDataURL('image/jpeg', 0.78));
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('Error leyendo la imagen'));
+          };
+          img.src = objectUrl;
+        });
+      } else if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        if (file.size > 1.5 * 1024 * 1024) {
+          alert(
+            isEn
+              ? 'PDF is larger than 1.5 MB. Please upload it to Google Drive and paste the link instead.'
+              : 'El PDF pesa más de 1,5 MB. Súbelo a Google Drive y pega el enlace.'
+          );
+          return;
+        }
+        dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.onerror = () => reject(new Error('Error leyendo el PDF'));
+          reader.readAsDataURL(file);
+        });
+      } else {
+        alert(
+          isEn
+            ? 'Please choose an image (JPG/PNG) or a PDF file.'
+            : 'Selecciona una imagen (JPG/PNG) o un archivo PDF.'
+        );
+        return;
+      }
+
+      if (!dataUrl) return;
+      const fallbackTitle = file.name.replace(/\.[^/.]+$/, '') || (isEn ? 'Guide file' : 'Instrucciones');
+      const title = newVideoTitle.trim() || fallbackTitle;
+      setDraft((prev) => ({
+        ...prev,
+        videos: [
+          ...(prev.videos || []),
+          {
+            id: `v-${Date.now()}`,
+            title,
+            category: newVideoCategory,
+            url: dataUrl,
+          },
+        ],
+      }));
+      setNewVideoTitle('');
+      setNewVideoUrl('');
+    } finally {
+      setUploadingGuideFile(false);
+    }
+  };
 
   const [newDepartureItem, setNewDepartureItem] = useState('');
   const [newExtraTitle, setNewExtraTitle] = useState('');
@@ -768,19 +848,22 @@ export default function PropertyCustomizerModal({
                 </div>
               </div>
 
-              {/* Vídeos Explicativos (Entrada, Electrodomésticos y Bienvenida) */}
+              {/* Vídeos, Imágenes o PDFs Explicativos (Entrada, Electrodomésticos y Bienvenida) */}
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px]">
-                    {isEn ? `Videos in Digital Guide (Optional · ${draft.videos?.length || 0})` : `Vídeos de la Guía Digital (Opcional · ${draft.videos?.length || 0})`}
+                    {isEn ? `Guide Media: Videos, Photos or PDFs (${draft.videos?.length || 0})` : `Guía Visual: Vídeos, Imágenes o PDFs (Opcional · ${draft.videos?.length || 0})`}
                   </span>
                   <span className="text-[11px] text-slate-400">
-                    {isEn ? 'YouTube, Shorts, TikTok or Drive' : 'YouTube, Shorts o Google Drive'}
+                    {isEn ? 'YouTube, Drive, Image or PDF' : 'YouTube, Drive, Imagen o PDF'}
                   </span>
                 </div>
 
                 <div className="space-y-2">
-                  {(draft.videos || []).map((v) => (
+                  {(draft.videos || []).map((v) => {
+                    const isDataImg = v.url.startsWith('data:image/');
+                    const isDataPdf = v.url.startsWith('data:application/pdf') || v.url.toLowerCase().endsWith('.pdf');
+                    return (
                     <div
                       key={v.id}
                       className="flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl p-2.5"
@@ -794,7 +877,13 @@ export default function PropertyCustomizerModal({
                             : (isEn ? 'HOME TOUR' : 'HOME TOUR BIENVENIDA')}
                         </span>
                         <p className="font-bold text-slate-900 truncate">{v.title}</p>
-                        <p className="text-[11px] font-mono text-slate-400 truncate max-w-sm">{v.url}</p>
+                        <p className="text-[11px] font-mono text-slate-400 truncate max-w-sm">
+                          {isDataImg
+                            ? (isEn ? 'Uploaded image (JPG/PNG)' : 'Imagen adjunta (JPG/PNG)')
+                            : isDataPdf
+                            ? (isEn ? 'Uploaded PDF instructions' : 'PDF de instrucciones adjunto')
+                            : v.url}
+                        </p>
                       </div>
                       <button
                         type="button"
@@ -805,27 +894,30 @@ export default function PropertyCustomizerModal({
                           })
                         }
                         className="text-rose-500 hover:bg-rose-50 p-2 rounded-xl transition shrink-0"
-                        title={isEn ? 'Delete video' : 'Eliminar vídeo'}
+                        title={isEn ? 'Delete item' : 'Eliminar elemento'}
                       >
                         <Trash2 size={14} />
                       </button>
                     </div>
-                  ))}
+                  );
+                  })}
                   {(draft.videos || []).length === 0 && (
                     <p className="text-slate-500 text-xs bg-white border border-dashed border-slate-200 rounded-xl p-3">
                       {isEn
-                        ? 'No videos added (completely optional). Your guide works normally with written instructions, WiFi and access details.'
-                        : 'Sin vídeos añadidos (100% opcional). Si no quieres usar vídeos, la guía funciona igualmente con tus instrucciones escritas, WiFi, normas y acceso visibles directamente.'}
+                        ? 'No videos, photos or PDFs added yet. You can upload an image/PDF or paste a video link below.'
+                        : 'Sin vídeos ni archivos añadidos. Puedes subir una imagen o PDF con instrucciones, o pegar un enlace de vídeo abajo.'}
                     </p>
                   )}
                 </div>
 
-                {/* Formulario rápido para añadir vídeo */}
-                <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
-                  <p className="font-bold text-slate-800 text-xs">{isEn ? 'Add video to guide' : 'Añadir nuevo vídeo a la guía'}</p>
+                {/* Formulario rápido para añadir vídeo, imagen o PDF */}
+                <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2.5">
+                  <p className="font-bold text-slate-800 text-xs">
+                    {isEn ? 'Add video link, image or PDF' : 'Añadir vídeo (enlace) o subir Imagen / PDF'}
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <input
-                      placeholder={isEn ? 'Title (e.g. How to enter / AC Remote)' : 'Título (ej. Cómo entrar / Mando Aire)'}
+                      placeholder={isEn ? 'Title (e.g. How to enter / House manual)' : 'Título (ej. Cómo entrar / Manual casa)'}
                       value={newVideoTitle}
                       onChange={(e) => setNewVideoTitle(e.target.value)}
                       className="sm:col-span-2 border border-slate-200 rounded-xl px-3 py-1.5 text-xs"
@@ -840,20 +932,35 @@ export default function PropertyCustomizerModal({
                       <option value="hometour">{isEn ? 'Home Tour (Welcome)' : 'Home Tour (Bienvenida)'}</option>
                     </select>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 items-center">
                     <input
-                      placeholder="https://www.youtube.com/watch?v=..."
+                      placeholder={isEn ? 'Paste YouTube / Drive / PDF URL...' : 'Pega enlace de YouTube, Drive o PDF...'}
                       value={newVideoUrl}
                       onChange={(e) => setNewVideoUrl(e.target.value)}
-                      className="flex-1 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-mono"
+                      className="flex-1 min-w-[200px] border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-mono"
                     />
                     <button
                       type="button"
                       onClick={addVideo}
-                      className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 py-1.5 rounded-xl text-xs flex items-center gap-1 transition shrink-0"
+                      className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1 transition shrink-0"
                     >
-                      <Plus size={13} /> {isEn ? 'Add' : 'Añadir'}
+                      <Plus size={13} /> {isEn ? 'Add Link' : 'Añadir Enlace'}
                     </button>
+                    <label className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition shrink-0 cursor-pointer">
+                      <Camera size={13} />
+                      <span>{uploadingGuideFile ? (isEn ? 'Uploading...' : 'Subiendo...') : isEn ? 'Upload Photo / PDF' : 'Subir Foto / PDF'}</span>
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        className="hidden"
+                        disabled={uploadingGuideFile}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleGuideFileUpload(f);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
                   </div>
                 </div>
               </div>

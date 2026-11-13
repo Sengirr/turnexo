@@ -486,6 +486,84 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     };
   };
 
+  const isImageUrl =
+    url.startsWith('data:image/') || /\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(url);
+  const isPdfUrl =
+    url.startsWith('data:application/pdf') || /\.pdf(\?.*)?$/i.test(url);
+
+  if (isImageUrl) {
+    return (
+      <div
+        onClick={() => onPlay?.()}
+        className={`relative overflow-hidden bg-slate-100 rounded-[2rem] shadow-xl border border-slate-200 cursor-pointer ${className}`}
+      >
+        {title && (
+          <div className="px-5 py-3 bg-white border-b border-slate-100 flex items-center justify-between gap-2">
+            <div>
+              <h3 className="font-black text-sm text-gray-900">{title}</h3>
+              {subtitle && (
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-[11px] font-bold text-primary-ivi hover:underline shrink-0"
+            >
+              Ampliar ↗
+            </a>
+          </div>
+        )}
+        <img
+          src={url}
+          alt={title || 'Instrucciones'}
+          className="w-full max-h-[520px] object-contain bg-slate-50"
+        />
+      </div>
+    );
+  }
+
+  if (isPdfUrl) {
+    return (
+      <div
+        onClick={() => onPlay?.()}
+        className={`relative overflow-hidden bg-white rounded-[2rem] shadow-xl border border-slate-200 p-5 space-y-4 ${className}`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-primary-ivi">
+              PDF · INSTRUCCIONES
+            </span>
+            <h3 className="font-black text-base text-gray-900">
+              {title || 'Manual del alojamiento'}
+            </h3>
+            {subtitle && (
+              <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
+            )}
+          </div>
+          <a
+            href={url}
+            download={url.startsWith('data:') ? `${(title || 'instrucciones').replace(/\s+/g, '-')}.pdf` : undefined}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => onPlay?.()}
+            className="px-4 py-2.5 bg-primary-ivi text-white text-xs font-black rounded-2xl shadow-md hover:opacity-95 transition shrink-0"
+          >
+            Abrir PDF ↗
+          </a>
+        </div>
+        <iframe
+          src={url}
+          title={title || 'Instrucciones PDF'}
+          className="w-full h-72 rounded-2xl border border-slate-200 bg-slate-50 hidden sm:block"
+        />
+      </div>
+    );
+  }
+
   const videoData = getVideoData(url);
   if (!videoData) return null;
 

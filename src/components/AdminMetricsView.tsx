@@ -67,6 +67,134 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
   const [metricsError, setMetricsError] = useState<string | null>(null);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
 
+  // CRM de Prospección (outreach_leads en Supabase)
+  type OutreachStatus = 'pendiente' | 'enviado' | 'respondido' | 'registrado' | 'descartado';
+  interface OutreachLead {
+    id: string;
+    company_name: string;
+    email: string;
+    city: string;
+    segment: 'asesoria' | 'gestora' | 'otro';
+    status: OutreachStatus;
+    sent_at: string | null;
+    notes: string;
+  }
+  const [leads, setLeads] = useState<OutreachLead[]>([]);
+  const [loadingLeads, setLoadingLeads] = useState(false);
+  const [leadFilter, setLeadFilter] = useState<'all' | OutreachStatus>('all');
+  const [newLeadCompany, setNewLeadCompany] = useState('');
+  const [newLeadEmail, setNewLeadEmail] = useState('');
+  const [newLeadCity, setNewLeadCity] = useState('Málaga');
+  const [newLeadSegment, setNewLeadSegment] = useState<'asesoria' | 'gestora' | 'otro'>('asesoria');
+
+  const fetchOutreachLeads = useCallback(async (tokenToUse: string) => {
+    if (!tokenToUse) return;
+    setLoadingLeads(true);
+    try {
+      const resp = await fetch('/api/admin-outreach', {
+        headers: { Authorization: `Bearer ${tokenToUse}` },
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        setLeads(Array.isArray(data.leads) ? data.leads : []);
+      }
+    } catch {
+      // Silencioso si aún no se ha creado la tabla outreach_leads
+    } finally {
+      setLoadingLeads(false);
+    }
+  }, []);
+
+  const handleAddLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminToken || !newLeadCompany.trim() || !newLeadEmail.trim()) return;
+    const resp = await fetch('/api/admin-outreach', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`,
+      },
+      body: JSON.stringify({
+        company_name: newLeadCompany.trim(),
+        email: newLeadEmail.trim(),
+        city: newLeadCity.trim(),
+        segment: newLeadSegment,
+      }),
+    });
+    if (resp.ok) {
+      setNewLeadCompany('');
+      setNewLeadEmail('');
+      fetchOutreachLeads(adminToken);
+    } else {
+      const err = await resp.json().catch(() => ({}));
+      setMetricsError(err?.error || 'Ejecuta supabase/outreach_leads.sql en Supabase para guardar leads.');
+    }
+  };
+
+  const handleSeedMalagaLeads = async () => {
+    if (!adminToken) return;
+    const initialBatch = [
+      { company_name: 'Asesoría Torremolinos S.L.', email: 'asetorre@asesoriatorremolinos.es', city: 'Torremolinos', segment: 'asesoria' },
+      { company_name: 'Asesoramientos Maresol', email: 'info@asesoramientosmaresol.com', city: 'Torremolinos', segment: 'asesoria' },
+      { company_name: 'Gestoría Administrativa Torremolinos', email: 'gestorremolinos@hotmail.com', city: 'Torremolinos', segment: 'asesoria' },
+      { company_name: 'BCM Asesores', email: 'consultas@bcmasesor.es', city: 'Benalmádena', segment: 'asesoria' },
+      { company_name: 'Fortes & Rodríguez Asesores', email: 'info@fortesyrodriguez.es', city: 'Benalmádena', segment: 'asesoria' },
+      { company_name: 'Asesoría Benamiel', email: 'abenamiel@gmail.com', city: 'Benalmádena', segment: 'asesoria' },
+      { company_name: 'Asesoría Elisa Vázquez', email: 'elisavf@asesoriaelisavazquez.com', city: 'Benalmádena', segment: 'asesoria' },
+      { company_name: 'Abogados Tributarios', email: 'at@abogadostributarios.es', city: 'Málaga', segment: 'asesoria' },
+      { company_name: 'Asesoramiento Farotru y Asociados', email: 'fiscalrasociados@gmail.com', city: 'Málaga', segment: 'asesoria' },
+      { company_name: 'Málaga Asesores', email: 'info@malagaasesores.es', city: 'Málaga', segment: 'asesoria' },
+      { company_name: 'Asesoría Fiscal Málaga SL', email: 'info@asesoriafiscalmalaga.es', city: 'Málaga', segment: 'asesoria' },
+      { company_name: 'Te Hago La Renta', email: 'info@tehagolarenta.com', city: 'Málaga', segment: 'asesoria' },
+    ];
+    const resp = await fetch('/api/admin-outreach', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`,
+      },
+      body: JSON.stringify({ leads: initialBatch }),
+    });
+    if (resp.ok) {
+      fetchOutreachLeads(adminToken);
+    } else {
+      const err = await resp.json().catch(() => ({}));
+      setMetricsError(err?.error || 'Ejecuta supabase/outreach_leads.sql en Supabase para importar la lista.');
+    }
+  };
+
+  const handleUpdateLeadStatus = async (id: string, status: OutreachStatus) => {
+    if (!adminToken) return;
+    const resp = await fetch('/api/admin-outreach', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`,
+      },
+      body: JSON.stringify({ id, status }),
+    });
+    if (resp.ok) {
+      setLeads((prev) =>
+        prev.map((l) =>
+          l.id === id
+            ? { ...l, status, sent_at: status === 'enviado' && !l.sent_at ? new Date().toISOString() : l.sent_at }
+            : l
+        )
+      );
+    }
+  };
+
+  const handleDeleteLead = async (id: string) => {
+    if (!adminToken) return;
+    const resp = await fetch(`/api/admin-outreach?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    if (resp.ok) {
+      setLeads((prev) => prev.filter((l) => l.id !== id));
+    }
+  };
+
   const fetchRealMetrics = useCallback(async (tokenToUse: string) => {
     if (!tokenToUse) return;
     setLoadingMetrics(true);
@@ -105,8 +233,9 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
   useEffect(() => {
     if (isAuthenticated && adminToken) {
       fetchRealMetrics(adminToken);
+      fetchOutreachLeads(adminToken);
     }
-  }, [isAuthenticated, adminToken, fetchRealMetrics]);
+  }, [isAuthenticated, adminToken, fetchRealMetrics, fetchOutreachLeads]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -840,6 +969,166 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
               </button>
             </div>
           </form>
+        </div>
+
+        {/* CRM DE PROSPECCIÓN Y CONTROL DE EMAILS */}
+        <div className="bg-white border border-[#E2DDD2] p-6 space-y-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#EFECE6] pb-4">
+            <div>
+              <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-[#C85A32]">
+                OUTREACH CRM · CONTROL DE CAPTACIÓN
+              </span>
+              <h3 className="text-base font-bold text-[#141413]">
+                Prospección de Asesorías y Gestoras ({leads.length})
+              </h3>
+              <p className="text-xs text-[#57554F]">
+                Lleva el control de a quién has contactado desde <code className="font-mono">info@turnexo.app</code>, respuestas y altas.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {leads.length === 0 && (
+                <button
+                  type="button"
+                  onClick={handleSeedMalagaLeads}
+                  className="px-3 py-1.5 bg-[#C85A32] hover:bg-[#B24D28] text-white text-xs font-mono font-bold uppercase transition"
+                >
+                  + Cargar 12 Asesorías (Málaga / Costa del Sol)
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => fetchOutreachLeads(adminToken)}
+                disabled={loadingLeads}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#141413] hover:bg-[#2C2C29] text-white text-xs font-mono font-bold uppercase transition disabled:opacity-50"
+              >
+                <RefreshCw size={13} className={loadingLeads ? 'animate-spin' : ''} />
+                <span>Refrescar</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Resumen rápido de estados */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
+            {(['pendiente', 'enviado', 'respondido', 'registrado', 'descartado'] as const).map((st) => {
+              const count = leads.filter((l) => l.status === st).length;
+              return (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => setLeadFilter((prev) => (prev === st ? 'all' : st))}
+                  className={`p-2.5 border text-left transition ${
+                    leadFilter === st
+                      ? 'border-[#141413] bg-[#FAF9F5]'
+                      : 'border-[#E2DDD2] bg-white hover:bg-[#FAF9F5]'
+                  }`}
+                >
+                  <span className="font-mono text-[10px] uppercase text-[#57554F] block">{st}</span>
+                  <span className="text-lg font-black font-mono text-[#141413]">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Añadir lead manual */}
+          <form onSubmit={handleAddLead} className="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs">
+            <input
+              type="text"
+              value={newLeadCompany}
+              onChange={(e) => setNewLeadCompany(e.target.value)}
+              placeholder="Nombre asesoría o empresa"
+              className="px-3 py-2 border border-[#D5CFC0] bg-white text-[#141413]"
+              required
+            />
+            <input
+              type="email"
+              value={newLeadEmail}
+              onChange={(e) => setNewLeadEmail(e.target.value)}
+              placeholder="email@asesoria.es"
+              className="px-3 py-2 border border-[#D5CFC0] bg-white text-[#141413]"
+              required
+            />
+            <input
+              type="text"
+              value={newLeadCity}
+              onChange={(e) => setNewLeadCity(e.target.value)}
+              placeholder="Ciudad (ej. Málaga)"
+              className="px-3 py-2 border border-[#D5CFC0] bg-white text-[#141413]"
+            />
+            <select
+              value={newLeadSegment}
+              onChange={(e) => setNewLeadSegment(e.target.value as any)}
+              className="px-3 py-2 border border-[#D5CFC0] bg-white text-[#141413]"
+            >
+              <option value="asesoria">Asesoría Fiscal</option>
+              <option value="gestora">Gestora</option>
+              <option value="otro">Otro</option>
+            </select>
+            <button
+              type="submit"
+              className="px-3 py-2 bg-[#141413] hover:bg-[#2C2C29] text-white font-mono font-bold uppercase transition"
+            >
+              + Añadir Lead
+            </button>
+          </form>
+
+          {/* Tabla de leads */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-[#E2DDD2] text-[10px] font-mono uppercase tracking-wider text-[#57554F]">
+                  <th className="py-2 pr-3">Empresa / Despacho</th>
+                  <th className="py-2 px-3">Email</th>
+                  <th className="py-2 px-3">Ciudad</th>
+                  <th className="py-2 px-3">Estado</th>
+                  <th className="py-2 px-3">Enviado</th>
+                  <th className="py-2 pl-3 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F0ECE3]">
+                {leads
+                  .filter((l) => leadFilter === 'all' || l.status === leadFilter)
+                  .map((lead) => (
+                    <tr key={lead.id} className="hover:bg-[#FAF9F5]">
+                      <td className="py-2.5 pr-3 font-semibold text-[#141413]">{lead.company_name}</td>
+                      <td className="py-2.5 px-3 font-mono text-[#57554F]">{lead.email}</td>
+                      <td className="py-2.5 px-3 text-[#57554F]">{lead.city || '—'}</td>
+                      <td className="py-2.5 px-3">
+                        <select
+                          value={lead.status}
+                          onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value as OutreachStatus)}
+                          className="px-2 py-1 border border-[#D5CFC0] bg-white text-[11px] font-mono font-bold uppercase"
+                        >
+                          <option value="pendiente">Pendiente</option>
+                          <option value="enviado">Enviado</option>
+                          <option value="respondido">Respondido</option>
+                          <option value="registrado">Registrado</option>
+                          <option value="descartado">Descartado</option>
+                        </select>
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[#57554F]">
+                        {lead.sent_at ? new Date(lead.sent_at).toLocaleDateString('es-ES') : '—'}
+                      </td>
+                      <td className="py-2.5 pl-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteLead(lead.id)}
+                          className="text-[11px] font-mono text-red-600 hover:underline"
+                        >
+                          Borrar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                {leads.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center text-[#57554F]">
+                      Aún no hay leads guardados. Ejecuta <code className="font-mono">supabase/outreach_leads.sql</code> en Supabase y pulsa <strong>+ Cargar 12 Asesorías</strong>.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* CENTRO DE CONEXIÓN NUBE & SUPABASE */}

@@ -414,29 +414,52 @@ export default function PropertyCustomizerModal({
                     </select>
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">{isEn ? 'Assigned Cleaner' : 'Limpiadora Asignada'}</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      {isEn ? 'Default Cleaner' : 'Limpiadora Habitual'}{' '}
+                      <span className="font-normal text-[10px] text-slate-400">
+                        ({isEn ? 'Optional · Rotating' : 'Opcional · Rotativa'})
+                      </span>
+                    </label>
                     <select
-                      value={draft.defaultCleanerId}
+                      value={draft.defaultCleanerId || ''}
                       onChange={(e) => setDraft({ ...draft, defaultCleanerId: e.target.value })}
-                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800"
+                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-slate-800 text-xs"
                     >
+                      <option value="">
+                        {isEn ? 'No fixed cleaner (Rotating / Assign per turn)' : 'Sin limpiadora fija (Rotativa / Asignar por turno)'}
+                      </option>
                       {cleaners.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
+                        <option key={c.id} value={c.id}>
+                          {c.name} ({c.phone})
+                        </option>
                       ))}
                     </select>
                   </div>
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">
-                      {isEn ? 'Pay per turn (€)' : 'Pago limpieza (€)'} <span className="font-normal text-[10px] text-slate-400">({isEn ? 'Optional' : 'Opcional'})</span>
+                      {isEn ? 'Cleaner Pay per turn (€)' : 'Pago a la limpiadora (€)'}{' '}
+                      <span className="font-normal text-[10px] text-slate-400">
+                        ({isEn ? 'Optional' : 'Opcional'})
+                      </span>
                     </label>
                     <input
                       type="number"
                       min="0"
                       placeholder="0"
                       value={draft.cleaningFee === 0 ? '' : draft.cleaningFee}
-                      onChange={(e) => setDraft({ ...draft, cleaningFee: e.target.value === '' ? 0 : Number(e.target.value) })}
-                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold"
+                      onChange={(e) =>
+                        setDraft({
+                          ...draft,
+                          cleaningFee: e.target.value === '' ? 0 : Number(e.target.value),
+                        })
+                      }
+                      className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-bold text-xs"
                     />
+                    <span className="text-[10px] text-slate-400 block mt-1 leading-tight">
+                      {isEn
+                        ? 'Amount paid to the cleaner per turnover (used for payroll, not the guest fee)'
+                        : 'Tarifa por turno abonada a la limpiadora (para liquidaciones, no es lo cobrado al huésped)'}
+                    </span>
                   </div>
                 </div>
               </div>

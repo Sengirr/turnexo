@@ -280,15 +280,15 @@ function AirbnbCsvInstructions({ compact }: { compact?: boolean }) {
     <div className="space-y-3.5 text-xs">
       <div className="flex items-center justify-between bg-rose-50/70 border border-rose-200/80 p-3 rounded-2xl">
         <div className="flex items-center gap-2">
-          <span className="font-extrabold text-rose-950">Sección: Reservas de Airbnb</span>
+          <span className="font-extrabold text-rose-950">Sección: Panel de Ingresos de Airbnb</span>
         </div>
         <a
-          href="https://www.airbnb.es/hosting/reservations/completed"
+          href="https://www.airbnb.es/users/transaction_history"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#FF385C] hover:bg-[#e03150] text-white rounded-xl font-bold transition shadow-2xs"
         >
-          <span>Abrir Reservas en Airbnb</span>
+          <span>Abrir Ingresos en Airbnb</span>
           <ExternalLink size={12} />
         </a>
       </div>
@@ -299,7 +299,7 @@ function AirbnbCsvInstructions({ compact }: { compact?: boolean }) {
             1
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Entra en tu modo anfitrión de Airbnb y ve a <strong>Menú → Reservas</strong> (o pulsa el botón rojo de arriba).
+            Inicia sesión en Airbnb <strong>desde un ordenador / navegador web</strong> (la app móvil no permite exportar) en <strong>Modo Anfitrión</strong> y entra en <strong>Menú → Ingresos</strong>.
           </div>
         </div>
 
@@ -308,7 +308,7 @@ function AirbnbCsvInstructions({ compact }: { compact?: boolean }) {
             2
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Haz clic en la pestaña <strong>«Completadas»</strong> (o usa el filtro de fechas para indicar el trimestre que vas a declarar, por ejemplo del 1 de octubre al 31 de diciembre).
+            Pulsa en <strong>«Ver todos los pagados»</strong> (o entra en el historial de transacciones completadas) y utiliza los filtros de fecha para elegir el trimestre a facturar.
           </div>
         </div>
 
@@ -317,7 +317,7 @@ function AirbnbCsvInstructions({ compact }: { compact?: boolean }) {
             3
           </span>
           <div className="text-slate-700 leading-relaxed">
-            En la esquina superior derecha de la lista, haz clic en el botón <strong>«Exportar»</strong> y selecciona <strong>«Descargar archivo CSV»</strong>.
+            Haz clic en el botón <strong>«Exportar CSV»</strong> (en la parte superior del listado) y confirma en la ventana emergente para descargar el archivo <code>.csv</code>.
           </div>
         </div>
 
@@ -326,13 +326,13 @@ function AirbnbCsvInstructions({ compact }: { compact?: boolean }) {
             4
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Sube el archivo descargado tal cual aquí en Turnexo. Se emitirán automáticamente todas las facturas correlativas con su base e IVA del 10%.
+            Sube ese archivo directamente aquí en Turnexo. Se emitirán automáticamente todas tus facturas correlativas con su base e IVA del 10%.
           </div>
         </div>
       </div>
 
       <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-amber-900 text-[11px] leading-relaxed">
-        <strong>💡 Alternativa por Historial de Ingresos:</strong> También puedes ir a <em>Menú → Ingresos → Historial de transacciones completadas</em> y pulsar «Descargar CSV». Turnexo reconoce ambos formatos a la perfección.
+        <strong>💡 Nota importante:</strong> Airbnb trasladó la exportación de reservas al panel de <strong>Ingresos</strong>. Si gestionas varios alojamientos, Turnexo filtrará automáticamente solo las reservas de tus pisos registrados.
       </div>
     </div>
   );
@@ -365,7 +365,7 @@ function BookingCsvInstructions({ compact }: { compact?: boolean }) {
             1
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Accede a tu cuenta en <strong>admin.booking.com</strong> y en el menú superior pulsa en <strong>«Reservas»</strong>.
+            Accede a <strong>admin.booking.com</strong> y en el menú superior pulsa en la pestaña <strong>«Reservas»</strong>.
           </div>
         </div>
 
@@ -374,7 +374,7 @@ function BookingCsvInstructions({ compact }: { compact?: boolean }) {
             2
           </span>
           <div className="text-slate-700 leading-relaxed">
-            En los filtros de búsqueda, en el desplegable de fechas selecciona <strong>«Fecha de salida»</strong> y marca el trimestre a facturar (ej. 1 de julio a 30 de septiembre). Pulsa <strong>«Mostrar»</strong>.
+            En los filtros, selecciona criterio <strong>«Fecha de salida»</strong> (check-out), indica el rango de fechas del trimestre (<em>Desde / Hasta</em>) y pulsa el botón <strong>«Mostrar»</strong>.
           </div>
         </div>
 
@@ -383,7 +383,7 @@ function BookingCsvInstructions({ compact }: { compact?: boolean }) {
             3
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Arriba a la derecha de la tabla, haz clic en el botón <strong>«Descargar»</strong> (o <em>«Imprimir lista de reservas»</em>) y elige formato <strong>Excel (.xls o .xlsx)</strong> o <strong>CSV</strong>.
+            Arriba a la derecha de la tabla de resultados, haz clic en <strong>«Descargar»</strong> (o <em>«Exportar»</em>) para descargar el archivo Excel oficial (<code>.xls</code> o <code>.xlsx</code>).
           </div>
         </div>
 
@@ -392,7 +392,7 @@ function BookingCsvInstructions({ compact }: { compact?: boolean }) {
             4
           </span>
           <div className="text-slate-700 leading-relaxed">
-            Guarda el archivo en tu ordenador y arrástralo directamente a Turnexo. No necesitas cambiarle el formato ni editar ninguna columna.
+            Sube el Excel descargado directamente aquí en Turnexo sin abrirlo ni convertirlo a CSV.
           </div>
         </div>
       </div>

@@ -6,8 +6,35 @@ import {
   getInvoiceChannel,
 } from './invoice';
 
+function escapeHtml(value: string | undefined | null): string {
+  if (!value) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function generateInvoiceHtml(invoice: Invoice): string {
   const isSimplified = invoice.isSimplified;
+  const hostName = escapeHtml(invoice.hostName);
+  const hostFiscalId = escapeHtml(invoice.hostFiscalId);
+  const hostAddress = escapeHtml(invoice.hostAddress);
+  const hostPostalCode = escapeHtml(invoice.hostPostalCode);
+  const hostCity = escapeHtml(invoice.hostCity);
+  const propertyName = escapeHtml(invoice.propertyName);
+  const invoiceNumber = escapeHtml(invoice.invoiceNumber);
+  const issueDate = escapeHtml(formatDisplayDate(invoice.issueDate));
+  const bookingRef = escapeHtml(getInvoiceBookingRef(invoice));
+  const channel = escapeHtml(getInvoiceChannel(invoice));
+  const guestName = escapeHtml(invoice.guestName);
+  const guestFiscalId = escapeHtml(invoice.guestFiscalId);
+  const guestAddress = escapeHtml(invoice.guestAddress);
+  const guestEmail = escapeHtml(invoice.guestEmail);
+  const stayStart = escapeHtml(formatDisplayDate(invoice.stayStartDate));
+  const stayEnd = escapeHtml(formatDisplayDate(invoice.stayEndDate));
+
   return `
     <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; background: #ffffff; padding: 24px; max-width: 750px; margin: 0 auto; font-size: 12px; line-height: 1.5;">
       <!-- Barra superior verde azulado IVI -->
@@ -17,17 +44,17 @@ export function generateInvoiceHtml(invoice: Invoice): string {
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: flex-start;">
         <div style="font-size: 11px; color: #334155; line-height: 1.5;">
           <p style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #0f172a; margin: 0 0 4px 0; letter-spacing: 0.5px;">EMISOR / ARRENDADOR:</p>
-          <p style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0 0 3px 0;">${invoice.hostName}</p>
-          <p style="font-family: monospace; font-size: 11px; color: #475569; margin: 0 0 2px 0;">NIF / CIF: ${invoice.hostFiscalId}</p>
-          <p style="color: #475569; margin: 0 0 2px 0;">Domicilio Fiscal: ${invoice.hostAddress}, ${invoice.hostPostalCode} ${invoice.hostCity} (ES)</p>
-          <p style="color: #475569; margin: 0;">Inmueble: <strong style="color: #0f172a;">${invoice.propertyName}</strong></p>
+          <p style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0 0 3px 0;">${hostName}</p>
+          <p style="font-family: monospace; font-size: 11px; color: #475569; margin: 0 0 2px 0;">NIF / CIF: ${hostFiscalId}</p>
+          <p style="color: #475569; margin: 0 0 2px 0;">Domicilio Fiscal: ${hostAddress}, ${hostPostalCode} ${hostCity} (ES)</p>
+          <p style="color: #475569; margin: 0;">Inmueble: <strong style="color: #0f172a;">${propertyName}</strong></p>
         </div>
         <div style="text-align: right; font-size: 11px; color: #475569;">
           <h1 style="font-size: 22px; font-weight: 900; color: #0e6f68; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: -0.5px;">FACTURA DE HOSPEDAJE</h1>
-          <p style="margin: 0 0 3px 0;">Nº Factura: <strong style="color: #0f172a; font-family: monospace; font-size: 12px;">${invoice.invoiceNumber}</strong></p>
-          <p style="margin: 0 0 3px 0;">Fecha de Emisión: <strong style="color: #334155;">${formatDisplayDate(invoice.issueDate)}</strong></p>
-          <p style="margin: 0 0 3px 0;">Localizador: <strong style="color: #334155; font-family: monospace;">${getInvoiceBookingRef(invoice)}</strong></p>
-          <p style="margin: 0;">Canal de Reserva: <strong style="color: #334155;">${getInvoiceChannel(invoice)}</strong></p>
+          <p style="margin: 0 0 3px 0;">Nº Factura: <strong style="color: #0f172a; font-family: monospace; font-size: 12px;">${invoiceNumber}</strong></p>
+          <p style="margin: 0 0 3px 0;">Fecha de Emisión: <strong style="color: #334155;">${issueDate}</strong></p>
+          <p style="margin: 0 0 3px 0;">Localizador: <strong style="color: #334155; font-family: monospace;">${bookingRef}</strong></p>
+          <p style="margin: 0;">Canal de Reserva: <strong style="color: #334155;">${channel}</strong></p>
         </div>
       </div>
 
@@ -37,16 +64,16 @@ export function generateInvoiceHtml(invoice: Invoice): string {
       <!-- Datos del Cliente / Huésped (Receptor) -->
       <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
         <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #0e6f68; margin: 0 0 4px 0; letter-spacing: 0.5px;">DATOS DEL CLIENTE / HUÉSPED (RECEPTOR)</p>
-        <p style="font-size: 13px; font-weight: 800; color: #0f172a; margin: 0 0 2px 0;">${invoice.guestName}</p>
+        <p style="font-size: 13px; font-weight: 800; color: #0f172a; margin: 0 0 2px 0;">${guestName}</p>
         ${
-          invoice.guestFiscalId
-            ? `<p style="font-family: monospace; font-size: 11px; color: #475569; margin: 0 0 2px 0;">NIF / ID: ${invoice.guestFiscalId}</p>`
+          guestFiscalId
+            ? `<p style="font-family: monospace; font-size: 11px; color: #475569; margin: 0 0 2px 0;">NIF / ID: ${guestFiscalId}</p>`
             : isSimplified
             ? `<p style="font-style: italic; font-size: 11px; color: #94a3b8; margin: 0 0 2px 0;">Particular (identificación según reserva / Registro de Viajeros)</p>`
             : `<p style="font-style: italic; font-size: 11px; color: #b45309; margin: 0 0 2px 0;">Particular (sin NIF registrado en plataforma)</p>`
         }
-        ${invoice.guestAddress ? `<p style="font-size: 11px; color: #475569; margin: 0 0 2px 0;">Domicilio: ${invoice.guestAddress}</p>` : ''}
-        ${invoice.guestEmail ? `<p style="font-size: 11px; color: #64748b; margin: 0;">${invoice.guestEmail}</p>` : ''}
+        ${guestAddress ? `<p style="font-size: 11px; color: #475569; margin: 0 0 2px 0;">Domicilio: ${guestAddress}</p>` : ''}
+        ${guestEmail ? `<p style="font-size: 11px; color: #64748b; margin: 0;">${guestEmail}</p>` : ''}
       </div>
 
       <!-- Tabla de Servicios estilo IVI -->
@@ -62,8 +89,8 @@ export function generateInvoiceHtml(invoice: Invoice): string {
         <tbody>
           <tr style="background-color: #ffffff;">
             <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
-              <strong style="color: #0f172a; display: block; font-size: 12px;">Servicio de alojamiento turístico en ${invoice.propertyName}</strong>
-              <span style="font-size: 11px; color: #64748b; display: block; margin-top: 3px;">Entrada: ${formatDisplayDate(invoice.stayStartDate)} — Salida: ${formatDisplayDate(invoice.stayEndDate)}</span>
+              <strong style="color: #0f172a; display: block; font-size: 12px;">Servicio de alojamiento turístico en ${propertyName}</strong>
+              <span style="font-size: 11px; color: #64748b; display: block; margin-top: 3px;">Entrada: ${stayStart} — Salida: ${stayEnd}</span>
             </td>
             <td style="padding: 12px; text-align: center; color: #334155; border-bottom: 1px solid #f1f5f9;">
               ${invoice.vatRate}%
@@ -82,7 +109,7 @@ export function generateInvoiceHtml(invoice: Invoice): string {
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: flex-start; margin-bottom: 24px;">
         <div style="font-size: 11px; color: #475569; line-height: 1.5;">
           <p style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #0e6f68; margin: 0 0 4px 0; letter-spacing: 0.5px;">ESTADO DEL PAGO:</p>
-          <p style="margin: 0 0 3px 0; color: #1e293b; font-weight: 600;">Cobrado y confirmado a través de plataforma (${getInvoiceChannel(invoice)}).</p>
+          <p style="margin: 0 0 3px 0; color: #1e293b; font-weight: 600;">Cobrado y confirmado a través de plataforma (${channel}).</p>
           <p style="margin: 0; color: #64748b;">Importe íntegro satisfecho con anterioridad o durante la estancia.</p>
         </div>
         <div>

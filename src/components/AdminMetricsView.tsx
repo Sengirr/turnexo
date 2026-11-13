@@ -37,9 +37,7 @@ interface Props {
   onBackToLanding: () => void;
 }
 
-const DEFAULT_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'turnexo2026!';
 const SESSION_AUTH_KEY = 'turnexo_admin_auth_v1';
-const STORED_PASSWORD_KEY = 'turnexo_admin_custom_password_v1';
 
 export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props) {
   // Autenticación de Administrador en memoria de sesión (se borra al cerrar la pestaña)
@@ -49,27 +47,36 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
 
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
 
   // Modal para cambiar contraseña de admin
   const [showChangePassModal, setShowChangePassModal] = useState(false);
   const [newAdminPass, setNewAdminPass] = useState('');
   const [passChangedMsg, setPassChangedMsg] = useState(false);
 
-  const getActivePassword = () => {
-    return localStorage.getItem(STORED_PASSWORD_KEY) || DEFAULT_ADMIN_PASSWORD;
-  };
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
-
-    const validPassword = getActivePassword();
-    if (passwordInput.trim() === validPassword) {
-      sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
-      setIsAuthenticated(true);
-      setPasswordInput('');
-    } else {
-      setAuthError('Contraseña incorrecta. Acceso restringido al fundador.');
+    setAuthLoading(true);
+    try {
+      const resp = await fetch('/api/admin-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: passwordInput.trim() }),
+      });
+      if (resp.ok) {
+        sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+        setIsAuthenticated(true);
+        setPasswordInput('');
+      } else if (resp.status === 503) {
+        setAuthError('Falta configurar ADMIN_PASSWORD en las variables de entorno de Vercel.');
+      } else {
+        setAuthError('Contraseña incorrecta. Acceso restringido al fundador.');
+      }
+    } catch {
+      setAuthError('No se pudo verificar la contraseña con el servidor.');
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -80,17 +87,9 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
 
   const handleChangePassword = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newAdminPass.trim().length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres.');
-      return;
-    }
-    localStorage.setItem(STORED_PASSWORD_KEY, newAdminPass.trim());
-    setPassChangedMsg(true);
-    setTimeout(() => {
-      setPassChangedMsg(false);
-      setShowChangePassModal(false);
-      setNewAdminPass('');
-    }, 2000);
+    alert('Por seguridad, actualiza la variable ADMIN_PASSWORD directamente en Vercel → Environment Variables.');
+    setShowChangePassModal(false);
+    setNewAdminPass('');
   };
 
   const [users, setUsers] = useState<SaasUser[]>(() => {

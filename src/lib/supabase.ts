@@ -99,7 +99,7 @@ export async function loadWorkspaceFromSupabase(): Promise<{
     ]);
 
     const properties: Property[] | null =
-      propsRes.data && propsRes.data.length > 0
+      !propsRes.error && Array.isArray(propsRes.data)
         ? propsRes.data.map((row: any) => ({
             id: row.id,
             name: row.name,
@@ -143,7 +143,7 @@ export async function loadWorkspaceFromSupabase(): Promise<{
         : null;
 
     const cleaners: Cleaner[] | null =
-      cleanersRes.data && cleanersRes.data.length > 0
+      !cleanersRes.error && Array.isArray(cleanersRes.data)
         ? cleanersRes.data.map((row: any) => ({
             id: row.id,
             name: row.name,
@@ -153,7 +153,7 @@ export async function loadWorkspaceFromSupabase(): Promise<{
         : null;
 
     const reservations: Reservation[] | null =
-      resvRes.data && resvRes.data.length > 0
+      !resvRes.error && Array.isArray(resvRes.data)
         ? resvRes.data.map((row: any) => ({
             id: row.id,
             propertyId: row.property_id,

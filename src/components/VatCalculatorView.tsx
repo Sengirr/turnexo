@@ -17,7 +17,7 @@ interface VatCalculatorViewProps {
   onNavigateToApp: () => void;
 }
 
-type CalculatorTab = 'booking' | 'pricing';
+type CalculatorTab = 'balance' | 'booking' | 'pricing';
 
 function formatEur(value: number): string {
   return new Intl.NumberFormat('es-ES', {
@@ -32,13 +32,21 @@ export default function VatCalculatorView({
   onBackToLanding,
   onNavigateToApp,
 }: VatCalculatorViewProps) {
-  const [tab, setTab] = useState<CalculatorTab>('booking');
+  const [tab, setTab] = useState<CalculatorTab>('balance');
 
-  // Pestaña 1: Desglose de una reserva concreta
+  // Pestaña 1 (Balance real mes): Ingresos vs Gastos con IVA deducible
+  const [monthlyIncomeInput, setMonthlyIncomeInput] = useState<string>('1000');
+  const [portalCommPctInput, setPortalCommPctInput] = useState<string>('16.3');
+  const [agencyPctInput, setAgencyPctInput] = useState<string>('20');
+  const [monthlyCleaningInput, setMonthlyCleaningInput] = useState<string>('70');
+  const [monthlyUtilitiesInput, setMonthlyUtilitiesInput] = useState<string>('155');
+  const [otherExpensesInput, setOtherExpensesInput] = useState<string>('0');
+
+  // Pestaña 2: Desglose de una reserva concreta
   const [guestPaidInput, setGuestPaidInput] = useState<string>('500');
   const [commissionPctInput, setCommissionPctInput] = useState<string>('15');
 
-  // Pestaña 2: Cómo ajustar tu tarifa por noche el 1 de diciembre
+  // Pestaña 3: Cómo ajustar tu tarifa por noche el 1 de diciembre
   const [currentNightRateInput, setCurrentNightRateInput] = useState<string>('100');
   const [nightsPerMonthInput, setNightsPerMonthInput] = useState<string>('15');
 
@@ -60,6 +68,76 @@ export default function VatCalculatorView({
       if (metaDesc && prevDesc) metaDesc.setAttribute('content', prevDesc);
     };
   }, []);
+
+  const balanceCalc = useMemo(() => {
+    const grossIncome = Math.max(0, Number(monthlyIncomeInput.replace(',', '.')) || 0);
+    const portalPct = Math.min(35, Math.max(0, Number(portalCommPctInput.replace(',', '.')) || 0));
+    const agencyPct = Math.min(50, Math.max(0, Number(agencyPctInput.replace(',', '.')) || 0));
+    const cleaningBase = Math.max(0, Number(monthlyCleaningInput.replace(',', '.')) || 0);
+    const utilitiesBase = Math.max(0, Number(monthlyUtilitiesInput.replace(',', '.')) || 0);
+    const otherBase = Math.max(0, Number(otherExpensesInput.replace(',', '.')) || 0);
+
+    const incomeBase = Math.round((grossIncome / 1.1) * 100) / 100;
+    const outputVat10 = Math.round((grossIncome - incomeBase) * 100) / 100;
+
+    // Gastos base (sin IVA) + su IVA deducible (21% en comisiones/limpieza/otros, ~18.5% mixto luz/agua/internet)
+    const portalBase = Math.round(((grossIncome * portalPct) / 100) * 100) / 100;
+    const portalVat = Math.round(portalBase * 0.21 * 100) / 100;
+
+    const agencyBase = Math.round(((grossIncome * agencyPct) / 100) * 100) / 100;
+    const agencyVat = Math.round(agencyBase * 0.21 * 100) / 100;
+
+    const cleaningVat = Math.round(cleaningBase * 0.21 * 100) / 100;
+    // Suministros: luz/internet al 21% y agua al 10% (aprox. 18,52% combinado como en el ejemplo real)
+    const utilitiesVat = Math.round(utilitiesBase * 0.18516 * 100) / 100;
+    const otherVat = Math.round(otherBase * 0.21 * 100) / 100;
+
+    const totalExpensesBase =
+      Math.round((portalBase + agencyBase + cleaningBase + utilitiesBase + otherBase) * 100) / 100;
+    const totalDeductibleVat =
+      Math.round((portalVat + agencyVat + cleaningVat + utilitiesVat + otherVat) * 100) / 100;
+
+    // Diferencia en Hacienda (positivo = pagas, negativo = Hacienda te devuelve / compensa)
+    const vatBalanceToPay = Math.round((outputVat10 - totalDeductibleVat) * 100) / 100;
+
+    // Antes (sin IVA repercutido: pagabas el IVA de los gastos de tu bolsillo)
+    const netBefore =
+      Math.round((grossIncome - (totalExpensesBase + totalDeductibleVat)) * 100) / 100;
+    // Ahora (con IVA 10%: los gastos se deducen por su base y el IVA se liquida aparte)
+    const netAfter = Math.round((incomeBase - totalExpensesBase) * 100) / 100;
+    const pocketDiff = Math.round((netAfter - netBefore) * 100) / 100;
+
+    return {
+      grossIncome,
+      incomeBase,
+      outputVat10,
+      portalPct,
+      portalBase,
+      portalVat,
+      agencyPct,
+      agencyBase,
+      agencyVat,
+      cleaningBase,
+      cleaningVat,
+      utilitiesBase,
+      utilitiesVat,
+      otherBase,
+      otherVat,
+      totalExpensesBase,
+      totalDeductibleVat,
+      vatBalanceToPay,
+      netBefore,
+      netAfter,
+      pocketDiff,
+    };
+  }, [
+    monthlyIncomeInput,
+    portalCommPctInput,
+    agencyPctInput,
+    monthlyCleaningInput,
+    monthlyUtilitiesInput,
+    otherExpensesInput,
+  ]);
 
   const bookingCalc = useMemo(() => {
     const total = Math.max(0, Number(guestPaidInput.replace(',', '.')) || 0);
@@ -94,7 +172,22 @@ export default function VatCalculatorView({
 
   const handleCopySummary = async () => {
     const text =
-      tab === 'booking'
+      tab === 'balance'
+        ? [
+            `📊 IVA 10% EN VUT: TU CASO REAL (Mes de ${formatEur(balanceCalc.grossIncome)})`,
+            '(Sin subir el precio al huésped)',
+            '',
+            `INGRESO: ${formatEur(balanceCalc.incomeBase)} + ${formatEur(balanceCalc.outputVat10)} IVA (10%)`,
+            `TOTAL IVA DEDUCIBLE EN GASTOS: -${formatEur(balanceCalc.totalDeductibleVat)}`,
+            balanceCalc.vatBalanceToPay <= 0
+              ? `✅ RESULTADO HACIENDA: Te devuelve / compensa ${formatEur(Math.abs(balanceCalc.vatBalanceToPay))}`
+              : `📌 RESULTADO HACIENDA: Pagas ${formatEur(balanceCalc.vatBalanceToPay)}`,
+            '',
+            `💰 EN TU BOLSILLO:`,
+            `• Antes (sin IVA): ${formatEur(balanceCalc.netBefore)}`,
+            `• Ahora (con IVA 10%): ${formatEur(balanceCalc.netAfter)} (${balanceCalc.pocketDiff >= 0 ? '+' : ''}${formatEur(balanceCalc.pocketDiff)})`,
+          ].join('\n')
+        : tab === 'booking'
         ? [
             'Resumen reserva con IVA 10% (Turnexo)',
             `Total pagado por huésped: ${formatEur(bookingCalc.total)}`,
@@ -165,8 +258,26 @@ export default function VatCalculatorView({
           </p>
         </section>
 
-        {/* Selector de 2 preguntas reales */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+        {/* Selector de 3 preguntas reales */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <button
+            type="button"
+            onClick={() => setTab('balance')}
+            className={`p-4 text-left border transition flex items-start gap-3 ${
+              tab === 'balance'
+                ? 'bg-[#141413] text-white border-[#141413]'
+                : 'bg-white text-[#141413] border-[#D5CFC0] hover:border-[#141413]'
+            }`}
+          >
+            <Sparkles size={18} className="shrink-0 mt-0.5 text-[#C85A32]" />
+            <div>
+              <p className="text-sm font-bold">1. ¿Gano o pierdo con mis gastos?</p>
+              <p className={`text-xs mt-0.5 ${tab === 'balance' ? 'text-white/75' : 'text-[#57554F]'}`}>
+                Compara el IVA 10% cobrado vs el IVA 21% que recuperas de Booking, limpieza y luz.
+              </p>
+            </div>
+          </button>
+
           <button
             type="button"
             onClick={() => setTab('booking')}
@@ -178,7 +289,7 @@ export default function VatCalculatorView({
           >
             <Calculator size={18} className="shrink-0 mt-0.5 text-[#C85A32]" />
             <div>
-              <p className="text-sm font-bold">1. ¿Cuánto me queda de una reserva?</p>
+              <p className="text-sm font-bold">2. ¿Cuánto me queda de 1 reserva?</p>
               <p className={`text-xs mt-0.5 ${tab === 'booking' ? 'text-white/75' : 'text-[#57554F]'}`}>
                 Mete lo que pagó el huésped y mira cuánto va a IVA, comisión y tu bolsillo.
               </p>
@@ -196,13 +307,239 @@ export default function VatCalculatorView({
           >
             <TrendingUp size={18} className="shrink-0 mt-0.5 text-[#C85A32]" />
             <div>
-              <p className="text-sm font-bold">2. ¿Subo el precio de mi piso?</p>
+              <p className="text-sm font-bold">3. ¿Subo el precio de mi piso?</p>
               <p className={`text-xs mt-0.5 ${tab === 'pricing' ? 'text-white/75' : 'text-[#57554F]'}`}>
                 Calcula tu nueva tarifa por noche para no perder margen el 1 de diciembre.
               </p>
             </div>
           </button>
         </div>
+
+        {/* PESTAÑA 1: BALANCE REAL MES (INGRESOS VS GASTOS DEDUCIBLES) */}
+        {tab === 'balance' && (
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="lg:col-span-6 bg-white border border-[#D5CFC0] p-6 space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#141413]">
+                  Tus números de un mes normal
+                </h2>
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMonthlyIncomeInput('1000');
+                      setPortalCommPctInput('16.3');
+                      setAgencyPctInput('20');
+                      setMonthlyCleaningInput('70');
+                      setMonthlyUtilitiesInput('155');
+                      setOtherExpensesInput('0');
+                    }}
+                    className="px-2.5 py-1 text-[11px] font-mono border border-[#D5CFC0] hover:border-[#141413] text-[#57554F] hover:text-[#141413]"
+                  >
+                    Con gestora (ejemplo)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMonthlyIncomeInput('1000');
+                      setPortalCommPctInput('15');
+                      setAgencyPctInput('0');
+                      setMonthlyCleaningInput('70');
+                      setMonthlyUtilitiesInput('155');
+                      setOtherExpensesInput('0');
+                    }}
+                    className="px-2.5 py-1 text-[11px] font-mono border border-[#D5CFC0] hover:border-[#141413] text-[#57554F] hover:text-[#141413]"
+                  >
+                    Sin gestora
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="monthly-income"
+                  className="block text-xs font-mono font-bold uppercase tracking-wider text-[#57554F] mb-1"
+                >
+                  Ingresos brutos del mes (lo que pagan los huéspedes, €)
+                </label>
+                <input
+                  id="monthly-income"
+                  type="number"
+                  min="0"
+                  step="50"
+                  value={monthlyIncomeInput}
+                  onChange={(e) => setMonthlyIncomeInput(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-lg font-mono font-extrabold text-[#141413] focus:outline-none focus:border-[#C85A32]"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-[#EAE5D9] space-y-3">
+                <p className="text-xs font-mono font-bold uppercase tracking-wider text-[#1F4E3D]">
+                  Gastos con factura (recuperas todo su IVA)
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-[#141413] mb-1">
+                      Comisión Airbnb / Booking (%)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="35"
+                      step="0.1"
+                      value={portalCommPctInput}
+                      onChange={(e) => setPortalCommPctInput(e.target.value)}
+                      className="w-full px-3 py-2 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-sm font-mono font-bold focus:outline-none focus:border-[#C85A32]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#141413] mb-1">
+                      Agencia / Gestora (% · 0 si lo llevas tú)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="50"
+                      step="1"
+                      value={agencyPctInput}
+                      onChange={(e) => setAgencyPctInput(e.target.value)}
+                      className="w-full px-3 py-2 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-sm font-mono font-bold focus:outline-none focus:border-[#C85A32]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#141413] mb-1">
+                      Limpieza del mes (base sin IVA, €)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="10"
+                      value={monthlyCleaningInput}
+                      onChange={(e) => setMonthlyCleaningInput(e.target.value)}
+                      className="w-full px-3 py-2 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-sm font-mono font-bold focus:outline-none focus:border-[#C85A32]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#141413] mb-1">
+                      Luz, agua e internet (base sin IVA, €)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="5"
+                      value={monthlyUtilitiesInput}
+                      onChange={(e) => setMonthlyUtilitiesInput(e.target.value)}
+                      className="w-full px-3 py-2 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-sm font-mono font-bold focus:outline-none focus:border-[#C85A32]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#141413] mb-1">
+                    Otros gastos / muebles / aire / reparaciones (base sin IVA, €)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="10"
+                    value={otherExpensesInput}
+                    onChange={(e) => setOtherExpensesInput(e.target.value)}
+                    className="w-full px-3 py-2 border border-[#D5CFC0] bg-[#F6F4EE]/50 text-sm font-mono font-bold focus:outline-none focus:border-[#C85A32]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 bg-[#141413] text-[#F6F4EE] p-6 space-y-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono uppercase tracking-wider text-[#C85A32] font-bold">
+                  Resultado real (sin subir precio)
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopySummary}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-[11px] font-mono uppercase transition"
+                >
+                  {copied ? <Check size={12} /> : <Copy size={12} />}
+                  <span>{copied ? 'Copiado WhatsApp' : 'Copiar para WhatsApp'}</span>
+                </button>
+              </div>
+
+              <div className="space-y-2 text-xs border-b border-white/15 pb-4">
+                <div className="flex justify-between">
+                  <span className="text-white/75">IVA 10% cobrado en alquiler ({formatEur(balanceCalc.incomeBase)} base)</span>
+                  <span className="font-mono font-bold text-white">+{formatEur(balanceCalc.outputVat10)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/75">IVA 21% Booking/Airbnb ({balanceCalc.portalPct}%)</span>
+                  <span className="font-mono text-emerald-300">-{formatEur(balanceCalc.portalVat)}</span>
+                </div>
+                {balanceCalc.agencyPct > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-white/75">IVA 21% Agencia / Gestora ({balanceCalc.agencyPct}%)</span>
+                    <span className="font-mono text-emerald-300">-{formatEur(balanceCalc.agencyVat)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-white/75">IVA 21% Limpieza</span>
+                  <span className="font-mono text-emerald-300">-{formatEur(balanceCalc.cleaningVat)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/75">IVA Luz, agua e internet</span>
+                  <span className="font-mono text-emerald-300">-{formatEur(balanceCalc.utilitiesVat)}</span>
+                </div>
+                {balanceCalc.otherBase > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-white/75">IVA 21% Otros gastos / mejoras</span>
+                    <span className="font-mono text-emerald-300">-{formatEur(balanceCalc.otherVat)}</span>
+                  </div>
+                )}
+              </div>
+
+              <div
+                className={`p-4 border ${
+                  balanceCalc.vatBalanceToPay <= 0
+                    ? 'bg-[#1F4E3D]/40 border-[#1F4E3D]'
+                    : 'bg-white/5 border-white/15'
+                }`}
+              >
+                <p className="text-xs text-white/75">Resultado en Hacienda (Modelo 303):</p>
+                <p className="text-xl font-mono font-extrabold text-white mt-1">
+                  {balanceCalc.vatBalanceToPay <= 0
+                    ? `Hacienda te devuelve / compensa ${formatEur(Math.abs(balanceCalc.vatBalanceToPay))}`
+                    : `Pagas ${formatEur(balanceCalc.vatBalanceToPay)} de IVA a Hacienda`}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3.5 bg-white/5 border border-white/10">
+                  <p className="text-[11px] text-white/65">Limpio ANTES (sin IVA)</p>
+                  <p className="text-lg font-mono font-bold text-white mt-1">
+                    {formatEur(balanceCalc.netBefore)}
+                  </p>
+                </div>
+                <div className="p-3.5 bg-white/5 border border-white/10">
+                  <p className="text-[11px] text-white/65">Limpio AHORA (con IVA 10%)</p>
+                  <p className="text-lg font-mono font-extrabold text-emerald-300 mt-1">
+                    {formatEur(balanceCalc.netAfter)}
+                  </p>
+                  <p className="text-[11px] font-mono text-emerald-300">
+                    ({balanceCalc.pocketDiff >= 0 ? '+' : ''}
+                    {formatEur(balanceCalc.pocketDiff)}/mes)
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-white/65 flex items-start gap-2">
+                <Info size={14} className="shrink-0 mt-0.5 text-[#C85A32]" />
+                <span>
+                  Al entrar en régimen de IVA, también podrás deducirte el 21% de IVA en muebles, aire acondicionado, reformas o menaje del piso.
+                </span>
+              </p>
+            </div>
+          </section>
+        )}
 
         {/* PESTAÑA 1: DESGLOSE RESERVA */}
         {tab === 'booking' && (

@@ -80,6 +80,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
         sessionStorage.removeItem(SESSION_TOKEN_KEY);
         setIsAuthenticated(false);
         setAdminToken('');
+        setAuthError('Sesión de administrador expirada. Vuelve a introducir la contraseña.');
         return;
       }
       const data = await resp.json();

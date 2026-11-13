@@ -75,7 +75,9 @@ export default async function handler(req: any, res: any) {
 
       if (!hostsRes.ok) {
         const errText = await hostsRes.text();
-        res.status(hostsRes.status).json({ error: `Error leyendo hosts: ${errText}` });
+        res.status(502).json({
+          error: `Error leyendo hosts en Supabase (${hostsRes.status}): ${errText}`,
+        });
         return;
       }
 
@@ -157,7 +159,9 @@ export default async function handler(req: any, res: any) {
 
       if (!patchRes.ok) {
         const errText = await patchRes.text();
-        res.status(patchRes.status).json({ error: `Error actualizando host: ${errText}` });
+        res.status(502).json({
+          error: `Error actualizando host en Supabase (${patchRes.status}): ${errText}`,
+        });
         return;
       }
 

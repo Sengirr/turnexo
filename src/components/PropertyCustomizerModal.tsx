@@ -20,6 +20,7 @@ import {
   Check,
   Compass,
   HelpCircle,
+  Globe,
 } from 'lucide-react';
 import { PlatformIcalGuideInline } from './PlatformExportGuideModal';
 import {
@@ -337,12 +338,12 @@ export default function PropertyCustomizerModal({
                 </div>
               </div>
 
-              {/* ENLACE PRIVADO Y SEGURIDAD ANTI-COLISIÓN */}
+              {/* ENLACE EXCLUSIVO DE LA GUÍA DIGITAL */}
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-900 block uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                    <ShieldCheck size={14} className="text-emerald-600" />
-                    {isEn ? 'Private Guide URL & Anti-Collision Security' : 'Enlace Privado de la Guía y Seguridad Anti-Colisión'}
+                    <Globe size={14} className="text-emerald-600" />
+                    {isEn ? 'Exclusive Digital Guide Link' : 'Enlace Exclusivo de tu Guía Digital'}
                   </span>
                   <button
                     type="button"
@@ -354,11 +355,11 @@ export default function PropertyCustomizerModal({
                         .replace(/(^-|-$)/g, '');
                       setDraft({ ...draft, slug: `${baseName}-${randSuffix}` });
                     }}
-                    className="text-[10px] font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 px-2.5 py-1 rounded-lg flex items-center gap-1 transition shadow-2xs"
-                    title={isEn ? 'Generate new secure unique token' : 'Regenerar enlace único seguro'}
+                    className="text-[10px] font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 px-2.5 py-1 rounded-lg flex items-center gap-1 transition shadow-2xs cursor-pointer"
+                    title={isEn ? 'Generate new link' : 'Generar nuevo enlace'}
                   >
                     <RotateCcw size={11} />
-                    {isEn ? 'Regenerate secure link' : 'Regenerar enlace seguro'}
+                    {isEn ? 'Generate new link' : 'Generar nuevo enlace'}
                   </button>
                 </div>
                 <div className="flex items-center bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-2xs">
@@ -377,8 +378,8 @@ export default function PropertyCustomizerModal({
                 </div>
                 <p className="text-[11px] text-slate-500 leading-snug">
                   {isEn
-                    ? 'Unique identifier so nobody on the internet can guess your apartment access codes or collide with properties of the same name.'
-                    : 'Identificador único seguro para evitar que nadie en internet pueda adivinar tus códigos de acceso ni colisionar con alojamientos que tengan el mismo nombre.'}
+                    ? 'Unique and private link for your accommodation. Customize it or share it directly via WhatsApp, email, or platform chat so guests can open their guide in 1 click with no app download required.'
+                    : 'Enlace único y privado para tu alojamiento. Puedes personalizarlo o compartirlo directamente por WhatsApp, email o chat de Airbnb/Booking para que tus huéspedes abran su guía en 1 clic sin tener que instalar ninguna app.'}
                 </p>
               </div>
 

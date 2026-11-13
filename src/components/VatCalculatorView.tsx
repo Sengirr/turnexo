@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowLeft,
   ArrowRight,
   Calculator,
   Check,
@@ -214,32 +213,100 @@ export default function VatCalculatorView({
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col">
-      {/* Cabecera */}
-      <header className="border-b border-[#D5CFC0] bg-[#F6F4EE]/95 backdrop-blur sticky top-0 z-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      {/* Cabecera completa Turnexo */}
+      <header className="border-b border-[#E2DDD2] bg-[#F6F4EE]/95 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              onBackToLanding();
+            }}
+            className="flex items-center gap-2.5 shrink-0 whitespace-nowrap group"
+          >
+            <div className="w-8 h-8 bg-[#141413] text-[#F6F4EE] flex items-center justify-center font-mono font-extrabold text-xs tracking-tighter group-hover:bg-[#C85A32] transition-colors">
+              TX
+            </div>
+            <span className="font-extrabold text-xl tracking-tight text-[#141413]">
+              Turnexo<span className="text-[#C85A32]">.</span>
+            </span>
+          </a>
+
+          <nav className="hidden lg:flex items-center gap-1.5 text-sm font-medium text-[#57554F] whitespace-nowrap">
+            <a
+              href="/#modulos"
+              onClick={(e) => {
+                e.preventDefault();
+                onBackToLanding();
+                setTimeout(() => {
+                  window.location.hash = 'modulos';
+                }, 50);
+              }}
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
+            >
+              Qué incluye
+            </a>
+            <a
+              href="/#comparativa"
+              onClick={(e) => {
+                e.preventDefault();
+                onBackToLanding();
+                setTimeout(() => {
+                  window.location.hash = 'comparativa';
+                }, 50);
+              }}
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
+            >
+              Comparativa
+            </a>
+            <a
+              href="/#precios"
+              onClick={(e) => {
+                e.preventDefault();
+                onBackToLanding();
+                setTimeout(() => {
+                  window.location.hash = 'precios';
+                }, 50);
+              }}
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
+            >
+              Precios
+            </a>
+            <a
+              href="/#faq"
+              onClick={(e) => {
+                e.preventDefault();
+                onBackToLanding();
+                setTimeout(() => {
+                  window.location.hash = 'faq';
+                }, 50);
+              }}
+              className="px-3.5 py-2 hover:text-[#141413] hover:bg-[#E8E4D9]/80 transition"
+            >
+              Preguntas
+            </a>
+            <span className="px-3.5 py-2 text-[#C85A32] font-bold bg-[#C85A32]/10">
+              Calculadora IVA 10%
+            </span>
+          </nav>
+
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 whitespace-nowrap">
             <button
               type="button"
               onClick={onBackToLanding}
-              className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#57554F] hover:text-[#141413] transition"
+              className="lg:hidden px-3 py-2 text-xs font-mono font-bold text-[#57554F] hover:text-[#141413] border border-[#D5CFC0]"
             >
-              <ArrowLeft size={14} />
-              <span>Turnexo</span>
+              Ver Web
             </button>
-            <span className="text-[#D5CFC0]">/</span>
-            <span className="text-xs font-mono font-bold text-[#C85A32] uppercase tracking-wider">
-              Calculadora IVA 10%
-            </span>
+            <button
+              type="button"
+              onClick={onNavigateToApp}
+              className="px-4 py-2.5 bg-[#141413] hover:bg-[#C85A32] text-white text-xs font-mono font-bold uppercase tracking-wider transition inline-flex items-center gap-1.5"
+            >
+              <span>Empezar Gratis</span>
+              <ArrowRight size={13} />
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={onNavigateToApp}
-            className="px-3.5 py-2 bg-[#141413] hover:bg-[#C85A32] text-white text-xs font-mono font-bold uppercase tracking-wider transition inline-flex items-center gap-1.5"
-          >
-            <span>Facturar CSV Gratis</span>
-            <ArrowRight size={13} />
-          </button>
         </div>
       </header>
 

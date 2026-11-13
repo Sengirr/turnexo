@@ -139,10 +139,23 @@ export default function VatCalculatorView({
 
     const base = Math.round((total / 1.1) * 100) / 100;
     const vat = Math.round((total - base) * 100) / 100;
-    const commission = Math.round(((total * commPct) / 100) * 100) / 100;
-    const ownerNet = Math.round((total - vat - commission) * 100) / 100;
+    const commissionBase = Math.round(((total * commPct) / 100) * 100) / 100;
+    const commissionVat = Math.round(commissionBase * 0.21 * 100) / 100;
+    const commissionTotal = Math.round((commissionBase + commissionVat) * 100) / 100;
+    const netVatToPay = Math.round((vat - commissionVat) * 100) / 100;
+    const ownerNet = Math.round((base - commissionBase) * 100) / 100;
 
-    return { total, commPct, base, vat, commission, ownerNet };
+    return {
+      total,
+      commPct,
+      base,
+      vat,
+      commissionBase,
+      commissionVat,
+      commissionTotal,
+      netVatToPay,
+      ownerNet,
+    };
   }, [guestPaidInput, commissionPctInput]);
 
   const handleCopySummary = async () => {
@@ -165,9 +178,10 @@ export default function VatCalculatorView({
         : [
             'Resumen reserva con IVA 10% (Turnexo)',
             `Total pagado por huésped: ${formatEur(bookingCalc.total)}`,
-            `IVA 10% para Hacienda (Modelo 303): ${formatEur(bookingCalc.vat)}`,
+            `IVA 10% cobrado: ${formatEur(bookingCalc.vat)}`,
+            `Comisión plataforma (${bookingCalc.commPct}% + 21% IVA): -${formatEur(bookingCalc.commissionTotal)} (${formatEur(bookingCalc.commissionBase)} + ${formatEur(bookingCalc.commissionVat)} IVA deducible)`,
+            `IVA neto a Hacienda (tras deducir IVA comisión): ${formatEur(bookingCalc.netVatToPay)}`,
             `Base imponible factura: ${formatEur(bookingCalc.base)}`,
-            `Comisión plataforma (${bookingCalc.commPct}%): -${formatEur(bookingCalc.commission)}`,
             `Limpio para ti (antes de IRPF/gastos): ${formatEur(bookingCalc.ownerNet)}`,
           ].join('\n');
 
@@ -597,15 +611,21 @@ export default function VatCalculatorView({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-3.5 bg-white/5 border border-white/10">
-                  <p className="text-[11px] text-white/65">Para Hacienda (IVA 10%)</p>
+                  <p className="text-[11px] text-white/65">IVA neto Hacienda</p>
                   <p className="text-xl font-mono font-extrabold text-[#C85A32] mt-1">
-                    {formatEur(bookingCalc.vat)}
+                    {formatEur(bookingCalc.netVatToPay)}
+                  </p>
+                  <p className="text-[10px] text-white/55 mt-1">
+                    {formatEur(bookingCalc.vat)} − {formatEur(bookingCalc.commissionVat)} IVA com.
                   </p>
                 </div>
                 <div className="p-3.5 bg-white/5 border border-white/10">
-                  <p className="text-[11px] text-white/65">Comisión ({bookingCalc.commPct}%)</p>
+                  <p className="text-[11px] text-white/65">Comisión + 21% IVA</p>
                   <p className="text-xl font-mono font-bold text-white/90 mt-1">
-                    - {formatEur(bookingCalc.commission)}
+                    - {formatEur(bookingCalc.commissionTotal)}
+                  </p>
+                  <p className="text-[10px] text-white/55 mt-1">
+                    {formatEur(bookingCalc.commissionBase)} + {formatEur(bookingCalc.commissionVat)} IVA
                   </p>
                 </div>
                 <div className="p-3.5 bg-[#1F4E3D]/40 border border-[#1F4E3D]">

@@ -155,7 +155,7 @@ export default async function handler(req: any, res: any) {
   }
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
-  const batchLimit = Math.min(20, Math.max(1, Number(body?.limit || process.env.OUTREACH_DAILY_LIMIT || 6)));
+  const batchLimit = Math.min(20, Math.max(1, Number(body?.limit || process.env.OUTREACH_DAILY_LIMIT || 15)));
 
   const sbHeaders = {
     apikey: serviceRoleKey,

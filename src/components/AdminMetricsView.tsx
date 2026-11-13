@@ -261,7 +261,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
           'Content-Type': 'application/json',
           Authorization: `Bearer ${adminToken}`,
         },
-        body: JSON.stringify({ limit: 6 }),
+        body: JSON.stringify({ limit: 15 }),
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
@@ -1094,7 +1094,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1F4E3D] hover:bg-[#163A2D] text-white text-xs font-mono font-bold uppercase transition disabled:opacity-50"
                 >
                   <Mail size={13} />
-                  <span>{sendingOutreach ? 'Enviando...' : 'Enviar 6 pendientes'}</span>
+                  <span>{sendingOutreach ? 'Enviando...' : 'Enviar 15 pendientes'}</span>
                 </button>
               )}
               <button

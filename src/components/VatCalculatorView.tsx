@@ -51,7 +51,6 @@ export default function VatCalculatorView({
   const [nightsPerMonthInput, setNightsPerMonthInput] = useState<string>('15');
 
   const [copied, setCopied] = useState(false);
-  const [copiedGuide, setCopiedGuide] = useState(false);
 
   useEffect(() => {
     const prevTitle = document.title;
@@ -210,29 +209,6 @@ export default function VatCalculatorView({
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // Clipboard blocked in restricted context
-    }
-  };
-
-  const handleCopyFullGuide = async () => {
-    const text = [
-      '📋 GUÍA RÁPIDA: QUÉ HACER CON EL IVA DEL 10% EN PISOS TURÍSTICOS (1 de diciembre)',
-      '',
-      '1️⃣ Alta en IVA (Modelo 036): Asegúrate de estar dado de alta en el régimen de IVA con tu asesoría antes del 1 de diciembre.',
-      '2️⃣ Pide factura con tu NIF de TODOS tus gastos: comisión de Booking/Airbnb, limpieza, gestora, luz, agua, internet, muebles o reformas (recuperas su IVA al 21%).',
-      '3️⃣ Revisa tus números antes de subir precios: si tienes varios gastos deducibles, muchas veces el IVA te sale neutro o incluso a devolver.',
-      '4️⃣ Emite factura al 10% por cada estancia: aunque el huésped no la pida, hay que generar factura simplificada (o completa si da su NIF).',
-      '5️⃣ Presenta el Modelo 303 cada trimestre: entregas tus facturas emitidas (10%) y tus gastos (21%) a tu gestoría.',
-      '',
-      '🧮 Calcula gratis tu caso real en 5 segundos:',
-      'https://turnexo.app/calculadora-iva-alquiler-vacacional',
-    ].join('\n');
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedGuide(true);
-      setTimeout(() => setCopiedGuide(false), 2500);
-    } catch {
-      // Clipboard blocked
     }
   };
 
@@ -486,7 +462,7 @@ export default function VatCalculatorView({
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-[11px] font-mono uppercase transition"
                 >
                   {copied ? <Check size={12} /> : <Copy size={12} />}
-                  <span>{copied ? 'Copiado WhatsApp' : 'Copiar para WhatsApp'}</span>
+                  <span>{copied ? 'Copiado' : 'Copiar'}</span>
                 </button>
               </div>
 
@@ -804,25 +780,15 @@ export default function VatCalculatorView({
           </section>
         )}
 
-        {/* Guía práctica paso a paso + Copiar para WhatsApp */}
+        {/* Guía práctica paso a paso */}
         <section className="bg-white border border-[#D5CFC0] p-6 sm:p-8 space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#1F4E3D]">
-                Checklist práctico · 1 de diciembre
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-[#141413] mt-1">
-                Qué tienes que hacer paso a paso como propietario
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={handleCopyFullGuide}
-              className="px-4 py-2.5 bg-[#1F4E3D] hover:bg-[#163A2D] text-white text-xs font-mono font-bold uppercase tracking-wider transition inline-flex items-center gap-2 shrink-0"
-            >
-              {copiedGuide ? <Check size={14} /> : <Copy size={14} />}
-              <span>{copiedGuide ? '¡Guía copiada!' : 'Copiar guía para WhatsApp'}</span>
-            </button>
+          <div>
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#1F4E3D]">
+              Checklist práctico · 1 de diciembre
+            </span>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#141413] mt-1">
+              Qué tienes que hacer paso a paso como propietario
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">

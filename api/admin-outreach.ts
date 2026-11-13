@@ -83,7 +83,7 @@ export default async function handler(req: any, res: any) {
           company_name: String(item.company_name).trim(),
           email: String(item.email).trim().toLowerCase(),
           city: String(item.city || '').trim(),
-          segment: ['asesoria', 'gestora', 'otro'].includes(item.segment) ? item.segment : 'asesoria',
+          segment: ['asesoria', 'gestora', 'propietario', 'otro'].includes(item.segment) ? item.segment : 'asesoria',
           status: ['pendiente', 'enviado', 'respondido', 'registrado', 'descartado'].includes(item.status)
             ? item.status
             : 'pendiente',

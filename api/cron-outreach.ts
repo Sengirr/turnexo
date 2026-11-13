@@ -37,8 +37,36 @@ function verifyAdminToken(authHeader: string | undefined, secret: string): boole
   }
 }
 
-function buildEmailBody(companyName: string, city?: string): string {
+function buildSubject(kind: 'initial' | 'followup', segment?: string): string {
+  if (segment === 'propietario') {
+    return kind === 'followup'
+      ? 'Re: IVA del 10% en tu vivienda turística (calculadora gratuita)'
+      : 'IVA del 10% en tu vivienda turística (calculadora gratuita)';
+  }
+  return kind === 'followup'
+    ? 'Re: Nuevo IVA 10% en alquiler vacacional'
+    : 'Nuevo IVA 10% en alquiler vacacional';
+}
+
+function buildEmailBody(companyName: string, city?: string, segment?: string): string {
   const area = city && city.trim() ? city.trim() : 'la zona';
+  if (segment === 'propietario') {
+    return [
+      `Hola (${companyName}),`,
+      '',
+      `Te escribo brevemente por tu alojamiento turístico en ${area}.`,
+      '',
+      'Con la entrada en vigor del IVA del 10% este 1 de diciembre, muchos propietarios nos preguntaban cuánto van a pagar realmente en Hacienda al deducirse el 21% de Booking/Airbnb, limpieza y suministros.',
+      '',
+      'Hemos preparado una calculadora gratuita para que metas tus números y veas en 5 segundos cuánto te queda limpio por reserva o al mes (sin necesidad de registro):',
+      'https://turnexo.app/calculadora-iva-alquiler-vacacional',
+      '',
+      'Y si luego necesitas emitir las facturas legales al 10% desde tu CSV de Airbnb o Booking en 1 clic, en Turnexo es gratis para 1 alojamiento.',
+      '',
+      'Un saludo,',
+      'Iván Álvarez · Turnexo',
+    ].join('\n');
+  }
   return [
     `Hola equipo de ${companyName},`,
     '',
@@ -55,8 +83,21 @@ function buildEmailBody(companyName: string, city?: string): string {
   ].join('\n');
 }
 
-function buildFollowupBody(companyName: string, city?: string): string {
+function buildFollowupBody(companyName: string, city?: string, segment?: string): string {
   const area = city && city.trim() ? city.trim() : 'la zona';
+  if (segment === 'propietario') {
+    return [
+      `Hola de nuevo (${companyName}):`,
+      '',
+      `Te subo este correo por si no lo viste. De cara al IVA del 10% del 1 de diciembre en ${area}, te dejo la calculadora gratuita para simular tus gastos deducibles (Booking/Airbnb, limpieza, luz) frente al 10%:',
+      'https://turnexo.app/calculadora-iva-alquiler-vacacional',
+      '',
+      'Y si quieres sacar todas tus facturas desde el CSV sin hacerlo a mano, en Turnexo tienes 1 alojamiento gratis.',
+      '',
+      'Un saludo,',
+      'Iván Álvarez · Turnexo',
+    ].join('\n');
+  }
   return [
     `Hola de nuevo, equipo de ${companyName}:`,
     '',
@@ -176,14 +217,11 @@ export default async function handler(req: any, res: any) {
 
     for (let i = 0; i < queue.length; i += 1) {
       const { lead, kind } = queue[i];
-      const subject =
-        kind === 'followup'
-          ? 'Re: Nuevo IVA 10% en alquiler vacacional'
-          : 'Nuevo IVA 10% en alquiler vacacional';
+      const subject = buildSubject(kind, lead.segment);
       const text =
         kind === 'followup'
-          ? buildFollowupBody(lead.company_name, lead.city)
-          : buildEmailBody(lead.company_name, lead.city);
+          ? buildFollowupBody(lead.company_name, lead.city, lead.segment)
+          : buildEmailBody(lead.company_name, lead.city, lead.segment);
 
       const sendResp = await fetch(
         `https://api.mail.hostinger.com/api/v1/mailboxes/${encodeURIComponent(mailboxId)}/send`,

@@ -31,6 +31,7 @@ import {
   SaasUser,
 } from '../lib/saasMetrics';
 import { isSupabaseConfigured } from '../lib/supabase';
+import { SEED_PROPIETARIOS } from '../data/seedPropietarios';
 
 interface Props {
   onBackToApp: () => void;
@@ -69,12 +70,13 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
 
   // CRM de Prospección (outreach_leads en Supabase)
   type OutreachStatus = 'pendiente' | 'enviado' | 'respondido' | 'registrado' | 'descartado';
+  type OutreachSegment = 'asesoria' | 'gestora' | 'propietario' | 'otro';
   interface OutreachLead {
     id: string;
     company_name: string;
     email: string;
     city: string;
-    segment: 'asesoria' | 'gestora' | 'otro';
+    segment: OutreachSegment;
     status: OutreachStatus;
     sent_at: string | null;
     notes: string;
@@ -82,10 +84,11 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
   const [leads, setLeads] = useState<OutreachLead[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
   const [leadFilter, setLeadFilter] = useState<'all' | OutreachStatus>('all');
+  const [segmentFilter, setSegmentFilter] = useState<'all' | OutreachSegment>('all');
   const [newLeadCompany, setNewLeadCompany] = useState('');
   const [newLeadEmail, setNewLeadEmail] = useState('');
   const [newLeadCity, setNewLeadCity] = useState('Málaga');
-  const [newLeadSegment, setNewLeadSegment] = useState<'asesoria' | 'gestora' | 'otro'>('asesoria');
+  const [newLeadSegment, setNewLeadSegment] = useState<OutreachSegment>('asesoria');
   const [sendingOutreach, setSendingOutreach] = useState(false);
   const [outreachSendMsg, setOutreachSendMsg] = useState<string | null>(null);
 
@@ -181,15 +184,19 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
     (seed) => !leads.some((l) => l.email.toLowerCase() === seed.email.toLowerCase())
   );
 
-  const handleSeedMalagaLeads = async () => {
-    if (!adminToken) return;
+  const missingPropietarios = SEED_PROPIETARIOS.filter(
+    (seed) => !leads.some((l) => l.email.toLowerCase() === seed.email.toLowerCase())
+  );
+
+  const seedLeadBatch = async (batch: Array<{ company_name: string; email: string; city: string; segment: OutreachSegment }>) => {
+    if (!adminToken || batch.length === 0) return;
     const resp = await fetch('/api/admin-outreach', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${adminToken}`,
       },
-      body: JSON.stringify({ leads: missingSeedLeads.length > 0 ? missingSeedLeads : SEED_ASESORIAS }),
+      body: JSON.stringify({ leads: batch }),
     });
     if (resp.ok) {
       fetchOutreachLeads(adminToken);
@@ -198,6 +205,17 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
       setMetricsError(err?.error || 'Ejecuta supabase/outreach_leads.sql en Supabase para importar la lista.');
     }
   };
+
+  const handleSeedMalagaLeads = () =>
+    seedLeadBatch(
+      (missingSeedLeads.length > 0 ? missingSeedLeads : SEED_ASESORIAS).map((l) => ({
+        ...l,
+        segment: 'asesoria' as const,
+      }))
+    );
+
+  const handleSeedPropietarios = () =>
+    seedLeadBatch(missingPropietarios.length > 0 ? missingPropietarios : SEED_PROPIETARIOS);
 
   const handleUpdateLeadStatus = async (id: string, status: OutreachStatus) => {
     if (!adminToken) return;
@@ -1043,10 +1061,10 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
                 OUTREACH CRM · CONTROL DE CAPTACIÓN
               </span>
               <h3 className="text-base font-bold text-[#141413]">
-                Prospección de Asesorías y Gestoras ({leads.length})
+                Prospección CRM ({leads.filter((l) => segmentFilter === 'all' || l.segment === segmentFilter).length})
               </h3>
               <p className="text-xs text-[#57554F]">
-                Lleva el control de a quién has contactado desde <code className="font-mono">info@turnexo.app</code>, respuestas y altas.
+                Lleva el control de a quién has contactado desde <code className="font-mono">info@turnexo.app</code> (plantilla propia por segmento).
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -1057,6 +1075,15 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
                   className="px-3 py-1.5 bg-[#C85A32] hover:bg-[#B24D28] text-white text-xs font-mono font-bold uppercase transition"
                 >
                   + Cargar {missingSeedLeads.length} Asesorías
+                </button>
+              )}
+              {missingPropietarios.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleSeedPropietarios}
+                  className="px-3 py-1.5 bg-[#1F4E3D] hover:bg-[#163A2D] text-white text-xs font-mono font-bold uppercase transition"
+                >
+                  + Cargar {missingPropietarios.length} Propietarios (OpenRTA)
                 </button>
               )}
               {leads.some((l) => l.status === 'pendiente') && (
@@ -1088,10 +1115,41 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
             </div>
           )}
 
+          {/* Filtro por segmento */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            {(
+              [
+                { id: 'all', label: 'Todos' },
+                { id: 'asesoria', label: 'Asesorías' },
+                { id: 'propietario', label: 'Propietarios VUT' },
+                { id: 'gestora', label: 'Gestoras' },
+              ] as const
+            ).map((seg) => {
+              const count =
+                seg.id === 'all' ? leads.length : leads.filter((l) => l.segment === seg.id).length;
+              return (
+                <button
+                  key={seg.id}
+                  type="button"
+                  onClick={() => setSegmentFilter(seg.id)}
+                  className={`px-3 py-1.5 border font-mono text-[11px] font-bold uppercase transition ${
+                    segmentFilter === seg.id
+                      ? 'bg-[#141413] text-white border-[#141413]'
+                      : 'bg-[#FAF9F5] text-[#57554F] border-[#E2DDD2] hover:text-[#141413]'
+                  }`}
+                >
+                  {seg.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+
           {/* Resumen rápido de estados */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
             {(['pendiente', 'enviado', 'respondido', 'registrado', 'descartado'] as const).map((st) => {
-              const count = leads.filter((l) => l.status === st).length;
+              const count = leads
+                .filter((l) => segmentFilter === 'all' || l.segment === segmentFilter)
+                .filter((l) => l.status === st).length;
               return (
                 <button
                   key={st}
@@ -1116,7 +1174,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
               type="text"
               value={newLeadCompany}
               onChange={(e) => setNewLeadCompany(e.target.value)}
-              placeholder="Nombre asesoría o empresa"
+              placeholder="Nombre asesoría o alojamiento"
               className="px-3 py-2 border border-[#D5CFC0] bg-white text-[#141413]"
               required
             />
@@ -1124,7 +1182,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
               type="email"
               value={newLeadEmail}
               onChange={(e) => setNewLeadEmail(e.target.value)}
-              placeholder="email@asesoria.es"
+              placeholder="email@ejemplo.es"
               className="px-3 py-2 border border-[#D5CFC0] bg-white text-[#141413]"
               required
             />
@@ -1141,6 +1199,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
               className="px-3 py-2 border border-[#D5CFC0] bg-white text-[#141413]"
             >
               <option value="asesoria">Asesoría Fiscal</option>
+              <option value="propietario">Propietario VUT</option>
               <option value="gestora">Gestora</option>
               <option value="otro">Otro</option>
             </select>
@@ -1157,7 +1216,8 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-[#E2DDD2] text-[10px] font-mono uppercase tracking-wider text-[#57554F]">
-                  <th className="py-2 pr-3">Empresa / Despacho</th>
+                  <th className="py-2 pr-3">Empresa / Alojamiento</th>
+                  <th className="py-2 px-3">Segmento</th>
                   <th className="py-2 px-3">Email</th>
                   <th className="py-2 px-3">Ciudad</th>
                   <th className="py-2 px-3">Estado</th>
@@ -1167,10 +1227,24 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
               </thead>
               <tbody className="divide-y divide-[#F0ECE3]">
                 {leads
+                  .filter((l) => segmentFilter === 'all' || l.segment === segmentFilter)
                   .filter((l) => leadFilter === 'all' || l.status === leadFilter)
                   .map((lead) => (
                     <tr key={lead.id} className="hover:bg-[#FAF9F5]">
                       <td className="py-2.5 pr-3 font-semibold text-[#141413]">{lead.company_name}</td>
+                      <td className="py-2.5 px-3">
+                        <span
+                          className={`inline-block px-2 py-0.5 font-mono text-[10px] font-bold uppercase ${
+                            lead.segment === 'propietario'
+                              ? 'bg-[#1F4E3D]/10 text-[#1F4E3D]'
+                              : lead.segment === 'asesoria'
+                              ? 'bg-[#C85A32]/10 text-[#C85A32]'
+                              : 'bg-[#E8E4D9] text-[#57554F]'
+                          }`}
+                        >
+                          {lead.segment}
+                        </span>
+                      </td>
                       <td className="py-2.5 px-3 font-mono text-[#57554F]">{lead.email}</td>
                       <td className="py-2.5 px-3 text-[#57554F]">{lead.city || '—'}</td>
                       <td className="py-2.5 px-3">
@@ -1202,7 +1276,7 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
                   ))}
                 {leads.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center text-[#57554F]">
+                    <td colSpan={7} className="py-6 text-center text-[#57554F]">
                       Aún no hay leads guardados. Ejecuta <code className="font-mono">supabase/outreach_leads.sql</code> en Supabase y pulsa <strong>+ Cargar 12 Asesorías</strong>.
                     </td>
                   </tr>

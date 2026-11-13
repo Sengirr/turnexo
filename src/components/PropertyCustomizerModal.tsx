@@ -19,7 +19,9 @@ import {
   RotateCcw,
   Check,
   Compass,
+  HelpCircle,
 } from 'lucide-react';
+import { PlatformIcalGuideInline } from './PlatformExportGuideModal';
 import {
   Cleaner,
   Property,
@@ -124,6 +126,7 @@ export default function PropertyCustomizerModal({
     return p;
   });
   const [tab, setTab] = useState<EditorTab>('general');
+  const [showIcalHelp, setShowIcalHelp] = useState(false);
 
   // Campos temporales para añadir vídeos, extras, normas, recomendaciones y checklist
   const [newVideoTitle, setNewVideoTitle] = useState('');
@@ -470,6 +473,26 @@ export default function PropertyCustomizerModal({
                       className="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 font-mono text-xs"
                     />
                   </div>
+                </div>
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowIcalHelp(!showIcalHelp)}
+                    className="text-[11px] font-bold text-orange-600 hover:text-orange-700 underline flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <HelpCircle size={13} />
+                    <span>
+                      {showIcalHelp
+                        ? (isEn ? 'Hide iCal guide' : 'Ocultar guía de iCal')
+                        : (isEn ? 'How to get your iCal URL from Airbnb or Booking?' : '¿Cómo conseguir estos enlaces en Airbnb o Booking?')}
+                    </span>
+                  </button>
+                  {showIcalHelp && (
+                    <div className="mt-2.5">
+                      <PlatformIcalGuideInline />
+                    </div>
+                  )}
                 </div>
               </div>
 

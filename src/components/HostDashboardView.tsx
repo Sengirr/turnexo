@@ -57,6 +57,7 @@ import CreateInvoiceModal from './CreateInvoiceModal';
 import FiscalProfileModal from './FiscalProfileModal';
 import ImportInvoicesCsvModal from './ImportInvoicesCsvModal';
 import EditInvoiceGuestModal from './EditInvoiceGuestModal';
+import PlatformExportGuideModal, { PlatformIcalGuideInline } from './PlatformExportGuideModal';
 import { CreditCard, ShieldCheck, FileText, Building2, Upload, HelpCircle, Pencil } from 'lucide-react';
 import {
   computeQuarterSummaries,
@@ -258,6 +259,15 @@ export default function HostDashboardView({
   const [showImportCsvModal, setShowImportCsvModal] = useState(false);
   const [preselectedResIdForInvoice, setPreselectedResIdForInvoice] = useState<string | undefined>(undefined);
   const [showFiscalProfileModal, setShowFiscalProfileModal] = useState(false);
+  const [platformGuideModal, setPlatformGuideModal] = useState<{
+    open: boolean;
+    topic: 'csv' | 'ical';
+    platform: 'airbnb' | 'booking';
+  }>({
+    open: false,
+    topic: 'csv',
+    platform: 'airbnb',
+  });
   const [invoiceSearch, setInvoiceSearch] = useState('');
   const [invoicePropertyFilter, setInvoicePropertyFilter] = useState('all');
   const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<string | null>(null);
@@ -1041,6 +1051,17 @@ export default function HostDashboardView({
                 </p>
               </div>
               <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPlatformGuideModal({ open: true, topic: 'ical', platform: 'airbnb' })}
+                  className="bg-orange-50 hover:bg-orange-100 text-orange-900 border border-orange-200 font-semibold text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition shadow-2xs"
+                  title="¿Dónde encontrar tu enlace iCal en Airbnb o Booking?"
+                >
+                  <HelpCircle size={14} className="text-orange-600" />
+                  <span className="hidden sm:inline">¿Dónde está mi iCal?</span>
+                  <span className="sm:hidden">iCal</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={handleTriggerSyncIcal}
@@ -2266,6 +2287,17 @@ export default function HostDashboardView({
 
                 <button
                   type="button"
+                  onClick={() => setPlatformGuideModal({ open: true, topic: 'csv', platform: 'airbnb' })}
+                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200/80 px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-2xs"
+                  title="Ver cómo descargar el Excel o CSV de reservas en Airbnb o Booking"
+                >
+                  <HelpCircle size={14} className="text-indigo-600" />
+                  <span className="hidden sm:inline">¿Cómo sacar el archivo?</span>
+                  <span className="sm:hidden">Guía</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setShowFiscalProfileModal(true)}
                   className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 px-3.5 py-2 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-2xs"
                 >
@@ -2322,10 +2354,19 @@ export default function HostDashboardView({
                   </p>
                 </div>
 
-                <div className="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl space-y-1">
-                  <span className="text-[10px] uppercase font-black tracking-wider text-amber-400 block">
-                    3. Cero trabajo manual
-                  </span>
+                <div className="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-black tracking-wider text-amber-400 block">
+                      3. Cero trabajo manual
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPlatformGuideModal({ open: true, topic: 'csv', platform: 'airbnb' })}
+                      className="text-[10px] font-bold text-amber-300 hover:text-white underline cursor-pointer"
+                    >
+                      Ver cómo sacarlo ↗
+                    </button>
+                  </div>
                   <p className="text-slate-300 text-[11px] leading-relaxed">
                     No piques facturas a mano: pulsa <strong>"Subir Excel / CSV"</strong> con tus descargas de Booking o Airbnb para emitir todo el trimestre en 1 clic.
                   </p>
@@ -3318,17 +3359,8 @@ export default function HostDashboardView({
                 />
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs text-slate-600 space-y-1.5">
-                <p className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
-                  ¿Dónde conseguir tu enlace iCal?
-                </p>
-                <p className="leading-relaxed">
-                  <strong>Airbnb:</strong> En tu anuncio &rarr; Disponibilidad &rarr; Sincronización de calendarios &rarr; <em>Exportar calendario</em>.
-                </p>
-                <p className="leading-relaxed">
-                  <strong>Booking.com:</strong> En la Extranet &rarr; Calendario &rarr; Sincronizar calendarios &rarr; <em>Exportar calendario</em>.
-                </p>
-              </div>
+              {/* Guía interactiva paso a paso con enlaces a Airbnb y Booking */}
+              <PlatformIcalGuideInline />
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -4433,6 +4465,14 @@ export default function HostDashboardView({
           </div>
         </div>
       )}
+
+      {/* Modal Guía Paso a Paso para sacar CSV/Excel e iCal de Airbnb y Booking */}
+      <PlatformExportGuideModal
+        isOpen={platformGuideModal.open}
+        onClose={() => setPlatformGuideModal((prev) => ({ ...prev, open: false }))}
+        defaultTopic={platformGuideModal.topic}
+        defaultPlatform={platformGuideModal.platform}
+      />
     </div>
   );
 }

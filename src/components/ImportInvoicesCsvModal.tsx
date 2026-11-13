@@ -14,6 +14,7 @@ import {
   SIMPLIFIED_INVOICE_MAX_AMOUNT,
 } from '../lib/invoice';
 import { Property } from '../lib/icalParser';
+import { PlatformCsvGuideInline } from './PlatformExportGuideModal';
 
 interface Props {
   fiscalProfile: HostFiscalProfile;
@@ -226,6 +227,9 @@ export default function ImportInvoicesCsvModal({
             <span>Pegar Tabla Copiada</span>
           </button>
         </div>
+
+        {/* Guía interactiva desplegable con pasos y enlaces directos */}
+        <PlatformCsvGuideInline />
 
         {/* Zona de Subida y Descarga de Plantilla */}
         <div className="space-y-4 text-xs">

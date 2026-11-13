@@ -51,6 +51,7 @@ export default function VatCalculatorView({
   const [nightsPerMonthInput, setNightsPerMonthInput] = useState<string>('15');
 
   const [copied, setCopied] = useState(false);
+  const [copiedGuide, setCopiedGuide] = useState(false);
 
   useEffect(() => {
     const prevTitle = document.title;
@@ -60,7 +61,7 @@ export default function VatCalculatorView({
     if (metaDesc) {
       metaDesc.setAttribute(
         'content',
-        'Calcula cuánto IVA del 10% apartar de cada reserva de Airbnb o Booking y a qué precio subir tu anuncio desde el 1 de diciembre para no perder margen.'
+        'Comprueba gratis si el IVA del 10% te afecta o te sale a devolver al deducir tus gastos (Booking, limpieza, luz, reformas) desde el 1 de diciembre.'
       );
     }
     return () => {
@@ -200,7 +201,7 @@ export default function VatCalculatorView({
             'Ajuste tarifa IVA 10% desde 1 de diciembre (Turnexo)',
             `Tu tarifa actual: ${formatEur(pricingCalc.currentRate)}/noche`,
             `Tarifa recomendada para ganar lo mismo: ${formatEur(pricingCalc.recommendedRate)}/noche`,
-            `Si no la subes, apartas ${formatEur(pricingCalc.vatIfUnchanged)}/noche de IVA (~${formatEur(pricingCalc.monthlyLossIfUnchanged)}/mes en ${pricingCalc.nightsPerMonth} noches).`,
+            `Si no la subes, pierdes ${formatEur(pricingCalc.vatIfUnchanged)}/noche en IVA (~${formatEur(pricingCalc.monthlyLossIfUnchanged)}/mes en ${pricingCalc.nightsPerMonth} noches).`,
           ].join('\n');
 
     try {
@@ -209,6 +210,29 @@ export default function VatCalculatorView({
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // Clipboard blocked in restricted context
+    }
+  };
+
+  const handleCopyFullGuide = async () => {
+    const text = [
+      '📋 GUÍA RÁPIDA: QUÉ HACER CON EL IVA DEL 10% EN PISOS TURÍSTICOS (1 de diciembre)',
+      '',
+      '1️⃣ Alta en IVA (Modelo 036): Asegúrate de estar dado de alta en el régimen de IVA con tu asesoría antes del 1 de diciembre.',
+      '2️⃣ Pide factura con tu NIF de TODOS tus gastos: comisión de Booking/Airbnb, limpieza, gestora, luz, agua, internet, muebles o reformas (recuperas su IVA al 21%).',
+      '3️⃣ Revisa tus números antes de subir precios: si tienes varios gastos deducibles, muchas veces el IVA te sale neutro o incluso a devolver.',
+      '4️⃣ Emite factura al 10% por cada estancia: aunque el huésped no la pida, hay que generar factura simplificada (o completa si da su NIF).',
+      '5️⃣ Presenta el Modelo 303 cada trimestre: entregas tus facturas emitidas (10%) y tus gastos (21%) a tu gestoría.',
+      '',
+      '🧮 Calcula gratis tu caso real en 5 segundos:',
+      'https://turnexo.app/calculadora-iva-alquiler-vacacional',
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedGuide(true);
+      setTimeout(() => setCopiedGuide(false), 2500);
+    } catch {
+      // Clipboard blocked
     }
   };
 
@@ -251,10 +275,10 @@ export default function VatCalculatorView({
             Nueva norma · 1 de diciembre
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#141413] leading-tight">
-            ¿Cuánto te quita el IVA del 10% en Airbnb y Booking?
+            ¿Cómo afecta el IVA del 10% a tu piso turístico?
           </h1>
           <p className="text-base text-[#57554F] leading-relaxed">
-            Calcula en 5 segundos <strong>cuánto dinero debes apartar para Hacienda</strong> en cada reserva o <strong>a qué precio subir tu anuncio</strong> para seguir ganando lo mismo.
+            Comprueba en 5 segundos <strong>si pagas o te devuelven en Hacienda</strong> al deducir el IVA de tus gastos (Booking, limpieza, luz, reformas) o <strong>a qué precio ajustar tu anuncio</strong>.
           </p>
         </section>
 
@@ -779,6 +803,61 @@ export default function VatCalculatorView({
             </div>
           </section>
         )}
+
+        {/* Guía práctica paso a paso + Copiar para WhatsApp */}
+        <section className="bg-white border border-[#D5CFC0] p-6 sm:p-8 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#1F4E3D]">
+                Checklist práctico · 1 de diciembre
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#141413] mt-1">
+                Qué tienes que hacer paso a paso como propietario
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyFullGuide}
+              className="px-4 py-2.5 bg-[#1F4E3D] hover:bg-[#163A2D] text-white text-xs font-mono font-bold uppercase tracking-wider transition inline-flex items-center gap-2 shrink-0"
+            >
+              {copiedGuide ? <Check size={14} /> : <Copy size={14} />}
+              <span>{copiedGuide ? '¡Guía copiada!' : 'Copiar guía para WhatsApp'}</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+            <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5">
+              <p className="font-mono font-bold text-[#C85A32]">1. Alta en IVA (Modelo 036)</p>
+              <p className="text-[#57554F] leading-relaxed">
+                Avisa a tu gestoría para darte de alta en el régimen de IVA en Hacienda antes del 1 de diciembre (en Canarias aplica IGIC).
+              </p>
+            </div>
+            <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5">
+              <p className="font-mono font-bold text-[#C85A32]">2. Pide facturas de TODO con tu NIF</p>
+              <p className="text-[#57554F] leading-relaxed">
+                Booking/Airbnb, gestora, limpieza, luz, agua, internet, muebles o aire acondicionado: ahora <strong>te deduces todo su IVA (21%)</strong>.
+              </p>
+            </div>
+            <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5">
+              <p className="font-mono font-bold text-[#C85A32]">3. Decide si ajustas precios</p>
+              <p className="text-[#57554F] leading-relaxed">
+                Usa la pestaña 1 arriba: si tienes bastantes gastos deducibles, muchas veces no te hace falta subir el precio al huésped.
+              </p>
+            </div>
+            <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5">
+              <p className="font-mono font-bold text-[#C85A32]">4. Emite factura al 10% por estancia</p>
+              <p className="text-[#57554F] leading-relaxed">
+                Aunque el huésped no te la pida, debes emitir factura simplificada por el total pagado (Turnexo te las genera todas desde tu CSV).
+              </p>
+            </div>
+            <div className="p-4 bg-[#F6F4EE]/60 border border-[#EAE5D9] space-y-1.5 md:col-span-2 lg:col-span-2">
+              <p className="font-mono font-bold text-[#C85A32]">5. Presentación trimestral (Modelo 303)</p>
+              <p className="text-[#57554F] leading-relaxed">
+                Cada trimestre entregas a tu asesoría tus facturas emitidas (IVA 10%) y tus facturas de gastos (IVA 21%). Si los gastos superan lo cobrado, la diferencia se compensa o Hacienda te devuelve.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* CTA Conversión a Turnexo */}
         <section className="bg-white border-2 border-[#C85A32] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">

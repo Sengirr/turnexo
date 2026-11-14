@@ -6,4 +6,4 @@ Disallow: /app
 Disallow: /c/
 Disallow: /api/
 
-Sitemap: https://turnexo.app/sitemap.xml
+Sitemap: https://www.turnexo.app/sitemap.xml

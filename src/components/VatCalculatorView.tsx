@@ -53,9 +53,15 @@ export default function VatCalculatorView({
         'Comprueba gratis si el IVA del 10% te afecta o te sale a devolver al deducir tus gastos (Booking, limpieza, luz, reformas) desde el 1 de diciembre.'
       );
     }
+    const canonical = document.querySelector('link[rel="canonical"]');
+    const prevCanonical = canonical?.getAttribute('href') || '';
+    if (canonical) {
+      canonical.setAttribute('href', 'https://www.turnexo.app/calculadora-iva-alquiler-vacacional');
+    }
     return () => {
       document.title = prevTitle;
       if (metaDesc && prevDesc) metaDesc.setAttribute('content', prevDesc);
+      if (canonical && prevCanonical) canonical.setAttribute('href', prevCanonical);
     };
   }, []);
 

@@ -77,6 +77,159 @@ export const getStripePaymentLink = (
   return '';
 };
 
+function mapPropertyRow(row: any): Property {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    address: row.address || '',
+    hostWhatsapp: row.host_whatsapp || '',
+    googleMapsUrl: row.google_maps_url || '',
+    airbnbIcalUrl: row.airbnb_ical_url || '',
+    bookingIcalUrl: row.booking_ical_url || '',
+    defaultCleanerId: row.default_cleaner_id || '',
+    cleaningFee: Number(row.cleaning_fee) || 40,
+    checkInTime: row.check_in_time || '15:00',
+    checkOutTime: row.check_out_time || '11:00',
+    lateCheckoutPrice: Number(row.late_checkout_price) || 35,
+    lateCheckoutUntil: row.late_checkout_until || '17:00',
+    wifiSsid: row.wifi_ssid || '',
+    wifiPassword: row.wifi_password || '',
+    doorCode: row.door_code || '',
+    intercomCode: row.intercom_code || '',
+    checkInInstructions: row.check_in_instructions || '',
+    checkOutInstructions: row.check_out_instructions || '',
+    departureChecklist: row.departure_checklist || [],
+    requireVideoToUnlockCodes: row.require_video_to_unlock_codes !== false,
+    videos: row.videos || [],
+    extras: row.extras || [],
+    houseRules: row.house_rules || [],
+    appliancesGuide: row.appliances_guide || '',
+    localRecommendations: row.local_recommendations || [],
+    customChecklist: row.custom_checklist || [],
+    modulesEnabled: row.modules_enabled || { cleanings: true, guestGuide: true },
+    lastSyncedAt: row.last_synced_at
+      ? new Date(row.last_synced_at).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : 'Sincronizado',
+    lastSyncedTimestamp: row.last_synced_at ? new Date(row.last_synced_at).getTime() : undefined,
+  };
+}
+
+function mapCleanerRow(row: any): Cleaner {
+  return {
+    id: row.id,
+    name: row.name,
+    phone: row.phone || '',
+    magicToken: row.magic_token,
+  };
+}
+
+function mapReservationRow(row: any): Reservation {
+  return {
+    id: row.id,
+    propertyId: row.property_id,
+    source: row.source || 'Airbnb',
+    guestName: row.guest_name || 'Huésped',
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    requestedExtras: row.requested_extras || [],
+    approvedExtras: row.approved_extras || [],
+    lateCheckoutRequested: Boolean(row.late_checkout_requested),
+    lateCheckoutApproved: Boolean(row.late_checkout_approved),
+    lateCheckoutTime: row.late_checkout_time || undefined,
+    lateCheckoutPaidAmount: row.late_checkout_paid_amount
+      ? Number(row.late_checkout_paid_amount)
+      : undefined,
+    estimatedArrivalTime: row.estimated_arrival_time || undefined,
+    estimatedDepartureTime: row.estimated_departure_time || undefined,
+    arrivalInstructionsConfirmed: Boolean(row.arrival_instructions_confirmed),
+    guestArrivedAt: row.guest_arrived_at || undefined,
+  };
+}
+
+function mapCleaningTaskRow(row: any): CleaningTask {
+  return {
+    id: row.id,
+    propertyId: row.property_id,
+    reservationId: row.reservation_id,
+    date: row.date,
+    cleanerId: row.cleaner_id || '',
+    sameDayCheckIn: false,
+    nextCheckInTime: '15:00',
+    scheduledCleaningTime: '11:00',
+    lateCheckoutActive: false,
+    status: row.status || 'pending',
+    startTime: row.start_time || row.startTime || undefined,
+    endTime: row.end_time || row.endTime || undefined,
+    actualHours: row.actual_hours !== undefined ? Number(row.actual_hours) : undefined,
+    photosUploaded: row.photos_uploaded || [],
+    checklist: row.checklist || [],
+    incidents: row.incidents || [],
+    fee: 40,
+  };
+}
+
+/**
+ * Carga propiedades, limpiadoras, reservas y tareas desde el endpoint seguro /api/public-view
+ * para las vistas públicas sin login (/g/:slug y /c/:token).
+ */
+export async function loadPublicViewFromApi(
+  type: 'guest' | 'cleaner',
+  key: string
+): Promise<{
+  properties: Property[] | null;
+  cleaners: Cleaner[] | null;
+  reservations: Reservation[] | null;
+  tasks: CleaningTask[] | null;
+}> {
+  if (!key) return { properties: null, cleaners: null, reservations: null, tasks: null };
+  try {
+    const param = type === 'guest' ? `slug=${encodeURIComponent(key)}` : `token=${encodeURIComponent(key)}`;
+    const resp = await fetch(`/api/public-view?type=${type}&${param}`);
+    if (!resp.ok) {
+      return { properties: null, cleaners: null, reservations: null, tasks: null };
+    }
+    const data = await resp.json();
+    return {
+      properties: Array.isArray(data.properties) ? data.properties.map(mapPropertyRow) : null,
+      cleaners: Array.isArray(data.cleaners) ? data.cleaners.map(mapCleanerRow) : null,
+      reservations: Array.isArray(data.reservations) ? data.reservations.map(mapReservationRow) : null,
+      tasks: Array.isArray(data.tasks) && data.tasks.length > 0 ? data.tasks.map(mapCleaningTaskRow) : null,
+    };
+  } catch {
+    return { properties: null, cleaners: null, reservations: null, tasks: null };
+  }
+}
+
+export async function syncPublicReservationToApi(slug: string, reservation: Reservation): Promise<void> {
+  if (!slug || !reservation?.id) return;
+  try {
+    await fetch('/api/public-view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update_reservation', slug, reservation }),
+    });
+  } catch (err) {
+    console.warn('[Turnexo Public API] Error actualizando reserva:', err);
+  }
+}
+
+export async function syncPublicCleaningTaskToApi(token: string, task: CleaningTask): Promise<void> {
+  if (!token || !task?.id) return;
+  try {
+    await fetch('/api/public-view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update_cleaning_task', token, task }),
+    });
+  } catch (err) {
+    console.warn('[Turnexo Public API] Error actualizando tarea:', err);
+  }
+}
+
 /**
  * Carga propiedades, limpiadoras, reservas y tareas desde Supabase cuando está configurado.
  */
@@ -100,103 +253,22 @@ export async function loadWorkspaceFromSupabase(): Promise<{
 
     const properties: Property[] | null =
       !propsRes.error && Array.isArray(propsRes.data)
-        ? propsRes.data.map((row: any) => ({
-            id: row.id,
-            name: row.name,
-            slug: row.slug,
-            address: row.address || '',
-            hostWhatsapp: row.host_whatsapp || '',
-            googleMapsUrl: row.google_maps_url || '',
-            airbnbIcalUrl: row.airbnb_ical_url || '',
-            bookingIcalUrl: row.booking_ical_url || '',
-            defaultCleanerId: row.default_cleaner_id || '',
-            cleaningFee: Number(row.cleaning_fee) || 40,
-            checkInTime: row.check_in_time || '15:00',
-            checkOutTime: row.check_out_time || '11:00',
-            lateCheckoutPrice: Number(row.late_checkout_price) || 35,
-            lateCheckoutUntil: row.late_checkout_until || '17:00',
-            wifiSsid: row.wifi_ssid || '',
-            wifiPassword: row.wifi_password || '',
-            doorCode: row.door_code || '',
-            intercomCode: row.intercom_code || '',
-            checkInInstructions: row.check_in_instructions || '',
-            checkOutInstructions: row.check_out_instructions || '',
-            departureChecklist: row.departure_checklist || [],
-            requireVideoToUnlockCodes: row.require_video_to_unlock_codes !== false,
-            videos: row.videos || [],
-            extras: row.extras || [],
-            houseRules: row.house_rules || [],
-            appliancesGuide: row.appliances_guide || '',
-            localRecommendations: row.local_recommendations || [],
-            customChecklist: row.custom_checklist || [],
-            modulesEnabled: row.modules_enabled || { cleanings: true, guestGuide: true },
-            lastSyncedAt: row.last_synced_at
-              ? new Date(row.last_synced_at).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })
-              : 'Sincronizado',
-            lastSyncedTimestamp: row.last_synced_at
-              ? new Date(row.last_synced_at).getTime()
-              : undefined,
-          }))
+        ? propsRes.data.map(mapPropertyRow)
         : null;
 
     const cleaners: Cleaner[] | null =
       !cleanersRes.error && Array.isArray(cleanersRes.data)
-        ? cleanersRes.data.map((row: any) => ({
-            id: row.id,
-            name: row.name,
-            phone: row.phone || '',
-            magicToken: row.magic_token,
-          }))
+        ? cleanersRes.data.map(mapCleanerRow)
         : null;
 
     const reservations: Reservation[] | null =
       !resvRes.error && Array.isArray(resvRes.data)
-        ? resvRes.data.map((row: any) => ({
-            id: row.id,
-            propertyId: row.property_id,
-            source: row.source || 'Airbnb',
-            guestName: row.guest_name || 'Huésped',
-            checkIn: row.check_in,
-            checkOut: row.check_out,
-            requestedExtras: row.requested_extras || [],
-            approvedExtras: row.approved_extras || [],
-            lateCheckoutRequested: Boolean(row.late_checkout_requested),
-            lateCheckoutApproved: Boolean(row.late_checkout_approved),
-            lateCheckoutTime: row.late_checkout_time || undefined,
-            lateCheckoutPaidAmount: row.late_checkout_paid_amount
-              ? Number(row.late_checkout_paid_amount)
-              : undefined,
-            estimatedArrivalTime: row.estimated_arrival_time || undefined,
-            estimatedDepartureTime: row.estimated_departure_time || undefined,
-            arrivalInstructionsConfirmed: Boolean(row.arrival_instructions_confirmed),
-            guestArrivedAt: row.guest_arrived_at || undefined,
-          }))
+        ? resvRes.data.map(mapReservationRow)
         : null;
 
     const tasks: CleaningTask[] | null =
       tasksRes.data && tasksRes.data.length > 0
-        ? tasksRes.data.map((row: any) => ({
-            id: row.id,
-            propertyId: row.property_id,
-            reservationId: row.reservation_id,
-            date: row.date,
-            cleanerId: row.cleaner_id || '',
-            sameDayCheckIn: false,
-            nextCheckInTime: '15:00',
-            scheduledCleaningTime: '11:00',
-            lateCheckoutActive: false,
-            status: row.status || 'pending',
-            startTime: row.start_time || row.startTime || undefined,
-            endTime: row.end_time || row.endTime || undefined,
-            actualHours: row.actual_hours !== undefined ? Number(row.actual_hours) : undefined,
-            photosUploaded: row.photos_uploaded || [],
-            checklist: row.checklist || [],
-            incidents: row.incidents || [],
-            fee: 40,
-          }))
+        ? tasksRes.data.map(mapCleaningTaskRow)
         : null;
 
     return { properties, cleaners, reservations, tasks };

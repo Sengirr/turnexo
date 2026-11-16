@@ -30,6 +30,8 @@ interface Props {
   ) => void;
   onOpenGuestDemo: () => void;
   onOpenCleanerDemo: () => void;
+  cleanerDemoHref?: string;
+  guestDemoHref?: string;
   onOpenLegal?: (tab?: 'privacy' | 'terms' | 'legal') => void;
   onOpenVatCalculator?: () => void;
 }
@@ -40,6 +42,8 @@ export default function LandingPageView({
   onNavigateToApp,
   onOpenGuestDemo,
   onOpenCleanerDemo,
+  cleanerDemoHref,
+  guestDemoHref,
   onOpenLegal,
   onOpenVatCalculator,
 }: Props) {
@@ -454,6 +458,8 @@ export default function LandingPageView({
           {/* Mockup Realista de Smartphone Interactivo */}
           <div className="lg:col-span-5">
             <HeroPhoneMockup
+              cleanerDemoHref={cleanerDemoHref}
+              guestDemoHref={guestDemoHref}
               onOpenCleanerDemo={onOpenCleanerDemo}
               onOpenGuestDemo={onOpenGuestDemo}
               lang={lang}

@@ -16,6 +16,8 @@ import {
 import { LandingLanguage, LANDING_TRANSLATIONS } from '../lib/landingTranslations';
 
 interface HeroPhoneMockupProps {
+  cleanerDemoHref?: string;
+  guestDemoHref?: string;
   onOpenCleanerDemo?: () => void;
   onOpenGuestDemo?: () => void;
   lang?: LandingLanguage;
@@ -28,6 +30,8 @@ interface ChecklistItem {
 }
 
 export default function HeroPhoneMockup({
+  cleanerDemoHref,
+  guestDemoHref,
   onOpenCleanerDemo,
   onOpenGuestDemo,
   lang = 'es',
@@ -76,22 +80,6 @@ export default function HeroPhoneMockup({
       navigator.clipboard.writeText('LoftCentro_2026').catch(() => {});
     }
     setTimeout(() => setWifiCopied(false), 2200);
-  };
-
-  const handleOpenFullDemo = () => {
-    if (activeRole === 'cleaner') {
-      if (onOpenCleanerDemo) {
-        onOpenCleanerDemo();
-      } else if (typeof window !== 'undefined') {
-        window.location.href = '/demo/limpiadora';
-      }
-    } else {
-      if (onOpenGuestDemo) {
-        onOpenGuestDemo();
-      } else if (typeof window !== 'undefined') {
-        window.location.href = '/demo/huesped';
-      }
-    }
   };
 
   const completedTasksCount = tasks.filter((tItem) => tItem.checked).length;
@@ -384,9 +372,23 @@ export default function HeroPhoneMockup({
 
       {/* 3. ACCIONES EXTERNAS DEBAJO DEL MÓVIL */}
       <div className="w-full bg-[#FAF9F5] border border-[#D5CFC0] rounded-2xl px-4 py-3 flex flex-col items-center text-center space-y-1 shadow-xs">
-        <button
-          type="button"
-          onClick={handleOpenFullDemo}
+        <a
+          href={
+            activeRole === 'cleaner'
+              ? cleanerDemoHref || '/demo/limpiadora'
+              : guestDemoHref || '/demo/huesped'
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => {
+            if (activeRole === 'cleaner' && !cleanerDemoHref && onOpenCleanerDemo) {
+              e.preventDefault();
+              onOpenCleanerDemo();
+            } else if (activeRole === 'guest' && !guestDemoHref && onOpenGuestDemo) {
+              e.preventDefault();
+              onOpenGuestDemo();
+            }
+          }}
           className="font-sans text-xs sm:text-sm font-bold text-[#141413] hover:text-[#C85A32] transition inline-flex items-center gap-1.5 group"
         >
           <span>
@@ -396,7 +398,7 @@ export default function HeroPhoneMockup({
             size={15}
             className="text-[#C85A32] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
           />
-        </button>
+        </a>
         <p className="text-[11px] text-[#57554F]">
           {activeRole === 'cleaner' ? t.externalDescCleaner : t.externalDescGuest}
         </p>

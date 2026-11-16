@@ -38,6 +38,7 @@ import {
   deletePropertyFromSupabase,
   HostAccount,
   isSupabaseConfigured,
+  loadPublicViewFromApi,
   loadWorkspaceFromSupabase,
   subscribeToWorkspaceChanges,
   supabase,
@@ -45,6 +46,8 @@ import {
   syncCleaningTaskToSupabase,
   syncHostToSupabase,
   syncPropertyToSupabase,
+  syncPublicCleaningTaskToApi,
+  syncPublicReservationToApi,
   syncReservationToSupabase,
 } from './lib/supabase';
 
@@ -267,7 +270,15 @@ export default function App() {
     });
 
     const fetchCloud = () => {
-      loadWorkspaceFromSupabase().then((cloud) => {
+      const currentRoute = parseCurrentLocation();
+      const loader =
+        currentRoute.kind === 'guest' && !currentRoute.fromLanding
+          ? loadPublicViewFromApi('guest', currentRoute.slug)
+          : currentRoute.kind === 'cleaner' && !currentRoute.fromLanding
+          ? loadPublicViewFromApi('cleaner', currentRoute.token)
+          : loadWorkspaceFromSupabase();
+
+      loader.then((cloud) => {
         if (cloud.properties) {
           setProperties((prev) => {
             const cloudIds = new Set(cloud.properties!.map((p) => p.id));
@@ -440,7 +451,11 @@ export default function App() {
       const others = prev.filter((t) => t.id !== updated.id);
       return [...others, updated];
     });
-    syncCleaningTaskToSupabase(updated);
+    if (route.kind === 'cleaner' && !route.fromLanding) {
+      syncPublicCleaningTaskToApi(route.token, updated);
+    } else {
+      syncCleaningTaskToSupabase(updated);
+    }
   };
 
   const handleImportIcalText = (propertyId: string, icsText: string, silent = false) => {
@@ -769,7 +784,11 @@ export default function App() {
 
   const handleUpdateReservation = (updated: Reservation, toast?: string) => {
     setReservations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
-    syncReservationToSupabase(updated);
+    if (route.kind === 'guest' && !route.fromLanding) {
+      syncPublicReservationToApi(route.slug, updated);
+    } else {
+      syncReservationToSupabase(updated);
+    }
     if (toast) showToast(toast);
   };
 
@@ -884,12 +903,14 @@ export default function App() {
             setAuthInitialPlan(plan);
             navigate('/app', { kind: 'app' });
           }}
+          cleanerDemoHref={`/c/${(cleaners[0] ?? INITIAL_CLEANERS[0]).magicToken}?demo=1`}
+          guestDemoHref={`/g/${(properties[0] ?? INITIAL_PROPERTIES[0]).slug}?demo=1`}
           onOpenGuestDemo={() => {
-            const prop = properties[0];
+            const prop = properties[0] ?? INITIAL_PROPERTIES[0];
             window.open(`/g/${prop.slug}?demo=1`, '_blank');
           }}
           onOpenCleanerDemo={() => {
-            const c = cleaners[0];
+            const c = cleaners[0] ?? INITIAL_CLEANERS[0];
             window.open(`/c/${c.magicToken}?demo=1`, '_blank');
           }}
           onOpenLegal={(tab = 'privacy') => setLegalModalTab(tab)}

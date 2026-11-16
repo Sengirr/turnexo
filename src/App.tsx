@@ -1013,69 +1013,93 @@ export default function App() {
         />
       )}
 
-      {route.kind === 'cleaner' && (
-        <CleanerMagicView
-          cleaners={cleaners}
-          selectedCleanerId={
-            cleaners.find((c) => c.magicToken === route.token)?.id || selectedCleanerId
-          }
-          onSelectCleaner={(id) => {
-            const c = cleaners.find((item) => item.id === id) || cleaners[0];
-            setSelectedCleanerId(c.id);
-            navigate(`/c/${c.magicToken}${route.fromLanding ? '?demo=1' : ''}`, {
-              kind: 'cleaner',
-              token: c.magicToken,
-              fromApp: route.fromApp,
-              fromLanding: route.fromLanding,
-            });
-          }}
-          tasks={tasks}
-          properties={properties}
-          onToggleChecklistItem={handleToggleChecklistItem}
-          onAddPhoto={handleAddPhoto}
-          onAddItemPhoto={handleAddItemPhoto}
-          onDeleteItemPhoto={handleDeleteItemPhoto}
-          onStartTask={handleStartTask}
-          onCompleteTask={handleCompleteTask}
-          onAddIncident={handleAddIncident}
-          onBackToApp={() =>
-            route.fromApp
-              ? navigate('/app', { kind: 'app' })
-              : navigate('/', { kind: 'landing' })
-          }
-        />
-      )}
-
-      {route.kind === 'guest' && (
-        <GuestGuidePortalView
-          activePropertySlug={route.slug}
-          properties={properties}
-          reservations={reservations}
-          selectedReservationId={selectedReservationId}
-          isWhiteLabel={hostAccount?.plan === 'plan_pro' || hostAccount?.plan === 'plan_manager'}
-          onSelectReservation={(resId) => {
-            const r = reservations.find((item) => item.id === resId);
-            const p = properties.find((item) => item.id === r?.propertyId);
-            setSelectedReservationId(resId);
-            if (p) {
-              navigate(`/g/${p.slug}${route.fromLanding ? '?demo=1' : ''}`, {
-                kind: 'guest',
-                slug: p.slug,
+      {route.kind === 'cleaner' && (() => {
+        const useDemoCleanerData =
+          route.fromLanding && !cleaners.some((c) => c.magicToken === route.token);
+        const viewCleaners = useDemoCleanerData
+          ? INITIAL_CLEANERS
+          : cleaners.length > 0
+            ? cleaners
+            : INITIAL_CLEANERS;
+        const viewTasks = useDemoCleanerData
+          ? buildCleaningTasksFromReservations(INITIAL_PROPERTIES, INITIAL_RESERVATIONS, INITIAL_TASK_OVERRIDES)
+          : tasks;
+        const viewProperties = useDemoCleanerData ? INITIAL_PROPERTIES : properties;
+        return (
+          <CleanerMagicView
+            cleaners={viewCleaners}
+            selectedCleanerId={
+              viewCleaners.find((c) => c.magicToken === route.token)?.id || selectedCleanerId
+            }
+            onSelectCleaner={(id) => {
+              const c = viewCleaners.find((item) => item.id === id) || viewCleaners[0];
+              if (!c) return;
+              setSelectedCleanerId(c.id);
+              navigate(`/c/${c.magicToken}${route.fromLanding ? '?demo=1' : ''}`, {
+                kind: 'cleaner',
+                token: c.magicToken,
                 fromApp: route.fromApp,
                 fromLanding: route.fromLanding,
               });
+            }}
+            tasks={viewTasks}
+            properties={viewProperties}
+            onToggleChecklistItem={handleToggleChecklistItem}
+            onAddPhoto={handleAddPhoto}
+            onAddItemPhoto={handleAddItemPhoto}
+            onDeleteItemPhoto={handleDeleteItemPhoto}
+            onStartTask={handleStartTask}
+            onCompleteTask={handleCompleteTask}
+            onAddIncident={handleAddIncident}
+            onBackToApp={() =>
+              route.fromApp
+                ? navigate('/app', { kind: 'app' })
+                : navigate('/', { kind: 'landing' })
             }
-          }}
-          onRequestExtra={handleRequestExtra}
-          onUpdateReservation={handleUpdateReservation}
-          onReportGuestIncident={handleReportGuestIncident}
-          onBackToApp={() =>
-            route.fromApp
-              ? navigate('/app', { kind: 'app' })
-              : navigate('/', { kind: 'landing' })
-          }
-        />
-      )}
+          />
+        );
+      })()}
+
+      {route.kind === 'guest' && (() => {
+        const useDemoGuestData =
+          route.fromLanding && !properties.some((p) => p.slug === route.slug);
+        const viewGuestProperties = useDemoGuestData
+          ? INITIAL_PROPERTIES
+          : properties.length > 0
+            ? properties
+            : INITIAL_PROPERTIES;
+        const viewGuestReservations = useDemoGuestData ? INITIAL_RESERVATIONS : reservations;
+        return (
+          <GuestGuidePortalView
+            activePropertySlug={route.slug}
+            properties={viewGuestProperties}
+            reservations={viewGuestReservations}
+            selectedReservationId={selectedReservationId}
+            isWhiteLabel={hostAccount?.plan === 'plan_pro' || hostAccount?.plan === 'plan_manager'}
+            onSelectReservation={(resId) => {
+              const r = viewGuestReservations.find((item) => item.id === resId);
+              const p = viewGuestProperties.find((item) => item.id === r?.propertyId);
+              setSelectedReservationId(resId);
+              if (p) {
+                navigate(`/g/${p.slug}${route.fromLanding ? '?demo=1' : ''}`, {
+                  kind: 'guest',
+                  slug: p.slug,
+                  fromApp: route.fromApp,
+                  fromLanding: route.fromLanding,
+                });
+              }
+            }}
+            onRequestExtra={handleRequestExtra}
+            onUpdateReservation={handleUpdateReservation}
+            onReportGuestIncident={handleReportGuestIncident}
+            onBackToApp={() =>
+              route.fromApp
+                ? navigate('/app', { kind: 'app' })
+                : navigate('/', { kind: 'landing' })
+            }
+          />
+        );
+      })()}
 
       {route.kind === 'admin' && (
         <AdminMetricsView

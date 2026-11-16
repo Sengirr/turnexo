@@ -82,12 +82,15 @@ export default function CleanerMagicView({
   }, []);
 
   // Tareas asignadas a esta limpiadora ordenadas cronológicamente por fecha
+  const cleanerId = cleaner?.id;
   const myTasks = useMemo(
     () =>
-      tasks
-        .filter((task) => task.cleanerId === cleaner.id)
-        .sort((a, b) => a.date.localeCompare(b.date)),
-    [tasks, cleaner.id]
+      cleanerId
+        ? tasks
+            .filter((task) => task.cleanerId === cleanerId)
+            .sort((a, b) => a.date.localeCompare(b.date))
+        : [],
+    [tasks, cleanerId]
   );
   const activeTask = myTasks.find((t) => t.id === activeTaskId);
 

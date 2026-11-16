@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Shield, FileText } from 'lucide-react';
+import { useEscapeKey } from '../lib/useModalClose';
 
 interface Props {
   onClose: () => void;
@@ -8,10 +9,16 @@ interface Props {
 
 export default function LegalModal({ onClose, initialTab = 'privacy' }: Props) {
   const [tab, setTab] = useState<'privacy' | 'terms' | 'legal'>(initialTab);
+  useEscapeKey(onClose);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-[#FAF9F5] border border-[#141413] max-w-2xl w-full p-6 sm:p-8 space-y-6 my-8 max-h-[90vh] flex flex-col shadow-2xl">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-[#FAF9F5] border border-[#141413] max-w-2xl w-full p-6 sm:p-8 space-y-6 my-auto max-h-[90vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between border-b border-[#E2DDD2] pb-4 shrink-0">
           <div className="flex items-center gap-2">
             <Shield size={18} className="text-[#C85A32]" />

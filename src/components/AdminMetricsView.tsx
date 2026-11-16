@@ -32,6 +32,7 @@ import {
 } from '../lib/saasMetrics';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { SEED_PROPIETARIOS } from '../data/seedPropietarios';
+import { useEscapeKey } from '../lib/useModalClose';
 
 function getTrialDaysRemaining(registeredAt: string, trialDays = 14): number | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(registeredAt.trim());
@@ -422,6 +423,11 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
   });
 
   const [stripeSavedMsg, setStripeSavedMsg] = useState(false);
+
+  useEscapeKey(() => {
+    setShowChangePassModal(false);
+    setShowAddUserModal(false);
+  }, showChangePassModal || showAddUserModal);
 
   const handleSaveStripeLinks = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1368,7 +1374,12 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
 
       {/* MODAL CAMBIAR CONTRASEÑA ADMIN */}
       {showChangePassModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowChangePassModal(false);
+          }}
+        >
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
             <div className="flex justify-between items-start">
               <div>
@@ -1431,7 +1442,12 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
 
       {/* MODAL PARA AÑADIR USUARIO MANUALMENTE */}
       {showAddUserModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAddUserModal(false);
+          }}
+        >
           <div className="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 space-y-5 shadow-2xl">
             <div className="flex justify-between items-start">
               <div>

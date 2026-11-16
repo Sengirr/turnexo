@@ -13,6 +13,7 @@ import {
   ChevronRight,
   BookOpen,
 } from 'lucide-react';
+import { useEscapeKey } from '../lib/useModalClose';
 
 export type GuideTopic = 'csv' | 'ical';
 export type PlatformType = 'airbnb' | 'booking';
@@ -35,12 +36,18 @@ export default function PlatformExportGuideModal({
 }: ModalProps) {
   const [topic, setTopic] = useState<GuideTopic>(defaultTopic);
   const [platform, setPlatform] = useState<PlatformType>(defaultPlatform);
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-8 animate-in fade-in zoom-in-95 duration-200 border border-slate-200/80">
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200 border border-slate-200/80">
         {/* Cabecera */}
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">

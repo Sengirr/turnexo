@@ -1,6 +1,7 @@
 import React from 'react';
 import { Wifi, KeyRound, Printer, Sparkles, Clock } from 'lucide-react';
 import { Property } from '../lib/icalParser';
+import { useEscapeKey } from '../lib/useModalClose';
 
 interface Props {
   property: Property;
@@ -8,14 +9,20 @@ interface Props {
 }
 
 export default function PrintableQrPosterModal({ property, onClose }: Props) {
+  useEscapeKey(onClose);
   const guideUrl = `${window.location.origin}/g/${property.slug}`;
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=10&data=${encodeURIComponent(
     guideUrl
   )}`;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl space-y-6 my-8">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl space-y-6 my-auto">
         {/* Barra no imprimible */}
         <div className="flex items-center justify-between print:hidden border-b border-slate-100 pb-4">
           <div>

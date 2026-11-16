@@ -75,6 +75,7 @@ import {
 } from '../lib/invoice';
 import { downloadSingleInvoicePdf } from '../lib/invoicePdf';
 import { DASHBOARD_TRANSLATIONS, DashboardLanguage } from '../lib/dashboardTranslations';
+import { useEscapeKey } from '../lib/useModalClose';
 
 const CHECKOUT_HOURS = [
   '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
@@ -503,6 +504,38 @@ export default function HostDashboardView({
     desc: string;
     targetPlan: 'plan_pro' | 'plan_manager';
   } | null>(null);
+
+  useEscapeKey(
+    () => {
+      if (previewPhotoIndex !== null) {
+        setPreviewPhotoIndex(null);
+      } else if (inspectingTaskPhotos) {
+        setInspectingTaskPhotos(null);
+      } else if (showDirectResModal) {
+        setShowDirectResModal(false);
+      } else if (planLimitReason) {
+        setPlanLimitReason(null);
+      } else if (showStripeNoticeModal) {
+        setShowStripeNoticeModal(false);
+      } else if (showNewPropModal) {
+        setShowNewPropModal(false);
+      } else if (showIcalModal) {
+        setShowIcalModal(false);
+      } else if (showAddCleanerModal) {
+        setShowAddCleanerModal(false);
+      }
+    },
+    Boolean(
+      previewPhotoIndex !== null ||
+        inspectingTaskPhotos ||
+        showDirectResModal ||
+        planLimitReason ||
+        showStripeNoticeModal ||
+        showNewPropModal ||
+        showIcalModal ||
+        showAddCleanerModal
+    )
+  );
 
   const rawPlan = hostAccount?.plan || 'plan_starter';
   const isManager = rawPlan === 'plan_manager';
@@ -3326,8 +3359,13 @@ export default function HostDashboardView({
 
       {/* Modal para Conectar URL iCal */}
       {showIcalModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl my-8">
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowIcalModal(false);
+          }}
+        >
+          <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl my-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-xl font-bold tracking-tight text-slate-900">
@@ -3409,10 +3447,15 @@ export default function HostDashboardView({
 
       {/* Modal Nueva Propiedad */}
       {showNewPropModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowNewPropModal(false);
+          }}
+        >
           <form
             onSubmit={handleCreateProperty}
-            className="bg-white rounded-3xl border border-slate-200 max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl my-8 max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-3xl border border-slate-200 max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto"
           >
             {/* Cabecera */}
             <div className="flex items-start justify-between border-b border-slate-100 pb-4">
@@ -4272,7 +4315,12 @@ export default function HostDashboardView({
 
       {/* Modal Atención al Cliente: Activación de Plan */}
       {showStripeNoticeModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowStripeNoticeModal(false);
+          }}
+        >
           <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-3">
@@ -4343,8 +4391,13 @@ export default function HostDashboardView({
 
       {/* MODAL PAYWALL DE CONTROL DE LÍMITES DE PLAN */}
       {planLimitReason && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100 my-8">
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-start justify-center p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setPlanLimitReason(null);
+          }}
+        >
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100 my-auto">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
@@ -4487,7 +4540,12 @@ export default function HostDashboardView({
 
       {/* Modal Nueva Reserva Directa (para generar limpieza y poder facturar sin iCal) */}
       {showDirectResModal && onAddDirectReservation && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowDirectResModal(false);
+          }}
+        >
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>

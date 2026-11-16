@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileSpreadsheet, Download, X, CheckCircle2, AlertTriangle, ShieldCheck, Clipboard, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useEscapeKey } from '../lib/useModalClose';
 import {
   createInvoicesFromImportedRows,
   downloadInvoiceImportTemplate,
@@ -163,6 +164,8 @@ export default function ImportInvoicesCsvModal({
     onClose();
   };
 
+  useEscapeKey(onClose);
+
   const simplifiedCount = rowsToImport.filter(
     (r) => r.totalAmount <= SIMPLIFIED_INVOICE_MAX_AMOUNT && !r.guestFiscalId
   ).length;
@@ -170,8 +173,13 @@ export default function ImportInvoicesCsvModal({
   const totalAmount = rowsToImport.reduce((sum, r) => sum + r.totalAmount, 0);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-8 animate-in fade-in zoom-in-95 duration-200">
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200">
         {/* Cabecera */}
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">

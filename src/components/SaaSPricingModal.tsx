@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Check, Sparkles, ShieldCheck, Zap, QrCode, Users, FileText } from 'lucide-react';
+import { useEscapeKey } from '../lib/useModalClose';
 
 export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  useEscapeKey(onClose);
 
   const plans = [
     {
@@ -73,8 +75,13 @@ export default function SaaSPricingModal({ onClose }: { onClose: () => void }) {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-4xl w-full p-6 md:p-8 space-y-6 shadow-2xl my-8">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-3xl max-w-4xl w-full p-6 md:p-8 space-y-6 shadow-2xl my-auto">
         <div className="flex items-start justify-between gap-4">
           <div>
             <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">

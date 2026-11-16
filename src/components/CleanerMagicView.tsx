@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useEscapeKey } from '../lib/useModalClose';
 import {
   Camera,
   CheckCircle2,
@@ -66,6 +67,7 @@ export default function CleanerMagicView({
   const [filterMissing, setFilterMissing] = useState(false);
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
   const [previewPhoto, setPreviewPhoto] = useState<{ url: string; title: string } | null>(null);
+  useEscapeKey(() => setPreviewPhoto(null), Boolean(previewPhoto));
   const [showDistant, setShowDistant] = useState(false);
   const timerRef = useRef<any>(null);
 

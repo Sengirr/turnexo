@@ -8,6 +8,7 @@ import {
   getInvoiceChannel,
 } from '../lib/invoice';
 import { downloadSingleInvoicePdf } from '../lib/invoicePdf';
+import { useEscapeKey } from '../lib/useModalClose';
 
 interface Props {
   invoice: Invoice;
@@ -70,9 +71,16 @@ export default function InvoicePrintModal({ invoice, onEditGuest, onClose }: Pro
     printWindow.document.close();
   };
 
+  useEscapeKey(onClose);
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto print:p-0 print:bg-white print:static">
-      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 space-y-6 shadow-2xl my-8 print:shadow-none print:m-0 print:p-6 print:rounded-none">
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto print:p-0 print:bg-white print:static"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 space-y-6 shadow-2xl my-auto print:shadow-none print:m-0 print:p-6 print:rounded-none">
         {/* Cabecera modal (oculta al imprimir) */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 print:hidden">
           <div className="flex items-center gap-2">

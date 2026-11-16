@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, X, Check, Building2 } from 'lucide-react';
 import { HostFiscalProfile } from '../lib/invoice';
+import { useEscapeKey } from '../lib/useModalClose';
 
 interface Props {
   profile: HostFiscalProfile;
@@ -17,9 +18,16 @@ export default function FiscalProfileModal({ profile, onSave, onClose }: Props) 
     onClose();
   };
 
+  useEscapeKey(onClose);
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 space-y-6 shadow-2xl my-8">
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 space-y-6 shadow-2xl my-auto">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider">

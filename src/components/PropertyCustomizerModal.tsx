@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEscapeKey } from '../lib/useModalClose';
 import {
   Clock,
   Video,
@@ -333,9 +334,16 @@ export default function PropertyCustomizerModal({
     });
   };
 
+  useEscapeKey(onClose);
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl space-y-5 my-6 max-h-[92vh] flex flex-col">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl space-y-5 my-auto max-h-[92vh] flex flex-col">
         {/* Cabecera */}
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-3 shrink-0">
           <div>

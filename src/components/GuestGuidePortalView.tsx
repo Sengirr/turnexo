@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useEscapeKey } from '../lib/useModalClose';
 import {
   Wifi,
   Video,
@@ -774,6 +775,7 @@ export default function GuestGuidePortalView({
 
   // Modal interactivo de Incidencias (igual que IVI ERP)
   const [isIncidentModalOpen, setIsIncidentModalOpen] = useState(false);
+  useEscapeKey(() => setIsIncidentModalOpen(false), isIncidentModalOpen);
   const [incidentTitle, setIncidentTitle] = useState('');
   const [incidentDetails, setIncidentDetails] = useState('');
   const [incidentSent, setIncidentSent] = useState(false);
@@ -1689,7 +1691,12 @@ export default function GuestGuidePortalView({
 
       {/* Incident Report Modal (Identical to IVI ERP) */}
       {isIncidentModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsIncidentModalOpen(false);
+          }}
+        >
           <div className="bg-white rounded-[2.5rem] max-w-md w-full p-6 space-y-5 shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

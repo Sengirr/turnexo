@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, User, FileText, MapPin, Mail, ShieldCheck } from 'lucide-react';
 import { Invoice, SIMPLIFIED_INVOICE_MAX_AMOUNT } from '../lib/invoice';
+import { useEscapeKey } from '../lib/useModalClose';
 
 interface Props {
   invoice: Invoice;
@@ -45,9 +46,16 @@ export default function EditInvoiceGuestModal({ invoice, onSave, onClose }: Prop
     onClose();
   };
 
+  useEscapeKey(onClose);
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 space-y-6 shadow-2xl my-8">
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 space-y-6 shadow-2xl my-auto">
         {/* Cabecera */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">

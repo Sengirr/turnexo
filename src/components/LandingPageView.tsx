@@ -20,6 +20,7 @@ import HeroPhoneMockup from './HeroPhoneMockup';
 import { LandingLanguage, LANDING_TRANSLATIONS } from '../lib/landingTranslations';
 import { HostAccount } from '../lib/supabase';
 import { isCommunityPromoCode, getUrlPromoCode } from '../lib/promo';
+import { useEscapeKey } from '../lib/useModalClose';
 
 interface Props {
   hostAccount?: HostAccount | null;
@@ -82,6 +83,7 @@ export default function LandingPageView({
 
   // Estado del Modal de Contacto integrado
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  useEscapeKey(() => setContactModalOpen(false), contactModalOpen);
   const [contactUnits, setContactUnits] = useState(t.contactModal.unitsOptions[3] || 'Más de 10 alojamientos');
   const [contactName, setContactName] = useState('');
   const [contactChannel, setContactChannel] = useState('');
@@ -548,9 +550,16 @@ export default function LandingPageView({
             </div>
 
             <div className="pt-4 border-t border-[#E2DDD2]">
-              <button
-                type="button"
-                onClick={onOpenGuestDemo}
+              <a
+                href={guestDemoHref || '/demo/huesped'}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (!guestDemoHref) {
+                    e.preventDefault();
+                    onOpenGuestDemo();
+                  }
+                }}
                 className="text-xs sm:text-sm font-sans font-bold text-[#C85A32] hover:text-[#B04A25] inline-flex items-center gap-1.5 group"
               >
                 <span>{t.modules.mod1Cta}</span>
@@ -558,7 +567,7 @@ export default function LandingPageView({
                   size={15}
                   className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
                 />
-              </button>
+              </a>
             </div>
           </div>
 
@@ -627,9 +636,16 @@ export default function LandingPageView({
             </div>
 
             <div className="pt-4 border-t border-[#E2DDD2]">
-              <button
-                type="button"
-                onClick={onOpenCleanerDemo}
+              <a
+                href={cleanerDemoHref || '/demo/limpiadora'}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (!cleanerDemoHref) {
+                    e.preventDefault();
+                    onOpenCleanerDemo();
+                  }
+                }}
                 className="text-xs sm:text-sm font-sans font-bold text-[#1F4E3D] hover:text-[#16382B] inline-flex items-center gap-1.5 group"
               >
                 <span>{t.modules.mod2Cta}</span>
@@ -637,7 +653,7 @@ export default function LandingPageView({
                   size={15}
                   className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
                 />
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -1112,24 +1128,38 @@ export default function LandingPageView({
                 </a>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={onOpenGuestDemo}
+                <a
+                  href={guestDemoHref || '/demo/huesped'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (!guestDemoHref) {
+                      e.preventDefault();
+                      onOpenGuestDemo();
+                    }
+                  }}
                   className="text-[#C85A32] hover:underline inline-flex items-center gap-1 font-semibold"
                 >
                   <span>{t.footer.linkGuestDemo}</span>
                   <ArrowUpRight size={13} />
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={onOpenCleanerDemo}
+                <a
+                  href={cleanerDemoHref || '/demo/limpiadora'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (!cleanerDemoHref) {
+                      e.preventDefault();
+                      onOpenCleanerDemo();
+                    }
+                  }}
                   className="text-emerald-400 hover:underline inline-flex items-center gap-1 font-semibold"
                 >
                   <span>{t.footer.linkCleanerDemo}</span>
                   <ArrowUpRight size={13} />
-                </button>
+                </a>
               </li>
             </ul>
           </div>
@@ -1236,7 +1266,12 @@ export default function LandingPageView({
 
       {/* MODAL DE CONTACTO INTEGRADO */}
       {contactModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setContactModalOpen(false);
+          }}
+        >
           <div className="bg-[#FAF9F5] border-2 border-[#141413] max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-[10px_10px_0px_#C85A32]">
             <div className="flex items-start justify-between gap-4 border-b border-[#E2DDD2] pb-4">
               <div>

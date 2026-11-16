@@ -33,6 +33,20 @@ import {
 import { isSupabaseConfigured } from '../lib/supabase';
 import { SEED_PROPIETARIOS } from '../data/seedPropietarios';
 
+function getTrialDaysRemaining(registeredAt: string, trialDays = 14): number | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(registeredAt.trim());
+  const regDate = match
+    ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    : new Date(registeredAt);
+  if (Number.isNaN(regDate.getTime())) return null;
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const regMidnight = new Date(regDate.getFullYear(), regDate.getMonth(), regDate.getDate());
+  const elapsedDays = Math.floor((today.getTime() - regMidnight.getTime()) / (1000 * 60 * 60 * 24));
+  return trialDays - Math.max(0, elapsedDays);
+}
+
 interface Props {
   onBackToApp: () => void;
   onBackToLanding: () => void;
@@ -918,10 +932,23 @@ export default function AdminMetricsView({ onBackToApp, onBackToLanding }: Props
                             Activo
                           </span>
                         ) : u.status === 'trialing' ? (
-                          <span className="inline-flex items-center gap-1 text-amber-700 font-bold">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                            Prueba 14d
-                          </span>
+                          (() => {
+                            const remaining = getTrialDaysRemaining(u.registeredAt);
+                            if (remaining !== null && remaining <= 0) {
+                              return (
+                                <span className="inline-flex items-center gap-1 text-rose-700 font-bold">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                  Prueba expirada
+                                </span>
+                              );
+                            }
+                            return (
+                              <span className="inline-flex items-center gap-1 text-amber-700 font-bold">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                {remaining !== null ? `Prueba (${remaining}d rest.)` : 'Prueba 14d'}
+                              </span>
+                            );
+                          })()
                         ) : (
                           <span className="text-slate-400">Cancelado</span>
                         )}

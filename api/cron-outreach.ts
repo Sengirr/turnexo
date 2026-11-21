@@ -37,76 +37,39 @@ function verifyAdminToken(authHeader: string | undefined, secret: string): boole
   }
 }
 
-function buildSubject(kind: 'initial' | 'followup', segment?: string): string {
-  if (segment === 'propietario') {
-    return kind === 'followup'
-      ? 'Re: IVA del 10% en tu vivienda turística (calculadora gratuita)'
-      : 'IVA del 10% en tu vivienda turística (calculadora gratuita)';
-  }
+function buildSubject(kind: 'initial' | 'followup', _segment?: string, city?: string): string {
+  const area = city && city.trim() ? ` en ${city.trim()}` : '';
   return kind === 'followup'
-    ? 'Re: Nuevo IVA 10% en alquiler vacacional'
-    : 'Nuevo IVA 10% en alquiler vacacional';
+    ? `Re: gestión de pisos turísticos${area}`
+    : `Pregunta rápida sobre vuestros pisos${area}`;
 }
 
-function buildEmailBody(companyName: string, city?: string, segment?: string): string {
-  const area = city && city.trim() ? city.trim() : 'la zona';
-  if (segment === 'propietario') {
-    return [
-      `Hola (${companyName}),`,
-      '',
-      `Te escribo brevemente por tu alojamiento turístico en ${area}.`,
-      '',
-      'Con la entrada en vigor del IVA del 10% este 1 de diciembre, hemos preparado una calculadora gratuita para que veas en 5 segundos cuánto te queda limpio tras deducirte el 21% de Booking/Airbnb, limpieza y suministros (sin registro):',
-      'https://turnexo.app/calculadora-iva-alquiler-vacacional',
-      '',
-      'Además, en Turnexo (gratis para 1 alojamiento) puedes llevar todo en un mismo sitio sin complicarte:',
-      '- Facturas legales al 10% en 1 clic desde tu CSV de Airbnb o Booking.',
-      '- App para limpiadoras sincronizada automáticamente con el calendario iCal.',
-      '- Guía digital para huéspedes (Guest App) con acceso, llaves y normas sin descargar nada.',
-      '',
-      'Si te sirve, pruébalo sin compromiso.',
-      '',
-      'Un saludo,',
-      'Iván Álvarez · Turnexo',
-    ].join('\n');
-  }
+function buildEmailBody(companyName: string, city?: string, _segment?: string): string {
+  const name = companyName?.trim() || 'equipo';
+  const area = city && city.trim() ? city.trim() : 'vuestra zona';
   return [
-    `Hola equipo de ${companyName},`,
+    `Hola ${name},`,
     '',
-    `¿Lleváis clientes particulares con viviendas turísticas en ${area}?`,
+    `He visto los alojamientos que gestionáis en ${area} y os escribo con una duda rápida.`,
     '',
-    'Con la entrada en vigor del IVA del 10% este 1 de diciembre, muchos propietarios os van a empezar a mandar extractos sueltos de Airbnb y Booking sin saber emitir la factura de cada estancia para el Modelo 303.',
+    'Con el IVA del 10% desde el 1 de diciembre y la coordinación diaria de limpiezas entre reservas de Airbnb y Booking, ¿cómo estáis llevando ahora las facturas por reserva y la comprobación con fotos de las limpiadoras?',
     '',
-    'En Turnexo hemos hecho una herramienta muy simple para que el propio propietario suba su Excel/CSV de Airbnb o Booking y genere en 1 clic todas las facturas legales al 10% + el resumen listo para entregaros (gratis para 1 alojamiento).',
+    'Hemos montado Turnexo justo para gestores con varios pisos (limpiezas sincronizadas por iCal con fotos obligatorias + facturas al 10% en 1 clic), y estamos buscando 3 o 4 agencias para probarlo de cerca.',
     '',
-    'Si tenéis algún cliente que os dé guerra con los extractos, ¿os paso el enlace para que se lo podáis recomendar directamente? A la asesoría no os cuesta nada.',
+    '¿Os cuadraría echarle un vistazo en 2 minutos o ya lo tenéis resuelto con otro software?',
     '',
     'Un saludo,',
     'Iván Álvarez · Turnexo',
   ].join('\n');
 }
 
-function buildFollowupBody(companyName: string, city?: string, segment?: string): string {
-  const area = city && city.trim() ? city.trim() : 'la zona';
-  if (segment === 'propietario') {
-    return [
-      `Hola de nuevo (${companyName}):`,
-      '',
-      `Te subo este correo por si no lo viste. De cara al IVA del 10% del 1 de diciembre en ${area}, te dejo la calculadora gratuita para simular tus gastos deducibles frente al 10%:`,
-      'https://turnexo.app/calculadora-iva-alquiler-vacacional',
-      '',
-      'Y si quieres automatizar las facturas desde el CSV, los avisos en la app de limpiadoras y la guía digital para huéspedes (Guest App), en Turnexo tienes 1 alojamiento gratis.',
-      '',
-      'Un saludo,',
-      'Iván Álvarez · Turnexo',
-    ].join('\n');
-  }
+function buildFollowupBody(companyName: string, city?: string, _segment?: string): string {
+  const name = companyName?.trim() || 'equipo';
+  const area = city && city.trim() ? city.trim() : 'vuestra zona';
   return [
-    `Hola de nuevo, equipo de ${companyName}:`,
+    `Hola de nuevo, ${name}:`,
     '',
-    `Os subo este correo por si quedó abajo con el lío de la semana. Con la entrada del IVA del 10% el 1 de diciembre, si algún cliente con pisos turísticos en ${area} os pregunta cómo sacar las facturas legales de Airbnb o Booking para el Modelo 303, Turnexo lo hace en 1 clic (gratis para 1 alojamiento).`,
-    '',
-    'Si queréis, os paso el enlace para que se lo reenviéis directamente cuando os pregunten.',
+    `Os subo este correo por si quedó abajo esta semana. Si en ${area} lleváis varios pisos de Airbnb o Booking y queréis evitar el lío de WhatsApp con limpiadoras y facturas del 10% de cara a diciembre, decidme y os paso un acceso de prueba sin compromiso.`,
     '',
     'Un saludo,',
     'Iván Álvarez · Turnexo',
@@ -131,10 +94,15 @@ export default async function handler(req: any, res: any) {
   const authHeader = req.headers?.authorization as string | undefined;
 
   const isAdminPost = req.method === 'POST' && adminSecret && verifyAdminToken(authHeader, adminSecret);
-  const isCronGet =
-    req.method === 'GET' &&
-    ((cronSecret && authHeader === `Bearer ${cronSecret}`) ||
-      (!cronSecret && req.headers?.['x-vercel-cron'] === '1'));
+
+  let isCronGet = false;
+  if (req.method === 'GET' && cronSecret && authHeader?.startsWith('Bearer ')) {
+    const provided = Buffer.from(authHeader.slice(7).trim(), 'utf8');
+    const expected = Buffer.from(cronSecret, 'utf8');
+    if (provided.length === expected.length && crypto.timingSafeEqual(provided, expected)) {
+      isCronGet = true;
+    }
+  }
 
   if (!isAdminPost && !isCronGet) {
     res.status(401).json({ error: 'No autorizado' });
@@ -220,7 +188,7 @@ export default async function handler(req: any, res: any) {
 
     for (let i = 0; i < queue.length; i += 1) {
       const { lead, kind } = queue[i];
-      const subject = buildSubject(kind, lead.segment);
+      const subject = buildSubject(kind, lead.segment, lead.city);
       const text =
         kind === 'followup'
           ? buildFollowupBody(lead.company_name, lead.city, lead.segment)
